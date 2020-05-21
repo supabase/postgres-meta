@@ -1,0 +1,33 @@
+{
+  "name": "@supabase/pg-api",
+  "version": "0.0.1",
+  "description": "A RESTful API for managing your Postgres.",
+  "main": "src/start.js",
+  "private": false,
+  "scripts": {
+    "dev": "nodemon ./src/start.js",
+    "pretty": "prettier --write \"./src/**/*.{js,json,yml,md,vue,css,scss}\"",
+    "start": "node ./src/start.js",
+    "test": "node -r esm ./node_modules/.bin/mocha 'test/**/*.js' --recursive "
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "esm": "^3.2.25",
+    "express": "^4.17.1",
+    "pg": "^7.18.2"
+  },
+  "devDependencies": {
+    "axios": "^0.19.2",
+    "mocha": "^7.1.2",
+    "nodemon": "^1.19.4",
+    "prettier": "^2.0.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/supabase/pg-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/HugoDF/supabase/pg-api/issues"
+  },
+  "homepage": "https://github.com/supabase/pg-api#readme"
+}
