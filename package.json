@@ -3,24 +3,38 @@
   "version": "0.0.1",
   "description": "A RESTful API for managing your Postgres.",
   "main": "src/start.js",
+  "bin": "src/start.js",
   "private": false,
   "scripts": {
-    "dev": "nodemon ./src/start.js",
-    "pretty": "prettier --write \"./src/**/*.{js,json,yml,md,vue,css,scss}\"",
-    "start": "node ./src/start.js",
+    "build": "npm-run-all clean build:transpile",
+    "build:transpile": "babel ./src/ --out-dir dist --copy-files",
+    "clean": "rimraf dist",
+    "clean:pretty": "prettier --write \"./src/**/*.{js,json,yml,md,vue,css,scss}\"",
+    "dist": "NODE_ENV=production npm-run-all build",
+    "dist:pkg": "pkg -c ./package.json --out-path ./bin dist/start.js",
+    "dev": "NODE_ENV=development npm-run-all build server",
+    "dev:watch": "nodemon",
+    "server": "node ./dist/start.js",
     "test": "node -r esm ./node_modules/.bin/mocha 'test/**/*.js' --recursive "
   },
   "dependencies": {
     "cors": "^2.8.5",
     "esm": "^3.2.25",
     "express": "^4.17.1",
+    "npm-run-all": "^4.1.5",
     "pg": "^7.18.2"
   },
   "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.6",
+    "@babel/plugin-transform-runtime": "^7.9.6",
+    "@babel/preset-env": "^7.9.6",
     "axios": "^0.19.2",
     "mocha": "^7.1.2",
     "nodemon": "^1.19.4",
-    "prettier": "^2.0.5"
+    "pkg": "^4.4.8",
+    "prettier": "^2.0.5",
+    "rimraf": "^3.0.2"
   },
   "repository": {
     "type": "git",
@@ -29,5 +43,33 @@
   "bugs": {
     "url": "https://github.com/HugoDF/supabase/pg-api/issues"
   },
-  "homepage": "https://github.com/supabase/pg-api#readme"
+  "homepage": "https://github.com/supabase/pg-api#readme",
+  "babel": {
+    "presets": [
+      "@babel/preset-env"
+    ],
+    "plugins": [
+      "@babel/plugin-transform-runtime"
+    ]
+  },
+  "nodemonConfig": {
+    "exec": "npm run dev",
+    "watch": [
+      "src/*",
+      "public/*"
+    ],
+    "ignore": [
+      "**/__tests__/**",
+      "*.test.js",
+      "*.spec.js"
+    ]
+  },
+  "pkg": {
+    "assets": [
+      "lib/**/*"
+    ],
+    "targets": [
+      "node10"
+    ]
+  }
 }
