@@ -11,7 +11,7 @@
     "clean": "rimraf dist",
     "clean:pretty": "prettier --write \"./src/**/*.{js,json,yml,md,vue,css,scss}\"",
     "dist": "NODE_ENV=production npm-run-all build",
-    "dist:pkg": "pkg -c ./package.json --out-path ./bin dist/start.js",
+    "dist:pkg": "rimraf bin && pkg --out-path ./bin dist/start.js",
     "dev": "NODE_ENV=development npm-run-all build server",
     "dev:watch": "nodemon",
     "server": "node ./dist/start.js",
@@ -62,14 +62,6 @@
       "**/__tests__/**",
       "*.test.js",
       "*.spec.js"
-    ]
-  },
-  "pkg": {
-    "assets": [
-      "lib/**/*"
-    ],
-    "targets": [
-      "node10"
     ]
   }
 }
