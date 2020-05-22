@@ -4,7 +4,7 @@ A RESTful API for managing your Postgres. Fetch tables, add roles, and run queri
 
 ## Docs
 
-Soon
+https://supabase.github.io/pg-api/
 
 ## Quickstart
 
