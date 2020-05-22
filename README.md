@@ -6,6 +6,15 @@ A RESTful API for managing your Postgres. Fetch tables, add roles, and run queri
 
 Soon
 
+## Quickstart
+
+Run any of the bin files in the `bin` directory
+```
+./bin/start-linux
+./bin/start-macos
+./bin/start-windows.exe
+```
+
 ## FAQs
 
 **What security does this use?**
