@@ -1,0 +1,43 @@
+/* place your custom CSS overrides here */
+
+div .highlight {
+	max-width: 95%;
+	max-height: 350px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+.toc-list-h3 {
+    display: none;
+    background-color: #1E2224;
+}
+.toc-h3 {
+    padding-left: 35px;
+    font-size: 11px;
+}
+.toc-list-h4 {
+    display: none;
+    background-color: #1E2224;
+}
+.toc-h4 {
+    padding-left: 45px;
+    font-size: 10px;
+}
+.toc-list-h5 {
+    display: none;
+    background-color: #1E2224;
+}
+.toc-h5 {
+    padding-left: 55px;
+    font-size: 9px;
+}
+.toc-list-h6 {
+    display: none;
+    background-color: #1E2224;
+}
+.toc-h6 {
+    padding-left: 65px;
+    font-size: 8px;
+}
+.well {
+    background: rgba(0, 0, 0, 0.01);
+}

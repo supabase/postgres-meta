@@ -1,0 +1,19 @@
+{
+  "name": "Shins",
+  "description": "Shins Is Not Slate",
+  "repository": "https://github.com/mermade/shins",
+  "logo": "http://mermade.github.io/shins/logo.jpg",
+  "keywords": ["api", "slate", "doc", "documentation", "swagger", "openapi", "shins"],
+  "env": {
+    "DYNAMIC_URL": {
+      "description": "The URL to load the source markdown from",
+      "value": "",
+      "required": false
+    },
+    "OPENAPI_URL": {
+      "description": "The URL to load the source OpenAPI spec. from",
+      "value": "",
+      "required": false
+    }
+  }
+}
