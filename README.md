@@ -15,6 +15,9 @@ Run any of the bin files in the `bin` directory
 ./bin/start-windows.exe
 ```
 
+Then you can call any of the following
+
+
 ## FAQs
 
 **What security does this use?**

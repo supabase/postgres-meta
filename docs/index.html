@@ -1,0 +1,267 @@
+
+
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Swagger Petstore v1.0.0</title>
+
+    <style>
+    </style>
+    <link rel="stylesheet" media="screen" href="pub/css/screen.css">
+    <link rel="stylesheet" media="print" href="pub/css/print.css">
+    <link rel="stylesheet" media="screen" href="pub/css/darkula.css">
+    
+      <script src="source/javascripts/lib/_jquery.js"></script>
+<script src="source/javascripts/lib/_jquery.highlight.js"></script>
+<script src="source/javascripts/lib/_lunr.js"></script>
+<script src="source/javascripts/lib/_imagesloaded.min.js"></script>
+<script src="source/javascripts/lib/_energize.js"></script>
+<script src="source/javascripts/app/_lang.js"></script>
+<script src="source/javascripts/app/_search.js"></script>
+<script src="source/javascripts/app/_toc.js"></script>
+<script type="text/javascript">
+$(function() {
+  loadToc($('#toc'), '.toc-link', '.toc-list-h2, .toc-list-h3, .toc-list-h4, .toc-list-h5, .toc-list-h6', 10);
+  setupLanguages($('body').data('languages'));
+  $('.content').imagesLoaded( function() {
+    recacheHeights();
+    refreshToc();
+  });
+});
+
+window.onpopstate = function() {
+  activateLanguage(getLanguageFromQueryString());
+};
+</script>
+
+    
+    <meta name="theme-color" content="#F3F7F9" />
+<!-- Renderer: Shins v2.5.0 -->
+<!-- Generator: Widdershins v4.0.1 -->
+  </head>
+
+  <body data-languages="[&quot;shell&quot;,&quot;http&quot;,&quot;javascript&quot;]">
+    <a href="#" id="nav-button">
+      <span>
+        NAV
+        <img src="source/images/navbar.png" class="undefined" alt="Navigation">
+      </span>
+    </a>
+    <div class="toc-wrapper">
+      <img src="source/images/logo.png" class="logo" alt="Logo">
+      
+        <div class="lang-selector">
+          
+            
+              <a href="#" data-language-name="shell">Shell</a>
+            
+          
+            
+              <a href="#" data-language-name="http">HTTP</a>
+            
+          
+            
+              <a href="#" data-language-name="javascript">JavaScript</a>
+            
+          
+        </div>
+      
+      
+        <div class="search">
+          <input type="text" class="search" id="input-search" placeholder="Search">
+        </div>
+        <ul class="search-results"></ul>
+      
+      <div id="toc" class="toc-list-h1">
+	  	<ul class="toc-list-h1">
+        
+          <li>
+            <a href="#swagger-pg-api" class="toc-h1 toc-link" data-title="@supabase/pg-api">@supabase/pg-api</a>
+            
+          </li>
+        
+          <li>
+            <a href="#getting-started" class="toc-h1 toc-link" data-title="Getting started">Getting started</a>
+            
+              <ul class="toc-list-h2">
+                
+                  <li>
+                    <a href="#installation" class="toc-h2 toc-link" data-title="">Installation</a>
+                    
+                  </li>
+                
+                  <li>
+                    <a href="#authentication" class="toc-h2 toc-link" data-title="">Authentication</a>
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+        
+          <li>
+            <a href="#swagger-pg-api-query" class="toc-h1 toc-link" data-title="Query">Query</a>
+            
+              <ul class="toc-list-h2">
+                
+                  <li>
+                    <a href="#query" class="toc-h2 toc-link" data-title="">query</a>
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+        
+          <li>
+            <a href="#swagger-pg-api-config" class="toc-h1 toc-link" data-title="Config">Config</a>
+            
+              <ul class="toc-list-h2">
+                
+                  <li>
+                    <a href="#getconfig" class="toc-h2 toc-link" data-title="">getConfig</a>
+                    
+                  </li>
+                
+                  <li>
+                    <a href="#getversion" class="toc-h2 toc-link" data-title="">getVersion</a>
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+        
+		</ul>
+      </div>
+      
+        <ul class="toc-footer">
+          
+            <li><a href="https://mermade.github.io/shins/asyncapi.html">See AsyncAPI example</a></li>
+          
+        </ul>
+      
+    </div>
+    <div class="page-wrapper">
+      <div class="dark-box"></div>
+      <div class="content">
+        <h1 id="swagger-pg-api">@supabase/pg-api</h1>
+<blockquote>
+<p>Scroll down for code samples, example requests and responses. Select a language for code samples from the tabs above or the mobile navigation menu.</p>
+</blockquote>
+<p>Manage your PostgreSQL database using a RESTful API.</p>
+<h1 id="getting-started">Getting started</h1>
+<h2 id="installation">Installation</h2>
+<pre class="highlight"><code>@todo
+</code></pre>
+<h2 id="authentication">Authentication</h2>
+<p>Authentication is not provided. Make sure you use this inside a secure network or put your own API proxy in front.</p>
+<h1 id="swagger-pg-api-query">Query</h1>
+<p>Directly query your database. Send any SQL you want!</p>
+<h2 id="query">query</h2>
+<p><a id="opIdquery"></a></p>
+<blockquote>
+<p>POST /query</p>
+</blockquote>
+<pre class="highlight tab tab-shell"><code>curl -X POST http://localhost:1337/query \
+  -H <span class="hljs-string">'Content-Type: application/json'</span> \
+</code></pre>
+<pre class="highlight tab tab-http"><code><span class="hljs-keyword">POST</span> <span class="hljs-string">http://localhost:1337/pet</span> HTTP/1.1
+<span class="hljs-attribute">Host</span>: localhost:1337
+<span class="hljs-attribute">Content-Type</span>: application/json
+
+</code></pre>
+<pre class="highlight tab tab-javascript"><code>
+<span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:1337/query'</span>, {
+  <span class="hljs-attr">method</span>: <span class="hljs-string">'POST'</span>,
+  <span class="hljs-attr">headers</span>: { <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span> },
+  body <span class="hljs-comment">// See body below</span>
+})
+</code></pre>
+<p><code>POST /query</code></p>
+<p><em>Execute an SQL query</em></p>
+<blockquote>
+<p>BODY</p>
+</blockquote>
+<pre class="highlight tab tab-json"><code>{
+  <span class="hljs-attr">"query"</span>: <span class="hljs-string">"SELECT * FROM your_table LIMIT 1;"</span>
+}
+</code></pre>
+<h3 id="addpet-parameters">Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>query</td>
+<td>string</td>
+<td>true</td>
+<td>SQL string to execute</td>
+</tr>
+</tbody>
+</table>
+<h1 id="swagger-pg-api-config">Config</h1>
+<p>Manage your Postgres config</p>
+<h2 id="getconfig">getConfig</h2>
+<p><a id="opIdConfig"></a></p>
+<blockquote>
+<p>GET /config</p>
+</blockquote>
+<pre class="highlight tab tab-shell"><code>curl -X GET http://localhost:1337/config
+</code></pre>
+<pre class="highlight tab tab-http"><code><span class="hljs-keyword">POST</span> <span class="hljs-string">http://localhost:1337/config</span> HTTP/1.1
+</code></pre>
+<pre class="highlight tab tab-javascript"><code>
+<span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:1337/config'</span>)
+</code></pre>
+<p><code>GET /config</code></p>
+<p><em>Get your Postgres version information</em></p>
+<h2 id="getversion">getVersion</h2>
+<p><a id="opIdConfigVersion"></a></p>
+<blockquote>
+<p>GET /config/version</p>
+</blockquote>
+<pre class="highlight tab tab-shell"><code>curl -X GET http://localhost:1337/config/version
+</code></pre>
+<pre class="highlight tab tab-http"><code><span class="hljs-keyword">POST</span> <span class="hljs-string">http://localhost:1337/config/version</span> HTTP/1.1
+</code></pre>
+<pre class="highlight tab tab-javascript"><code>
+<span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:1337/config/version'</span>)
+</code></pre>
+<p><code>GET /config/version</code></p>
+<p><em>Get your Postgres version information</em></p>
+<!-- Renderer: Shins v2.5.0 -->
+<!-- Generator: Widdershins v4.0.1 -->
+      </div>
+      <div class="dark-box">
+        
+          <div class="lang-selector">
+            
+              
+                <a href="#" data-language-name="shell">Shell</a>
+              
+            
+              
+                <a href="#" data-language-name="http">HTTP</a>
+              
+            
+              
+                <a href="#" data-language-name="javascript">JavaScript</a>
+              
+            
+          </div>
+        
+      </div>
+    </div>
+  </body>
+</html>

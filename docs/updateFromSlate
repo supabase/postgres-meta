@@ -1,0 +1,10 @@
+#!/bin/sh
+# This script assumes you have Ruby Slate checked-out by the side of shins
+cp -r ../slate/source/fonts source/
+cp -r ../slate/source/images source/
+cp -r ../slate/source/includes source/
+cp -r ../slate/source/javascripts source/
+cp -r ../slate/source/layouts source/
+cp -r ../slate/source/stylesheets source/
+git checkout HEAD source/images/logo.png
+echo Please run \'node buildstyle\' to rebuild the .css files
