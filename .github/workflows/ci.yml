@@ -23,11 +23,6 @@ jobs:
       - name: Set up DB
         run: docker-compose up -d
 
-      - name: Sleep for 30s
-        uses: jakejarvis/wait-action@v0.1.0
-        with:
-          time: '30s'
-
       - uses: actions/cache@v1
         with:
           path: ~/.npm
@@ -42,6 +37,11 @@ jobs:
 
       - run: npm install
 
-      - run: npm run dev
+      - run: npm run dev &
+
+      - name: Sleep for 30s
+        uses: jakejarvis/wait-action@v0.1.0
+        with:
+          time: '30s'
 
       - run: npm test
