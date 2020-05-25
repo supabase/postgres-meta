@@ -78,3 +78,10 @@ jobs:
           asset_path: ./pg-api-windows.tar.gz
           asset_name: pg-api-windows.tar.gz
           asset_content_type: application/gzip
+
+      - name: Fly.io deploy
+        uses: superfly/flyctl-actions@1.0
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        with:
+          args: 'deploy'
