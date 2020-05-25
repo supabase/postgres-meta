@@ -26,7 +26,7 @@ router.get('/', /*#__PURE__*/function () {
           case 0:
             _context.prev = 0;
             _context.next = 3;
-            return RunQuery(req.pg, config.list);
+            return RunQuery(req.headers.pg, config.list);
 
           case 3:
             _yield$RunQuery = _context.sent;
@@ -61,7 +61,7 @@ router.get('/version', /*#__PURE__*/function () {
           case 0:
             _context2.prev = 0;
             _context2.next = 3;
-            return RunQuery(req.pg, config.version);
+            return RunQuery(req.headers.pg, config.version);
 
           case 3:
             _yield$RunQuery2 = _context2.sent;

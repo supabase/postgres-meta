@@ -1,13 +1,7 @@
-FROM node:10.15.3
+# docker build -t pg-api .
+# docker run -p8080:8080 pg-api
 
-WORKDIR /app
-
-COPY ./package.json .
-
-RUN npm install
-
-COPY . .
-
-EXPOSE 3000
-
-CMD npm start
+FROM debian:stable-slim
+COPY ./bin/start-linux /bin/
+ENV PG_API_PORT=8080
+CMD ["/bin/start-linux"]

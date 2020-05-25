@@ -26,7 +26,7 @@ router.get('/', /*#__PURE__*/function () {
           case 0:
             _context.prev = 0;
             _context.next = 3;
-            return RunQuery(req.pg, plugins.list);
+            return RunQuery(req.headers.pg, plugins.list);
 
           case 3:
             _yield$RunQuery = _context.sent;
