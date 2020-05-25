@@ -20,26 +20,27 @@ var RunQuery = /*#__PURE__*/function () {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
+            console.log('connection', connection);
             pool = new Pool(connection);
-            _context.prev = 1;
-            _context.next = 4;
+            _context.prev = 2;
+            _context.next = 5;
             return pool.query(sql);
 
-          case 4:
+          case 5:
             results = _context.sent;
             return _context.abrupt("return", {
               data: results.rows,
               error: null
             });
 
-          case 8:
-            _context.prev = 8;
-            _context.t0 = _context["catch"](1);
+          case 9:
+            _context.prev = 9;
+            _context.t0 = _context["catch"](2);
             console.log('PG Error', _context.t0);
             throw _context.t0;
 
-          case 12:
-            _context.prev = 12;
+          case 13:
+            _context.prev = 13;
 
             // Try to close the connection
             // Not necessary?
@@ -49,14 +50,14 @@ var RunQuery = /*#__PURE__*/function () {
               console.log('pool.end error', error);
             }
 
-            return _context.finish(12);
+            return _context.finish(13);
 
-          case 15:
+          case 16:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[1, 8, 12, 15]]);
+    }, _callee, null, [[2, 9, 13, 16]]);
   }));
 
   return function RunQuery(_x, _x2) {

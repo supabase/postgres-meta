@@ -5,7 +5,7 @@ const RunQuery = require('../lib/connectionPool')
 
 router.get('/', async (req, res) => {
   try {
-    const { data } = await RunQuery(req.pg, config.list)
+    const { data } = await RunQuery(req.headers.pg, config.list)
     return res.status(200).json(data)
   } catch (error) {
     console.log('throwing error')
@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
 })
 router.get('/version', async (req, res) => {
   try {
-    const { data } = await RunQuery(req.pg, config.version)
+    const { data } = await RunQuery(req.headers.pg, config.version)
     return res.status(200).json(data[0]) // only one row
   } catch (error) {
     console.log('throwing error')

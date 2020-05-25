@@ -5,7 +5,7 @@ const RunQuery = require('../lib/connectionPool')
 
 router.get('/', async (req, res) => {
   try {
-    const { data } = await RunQuery(req.pg, tables.list)
+    const { data } = await RunQuery(req.headers.pg, tables.list)
     return res.status(200).json(data)
   } catch (error) {
     console.log('throwing error')
@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
 })
 router.get('/grants', async (req, res) => {
   try {
-    const { data } = await RunQuery(req.pg, tables.grants)
+    const { data } = await RunQuery(req.headers.pg, tables.grants)
     return res.status(200).json(data)
   } catch (error) {
     console.log('throwing error')

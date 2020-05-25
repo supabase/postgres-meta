@@ -24,7 +24,7 @@ router.post('/', /*#__PURE__*/function () {
             _context.prev = 0;
             query = req.body.query;
             _context.next = 4;
-            return RunQuery(req.pg, query);
+            return RunQuery(req.headers.pg, query);
 
           case 4:
             _yield$RunQuery = _context.sent;

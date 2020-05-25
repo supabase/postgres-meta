@@ -11,10 +11,17 @@ var app = express();
 
 var api = require('./api');
 
+var project = require('../package.json');
+
 app.use(express.json());
 app.use(api);
 app.get('/', function (req, res) {
-  return res.sendStatus(200);
+  return res.status(200).json({
+    status: 200,
+    name: project.name,
+    version: project.version,
+    documentation: 'https://supabase.github.io/pg-api/'
+  });
 });
 app.get('/health', function (req, res) {
   return res.status(200).json({
