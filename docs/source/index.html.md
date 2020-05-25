@@ -76,7 +76,7 @@ We support several different methods for self-hosting, detailed in the [reposito
 
 ## Authentication
 
-Authentication is not provided. Make sure you use this inside a secure network or put your own API proxy in front.
+Authentication is not provided. Make sure you use this inside a secure network or behind a secure API proxy.
 
 
 
@@ -216,7 +216,7 @@ const data = await fetch('https://pg-api.fly.dev/config', {
 
 `GET /config`
 
-*Get your Postgres version information*
+Get your Postgres config.
 
 
 ## getVersion
@@ -229,7 +229,7 @@ curl -X GET https://pg-api.fly.dev/config/version \
   -H 'Content-Type: application/json' \
   -H 'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'
 ```
-```javascript
+```js
 const data = await fetch('https://pg-api.fly.dev/config/version', {
   method: 'GET',
   headers: { 
@@ -240,7 +240,7 @@ const data = await fetch('https://pg-api.fly.dev/config/version', {
 
 `GET /config/version`
 
-*Get your Postgres version information*
+Get your Postgres version information.
 
 
 
