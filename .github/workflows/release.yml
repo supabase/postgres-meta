@@ -1,0 +1,85 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+jobs:
+  release:
+    name: Release / Node ${{ matrix.node }}
+
+    strategy:
+      matrix:
+        node: ['14']
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Set up Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Prepare release
+        run: |
+          npm install
+          npm run dist
+          tar -czvf pg-api-linux.tar.gz -C ./bin start-linux
+          tar -czvf pg-api-macos.tar.gz -C ./bin start-macos
+          tar -czvf pg-api-windows.tar.gz -C ./bin start-win.exe
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+
+      - name: Upload linux release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./pg-api-linux.tar.gz
+          asset_name: pg-api-linux.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload macos release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./pg-api-macos.tar.gz
+          asset_name: pg-api-macos.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload windows release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./pg-api-windows.tar.gz
+          asset_name: pg-api-windows.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Fly.io deploy
+        uses: superfly/flyctl-actions@1.0
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        with:
+          args: 'deploy'
