@@ -47,6 +47,15 @@ No. Primarily because you shouldn't really query your database directly from a c
 2. Run `npm run dev`
 3. Run `npm test` while you work
 
+**Deploy**
+
+Deploys are automated on tag:
+
+```sh
+git tag <version> # use package.json version
+git push origin --tags
+```
+
 ## Licence
 
 Apache 2.0
