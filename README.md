@@ -4,11 +4,26 @@ A RESTful API for managing your Postgres. Fetch tables, add roles, and run queri
 
 ## Docs
 
-https://supabase.github.io/pg-api/
+All docs https://supabase.github.io/pg-api/
+
+A trial API is set up here: https://pg-api.fly.dev/
 
 ## Quickstart
 
-Run any of the bin files in the `bin` directory
+Set the following ENV VARS:
+
+```bash
+PG_API_PORT=8080
+PG_API_DB_HOST="postgres"
+PG_API_DB_NAME="postgres"
+PG_API_DB_USER="postgres"
+PG_API_DB_PORT=5432
+PG_API_DB_PASSWORD="postgres"
+PG_API_DB_SSL=false
+```
+
+Then run any of the bin files in the `bin` directory
+
 ```
 ./bin/start-linux
 ./bin/start-macos
