@@ -42,7 +42,7 @@
     "url": "git+https://github.com/supabase/pg-api.git"
   },
   "bugs": {
-    "url": "https://github.com/HugoDF/supabase/pg-api/issues"
+    "url": "https://github.com/supabase/pg-api/issues"
   },
   "homepage": "https://github.com/supabase/pg-api#readme",
   "babel": {
