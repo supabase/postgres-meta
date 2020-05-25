@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Test ${{ matrix.platform }} / Node ${{ matrix.node }}
+    name: Test / OS ${{ matrix.platform }} / Node ${{ matrix.node }}
     strategy:
       fail-fast: false
       matrix:
