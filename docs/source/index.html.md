@@ -1,12 +1,10 @@
 ---
-title: Swagger Petstore v1.0.0
+title: Postgres Admin API
 language_tabs:
-  - shell: Shell
-  - http: HTTP
-  - javascript: JavaScript
+  - sh: Shell
+  - js: JavaScript
 toc_footers:
-  - <a href="https://mermade.github.io/shins/asyncapi.html">See AsyncAPI
-    example</a>
+  - © <a href="https://supabase.io">Supabase</a> 2020
 includes: []
 search: true
 highlight_theme: darkula
@@ -16,30 +14,69 @@ headingLevel: 2
 
 <!-- Generator: Widdershins v4.0.1 -->
 
-<h1 id="swagger-pg-api">@supabase/pg-api</h1>
+<h1 id="about">Postgres API</h1>
 
 > Scroll down for code samples, example requests and responses. Select a language for code samples from the tabs above or the mobile navigation menu.
 
 Manage your PostgreSQL database using a RESTful API.
 
+This is still in early development, so most of the functionality is read-only. The goal of this API is to allow any user to manage a Postgres database using a RESTful interface. This includes running queries as well as adding tables, columns, roles, and users at runtime. 
 
+### Support
+
+- Repository: https://github.com/supabase/pg-api
+- Made by Supabase: https://supabase.io
 
 
 # Getting started
 
+## Usage
 
-## Installation
+> Basic usage
+
+```sh
+curl -X GET https://pg-api.fly.dev/ \
+  -H 'Content-Type: application/json' \
+  -H 'pg: {}' # see Postgres connection header below
+```
+```js
+const data = await fetch('https://pg-api.fly.dev', {
+  method: 'GET',
+  headers: { 
+    'Content-Type': 'application/json',
+    'pg': {} // see Postgres connection header below
+  }
+})
+```
+> Postgres connection header
+```json
+{
+  "user": "postgres",
+  "password": "postgres", 
+  "port": 5432, 
+  "host": "db.domain.com" 
+}
+```
+
+For security reasons, this API is best self-hosted. However, we provide an example API for you to test before installing. To use the API however, you have to send your PG connection via HTTPS headers. 
+
+We DO NOT log these headers anywhere. But still, we HIGHLY recommend that you just self-host (we have tried to make this easy for you). Use the demo API at your own risk.
+
+Database connection headers are not required for self-hosting. You can set ENV vars with your default connection details so that you don't pass connection details over a network.
+
+
+## Self Hosting
 
 ```
-@todo
+https://github.com/supabase/pg-api
 ```
+
+We support several different methods for self-hosting, detailed in the [repository](https://github.com/supabase/pg-api).
 
 
 ## Authentication
 
 Authentication is not provided. Make sure you use this inside a secure network or put your own API proxy in front.
-
-
 
 
 
@@ -57,38 +94,29 @@ Directly query your database. Send any SQL you want!
 
 > POST /query
 
-```shell
-curl -X POST http://localhost:1337/query \
+```sh
+curl -X POST https://pg-api.fly.dev/query \
   -H 'Content-Type: application/json' \
+  -d '{}' # see example body below
 ```
+```js
 
-```http
-POST http://localhost:1337/pet HTTP/1.1
-Host: localhost:1337
-Content-Type: application/json
-
-```
-
-```javascript
-
-const data = await fetch('http://localhost:1337/query', {
+const data = await fetch('https://pg-api.fly.dev/query', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body // See body below
+  body: {} // see example body below
 })
 ```
-
-`POST /query`
-
-*Execute an SQL query*
-
-> BODY
-
+> Example body
 ```json
 {
   "query": "SELECT * FROM your_table LIMIT 1;"
 }
 ```
+
+`POST /query`
+
+*Execute an SQL query*
 
 <h3 id="addpet-parameters">Parameters</h3>
 
@@ -98,31 +126,92 @@ const data = await fetch('http://localhost:1337/query', {
 
 
 
+<h1 id="pg-api-tables">Tables</h1>
+
+View and manage your Postgres tables.
+
+## getTables
+
+<a id="get-tables"></a>
+
+> GET /tables
+
+```sh
+curl -X GET https://pg-api.fly.dev/tables \
+  -H 'Content-Type: application/json' \
+  -H 'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'
+```
+```js
+const data = await fetch('https://pg-api.fly.dev/tables', {
+  method: 'GET',
+  headers: { 
+    'pg': { "host": "DB_HOST", "password": "DB_PASSWORD" } 
+  }
+})
+```
+
+`GET /tables`
+
+*Get all tables*
+
+
+
+<h1 id="pg-api-plugins">Plugins</h1>
+
+View and manage your Postgres plugins.
+
+## getPlugins
+
+<a id="get-plugins"></a>
+
+> GET /plugins
+
+```sh
+curl -X GET https://pg-api.fly.dev/plugins \
+  -H 'Content-Type: application/json' \
+  -H 'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'
+```
+```js
+const data = await fetch('https://pg-api.fly.dev/plugins', {
+  method: 'GET',
+  headers: { 
+    'pg': { "host": "DB_HOST", "password": "DB_PASSWORD" } 
+  }
+})
+```
+
+`GET /plugins`
+
+*Get all plugins*
 
 
 
 
-<h1 id="swagger-pg-api-config">Config</h1>
 
-Manage your Postgres config
+
+
+<h1 id="pg-api-config">Config</h1>
+
+View and manage your Postgres config.
 
 ## getConfig
 
-<a id="opIdConfig"></a>
+<a id="config"></a>
 
 > GET /config
 
-```shell
-curl -X GET http://localhost:1337/config
+```sh
+curl -X GET https://pg-api.fly.dev/config \
+  -H 'Content-Type: application/json' \
+  -H 'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'
 ```
-
-```http
-POST http://localhost:1337/config HTTP/1.1
-```
-
-```javascript
-
-const data = await fetch('http://localhost:1337/config')
+```js
+const data = await fetch('https://pg-api.fly.dev/config', {
+  method: 'GET',
+  headers: { 
+    'pg': { "host": "DB_HOST", "password": "DB_PASSWORD" } 
+  }
+})
 ```
 
 `GET /config`
@@ -132,21 +221,21 @@ const data = await fetch('http://localhost:1337/config')
 
 ## getVersion
 
-<a id="opIdConfigVersion"></a>
+<a id="config-version"></a>
 
 > GET /config/version
-
-```shell
-curl -X GET http://localhost:1337/config/version
+```sh
+curl -X GET https://pg-api.fly.dev/config/version \
+  -H 'Content-Type: application/json' \
+  -H 'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'
 ```
-
-```http
-POST http://localhost:1337/config/version HTTP/1.1
-```
-
 ```javascript
-
-const data = await fetch('http://localhost:1337/config/version')
+const data = await fetch('https://pg-api.fly.dev/config/version', {
+  method: 'GET',
+  headers: { 
+    'pg': { "host": "DB_HOST", "password": "DB_PASSWORD" } 
+  }
+})
 ```
 
 `GET /config/version`
