@@ -30,6 +30,7 @@ jobs:
 
       - name: Prepare release
         run: |
+          npm install
           npm run dist
           tar -czvf pg-api-linux-node${{ matrix.node }}.tar.gz -C ./bin start-linux
           tar -czvf pg-api-macos-node${{ matrix.node }}.tar.gz -C ./bin start-macos
