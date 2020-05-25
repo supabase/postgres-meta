@@ -2,11 +2,18 @@
 
 A RESTful API for managing your Postgres. Fetch tables, add roles, and run queries (and more).
 
-## Docs
+## Usage
 
-All docs https://supabase.github.io/pg-api/
+Full documentation: https://supabase.github.io/pg-api/
 
-A trial API is set up here: https://pg-api.fly.dev/
+A trial API is set up here: https://pg-api.fly.dev/. To use this with your own Postgres database, pass a `pg` header. Example:
+
+```bash
+curl -X GET \
+  'https://pg-api.fly.dev/config/version' \
+  -H 'pg: { "password":"YOUR_PASSWORD", "host": "YOUR_DB_URL" } '
+```
+
 
 ## Quickstart
 
