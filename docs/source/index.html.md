@@ -20,7 +20,9 @@ headingLevel: 2
 
 Manage your PostgreSQL database using a RESTful API.
 
-This is still in early development, so most of the functionality is read-only. The goal of this API is to allow any user to manage a Postgres database using a RESTful interface. This includes running queries as well as adding tables, columns, roles, and users at runtime. 
+This is still in early development, so most of the functionality is read-only. 
+
+The goal of this API is to enable the full management of a Postgres database using a RESTful interface. This includes adding tables, columns, roles, and users at runtime, as well as running ad-hoc queries.
 
 ### Support
 
