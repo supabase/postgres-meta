@@ -1,6 +1,6 @@
 {
   "name": "@supabase/pg-api",
-  "version": "0.0.2-canary.0",
+  "version": "0.0.3",
   "description": "A RESTful API for managing your Postgres.",
   "main": "src/start.js",
   "bin": "src/start.js",
