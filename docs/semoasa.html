@@ -1,0 +1,236 @@
+
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>SEMOASA documentation</title>
+
+    <style>
+    </style>
+    <link rel="stylesheet" media="screen" href="pub/css/screen.css">
+    <link rel="stylesheet" media="print" href="pub/css/print.css">
+    <link rel="stylesheet" media="screen" href="pub/css/darkula.css">
+    
+      <script src="source/javascripts/lib/_jquery.js"></script>
+<script src="source/javascripts/lib/_jquery.highlight.js"></script>
+<script src="source/javascripts/lib/_lunr.js"></script>
+<script src="source/javascripts/lib/_imagesloaded.min.js"></script>
+<script src="source/javascripts/lib/_energize.js"></script>
+<script src="source/javascripts/app/_lang.js"></script>
+<script src="source/javascripts/app/_search.js"></script>
+<script src="source/javascripts/app/_toc.js"></script>
+<script type="text/javascript">
+$(function() {
+  loadToc($('#toc'), '.toc-link', '.toc-list-h2', 10);
+  setupLanguages($('body').data('languages'));
+  $('.content').imagesLoaded( function() {
+    recacheHeights();
+    refreshToc();
+  });
+});
+
+window.onpopstate = function() {
+  activateLanguage(getLanguageFromQueryString());
+};
+</script>
+
+    
+  </head>
+
+  <body data-languages="[&quot;json&quot;,&quot;yaml&quot;]">
+    <a href="#" id="nav-button">
+      <span>
+        NAV
+        <img src="source/images/navbar.png" class="undefined" alt="Navigation">
+      </span>
+    </a>
+    <div class="toc-wrapper">
+      <img src="source/images/logo.png" class="logo" alt="Logo">
+      
+        <div class="lang-selector">
+          
+            
+              <a href="#" data-language-name="json">json</a>
+            
+          
+            
+              <a href="#" data-language-name="yaml">yaml</a>
+            
+          
+        </div>
+      
+      
+        <div class="search">
+          <input type="text" class="search" id="input-search" placeholder="Search">
+        </div>
+        <ul class="search-results"></ul>
+      
+      <div id="toc" class="toc-list-h1">
+	  	<ul class="toc-list-h1">
+        
+          <li>
+            <a href="#openapi-extensions-documentation" class="toc-h1 toc-link" data-title="OpenAPI Extensions Documentation">OpenAPI Extensions Documentation</a>
+            
+          </li>
+        
+          <li>
+            <a href="#com-amazon-aws" class="toc-h1 toc-link" data-title="com.amazon.aws">com.amazon.aws</a>
+            
+              <ul class="toc-list-h2">
+                
+                  <li>
+                    <a href="#x-amazon-apigateway-integration" class="toc-h2 toc-link" data-title="x-amazon-apigateway-integration">x-amazon-apigateway-integration</a>
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+        
+		</ul>
+      </div>
+      
+        <ul class="toc-footer">
+          
+        </ul>
+      
+    </div>
+    <div class="page-wrapper">
+      <div class="dark-box"></div>
+      <div class="content">
+        <h1 id="openapi-extensions-documentation">OpenAPI Extensions Documentation</h1>
+<blockquote>
+<p>Scroll down for schema examples. Select a format for examples from the tabs above or the mobile navigation menu.</p>
+</blockquote>
+<p>This documentation was automatically generated from a v0.1.0 <a href="https://github.com/RepreZen/SEMOASA">SEMOASA</a> file.</p>
+<h1 id="com-amazon-aws">com.amazon.aws</h1>
+<p>Provider: <a href="https://aws.amazon.com/">Amazon Web Services</a></p>
+<h2 id="x-amazon-apigateway-integration">x-amazon-apigateway-integration</h2>
+<blockquote>
+<p>x-amazon-apigateway-integration example</p>
+</blockquote>
+<pre class="highlight tab tab-json"><code>{
+  <span class="hljs-attr">"cacheKeyParameters"</span>: [
+    <span class="hljs-string">"string"</span>
+  ],
+  <span class="hljs-attr">"cacheNamespace"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"credentials"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"contentHandling"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"httpMethod"</span>: <span class="hljs-string">"string"</span>
+}
+</code></pre>
+<pre class="highlight tab tab-yaml"><code><span class="hljs-attr">cacheKeyParameters:</span>
+<span class="hljs-bullet">  -</span> <span class="hljs-string">string</span>
+<span class="hljs-attr">cacheNamespace:</span> <span class="hljs-string">string</span>
+<span class="hljs-attr">credentials:</span> <span class="hljs-string">string</span>
+<span class="hljs-attr">contentHandling:</span> <span class="hljs-string">string</span>
+<span class="hljs-attr">httpMethod:</span> <span class="hljs-string">string</span>
+
+</code></pre>
+<p><em>Specifies the integration of the method with the backend.</em></p>
+<p>Specifies details of the backend integration used for this method.
+This extension is an extended property of the Swagger Operation object.
+The result is an API Gateway integration object.</p>
+<p><a href="http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-swagger-extensions-integration.html">AWS documentation page in the  Amazon API Gateway Developer Guide</a></p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cacheNamespace</td>
+<td>string</td>
+<td>false</td>
+<td>An API-specific tag group of related cached parameters.</td>
+</tr>
+<tr>
+<td>credentials</td>
+<td>string</td>
+<td>false</td>
+<td>For AWS IAM role-based credentials, specify the ARN of an appropriate IAM role. If unspecified, credentials will default to resource-based permissions that must be added manually to allow the API to access the resource. For more information, see Granting Permissions Using a Resource Policy.</td>
+</tr>
+<tr>
+<td>contentHandling</td>
+<td>string</td>
+<td>false</td>
+<td>Request payload encoding conversion types. Valid values are 1) CONVERT_TO_TEXT, for converting a binary payload into a Base64-encoded string or converting a text payload into a utf-8-encoded string or passing through the text payload natively without modification, and 2) CONVERT_TO_BINARY, for converting a text payload into Base64-decoded blob or passing through a binary payload natively without modification.</td>
+</tr>
+<tr>
+<td>httpMethod</td>
+<td>string</td>
+<td>false</td>
+<td>The HTTP method used in the integration request. For Lambda function invocations, the value must be POST.</td>
+</tr>
+<tr>
+<td>cacheKeyParameters</td>
+<td>[string]</td>
+<td>false</td>
+<td>A list of request parameters whose values are to be cached.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>In the OpenAPI specification v2.0, this extension can be used as follows:</strong></p>
+<aside class="warning">
+The extension may only be used in the following objects:
+</aside>
+<table>
+<thead>
+<tr>
+<th>Object</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/OAI/openapi-specification/tree/master/versions/2.0.md#operationObject">OperationObject</a></td>
+<td>Describes a single API operation on a path.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>In the OpenAPI specification v3.x, this extension can be used as follows:</strong></p>
+<aside class="warning">
+The extension may only be used in the following objects:
+</aside>
+<table>
+<thead>
+<tr>
+<th>Object</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/OAI/openapi-specification/tree/master/versions/3.0.0.md#operationObject">OperationObject</a></td>
+<td>Describes a single API operation on a path.</td>
+</tr>
+</tbody>
+</table>
+
+        
+      </div>
+      <div class="dark-box">
+        
+          <div class="lang-selector">
+            
+              
+                <a href="#" data-language-name="json">json</a>
+              
+            
+              
+                <a href="#" data-language-name="yaml">yaml</a>
+              
+            
+          </div>
+        
+      </div>
+    </div>
+  </body>
+</html>
