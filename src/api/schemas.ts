@@ -27,7 +27,7 @@ router.get('/', async (req, res) => {
 
 
 const removeSystemSchemas = (data: Schemas.Schema[]) => {
-  return data.filter((x) => !DEFAULT_SYSTEM_SCHEMAS.includes(x.schema_name))
+  return data.filter((x) => !DEFAULT_SYSTEM_SCHEMAS.includes(x.name))
 }
 
 

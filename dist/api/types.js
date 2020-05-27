@@ -38,7 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var Router = require('express').Router;
 var router = new Router();
-var schemas = require('../lib/sql').schemas;
+var types = require('../lib/sql').types;
 var RunQuery = require('../lib/connectionPool');
 var schemas_1 = require("../lib/constants/schemas");
 router.get('/', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
@@ -47,7 +47,7 @@ router.get('/', function (req, res) { return __awaiter(void 0, void 0, void 0, f
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, RunQuery(req.headers.pg, schemas.list)];
+                return [4 /*yield*/, RunQuery(req.headers.pg, types.list)];
             case 1:
                 data = (_a.sent()).data;
                 query = req.query;
@@ -65,6 +65,6 @@ router.get('/', function (req, res) { return __awaiter(void 0, void 0, void 0, f
     });
 }); });
 var removeSystemSchemas = function (data) {
-    return data.filter(function (x) { return !schemas_1.DEFAULT_SYSTEM_SCHEMAS.includes(x.name); });
+    return data.filter(function (x) { return !schemas_1.DEFAULT_SYSTEM_SCHEMAS.includes(x.schema_name); });
 };
 module.exports = router;

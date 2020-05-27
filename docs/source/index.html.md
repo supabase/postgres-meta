@@ -5,6 +5,8 @@ language_tabs:
   - js: JavaScript
 toc_footers:
   - © <a href="https://supabase.io">Supabase</a> 2020
+  - <a href="https://supabase.io">Visit supabase.io</a>
+  - <a href="https://github.com/supabase/pg-api">View on GitHub</a>
 includes: []
 search: true
 highlight_theme: darkula
@@ -156,7 +158,7 @@ const data = await fetch('https://pg-api.fly.dev/schemas', {
 
 `GET /schemas`
 
-*Get all tables*
+*Get all schemas*
 
 > Parameters:
 ```javascript
@@ -164,12 +166,12 @@ const data = await fetch('https://pg-api.fly.dev/schemas', {
  * @param {boolean} [includeSystemSchemas=false] - Return system schemas as well as user schemas
  */
  ```
- > Returns: Scehemas.Schema[]
+ > Returns: Schemas.Schema[]
  ```javascript
 {
   catalog_name: string
-  schema_name: string
-  schema_owner: string
+  name: string
+  owner: string
   default_character_set_catalog: string
   default_character_set_schema: string
   default_character_set_name: string
@@ -210,6 +212,59 @@ const data = await fetch('https://pg-api.fly.dev/tables', {
 `GET /tables`
 
 *Get all tables*
+
+
+
+
+
+
+
+<h1 id="pg-api-schemas">Types</h1>
+
+View and manage your Postgres types.
+
+## getTypes
+
+<a id="get-types"></a>
+
+> GET /types
+
+```sh
+curl -X GET https://pg-api.fly.dev/types \
+  -H 'Content-Type: application/json' \
+  -H 'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'
+```
+```js
+const data = await fetch('https://pg-api.fly.dev/types', {
+  method: 'GET',
+  headers: { 
+    'pg': { "host": "DB_HOST", "password": "DB_PASSWORD" } 
+  }
+})
+```
+
+`GET /types`
+
+*Get all Types*
+
+> Parameters:
+```javascript
+/**
+ * @param {boolean} [includeSystemSchemas=false] - Return system schemas as well as user schemas
+ */
+ ```
+ > Returns: Types.Type[]
+ ```javascript
+{
+  name: string
+  format: string
+  schema_name: string
+  description: string
+  size: string
+  enums: string
+}
+```
+
 
 
 

@@ -147,6 +147,20 @@ window.onpopstate = function() {
           </li>
         
           <li>
+            <a href="#pg-api-schemas" class="toc-h1 toc-link" data-title="Types">Types</a>
+            
+              <ul class="toc-list-h2">
+                
+                  <li>
+                    <a href="#gettypes" class="toc-h2 toc-link" data-title="">getTypes</a>
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+        
+          <li>
             <a href="#pg-api-plugins" class="toc-h1 toc-link" data-title="Plugins">Plugins</a>
             
               <ul class="toc-list-h2">
@@ -185,6 +199,10 @@ window.onpopstate = function() {
         <ul class="toc-footer">
           
             <li>© <a href="https://supabase.io">Supabase</a> 2020</li>
+          
+            <li><a href="https://supabase.io">Visit supabase.io</a></li>
+          
+            <li><a href="https://github.com/supabase/pg-api">View on GitHub</a></li>
           
         </ul>
       
@@ -305,7 +323,7 @@ window.onpopstate = function() {
 })
 </code></pre>
 <p><code>GET /schemas</code></p>
-<p><em>Get all tables</em></p>
+<p><em>Get all schemas</em></p>
 <blockquote>
 <p>Parameters:</p>
 </blockquote>
@@ -314,12 +332,12 @@ window.onpopstate = function() {
  */</span>
 </code></pre>
 <blockquote>
-<p>Returns: Scehemas.Schema[]</p>
+<p>Returns: Schemas.Schema[]</p>
 </blockquote>
 <pre class="highlight tab tab-javascript"><code>{
  <span class="hljs-attr">catalog_name</span>: string
- <span class="hljs-attr">schema_name</span>: string
- <span class="hljs-attr">schema_owner</span>: string
+ <span class="hljs-attr">name</span>: string
+ <span class="hljs-attr">owner</span>: string
  <span class="hljs-attr">default_character_set_catalog</span>: string
  <span class="hljs-attr">default_character_set_schema</span>: string
  <span class="hljs-attr">default_character_set_name</span>: string
@@ -346,6 +364,45 @@ window.onpopstate = function() {
 </code></pre>
 <p><code>GET /tables</code></p>
 <p><em>Get all tables</em></p>
+<h1 id="pg-api-schemas">Types</h1>
+<p>View and manage your Postgres types.</p>
+<h2 id="gettypes">getTypes</h2>
+<p><a id="get-types"></a></p>
+<blockquote>
+<p>GET /types</p>
+</blockquote>
+<pre class="highlight tab tab-sh"><code>curl -X GET https://pg-api.fly.dev/types \
+  -H <span class="hljs-string">'Content-Type: application/json'</span> \
+  -H <span class="hljs-string">'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'</span>
+</code></pre>
+<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'https://pg-api.fly.dev/types'</span>, {
+  <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
+  <span class="hljs-attr">headers</span>: { 
+    <span class="hljs-string">'pg'</span>: { <span class="hljs-string">"host"</span>: <span class="hljs-string">"DB_HOST"</span>, <span class="hljs-string">"password"</span>: <span class="hljs-string">"DB_PASSWORD"</span> } 
+  }
+})
+</code></pre>
+<p><code>GET /types</code></p>
+<p><em>Get all Types</em></p>
+<blockquote>
+<p>Parameters:</p>
+</blockquote>
+<pre class="highlight tab tab-javascript"><code><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@param <span class="hljs-type">{boolean}</span> </span>[includeSystemSchemas=false] - Return system schemas as well as user schemas
+ */</span>
+</code></pre>
+<blockquote>
+<p>Returns: Types.Type[]</p>
+</blockquote>
+<pre class="highlight tab tab-javascript"><code>{
+ <span class="hljs-attr">name</span>: string
+ <span class="hljs-attr">format</span>: string
+ <span class="hljs-attr">schema_name</span>: string
+ <span class="hljs-attr">description</span>: string
+ <span class="hljs-attr">size</span>: string
+ <span class="hljs-attr">enums</span>: string
+}
+</code></pre>
 <h1 id="pg-api-plugins">Plugins</h1>
 <p>View and manage your Postgres plugins.</p>
 <h2 id="getplugins">getPlugins</h2>
