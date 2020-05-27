@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "allowJs": true,
+    "checkJs": false,
+    "module": "commonjs",
+    "target": "es5"
+  },
+  "exclude": ["node_modules", "test", "dist", "docs", "bin"]
+}

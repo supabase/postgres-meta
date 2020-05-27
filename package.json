@@ -6,19 +6,21 @@
   "bin": "src/start.js",
   "private": false,
   "scripts": {
-    "build": "npm-run-all clean build:transpile",
-    "build:transpile": "babel ./src/ --out-dir dist --copy-files",
-    "clean": "rimraf dist",
-    "clean:pretty": "prettier --write \"./src/**/*.{js,json,yml,md,vue,css,scss}\"",
+    "build": "npm-run-all build:clean build:transpile build:copy",
+    "build:clean": "rimraf dist",
+    "build:transpile": "./node_modules/.bin/tsc",
+    "build:copy": "cp -r ./src/lib/sql/ ./dist/lib/sql/",
     "dist": "NODE_ENV=production npm-run-all dist:build dist:pkg",
     "dist:build": "NODE_ENV=production npm run build",
     "dist:pkg": "rimraf bin && pkg --out-path ./bin dist/start.js",
     "dev": "NODE_ENV=development npm-run-all build server",
     "dev:watch": "nodemon",
+    "pretty": "prettier --write \"./src/**/*.{js,json,yml,md,vue,css,scss}\"",
     "server": "node ./dist/start.js",
     "test": "node -r esm ./node_modules/.bin/mocha 'test/**/*.js' --recursive "
   },
   "dependencies": {
+    "@types/node": "^14.0.5",
     "cors": "^2.8.5",
     "esm": "^3.2.25",
     "express": "^4.17.1",
@@ -35,7 +37,8 @@
     "nodemon": "^1.19.4",
     "pkg": "^4.4.8",
     "prettier": "^2.0.5",
-    "rimraf": "^3.0.2"
+    "rimraf": "^3.0.2",
+    "typescript": "^3.9.3"
   },
   "repository": {
     "type": "git",
@@ -56,9 +59,9 @@
   "nodemonConfig": {
     "exec": "npm run dev",
     "watch": [
-      "src/*",
-      "public/*"
+      "src"
     ],
+    "ext": "js,ts,sql",
     "ignore": [
       "**/__tests__/**",
       "*.test.js",
