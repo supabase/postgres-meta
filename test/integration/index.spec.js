@@ -49,6 +49,26 @@ describe('/config/version', () => {
     assert.equal(true, res.data.version_number == '120003')
   })
 })
+describe('/schemas', () => {
+  it('GET', async () => {
+    const res = await axios.get(`${URL}/schemas`)
+    // console.log('res.data', res.data)
+    const datum = res.data.find((x) => x.schema_name == 'public')
+    const notIncluded = res.data.find((x) => x.schema_name == 'pg_toast')
+    assert.equal(res.status, STATUS.SUCCESS)
+    assert.equal(true, !!datum)
+    assert.equal(true, !notIncluded)
+  })
+  it('GET with system schemas', async () => {
+    const res = await axios.get(`${URL}/schemas?includeSystemSchemas=true`)
+    // console.log('res.data', res.data)
+    const datum = res.data.find((x) => x.schema_name == 'public')
+    const included = res.data.find((x) => x.schema_name == 'pg_toast')
+    assert.equal(res.status, STATUS.SUCCESS)
+    assert.equal(true, !!datum)
+    assert.equal(true, !!included)
+  })
+})
 describe('/tables', () => {
   it('GET', async () => {
     const res = await axios.get(`${URL}/tables`)
