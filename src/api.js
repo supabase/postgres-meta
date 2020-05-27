@@ -10,6 +10,7 @@ router.use('/plugins', addConnectionToRequest, require('./api/plugins'))
 router.use('/query', addConnectionToRequest, require('./api/query'))
 router.use('/schemas', addConnectionToRequest, require('./api/schemas'))
 router.use('/tables', addConnectionToRequest, require('./api/tables'))
+router.use('/types', addConnectionToRequest, require('./api/types'))
 router.use('/users', addConnectionToRequest, require('./api/users'))
 
 module.exports = router

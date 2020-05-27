@@ -11,5 +11,6 @@ router.use('/plugins', connectionMiddleware_1.addConnectionToRequest, require('.
 router.use('/query', connectionMiddleware_1.addConnectionToRequest, require('./api/query'));
 router.use('/schemas', connectionMiddleware_1.addConnectionToRequest, require('./api/schemas'));
 router.use('/tables', connectionMiddleware_1.addConnectionToRequest, require('./api/tables'));
+router.use('/types', connectionMiddleware_1.addConnectionToRequest, require('./api/types'));
 router.use('/users', connectionMiddleware_1.addConnectionToRequest, require('./api/users'));
 module.exports = router;

@@ -2,8 +2,8 @@ export namespace Schemas {
 
   export interface Schema {
     catalog_name: string
-    schema_name: string
-    schema_owner: string
+    name: string
+    owner: string
     default_character_set_catalog: string
     default_character_set_schema: string
     default_character_set_name: string

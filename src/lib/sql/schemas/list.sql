@@ -1,7 +1,7 @@
 SELECT
     catalog_name,
-    schema_name,
-    schema_owner,
+    schema_name as name,
+    schema_owner as owner,
     default_character_set_catalog,
     default_character_set_schema,
     default_character_set_name,
