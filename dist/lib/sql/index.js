@@ -27,6 +27,9 @@ module.exports = {
   sequences: {
     list: fs.readFileSync(path.join(__dirname, '/sequences/list.sql')).toString(),
   },
+  schemas: {
+    list: fs.readFileSync(path.join(__dirname, '/schemas/list.sql')).toString(),
+  },
   types: {
     list: fs.readFileSync(path.join(__dirname, '/types/list.sql')).toString(),
   },

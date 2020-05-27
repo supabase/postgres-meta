@@ -44,14 +44,6 @@
     "url": "https://github.com/supabase/pg-api/issues"
   },
   "homepage": "https://github.com/supabase/pg-api#readme",
-  "babel": {
-    "presets": [
-      "@babel/preset-env"
-    ],
-    "plugins": [
-      "@babel/plugin-transform-runtime"
-    ]
-  },
   "nodemonConfig": {
     "exec": "npm run dev",
     "watch": [
