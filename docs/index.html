@@ -1,0 +1,427 @@
+
+
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Postgres Admin API</title>
+
+    <style>
+    </style>
+    <link rel="stylesheet" media="screen" href="pub/css/screen.css">
+    <link rel="stylesheet" media="print" href="pub/css/print.css">
+    <link rel="stylesheet" media="screen" href="pub/css/darkula.css">
+    
+      <script src="source/javascripts/lib/_jquery.js"></script>
+<script src="source/javascripts/lib/_jquery.highlight.js"></script>
+<script src="source/javascripts/lib/_lunr.js"></script>
+<script src="source/javascripts/lib/_imagesloaded.min.js"></script>
+<script src="source/javascripts/lib/_energize.js"></script>
+<script src="source/javascripts/app/_lang.js"></script>
+<script src="source/javascripts/app/_search.js"></script>
+<script src="source/javascripts/app/_toc.js"></script>
+<script type="text/javascript">
+$(function() {
+  loadToc($('#toc'), '.toc-link', '.toc-list-h2, .toc-list-h3, .toc-list-h4, .toc-list-h5, .toc-list-h6', 10);
+  setupLanguages($('body').data('languages'));
+  $('.content').imagesLoaded( function() {
+    recacheHeights();
+    refreshToc();
+  });
+});
+
+window.onpopstate = function() {
+  activateLanguage(getLanguageFromQueryString());
+};
+</script>
+
+    
+    <meta name="theme-color" content="#F3F7F9" />
+<!-- Renderer: Shins v2.5.0 -->
+<!-- Generator: Widdershins v4.0.1 -->
+  </head>
+
+  <body data-languages="[&quot;sh&quot;,&quot;js&quot;]">
+    <a href="#" id="nav-button">
+      <span>
+        NAV
+        <img src="source/images/navbar.png" class="undefined" alt="Navigation">
+      </span>
+    </a>
+    <div class="toc-wrapper">
+      <img src="source/images/logo.png" class="logo" alt="Logo">
+      
+        <div class="lang-selector">
+          
+            
+              <a href="#" data-language-name="sh">Shell</a>
+            
+          
+            
+              <a href="#" data-language-name="js">JavaScript</a>
+            
+          
+        </div>
+      
+      
+        <div class="search">
+          <input type="text" class="search" id="input-search" placeholder="Search">
+        </div>
+        <ul class="search-results"></ul>
+      
+      <div id="toc" class="toc-list-h1">
+	  	<ul class="toc-list-h1">
+        
+          <li>
+            <a href="#about" class="toc-h1 toc-link" data-title="Postgres API">Postgres API</a>
+            
+          </li>
+        
+          <li>
+            <a href="#getting-started" class="toc-h1 toc-link" data-title="Getting started">Getting started</a>
+            
+              <ul class="toc-list-h2">
+                
+                  <li>
+                    <a href="#usage" class="toc-h2 toc-link" data-title="">Usage</a>
+                    
+                  </li>
+                
+                  <li>
+                    <a href="#self-hosting" class="toc-h2 toc-link" data-title="">Self Hosting</a>
+                    
+                  </li>
+                
+                  <li>
+                    <a href="#authentication" class="toc-h2 toc-link" data-title="">Authentication</a>
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+        
+          <li>
+            <a href="#swagger-pg-api-query" class="toc-h1 toc-link" data-title="Query">Query</a>
+            
+              <ul class="toc-list-h2">
+                
+                  <li>
+                    <a href="#query" class="toc-h2 toc-link" data-title="">query</a>
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+        
+          <li>
+            <a href="#pg-api-schemas" class="toc-h1 toc-link" data-title="Schemas">Schemas</a>
+            
+              <ul class="toc-list-h2">
+                
+                  <li>
+                    <a href="#getschemas" class="toc-h2 toc-link" data-title="">getSchemas</a>
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+        
+          <li>
+            <a href="#pg-api-tables" class="toc-h1 toc-link" data-title="Tables">Tables</a>
+            
+              <ul class="toc-list-h2">
+                
+                  <li>
+                    <a href="#gettables" class="toc-h2 toc-link" data-title="">getTables</a>
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+        
+          <li>
+            <a href="#pg-api-plugins" class="toc-h1 toc-link" data-title="Plugins">Plugins</a>
+            
+              <ul class="toc-list-h2">
+                
+                  <li>
+                    <a href="#getplugins" class="toc-h2 toc-link" data-title="">getPlugins</a>
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+        
+          <li>
+            <a href="#pg-api-config" class="toc-h1 toc-link" data-title="Config">Config</a>
+            
+              <ul class="toc-list-h2">
+                
+                  <li>
+                    <a href="#getconfig" class="toc-h2 toc-link" data-title="">getConfig</a>
+                    
+                  </li>
+                
+                  <li>
+                    <a href="#getversion" class="toc-h2 toc-link" data-title="">getVersion</a>
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+        
+		</ul>
+      </div>
+      
+        <ul class="toc-footer">
+          
+            <li>© <a href="https://supabase.io">Supabase</a> 2020</li>
+          
+        </ul>
+      
+    </div>
+    <div class="page-wrapper">
+      <div class="dark-box"></div>
+      <div class="content">
+        <h1 id="about">Postgres API</h1>
+<blockquote>
+<p>Scroll down for code samples, example requests and responses. Select a language for code samples from the tabs above or the mobile navigation menu.</p>
+</blockquote>
+<p>Manage your PostgreSQL database using a RESTful API.</p>
+<p>This is still in early development, so most of the functionality is read-only.</p>
+<p>The goal of this API is to enable the full management of a Postgres database using a RESTful interface. This includes adding tables, columns, roles, and users at runtime, as well as running ad-hoc queries.</p>
+<h3 id="support">Support</h3>
+<ul>
+<li>Repository: <a href="https://github.com/supabase/pg-api">https://github.com/supabase/pg-api</a></li>
+<li>Made by Supabase: <a href="https://supabase.io">https://supabase.io</a></li>
+</ul>
+<h1 id="getting-started">Getting started</h1>
+<h2 id="usage">Usage</h2>
+<blockquote>
+<p>Basic usage</p>
+</blockquote>
+<pre class="highlight tab tab-sh"><code>curl -X GET https://pg-api.fly.dev/ \
+  -H <span class="hljs-string">'Content-Type: application/json'</span> \
+  -H <span class="hljs-string">'pg: {}'</span> <span class="hljs-comment"># see Postgres connection header below</span>
+</code></pre>
+<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'https://pg-api.fly.dev'</span>, {
+  <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
+  <span class="hljs-attr">headers</span>: { 
+    <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span>,
+    <span class="hljs-string">'pg'</span>: {} <span class="hljs-comment">// see Postgres connection header below</span>
+  }
+})
+</code></pre>
+<blockquote>
+<p>Postgres connection header</p>
+</blockquote>
+<pre class="highlight tab tab-json"><code>{
+  <span class="hljs-attr">"user"</span>: <span class="hljs-string">"postgres"</span>,
+  <span class="hljs-attr">"password"</span>: <span class="hljs-string">"postgres"</span>, 
+  <span class="hljs-attr">"port"</span>: <span class="hljs-number">5432</span>, 
+  <span class="hljs-attr">"host"</span>: <span class="hljs-string">"db.domain.com"</span> 
+}
+</code></pre>
+<p>For security reasons, this API is best self-hosted. However, we provide an example API for you to test before installing. To use the API however, you have to send your PG connection via HTTPS headers.</p>
+<p>We DO NOT log these headers anywhere. But still, we HIGHLY recommend that you just self-host (we have tried to make this easy for you). Use the demo API at your own risk.</p>
+<p>Database connection headers are not required for self-hosting. You can set ENV vars with your default connection details so that you don't pass connection details over a network.</p>
+<h2 id="self-hosting">Self Hosting</h2>
+<pre class="highlight"><code>https://github.com/supabase/pg-api
+</code></pre>
+<p>We support several different methods for self-hosting, detailed in the <a href="https://github.com/supabase/pg-api">repository</a>.</p>
+<h2 id="authentication">Authentication</h2>
+<p>Authentication is not provided. Make sure you use this inside a secure network or behind a secure API proxy.</p>
+<h1 id="swagger-pg-api-query">Query</h1>
+<p>Directly query your database. Send any SQL you want!</p>
+<h2 id="query">query</h2>
+<p><a id="opIdquery"></a></p>
+<blockquote>
+<p>POST /query</p>
+</blockquote>
+<pre class="highlight tab tab-sh"><code>curl -X POST https://pg-api.fly.dev/query \
+  -H <span class="hljs-string">'Content-Type: application/json'</span> \
+  -d <span class="hljs-string">'{}'</span> <span class="hljs-comment"># see example body below</span>
+</code></pre>
+<pre class="highlight tab tab-js"><code>
+<span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'https://pg-api.fly.dev/query'</span>, {
+  <span class="hljs-attr">method</span>: <span class="hljs-string">'POST'</span>,
+  <span class="hljs-attr">headers</span>: { <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span> },
+  <span class="hljs-attr">body</span>: {} <span class="hljs-comment">// see example body below</span>
+})
+</code></pre>
+<blockquote>
+<p>Example body</p>
+</blockquote>
+<pre class="highlight tab tab-json"><code>{
+  <span class="hljs-attr">"query"</span>: <span class="hljs-string">"SELECT * FROM your_table LIMIT 1;"</span>
+}
+</code></pre>
+<p><code>POST /query</code></p>
+<p><em>Execute an SQL query</em></p>
+<h3 id="addpet-parameters">Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>query</td>
+<td>string</td>
+<td>true</td>
+<td>SQL string to execute</td>
+</tr>
+</tbody>
+</table>
+<h1 id="pg-api-schemas">Schemas</h1>
+<p>View and manage your Postgres schemas.</p>
+<h2 id="getschemas">getSchemas</h2>
+<p><a id="get-schemas"></a></p>
+<blockquote>
+<p>GET /schemas</p>
+</blockquote>
+<pre class="highlight tab tab-sh"><code>curl -X GET https://pg-api.fly.dev/schemas \
+  -H <span class="hljs-string">'Content-Type: application/json'</span> \
+  -H <span class="hljs-string">'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'</span>
+</code></pre>
+<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'https://pg-api.fly.dev/schemas'</span>, {
+  <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
+  <span class="hljs-attr">headers</span>: { 
+    <span class="hljs-string">'pg'</span>: { <span class="hljs-string">"host"</span>: <span class="hljs-string">"DB_HOST"</span>, <span class="hljs-string">"password"</span>: <span class="hljs-string">"DB_PASSWORD"</span> } 
+  }
+})
+</code></pre>
+<p><code>GET /schemas</code></p>
+<p><em>Get all tables</em></p>
+<blockquote>
+<p>Parameters:</p>
+</blockquote>
+<pre class="highlight tab tab-javascript"><code><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@param <span class="hljs-type">{boolean}</span> </span>[includeSystemSchemas=false] - Return system schemas as well as user schemas
+ */</span>
+</code></pre>
+<blockquote>
+<p>Returns: Scehemas.Schema[]</p>
+</blockquote>
+<pre class="highlight tab tab-javascript"><code>{
+ <span class="hljs-attr">catalog_name</span>: string
+ <span class="hljs-attr">schema_name</span>: string
+ <span class="hljs-attr">schema_owner</span>: string
+ <span class="hljs-attr">default_character_set_catalog</span>: string
+ <span class="hljs-attr">default_character_set_schema</span>: string
+ <span class="hljs-attr">default_character_set_name</span>: string
+ <span class="hljs-attr">sql_path</span>: string
+}
+</code></pre>
+<h1 id="pg-api-tables">Tables</h1>
+<p>View and manage your Postgres tables.</p>
+<h2 id="gettables">getTables</h2>
+<p><a id="get-tables"></a></p>
+<blockquote>
+<p>GET /tables</p>
+</blockquote>
+<pre class="highlight tab tab-sh"><code>curl -X GET https://pg-api.fly.dev/tables \
+  -H <span class="hljs-string">'Content-Type: application/json'</span> \
+  -H <span class="hljs-string">'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'</span>
+</code></pre>
+<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'https://pg-api.fly.dev/tables'</span>, {
+  <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
+  <span class="hljs-attr">headers</span>: { 
+    <span class="hljs-string">'pg'</span>: { <span class="hljs-string">"host"</span>: <span class="hljs-string">"DB_HOST"</span>, <span class="hljs-string">"password"</span>: <span class="hljs-string">"DB_PASSWORD"</span> } 
+  }
+})
+</code></pre>
+<p><code>GET /tables</code></p>
+<p><em>Get all tables</em></p>
+<h1 id="pg-api-plugins">Plugins</h1>
+<p>View and manage your Postgres plugins.</p>
+<h2 id="getplugins">getPlugins</h2>
+<p><a id="get-plugins"></a></p>
+<blockquote>
+<p>GET /plugins</p>
+</blockquote>
+<pre class="highlight tab tab-sh"><code>curl -X GET https://pg-api.fly.dev/plugins \
+  -H <span class="hljs-string">'Content-Type: application/json'</span> \
+  -H <span class="hljs-string">'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'</span>
+</code></pre>
+<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'https://pg-api.fly.dev/plugins'</span>, {
+  <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
+  <span class="hljs-attr">headers</span>: { 
+    <span class="hljs-string">'pg'</span>: { <span class="hljs-string">"host"</span>: <span class="hljs-string">"DB_HOST"</span>, <span class="hljs-string">"password"</span>: <span class="hljs-string">"DB_PASSWORD"</span> } 
+  }
+})
+</code></pre>
+<p><code>GET /plugins</code></p>
+<p><em>Get all plugins</em></p>
+<h1 id="pg-api-config">Config</h1>
+<p>View and manage your Postgres config.</p>
+<h2 id="getconfig">getConfig</h2>
+<p><a id="config"></a></p>
+<blockquote>
+<p>GET /config</p>
+</blockquote>
+<pre class="highlight tab tab-sh"><code>curl -X GET https://pg-api.fly.dev/config \
+  -H <span class="hljs-string">'Content-Type: application/json'</span> \
+  -H <span class="hljs-string">'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'</span>
+</code></pre>
+<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'https://pg-api.fly.dev/config'</span>, {
+  <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
+  <span class="hljs-attr">headers</span>: { 
+    <span class="hljs-string">'pg'</span>: { <span class="hljs-string">"host"</span>: <span class="hljs-string">"DB_HOST"</span>, <span class="hljs-string">"password"</span>: <span class="hljs-string">"DB_PASSWORD"</span> } 
+  }
+})
+</code></pre>
+<p><code>GET /config</code></p>
+<p>Get your Postgres config.</p>
+<h2 id="getversion">getVersion</h2>
+<p><a id="config-version"></a></p>
+<blockquote>
+<p>GET /config/version</p>
+</blockquote>
+<pre class="highlight tab tab-sh"><code>curl -X GET https://pg-api.fly.dev/config/version \
+  -H <span class="hljs-string">'Content-Type: application/json'</span> \
+  -H <span class="hljs-string">'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'</span>
+</code></pre>
+<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'https://pg-api.fly.dev/config/version'</span>, {
+  <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
+  <span class="hljs-attr">headers</span>: { 
+    <span class="hljs-string">'pg'</span>: { <span class="hljs-string">"host"</span>: <span class="hljs-string">"DB_HOST"</span>, <span class="hljs-string">"password"</span>: <span class="hljs-string">"DB_PASSWORD"</span> } 
+  }
+})
+</code></pre>
+<p><code>GET /config/version</code></p>
+<p>Get your Postgres version information.</p>
+<!-- Renderer: Shins v2.5.0 -->
+<!-- Generator: Widdershins v4.0.1 -->
+      </div>
+      <div class="dark-box">
+        
+          <div class="lang-selector">
+            
+              
+                <a href="#" data-language-name="sh">Shell</a>
+              
+            
+              
+                <a href="#" data-language-name="js">JavaScript</a>
+              
+            
+          </div>
+        
+      </div>
+    </div>
+  </body>
+</html>
