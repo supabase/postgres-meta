@@ -13,7 +13,7 @@ describe('/', () => {
   it('GET', async () => {
     const res = await axios.get(`${URL}/`)
     assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(res.data, 'OK')
+    assert.equal(!!res.data.version, true)
   })
 })
 describe('/health', () => {

@@ -5,8 +5,7 @@ import { CONNECTION } from './constants'
  */
 export const addConnectionToRequest = async (req, res, next) => {
   try {
-    if (!('pg' in req.headers)) return next()
-    let overrides = JSON.parse(req.headers['pg'])
+    let overrides = ('pg' in req.headers) ? JSON.parse(req.headers['pg']) : {}
     req.headers['pg'] = { ...CONNECTION, ...overrides }
     return next()
   } catch (error) {
