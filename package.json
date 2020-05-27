@@ -1,6 +1,6 @@
 {
   "name": "@supabase/pg-api",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A RESTful API for managing your Postgres.",
   "main": "src/start.js",
   "bin": "src/start.js",
@@ -10,8 +10,7 @@
     "build:clean": "rimraf dist",
     "build:transpile": "./node_modules/.bin/tsc",
     "build:copy": "cp -r ./src/lib/sql/ ./dist/lib/sql/",
-    "dist": "NODE_ENV=production npm-run-all dist:build dist:pkg",
-    "dist:build": "NODE_ENV=production npm run build",
+    "dist": "NODE_ENV=production npm-run-all build dist:pkg",
     "dist:pkg": "rimraf bin && pkg --out-path ./bin dist/start.js",
     "dev": "NODE_ENV=development npm-run-all build server",
     "dev:watch": "nodemon",
