@@ -30,6 +30,9 @@ Then run any of the bin files in the `bin` directory
 ./bin/start-windows.exe
 ```
 
+## Self-hosting
+
+[![Run on Google Cloud](https://deploy.cloud.run/button.svg)](https://deploy.cloud.run)
 
 ## FAQs
 
