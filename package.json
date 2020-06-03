@@ -21,6 +21,7 @@
   "dependencies": {
     "@types/node": "^14.0.5",
     "cors": "^2.8.5",
+    "crypto-js": "^4.0.0",
     "express": "^4.17.1",
     "pg": "^7.18.2"
   },

@@ -38,12 +38,12 @@ var _this = this;
 var pg = require('pg');
 pg.types.setTypeParser(20, 'text', parseInt);
 var Pool = require('pg').Pool;
-var RunQuery = function (connection, sql) { return __awaiter(_this, void 0, void 0, function () {
+var RunQuery = function (connectionString, sql) { return __awaiter(_this, void 0, void 0, function () {
     var pool, results, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                pool = new Pool(connection);
+                pool = new Pool({ connectionString: connectionString });
                 _a.label = 1;
             case 1:
                 _a.trys.push([1, 3, 4, 5]);
@@ -53,7 +53,7 @@ var RunQuery = function (connection, sql) { return __awaiter(_this, void 0, void
                 return [2 /*return*/, { data: results.rows, error: null }];
             case 3:
                 error_1 = _a.sent();
-                console.log('PG Error', error_1);
+                console.log('PG Error');
                 throw error_1;
             case 4:
                 // Try to close the connection
