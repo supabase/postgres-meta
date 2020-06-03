@@ -1,10 +1,12 @@
 var assert = require('assert')
+const CryptoJS = require('crypto-js')
 import axios from 'axios'
-import { PG_API_URL, PG_API_PORT } from '../../src/lib/constants'
+import { PG_API_URL, PG_API_PORT, PG_CONNECTION, CRYPTO_KEY } from '../../src/lib/constants'
 
 const URL = `${PG_API_URL}:${PG_API_PORT}`
 const STATUS = {
   SUCCESS: 200,
+  ERROR: 500,
 }
 
 console.log('Running tests on ', URL)
@@ -21,6 +23,34 @@ describe('/health', () => {
     const res = await axios.get(`${URL}/health`)
     assert.equal(res.status, STATUS.SUCCESS)
     assert.equal(!!res.data.date, true)
+  })
+})
+describe('When passing an encrypted connection header', () => {
+  it('should decrypt the connection and return a result', async () => {
+    const encrypted = CryptoJS.AES.encrypt(PG_CONNECTION, CRYPTO_KEY).toString()
+    const res = await axios.get(`${URL}/config`, {
+      headers: {
+        'X-Connection-Encrypted': encrypted,
+      },
+    })
+    // console.log('res.data', res.data)
+    const datum = res.data.find((x) => x.name == 'trace_recovery_messages')
+    assert.equal(res.status, STATUS.SUCCESS)
+    assert.equal(true, !!datum)
+  })
+  it('should fail with a bad connection', async () => {
+    const encrypted = CryptoJS.AES.encrypt('bad connection', CRYPTO_KEY).toString()
+    try {
+      const res = await axios.get(`${URL}/config`, {
+        headers: {
+          'X-Connection-Encrypted': encrypted,
+        },
+      })
+      assert.equal(res.status, STATUS.ERROR)
+    } catch (error) {
+      console.log('error', error)
+      assert.equal(error.response.status, STATUS.ERROR)
+    }
   })
 })
 describe('/query', () => {
