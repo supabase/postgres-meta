@@ -39,7 +39,7 @@ The goal of this API is to enable the full management of a Postgres database usi
 > Basic usage
 
 ```sh
-curl -X GET https://pg-api.fly.dev/ \
+curl -X GET http://localhost:1337/ \
   -H 'Content-Type: application/json' \
   -H 'pg: {}' # see Postgres connection header below
 ```
@@ -99,13 +99,13 @@ Directly query your database. Send any SQL you want!
 > POST /query
 
 ```sh
-curl -X POST https://pg-api.fly.dev/query \
+curl -X POST http://localhost:1337/query \
   -H 'Content-Type: application/json' \
   -d '{}' # see example body below
 ```
 ```js
 
-const data = await fetch('https://pg-api.fly.dev/query', {
+const data = await fetch('http://localhost:1337/query', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: {} // see example body below
@@ -143,12 +143,12 @@ View and manage your Postgres schemas.
 > GET /schemas
 
 ```sh
-curl -X GET https://pg-api.fly.dev/schemas \
+curl -X GET http://localhost:1337/schemas \
   -H 'Content-Type: application/json' \
   -H 'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'
 ```
 ```js
-const data = await fetch('https://pg-api.fly.dev/schemas', {
+const data = await fetch('http://localhost:1337/schemas', {
   method: 'GET',
   headers: { 
     'pg': { "host": "DB_HOST", "password": "DB_PASSWORD" } 
@@ -196,12 +196,12 @@ View and manage your Postgres tables.
 > GET /tables
 
 ```sh
-curl -X GET https://pg-api.fly.dev/tables \
+curl -X GET http://localhost:1337/tables \
   -H 'Content-Type: application/json' \
   -H 'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'
 ```
 ```js
-const data = await fetch('https://pg-api.fly.dev/tables', {
+const data = await fetch('http://localhost:1337/tables', {
   method: 'GET',
   headers: { 
     'pg': { "host": "DB_HOST", "password": "DB_PASSWORD" } 
@@ -230,12 +230,12 @@ View and manage your Postgres types.
 > GET /types
 
 ```sh
-curl -X GET https://pg-api.fly.dev/types \
+curl -X GET http://localhost:1337/types \
   -H 'Content-Type: application/json' \
   -H 'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'
 ```
 ```js
-const data = await fetch('https://pg-api.fly.dev/types', {
+const data = await fetch('http://localhost:1337/types', {
   method: 'GET',
   headers: { 
     'pg': { "host": "DB_HOST", "password": "DB_PASSWORD" } 
@@ -282,12 +282,12 @@ View and manage your Postgres plugins.
 > GET /plugins
 
 ```sh
-curl -X GET https://pg-api.fly.dev/plugins \
+curl -X GET http://localhost:1337/plugins \
   -H 'Content-Type: application/json' \
   -H 'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'
 ```
 ```js
-const data = await fetch('https://pg-api.fly.dev/plugins', {
+const data = await fetch('http://localhost:1337/plugins', {
   method: 'GET',
   headers: { 
     'pg': { "host": "DB_HOST", "password": "DB_PASSWORD" } 
@@ -316,12 +316,12 @@ View and manage your Postgres config.
 > GET /config
 
 ```sh
-curl -X GET https://pg-api.fly.dev/config \
+curl -X GET http://localhost:1337/config \
   -H 'Content-Type: application/json' \
   -H 'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'
 ```
 ```js
-const data = await fetch('https://pg-api.fly.dev/config', {
+const data = await fetch('http://localhost:1337/config', {
   method: 'GET',
   headers: { 
     'pg': { "host": "DB_HOST", "password": "DB_PASSWORD" } 
@@ -340,12 +340,12 @@ Get your Postgres config.
 
 > GET /config/version
 ```sh
-curl -X GET https://pg-api.fly.dev/config/version \
+curl -X GET http://localhost:1337/config/version \
   -H 'Content-Type: application/json' \
   -H 'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'
 ```
 ```js
-const data = await fetch('https://pg-api.fly.dev/config/version', {
+const data = await fetch('http://localhost:1337/config/version', {
   method: 'GET',
   headers: { 
     'pg': { "host": "DB_HOST", "password": "DB_PASSWORD" } 

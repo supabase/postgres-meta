@@ -227,7 +227,7 @@ window.onpopstate = function() {
 <blockquote>
 <p>Basic usage</p>
 </blockquote>
-<pre class="highlight tab tab-sh"><code>curl -X GET https://pg-api.fly.dev/ \
+<pre class="highlight tab tab-sh"><code>curl -X GET http://localhost:1337/ \
   -H <span class="hljs-string">'Content-Type: application/json'</span> \
   -H <span class="hljs-string">'pg: {}'</span> <span class="hljs-comment"># see Postgres connection header below</span>
 </code></pre>
@@ -265,12 +265,12 @@ window.onpopstate = function() {
 <blockquote>
 <p>POST /query</p>
 </blockquote>
-<pre class="highlight tab tab-sh"><code>curl -X POST https://pg-api.fly.dev/query \
+<pre class="highlight tab tab-sh"><code>curl -X POST http://localhost:1337/query \
   -H <span class="hljs-string">'Content-Type: application/json'</span> \
   -d <span class="hljs-string">'{}'</span> <span class="hljs-comment"># see example body below</span>
 </code></pre>
 <pre class="highlight tab tab-js"><code>
-<span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'https://pg-api.fly.dev/query'</span>, {
+<span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:1337/query'</span>, {
   <span class="hljs-attr">method</span>: <span class="hljs-string">'POST'</span>,
   <span class="hljs-attr">headers</span>: { <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span> },
   <span class="hljs-attr">body</span>: {} <span class="hljs-comment">// see example body below</span>
@@ -311,11 +311,11 @@ window.onpopstate = function() {
 <blockquote>
 <p>GET /schemas</p>
 </blockquote>
-<pre class="highlight tab tab-sh"><code>curl -X GET https://pg-api.fly.dev/schemas \
+<pre class="highlight tab tab-sh"><code>curl -X GET http://localhost:1337/schemas \
   -H <span class="hljs-string">'Content-Type: application/json'</span> \
   -H <span class="hljs-string">'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'</span>
 </code></pre>
-<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'https://pg-api.fly.dev/schemas'</span>, {
+<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:1337/schemas'</span>, {
   <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
   <span class="hljs-attr">headers</span>: { 
     <span class="hljs-string">'pg'</span>: { <span class="hljs-string">"host"</span>: <span class="hljs-string">"DB_HOST"</span>, <span class="hljs-string">"password"</span>: <span class="hljs-string">"DB_PASSWORD"</span> } 
@@ -351,11 +351,11 @@ window.onpopstate = function() {
 <blockquote>
 <p>GET /tables</p>
 </blockquote>
-<pre class="highlight tab tab-sh"><code>curl -X GET https://pg-api.fly.dev/tables \
+<pre class="highlight tab tab-sh"><code>curl -X GET http://localhost:1337/tables \
   -H <span class="hljs-string">'Content-Type: application/json'</span> \
   -H <span class="hljs-string">'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'</span>
 </code></pre>
-<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'https://pg-api.fly.dev/tables'</span>, {
+<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:1337/tables'</span>, {
   <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
   <span class="hljs-attr">headers</span>: { 
     <span class="hljs-string">'pg'</span>: { <span class="hljs-string">"host"</span>: <span class="hljs-string">"DB_HOST"</span>, <span class="hljs-string">"password"</span>: <span class="hljs-string">"DB_PASSWORD"</span> } 
@@ -371,11 +371,11 @@ window.onpopstate = function() {
 <blockquote>
 <p>GET /types</p>
 </blockquote>
-<pre class="highlight tab tab-sh"><code>curl -X GET https://pg-api.fly.dev/types \
+<pre class="highlight tab tab-sh"><code>curl -X GET http://localhost:1337/types \
   -H <span class="hljs-string">'Content-Type: application/json'</span> \
   -H <span class="hljs-string">'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'</span>
 </code></pre>
-<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'https://pg-api.fly.dev/types'</span>, {
+<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:1337/types'</span>, {
   <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
   <span class="hljs-attr">headers</span>: { 
     <span class="hljs-string">'pg'</span>: { <span class="hljs-string">"host"</span>: <span class="hljs-string">"DB_HOST"</span>, <span class="hljs-string">"password"</span>: <span class="hljs-string">"DB_PASSWORD"</span> } 
@@ -410,11 +410,11 @@ window.onpopstate = function() {
 <blockquote>
 <p>GET /plugins</p>
 </blockquote>
-<pre class="highlight tab tab-sh"><code>curl -X GET https://pg-api.fly.dev/plugins \
+<pre class="highlight tab tab-sh"><code>curl -X GET http://localhost:1337/plugins \
   -H <span class="hljs-string">'Content-Type: application/json'</span> \
   -H <span class="hljs-string">'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'</span>
 </code></pre>
-<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'https://pg-api.fly.dev/plugins'</span>, {
+<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:1337/plugins'</span>, {
   <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
   <span class="hljs-attr">headers</span>: { 
     <span class="hljs-string">'pg'</span>: { <span class="hljs-string">"host"</span>: <span class="hljs-string">"DB_HOST"</span>, <span class="hljs-string">"password"</span>: <span class="hljs-string">"DB_PASSWORD"</span> } 
@@ -430,11 +430,11 @@ window.onpopstate = function() {
 <blockquote>
 <p>GET /config</p>
 </blockquote>
-<pre class="highlight tab tab-sh"><code>curl -X GET https://pg-api.fly.dev/config \
+<pre class="highlight tab tab-sh"><code>curl -X GET http://localhost:1337/config \
   -H <span class="hljs-string">'Content-Type: application/json'</span> \
   -H <span class="hljs-string">'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'</span>
 </code></pre>
-<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'https://pg-api.fly.dev/config'</span>, {
+<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:1337/config'</span>, {
   <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
   <span class="hljs-attr">headers</span>: { 
     <span class="hljs-string">'pg'</span>: { <span class="hljs-string">"host"</span>: <span class="hljs-string">"DB_HOST"</span>, <span class="hljs-string">"password"</span>: <span class="hljs-string">"DB_PASSWORD"</span> } 
@@ -448,11 +448,11 @@ window.onpopstate = function() {
 <blockquote>
 <p>GET /config/version</p>
 </blockquote>
-<pre class="highlight tab tab-sh"><code>curl -X GET https://pg-api.fly.dev/config/version \
+<pre class="highlight tab tab-sh"><code>curl -X GET http://localhost:1337/config/version \
   -H <span class="hljs-string">'Content-Type: application/json'</span> \
   -H <span class="hljs-string">'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'</span>
 </code></pre>
-<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'https://pg-api.fly.dev/config/version'</span>, {
+<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:1337/config/version'</span>, {
   <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
   <span class="hljs-attr">headers</span>: { 
     <span class="hljs-string">'pg'</span>: { <span class="hljs-string">"host"</span>: <span class="hljs-string">"DB_HOST"</span>, <span class="hljs-string">"password"</span>: <span class="hljs-string">"DB_PASSWORD"</span> } 
