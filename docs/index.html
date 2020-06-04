@@ -231,7 +231,7 @@ window.onpopstate = function() {
   -H <span class="hljs-string">'Content-Type: application/json'</span> \
   -H <span class="hljs-string">'pg: {}'</span> <span class="hljs-comment"># see Postgres connection header below</span>
 </code></pre>
-<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'https://pg-api.fly.dev'</span>, {
+<pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:1337'</span>, {
   <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
   <span class="hljs-attr">headers</span>: { 
     <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span>,
@@ -243,15 +243,11 @@ window.onpopstate = function() {
 <p>Postgres connection header</p>
 </blockquote>
 <pre class="highlight tab tab-json"><code>{
-  <span class="hljs-attr">"user"</span>: <span class="hljs-string">"postgres"</span>,
-  <span class="hljs-attr">"password"</span>: <span class="hljs-string">"postgres"</span>, 
-  <span class="hljs-attr">"port"</span>: <span class="hljs-number">5432</span>, 
-  <span class="hljs-attr">"host"</span>: <span class="hljs-string">"db.domain.com"</span> 
+  <span class="hljs-attr">"X-Connection-Encrypted"</span>: <span class="hljs-string">"ENCRYPTED_CONNECTION_STRING"</span>
 }
 </code></pre>
-<p>For security reasons, this API is best self-hosted. However, we provide an example API for you to test before installing. To use the API however, you have to send your PG connection via HTTPS headers.</p>
-<p>We DO NOT log these headers anywhere. But still, we HIGHLY recommend that you just self-host (we have tried to make this easy for you). Use the demo API at your own risk.</p>
-<p>Database connection headers are not required for self-hosting. You can set ENV vars with your default connection details so that you don't pass connection details over a network.</p>
+<p>For security reasons, this API is best self-hosted and set up with ENV_VARS with the default connection string.</p>
+<p>If you want to use this with multiple Postgres instances, you can pass the connection string as a header but it must be encrypted.</p>
 <h2 id="self-hosting">Self Hosting</h2>
 <pre class="highlight"><code>https://github.com/supabase/pg-api
 </code></pre>

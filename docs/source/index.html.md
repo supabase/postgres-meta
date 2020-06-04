@@ -44,7 +44,7 @@ curl -X GET http://localhost:1337/ \
   -H 'pg: {}' # see Postgres connection header below
 ```
 ```js
-const data = await fetch('https://pg-api.fly.dev', {
+const data = await fetch('http://localhost:1337', {
   method: 'GET',
   headers: { 
     'Content-Type': 'application/json',
@@ -55,18 +55,13 @@ const data = await fetch('https://pg-api.fly.dev', {
 > Postgres connection header
 ```json
 {
-  "user": "postgres",
-  "password": "postgres", 
-  "port": 5432, 
-  "host": "db.domain.com" 
+  "X-Connection-Encrypted": "ENCRYPTED_CONNECTION_STRING"
 }
 ```
 
-For security reasons, this API is best self-hosted. However, we provide an example API for you to test before installing. To use the API however, you have to send your PG connection via HTTPS headers. 
+For security reasons, this API is best self-hosted and set up with ENV_VARS with the default connection string.
 
-We DO NOT log these headers anywhere. But still, we HIGHLY recommend that you just self-host (we have tried to make this easy for you). Use the demo API at your own risk.
-
-Database connection headers are not required for self-hosting. You can set ENV vars with your default connection details so that you don't pass connection details over a network.
+If you want to use this with multiple Postgres instances, you can pass the connection string as a header but it must be encrypted.
 
 
 ## Self Hosting
