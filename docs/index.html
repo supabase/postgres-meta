@@ -229,22 +229,15 @@ window.onpopstate = function() {
 </blockquote>
 <pre class="highlight tab tab-sh"><code>curl -X GET http://localhost:1337/ \
   -H <span class="hljs-string">'Content-Type: application/json'</span> \
-  -H <span class="hljs-string">'pg: {}'</span> <span class="hljs-comment"># see Postgres connection header below</span>
+  -H <span class="hljs-string">'X-Connection-Encrypted: ENCRYPTED_STRING'</span>
 </code></pre>
 <pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:1337'</span>, {
   <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
   <span class="hljs-attr">headers</span>: { 
     <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span>,
-    <span class="hljs-string">'pg'</span>: {} <span class="hljs-comment">// see Postgres connection header below</span>
+    <span class="hljs-string">'X-Connection-Encrypted'</span>: <span class="hljs-string">'ENCRYPTED_STRING'</span> 
   }
 })
-</code></pre>
-<blockquote>
-<p>Postgres connection header</p>
-</blockquote>
-<pre class="highlight tab tab-json"><code>{
-  <span class="hljs-attr">"X-Connection-Encrypted"</span>: <span class="hljs-string">"ENCRYPTED_CONNECTION_STRING"</span>
-}
 </code></pre>
 <p>For security reasons, this API is best self-hosted and set up with ENV_VARS with the default connection string.</p>
 <p>If you want to use this with multiple Postgres instances, you can pass the connection string as a header but it must be encrypted.</p>
