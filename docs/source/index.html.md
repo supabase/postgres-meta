@@ -41,22 +41,16 @@ The goal of this API is to enable the full management of a Postgres database usi
 ```sh
 curl -X GET http://localhost:1337/ \
   -H 'Content-Type: application/json' \
-  -H 'pg: {}' # see Postgres connection header below
+  -H 'X-Connection-Encrypted: ENCRYPTED_STRING'
 ```
 ```js
 const data = await fetch('http://localhost:1337', {
   method: 'GET',
   headers: { 
     'Content-Type': 'application/json',
-    'pg': {} // see Postgres connection header below
+    'X-Connection-Encrypted': 'ENCRYPTED_STRING' 
   }
 })
-```
-> Postgres connection header
-```json
-{
-  "X-Connection-Encrypted": "ENCRYPTED_CONNECTION_STRING"
-}
 ```
 
 For security reasons, this API is best self-hosted and set up with ENV_VARS with the default connection string.
