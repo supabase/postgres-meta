@@ -15,8 +15,8 @@ module.exports = {
   joins: {
     list: fs.readFileSync(path.join(__dirname, '/joins/list.sql')).toString(),
   },
-  plugins: {
-    list: fs.readFileSync(path.join(__dirname, '/plugins/list.sql')).toString(),
+  extensions: {
+    list: fs.readFileSync(path.join(__dirname, '/extensions/list.sql')).toString(),
   },
   policies: {
     list: fs.readFileSync(path.join(__dirname, '/policies/list.sql')).toString(),

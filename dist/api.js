@@ -7,7 +7,7 @@ var connectionMiddleware_1 = require("./lib/connectionMiddleware");
 var router = new Router();
 router.use(cors());
 router.use('/config', connectionMiddleware_1.addConnectionToRequest, require('./api/config'));
-router.use('/plugins', connectionMiddleware_1.addConnectionToRequest, require('./api/plugins'));
+router.use('/extensions', connectionMiddleware_1.addConnectionToRequest, require('./api/extensions'));
 router.use('/query', connectionMiddleware_1.addConnectionToRequest, require('./api/query'));
 router.use('/schemas', connectionMiddleware_1.addConnectionToRequest, require('./api/schemas'));
 router.use('/tables', connectionMiddleware_1.addConnectionToRequest, require('./api/tables'));

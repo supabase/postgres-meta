@@ -6,7 +6,7 @@ import { addConnectionToRequest }  from './lib/connectionMiddleware'
 const router = new Router()
 router.use(cors())
 router.use('/config', addConnectionToRequest, require('./api/config'))
-router.use('/plugins', addConnectionToRequest, require('./api/plugins'))
+router.use('/extensions', addConnectionToRequest, require('./api/extensions'))
 router.use('/query', addConnectionToRequest, require('./api/query'))
 router.use('/schemas', addConnectionToRequest, require('./api/schemas'))
 router.use('/tables', addConnectionToRequest, require('./api/tables'))

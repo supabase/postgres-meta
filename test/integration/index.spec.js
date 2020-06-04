@@ -140,9 +140,9 @@ describe('/tables/grants', () => {
     assert.equal('users', datum.table_name)
   })
 })
-describe('/plugins', () => {
+describe('/extensions', () => {
   it('GET', async () => {
-    const res = await axios.get(`${URL}/plugins`)
+    const res = await axios.get(`${URL}/extensions`)
     // console.log('res.data', res.data)
     const datum = res.data.find((x) => x.name == 'uuid-ossp')
     assert.equal(res.status, STATUS.SUCCESS)
