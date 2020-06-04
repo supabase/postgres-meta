@@ -313,7 +313,7 @@ window.onpopstate = function() {
 </blockquote>
 <pre class="highlight tab tab-sh"><code>curl -X GET http://localhost:1337/schemas \
   -H <span class="hljs-string">'Content-Type: application/json'</span> \
-  -H <span class="hljs-string">'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'</span>
+  -H <span class="hljs-string">'X-Connection-Encrypted: ENCRYPTED_STRING'</span>
 </code></pre>
 <pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:1337/schemas'</span>, {
   <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
@@ -353,7 +353,7 @@ window.onpopstate = function() {
 </blockquote>
 <pre class="highlight tab tab-sh"><code>curl -X GET http://localhost:1337/tables \
   -H <span class="hljs-string">'Content-Type: application/json'</span> \
-  -H <span class="hljs-string">'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'</span>
+  -H <span class="hljs-string">'X-Connection-Encrypted: ENCRYPTED_STRING'</span>
 </code></pre>
 <pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:1337/tables'</span>, {
   <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
@@ -373,7 +373,7 @@ window.onpopstate = function() {
 </blockquote>
 <pre class="highlight tab tab-sh"><code>curl -X GET http://localhost:1337/types \
   -H <span class="hljs-string">'Content-Type: application/json'</span> \
-  -H <span class="hljs-string">'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'</span>
+  -H <span class="hljs-string">'X-Connection-Encrypted: ENCRYPTED_STRING'</span>
 </code></pre>
 <pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:1337/types'</span>, {
   <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
@@ -412,7 +412,7 @@ window.onpopstate = function() {
 </blockquote>
 <pre class="highlight tab tab-sh"><code>curl -X GET http://localhost:1337/plugins \
   -H <span class="hljs-string">'Content-Type: application/json'</span> \
-  -H <span class="hljs-string">'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'</span>
+  -H <span class="hljs-string">'X-Connection-Encrypted: ENCRYPTED_STRING'</span>
 </code></pre>
 <pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:1337/plugins'</span>, {
   <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
@@ -432,7 +432,7 @@ window.onpopstate = function() {
 </blockquote>
 <pre class="highlight tab tab-sh"><code>curl -X GET http://localhost:1337/config \
   -H <span class="hljs-string">'Content-Type: application/json'</span> \
-  -H <span class="hljs-string">'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'</span>
+  -H <span class="hljs-string">'X-Connection-Encrypted: ENCRYPTED_STRING'</span>
 </code></pre>
 <pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:1337/config'</span>, {
   <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,
@@ -450,7 +450,7 @@ window.onpopstate = function() {
 </blockquote>
 <pre class="highlight tab tab-sh"><code>curl -X GET http://localhost:1337/config/version \
   -H <span class="hljs-string">'Content-Type: application/json'</span> \
-  -H <span class="hljs-string">'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'</span>
+  -H <span class="hljs-string">'X-Connection-Encrypted: ENCRYPTED_STRING'</span>
 </code></pre>
 <pre class="highlight tab tab-js"><code><span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">'http://localhost:1337/config/version'</span>, {
   <span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>,

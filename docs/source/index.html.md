@@ -145,7 +145,7 @@ View and manage your Postgres schemas.
 ```sh
 curl -X GET http://localhost:1337/schemas \
   -H 'Content-Type: application/json' \
-  -H 'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'
+  -H 'X-Connection-Encrypted: ENCRYPTED_STRING'
 ```
 ```js
 const data = await fetch('http://localhost:1337/schemas', {
@@ -198,7 +198,7 @@ View and manage your Postgres tables.
 ```sh
 curl -X GET http://localhost:1337/tables \
   -H 'Content-Type: application/json' \
-  -H 'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'
+  -H 'X-Connection-Encrypted: ENCRYPTED_STRING'
 ```
 ```js
 const data = await fetch('http://localhost:1337/tables', {
@@ -232,7 +232,7 @@ View and manage your Postgres types.
 ```sh
 curl -X GET http://localhost:1337/types \
   -H 'Content-Type: application/json' \
-  -H 'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'
+  -H 'X-Connection-Encrypted: ENCRYPTED_STRING'
 ```
 ```js
 const data = await fetch('http://localhost:1337/types', {
@@ -284,7 +284,7 @@ View and manage your Postgres plugins.
 ```sh
 curl -X GET http://localhost:1337/plugins \
   -H 'Content-Type: application/json' \
-  -H 'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'
+  -H 'X-Connection-Encrypted: ENCRYPTED_STRING'
 ```
 ```js
 const data = await fetch('http://localhost:1337/plugins', {
@@ -318,7 +318,7 @@ View and manage your Postgres config.
 ```sh
 curl -X GET http://localhost:1337/config \
   -H 'Content-Type: application/json' \
-  -H 'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'
+  -H 'X-Connection-Encrypted: ENCRYPTED_STRING'
 ```
 ```js
 const data = await fetch('http://localhost:1337/config', {
@@ -342,7 +342,7 @@ Get your Postgres config.
 ```sh
 curl -X GET http://localhost:1337/config/version \
   -H 'Content-Type: application/json' \
-  -H 'pg: { "host": "DB_HOST", "password": "DB_PASSWORD" }'
+  -H 'X-Connection-Encrypted: ENCRYPTED_STRING'
 ```
 ```js
 const data = await fetch('http://localhost:1337/config/version', {
