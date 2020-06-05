@@ -35,7 +35,6 @@ module.exports = {
   },
   tables: {
     list: fs.readFileSync(path.join(__dirname, '/tables/list.sql')).toString(),
-    grants: fs.readFileSync(path.join(__dirname, '/tables/grants.sql')).toString(),
   },
   users: {
     list: fs.readFileSync(path.join(__dirname, '/users/list.sql')).toString(),

@@ -2,24 +2,23 @@ const { Router } = require('express')
 const router = new Router()
 const { tables } = require('../lib/sql')
 const RunQuery = require('../lib/connectionPool')
+import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants/schemas'
 
 router.get('/', async (req, res) => {
   try {
     const { data } = await RunQuery(req.headers.pg, tables.list)
-    return res.status(200).json(data)
+    const query = req.query
+    let payload = data
+    if (!query?.includeSystemSchemas) payload = removeSystemSchemas(data)
+    return res.status(200).json(payload)
   } catch (error) {
-    console.log('throwing error')
-    res.status(500).json({ error: 'Database error', status: 500 })
-  }
-})
-router.get('/grants', async (req, res) => {
-  try {
-    const { data } = await RunQuery(req.headers.pg, tables.grants)
-    return res.status(200).json(data)
-  } catch (error) {
-    console.log('throwing error')
+    console.log('throwing error', error)
     res.status(500).json({ error: 'Database error', status: 500 })
   }
 })
 
 module.exports = router
+
+const removeSystemSchemas = (data) => {
+  return data.filter((x) => !DEFAULT_SYSTEM_SCHEMAS.includes(x.schema))
+}
