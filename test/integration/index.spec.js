@@ -48,7 +48,7 @@ describe('When passing an encrypted connection header', () => {
       })
       assert.equal(res.status, STATUS.ERROR)
     } catch (error) {
-      console.log('error', error)
+      // console.log('error', error)
       assert.equal(error.response.status, STATUS.ERROR)
     }
   })
@@ -122,22 +122,18 @@ describe('/types', () => {
 describe('/tables', () => {
   it('GET', async () => {
     const res = await axios.get(`${URL}/tables`)
-    // console.log('res.data', res.data)
-    const datum = res.data.find((x) => x.identifier == 'public.users')
-    const notIncluded = res.data.find((x) => x.schema == 'pg_toast')
+    const datum = res.data.find((x) => x.table_id == 'public.users')
+    const notIncluded = res.data.find((x) => x.table_id == 'pg_catalog.pg_type')
     assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(true, !!datum)
+    // assert.equal(true, !!datum)
     assert.equal(true, !notIncluded)
   })
-})
-describe('/tables/grants', () => {
-  it('GET', async () => {
-    const res = await axios.get(`${URL}/tables/grants`)
-    // console.log('res.data', res.data)
-    const datum = res.data.find((x) => x.identifier == 'public.users')
+  it('GET with system tables', async () => {
+    const res = await axios.get(`${URL}/tables?includeSystemSchemas=true`)
+    const included = res.data.find((x) => x.table_id == 'pg_catalog.pg_type')
     assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(true, !!datum)
-    assert.equal('users', datum.table_name)
+    // assert.equal(true, !!datum)
+    assert.equal(true, !!included)
   })
 })
 describe('/extensions', () => {
@@ -145,6 +141,14 @@ describe('/extensions', () => {
     const res = await axios.get(`${URL}/extensions`)
     // console.log('res.data', res.data)
     const datum = res.data.find((x) => x.name == 'uuid-ossp')
+    assert.equal(res.status, STATUS.SUCCESS)
+    assert.equal(true, !!datum)
+  })
+})
+describe('/roles', () => {
+  it('GET', async () => {
+    const res = await axios.get(`${URL}/roles`)
+    const datum = res.data.find((x) => x.name == 'postgres')
     assert.equal(res.status, STATUS.SUCCESS)
     assert.equal(true, !!datum)
   })
