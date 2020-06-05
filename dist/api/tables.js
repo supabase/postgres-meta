@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34,13 +35,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _this = this;
+Object.defineProperty(exports, "__esModule", { value: true });
 var Router = require('express').Router;
 var router = new Router();
 var tables = require('../lib/sql').tables;
 var RunQuery = require('../lib/connectionPool');
-router.get('/', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-    var data, error_1;
+var schemas_1 = require("../lib/constants/schemas");
+router.get('/', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var data, query, payload, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -48,29 +50,14 @@ router.get('/', function (req, res) { return __awaiter(_this, void 0, void 0, fu
                 return [4 /*yield*/, RunQuery(req.headers.pg, tables.list)];
             case 1:
                 data = (_a.sent()).data;
-                return [2 /*return*/, res.status(200).json(data)];
+                query = req.query;
+                payload = data;
+                if (!(query === null || query === void 0 ? void 0 : query.includeSystemSchemas))
+                    payload = removeSystemSchemas(data);
+                return [2 /*return*/, res.status(200).json(payload)];
             case 2:
                 error_1 = _a.sent();
-                console.log('throwing error');
-                res.status(500).json({ error: 'Database error', status: 500 });
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
-        }
-    });
-}); });
-router.get('/grants', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-    var data, error_2;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, RunQuery(req.headers.pg, tables.grants)];
-            case 1:
-                data = (_a.sent()).data;
-                return [2 /*return*/, res.status(200).json(data)];
-            case 2:
-                error_2 = _a.sent();
-                console.log('throwing error');
+                console.log('throwing error', error_1);
                 res.status(500).json({ error: 'Database error', status: 500 });
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
@@ -78,3 +65,6 @@ router.get('/grants', function (req, res) { return __awaiter(_this, void 0, void
     });
 }); });
 module.exports = router;
+var removeSystemSchemas = function (data) {
+    return data.filter(function (x) { return !schemas_1.DEFAULT_SYSTEM_SCHEMAS.includes(x.schema); });
+};
