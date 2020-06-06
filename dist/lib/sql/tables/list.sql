@@ -37,10 +37,14 @@ tables as (
 columns AS (
   select
     table_schema as schema,
-    column_name,
-    column_default,
+    column_name as name,
+    column_default as default_value,
+    is_nullable::boolean,
     is_nullable :: boolean,
     data_type,
+    is_identity,
+    identity_generation,
+    is_updatable,
     udt_name as format,
     table_name,
     col_description(
