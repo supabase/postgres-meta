@@ -37,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var _this = this;
 var Router = require('express').Router;
 var router = new Router();
-var users = require('../lib/sql').users;
+var roles = require('../lib/sql').roles;
 var RunQuery = require('../lib/connectionPool');
 router.get('/', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var data, error_1;
@@ -45,7 +45,7 @@ router.get('/', function (req, res) { return __awaiter(_this, void 0, void 0, fu
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, RunQuery(req.headers.pg, users.list)];
+                return [4 /*yield*/, RunQuery(req.headers.pg, roles.list)];
             case 1:
                 data = (_a.sent()).data;
                 return [2 /*return*/, res.status(200).json(data)];
