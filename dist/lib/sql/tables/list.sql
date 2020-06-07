@@ -40,11 +40,11 @@ columns AS (
     column_name as name,
     column_default as default_value,
     is_nullable::boolean,
-    is_nullable :: boolean,
+    is_nullable::boolean,
     data_type,
-    is_identity,
+    is_identity::boolean,
     identity_generation,
-    is_updatable,
+    is_updatable::boolean,
     udt_name as format,
     table_name,
     col_description(
@@ -68,6 +68,25 @@ grants as (
     with_hierarchy
   FROM
     information_schema.role_table_grants
+),
+pk_list as (
+  SELECT
+  pg_namespace.nspname as schema,
+  pg_class.oid :: regclass as table_name,
+  pg_attribute.attname as name,
+  (
+    pg_namespace.nspname || '.' || (pg_class.oid :: regclass)
+  ) as table_id
+FROM
+  pg_index,
+  pg_class,
+  pg_attribute,
+  pg_namespace
+WHERE
+  indrelid = pg_class.oid
+  AND pg_class.relnamespace = pg_namespace.oid
+  AND pg_attribute.attrelid = pg_class.oid
+  AND pg_attribute.attnum = any(pg_index.indkey)
 )
 SELECT 
   *,
@@ -102,5 +121,21 @@ SELECT
         ) grants
     ),
     '[]'
-  ) AS grants 
+  ) AS grants,
+  COALESCE(
+  (
+    SELECT
+      array_to_json(array_agg(row_to_json(primary_keys)))
+    FROM
+      (
+        SELECT
+          *
+        FROM
+          pk_list
+        WHERE
+          pk_list.table_id = tables.table_id
+      ) primary_keys
+  ),
+  '[]'
+) AS primary_keys
 FROM tables
