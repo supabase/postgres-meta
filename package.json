@@ -10,6 +10,8 @@
     "build:clean": "rimraf dist",
     "build:transpile": "./node_modules/.bin/tsc",
     "build:copy": "cp -r ./src/lib/sql/ ./dist/lib/sql/",
+    "docker:build": "docker build -t supabase/pg-api .",
+    "docker:deploy": "docker push supabase/pg-api:latest",
     "dist": "NODE_ENV=production npm-run-all build dist:pkg",
     "dist:pkg": "rimraf bin && pkg --out-path ./bin dist/start.js",
     "dev": "NODE_ENV=development npm-run-all build server",
