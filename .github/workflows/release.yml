@@ -2,23 +2,78 @@ name: Release
 
 on:
   push:
-    tags:
-      - '*.*.*'
+    branches:
+      - master
 
 jobs:
   release:
     name: Release / Node ${{ matrix.node }}
-
     strategy:
       matrix:
-        node: ['14']
+        node: ['12']
 
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
 
+      - name: Set up Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Get version before
+        run: echo ::set-env name=VERSION_BEFORE::$(curl -s https://api.github.com/repos/supabase/pg-api/releases/latest | jq .name -r)
+
+      - name: Release on GitHub
+        run: npx semantic-release -p        \
+          @semantic-release/commit-analyzer \
+          @semantic-release/github         \
+          @semantic-release/release-notes-generator
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get version after
+        run: echo ::set-env name=VERSION_AFTER::$(curl -s https://api.github.com/repos/supabase/pg-api/releases/latest | jq .name -r)
+
+      - name: Check version difference
+        run: |
+          if [ ${{ env.VERSION_BEFORE }} = ${{ env.VERSION_AFTER }} ]; then
+            echo 0 > has-new-release
+          else
+            echo 1 > has-new-release
+          fi
+
+      - uses: actions/upload-artifact@v1
+        with:
+          name: has-new-release
+          path: has-new-release
+
+  upload:
+    name: Upload / Node ${{ matrix.node }}
+
+    needs:
+      - release
+
+    strategy:
+      matrix:
+        node: ['12']
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/download-artifact@v1
+        with:
+          name: has-new-release
+
+      - name: Check for new release
+        run: echo ::set-env name=HAS_NEW_RELEASE::$(cat has-new-release/has-new-release)
+
+      - uses: actions/checkout@v2
+        if: env.HAS_NEW_RELEASE == 1
+
       - uses: actions/cache@v1
+        if: env.HAS_NEW_RELEASE == 1
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -26,53 +81,53 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Set up Node
+        if: env.HAS_NEW_RELEASE == 1
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node }}
 
       - name: Prepare release
+        if: env.HAS_NEW_RELEASE == 1
         run: |
-          npm install
+          npm ci
           npm run dist
           tar -czvf pg-api-linux.tar.gz -C ./bin start-linux
           tar -czvf pg-api-macos.tar.gz -C ./bin start-macos
           tar -czvf pg-api-windows.tar.gz -C ./bin start-win.exe
 
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
+      - name: Get upload url
+        if: env.HAS_NEW_RELEASE == 1
+        run: echo ::set-env name=UPLOAD_URL::$(curl -s https://api.github.com/repos/supabase/pg-api/releases/latest | jq .upload_url -r)
 
       - name: Upload linux release asset
+        if: env.HAS_NEW_RELEASE == 1
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ env.UPLOAD_URL }}
           asset_path: ./pg-api-linux.tar.gz
           asset_name: pg-api-linux.tar.gz
           asset_content_type: application/gzip
 
       - name: Upload macos release asset
+        if: env.HAS_NEW_RELEASE == 1
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ env.UPLOAD_URL }}
           asset_path: ./pg-api-macos.tar.gz
           asset_name: pg-api-macos.tar.gz
           asset_content_type: application/gzip
 
       - name: Upload windows release asset
+        if: env.HAS_NEW_RELEASE == 1
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ env.UPLOAD_URL }}
           asset_path: ./pg-api-windows.tar.gz
           asset_name: pg-api-windows.tar.gz
           asset_content_type: application/gzip
