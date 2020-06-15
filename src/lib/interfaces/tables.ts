@@ -9,7 +9,7 @@ export namespace Tables {
     is_typed: boolean
     bytes: number
     size: string
-    relationships: Relationship[]
+    relationships: Tables.Relationship[]
   }
 
   export interface Relationship {
