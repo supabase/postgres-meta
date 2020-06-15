@@ -193,6 +193,30 @@ window.onpopstate = function() {
             
           </li>
         
+          <li>
+            <a href="#api-type-definitions" class="toc-h1 toc-link" data-title="API Type Definitions">API Type Definitions</a>
+            
+              <ul class="toc-list-h2">
+                
+                  <li>
+                    <a href="#schemas-schema" class="toc-h2 toc-link" data-title="">Schemas.Schema</a>
+                    
+                  </li>
+                
+                  <li>
+                    <a href="#tables-table" class="toc-h2 toc-link" data-title="">Tables.Table</a>
+                    
+                  </li>
+                
+                  <li>
+                    <a href="#tables-relationship" class="toc-h2 toc-link" data-title="">Tables.Relationship</a>
+                    
+                  </li>
+                
+              </ul>
+            
+          </li>
+        
 		</ul>
       </div>
       
@@ -313,25 +337,14 @@ window.onpopstate = function() {
 </code></pre>
 <p><code>GET /schemas</code></p>
 <p><em>Get all schemas</em></p>
+<h3 id="returns">Returns</h3>
+<p><code>{Array}</code> <a href="#schemas-schema">Schemas.Schema</a></p>
 <blockquote>
 <p>Parameters:</p>
 </blockquote>
 <pre class="highlight tab tab-javascript"><code><span class="hljs-comment">/**
  * <span class="hljs-doctag">@param <span class="hljs-type">{boolean}</span> </span>[includeSystemSchemas=false] - Return system schemas as well as user schemas
  */</span>
-</code></pre>
-<blockquote>
-<p>Returns: Schemas.Schema[]</p>
-</blockquote>
-<pre class="highlight tab tab-javascript"><code>{
- <span class="hljs-attr">catalog_name</span>: string
- <span class="hljs-attr">name</span>: string
- <span class="hljs-attr">owner</span>: string
- <span class="hljs-attr">default_character_set_catalog</span>: string
- <span class="hljs-attr">default_character_set_schema</span>: string
- <span class="hljs-attr">default_character_set_name</span>: string
- <span class="hljs-attr">sql_path</span>: string
-}
 </code></pre>
 <h1 id="pg-api-tables">Tables</h1>
 <p>View and manage your Postgres tables.</p>
@@ -353,6 +366,15 @@ window.onpopstate = function() {
 </code></pre>
 <p><code>GET /tables</code></p>
 <p><em>Get all tables</em></p>
+<h3 id="returns-2">Returns</h3>
+<p><code>{Array}</code> <a href="#tables-table">Tables.Table</a></p>
+<blockquote>
+<p>Parameters:</p>
+</blockquote>
+<pre class="highlight tab tab-javascript"><code><span class="hljs-comment">/**
+ * <span class="hljs-doctag">@param <span class="hljs-type">{boolean}</span> </span>[includeSystemSchemas=false] - Return system schemas as well as user schemas
+ */</span>
+</code></pre>
 <h1 id="pg-api-schemas">Types</h1>
 <p>View and manage your Postgres types.</p>
 <h2 id="gettypes">getTypes</h2>
@@ -450,6 +472,44 @@ window.onpopstate = function() {
 </code></pre>
 <p><code>GET /config/version</code></p>
 <p>Get your Postgres version information.</p>
+<h1 id="api-type-definitions">API Type Definitions</h1>
+<h2 id="schemas-schema">Schemas.Schema</h2>
+<pre class="highlight tab tab-typescript"><code>{
+  catalog_name: <span class="hljs-built_in">string</span>
+  name: <span class="hljs-built_in">string</span>
+  owner: <span class="hljs-built_in">string</span>
+  default_character_set_catalog: <span class="hljs-built_in">string</span>
+  default_character_set_schema: <span class="hljs-built_in">string</span>
+  default_character_set_name: <span class="hljs-built_in">string</span>
+  sql_path: <span class="hljs-built_in">string</span>
+}
+</code></pre>
+<h2 id="tables-table">Tables.Table</h2>
+<pre class="highlight tab tab-typescript"><code>{
+  table_id: <span class="hljs-built_in">string</span>
+  catalog: <span class="hljs-built_in">string</span>
+  schema: <span class="hljs-built_in">string</span>
+  name: <span class="hljs-built_in">string</span>
+  is_insertable_into: <span class="hljs-built_in">boolean</span>
+  is_typed: <span class="hljs-built_in">boolean</span>
+  bytes: <span class="hljs-built_in">number</span>
+  size: <span class="hljs-built_in">string</span>
+  relationships: Tables.Relationship[]
+}
+</code></pre>
+<h2 id="tables-relationship">Tables.Relationship</h2>
+<pre class="highlight tab tab-typescript"><code>{
+  source_table_id: <span class="hljs-built_in">string</span>
+  source_schema: <span class="hljs-built_in">string</span>
+  source_table_name: <span class="hljs-built_in">string</span>
+  source_column_name: <span class="hljs-built_in">string</span>
+  target_table_id: <span class="hljs-built_in">string</span>
+  target_table_schema: <span class="hljs-built_in">string</span>
+  target_table_name: <span class="hljs-built_in">string</span>
+  target_column_name: <span class="hljs-built_in">string</span>
+  constraint_name: <span class="hljs-built_in">string</span>
+}
+</code></pre>
 <!-- Renderer: Shins v2.5.0 -->
 <!-- Generator: Widdershins v4.0.1 -->
       </div>
