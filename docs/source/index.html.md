@@ -149,26 +149,17 @@ const data = await fetch('http://localhost:1337/schemas', {
 
 *Get all schemas*
 
+### Returns 
+
+`{Array}` [Schemas.Schema](#schemas-schema)
+
 > Parameters:
 ```javascript
 /**
  * @param {boolean} [includeSystemSchemas=false] - Return system schemas as well as user schemas
  */
  ```
- > Returns: Schemas.Schema[]
- ```javascript
-{
-  catalog_name: string
-  name: string
-  owner: string
-  default_character_set_catalog: string
-  default_character_set_schema: string
-  default_character_set_name: string
-  sql_path: string
-}
-```
-
-
+ 
 
 
 
@@ -202,7 +193,16 @@ const data = await fetch('http://localhost:1337/tables', {
 
 *Get all tables*
 
+### Returns 
 
+`{Array}` [Tables.Table](#tables-table)
+
+> Parameters:
+```javascript
+/**
+ * @param {boolean} [includeSystemSchemas=false] - Return system schemas as well as user schemas
+ */
+ ```
 
 
 
@@ -349,4 +349,54 @@ Get your Postgres version information.
 
 
 
+
+
+# API Type Definitions
+
+
+## Schemas.Schema
+
+```typescript
+{
+  catalog_name: string
+  name: string
+  owner: string
+  default_character_set_catalog: string
+  default_character_set_schema: string
+  default_character_set_name: string
+  sql_path: string
+}
+```
+
+## Tables.Table
+
+```typescript
+{
+  table_id: string
+  catalog: string
+  schema: string
+  name: string
+  is_insertable_into: boolean
+  is_typed: boolean
+  bytes: number
+  size: string
+  relationships: Tables.Relationship[]
+}
+```
+
+## Tables.Relationship
+
+```typescript
+{
+  source_table_id: string
+  source_schema: string
+  source_table_name: string
+  source_column_name: string
+  target_table_id: string
+  target_table_schema: string
+  target_table_name: string
+  target_column_name: string
+  constraint_name: string
+}
+```
 
