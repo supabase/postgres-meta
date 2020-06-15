@@ -87,6 +87,24 @@ WHERE
   AND pg_class.relnamespace = pg_namespace.oid
   AND pg_attribute.attrelid = pg_class.oid
   AND pg_attribute.attnum = any(pg_index.indkey)
+),
+relationships as (
+  select
+    (tc.table_schema || '.' || (tc.table_name)) as source_table_id,
+    tc.table_schema as source_schema,
+    tc.table_name as source_table_name,
+    kcu.column_name as source_column_name,
+    (ccu.table_schema || '.' || (ccu.table_name)) as target_table_id,
+    ccu.table_schema AS target_table_schema,
+    ccu.table_name AS target_table_name,
+    ccu.column_name AS target_column_name,
+    tc.constraint_name
+  FROM
+    information_schema.table_constraints AS tc
+    JOIN information_schema.key_column_usage AS kcu USING (constraint_schema, constraint_name)
+    JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_name)
+  where
+    tc.constraint_type = 'FOREIGN KEY'
 )
 SELECT 
   *,
@@ -135,7 +153,24 @@ SELECT
         WHERE
           pk_list.table_id = tables.table_id
       ) primary_keys
-  ),
-  '[]'
-) AS primary_keys
+    ),
+    '[]'
+  ) AS primary_keys,
+  COALESCE(
+  (
+    SELECT
+      array_to_json(array_agg(row_to_json(relationships)))
+    FROM
+      (
+        SELECT
+          *
+        FROM
+          relationships
+        WHERE
+          relationships.source_table_id = tables.table_id
+          OR relationships.target_table_id = tables.table_id
+      ) relationships
+    ),
+    '[]'
+  ) AS relationships
 FROM tables
