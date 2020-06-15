@@ -145,6 +145,14 @@ describe('/tables', async () => {
     const datum = tables.data.find((x) => x.table_id == 'public.users')
     assert.equal(datum.grants.length > 0, true)
   })
+  it('should return the relationships', async () => {
+    const tables = await axios.get(`${URL}/tables`)
+    const datum = tables.data.find((x) => x.table_id == 'public.users')
+    const relationships = datum.relationships
+    const relationship = relationships.find(x => x.source_table_id == 'public.todos')
+    assert.equal(relationships.length > 0, true)
+    assert.equal(true, relationship.target_table_id == 'public.users')
+  })
 
   it('GET with system tables', async () => {
     const res = await axios.get(`${URL}/tables?includeSystemSchemas=true`)
