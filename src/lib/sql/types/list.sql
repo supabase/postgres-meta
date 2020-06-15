@@ -1,13 +1,9 @@
 SELECT 
+(t.typname || '.' || n.nspname) as type_id,
 t.typname  AS name,
+n.nspname as schema,
 pg_catalog.Format_type ( t.oid, NULL ) AS format,
-n.nspname as schema_name,
 pg_catalog.obj_description ( t.oid, 'pg_type' ) AS description,
-CASE
-	WHEN t.typrelid != 0 THEN Cast ( 'tuple' AS pg_catalog.TEXT )
-	WHEN t.typlen < 0 THEN Cast ( 'var' AS pg_catalog.TEXT )
-	ELSE Cast ( t.typlen AS pg_catalog.TEXT )
-END AS size,
 array (
 	select   e.enumlabel
 	FROM     pg_catalog.pg_enum e
@@ -24,6 +20,4 @@ and NOT EXISTS (
 	SELECT 1
 	FROM pg_catalog.pg_type el
 	WHERE el.oid = t.typelem AND el.typarray = t.oid 
-)
-AND pg_catalog.pg_type_is_visible ( t.oid )
-ORDER BY 1, 2; 
+); 

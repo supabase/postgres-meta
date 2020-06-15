@@ -1,12 +1,12 @@
 export namespace Types {
 
   export interface Type {
+    type_id: string
     name: string
+    schema: string
     format: string
-    schema_name: string
     description: string
-    size: string
-    enums: string
+    enums: string[]
   }
   
 
