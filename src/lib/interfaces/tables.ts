@@ -10,6 +10,7 @@ export namespace Tables {
     bytes: number
     size: string
     relationships: Tables.Relationship[]
+    enums: string[]
   }
 
   export interface Relationship {
