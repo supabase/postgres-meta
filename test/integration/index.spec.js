@@ -103,8 +103,8 @@ describe('/types', () => {
   it('GET', async () => {
     const res = await axios.get(`${URL}/types`)
     // console.log('res.data', res.data)
-    const datum = res.data.find((x) => x.schema_name == 'public')
-    const notIncluded = res.data.find((x) => x.schema_name == 'pg_toast')
+    const datum = res.data.find((x) => x.schema == 'public')
+    const notIncluded = res.data.find((x) => x.schema == 'pg_toast')
     assert.equal(res.status, STATUS.SUCCESS)
     assert.equal(true, !!datum)
     assert.equal(true, !notIncluded)
@@ -112,8 +112,8 @@ describe('/types', () => {
   it('GET with system types', async () => {
     const res = await axios.get(`${URL}/types?includeSystemSchemas=true`)
     // console.log('res.data', res.data)
-    const datum = res.data.find((x) => x.schema_name == 'public')
-    const included = res.data.find((x) => x.schema_name == 'pg_catalog')
+    const datum = res.data.find((x) => x.schema == 'public')
+    const included = res.data.find((x) => x.schema == 'pg_catalog')
     assert.equal(res.status, STATUS.SUCCESS)
     assert.equal(true, !!datum)
     assert.equal(true, !!included)

@@ -65,6 +65,6 @@ router.get('/', function (req, res) { return __awaiter(void 0, void 0, void 0, f
     });
 }); });
 var removeSystemSchemas = function (data) {
-    return data.filter(function (x) { return !schemas_1.DEFAULT_SYSTEM_SCHEMAS.includes(x.schema_name); });
+    return data.filter(function (x) { return !schemas_1.DEFAULT_SYSTEM_SCHEMAS.includes(x.schema); });
 };
 module.exports = router;
