@@ -51,7 +51,13 @@ columns AS (
       (table_schema || '."' || table_name || '"') :: regclass,
       ordinal_position
     ) as description,
-    (table_schema || '.' || table_name) as table_id
+    (table_schema || '.' || table_name) as table_id,
+    array_to_json(array(
+      select   enumlabel
+      FROM     pg_catalog.pg_enum enums
+      WHERE    udt_name = pg_catalog.Format_type(enums.enumtypid::regclass, NULL) 
+      ORDER BY enums.enumsortorder
+    )) AS enums
   from
     information_schema.columns
 ),

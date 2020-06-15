@@ -381,6 +381,7 @@ Get your Postgres version information.
   bytes: number
   size: string
   relationships: Tables.Relationship[]
+  enums: string[]
 }
 ```
 
