@@ -176,7 +176,11 @@ describe('/roles', () => {
   it('GET', async () => {
     const res = await axios.get(`${URL}/roles`)
     const datum = res.data.find((x) => x.name == 'postgres')
+    const hasSystemSchema = res.data[0].grants.some((x) => x.schema == 'information_schema')
+    const hasPublicSchema = res.data[0].grants.some((x) => x.schema == 'public')
     assert.equal(res.status, STATUS.SUCCESS)
     assert.equal(true, !!datum)
+    assert.equal(hasSystemSchema, false)
+    assert.equal(hasPublicSchema, true)
   })
 })

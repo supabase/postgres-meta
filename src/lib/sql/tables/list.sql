@@ -70,8 +70,8 @@ grants as (
     table_schema as schema,
     table_name,
     privilege_type,
-    is_grantable,
-    with_hierarchy
+    is_grantable::boolean,
+    with_hierarchy::boolean
   FROM
     information_schema.role_table_grants
 ),
