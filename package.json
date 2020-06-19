@@ -9,7 +9,7 @@
     "build": "npm-run-all build:clean build:transpile build:copy",
     "build:clean": "rimraf dist",
     "build:transpile": "./node_modules/.bin/tsc",
-    "build:copy": "cp -r ./src/lib/sql/ ./dist/lib/sql/",
+    "build:copy": "cp -r ./src/lib/sql ./dist/lib/",
     "docker:build": "docker build -t supabase/pg-api:0.4.0 .",
     "docker:deploy": "docker push supabase/pg-api:0.4.0",
     "dist": "NODE_ENV=production npm-run-all build dist:pkg",
@@ -21,13 +21,17 @@
     "test": "node -r esm ./node_modules/.bin/mocha 'test/**/*.js' --recursive "
   },
   "dependencies": {
-    "@types/node": "^14.0.5",
     "cors": "^2.8.5",
     "crypto-js": "^4.0.0",
     "express": "^4.17.1",
     "pg": "^7.18.2"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.6",
+    "@types/crypto-js": "^3.1.47",
+    "@types/express": "^4.17.6",
+    "@types/node": "^14.0.13",
+    "@types/pg": "^7.14.3",
     "axios": "^0.19.2",
     "esm": "^3.2.25",
     "mocha": "^7.1.2",
