@@ -1,5 +1,5 @@
-const { Router } = require('express')
-const router = new Router()
+import { Router } from 'express'
+const router = Router()
 const { roles } = require('../lib/sql')
 const RunQuery = require('../lib/connectionPool')
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants/schemas'
@@ -25,13 +25,12 @@ router.get('/', async (req, res) => {
   }
 })
 
-
 const removeSystemSchemas = (data: Roles.Role[]) => {
-  return data.map(role => {
+  return data.map((role) => {
     let grants = role.grants.filter((x) => !DEFAULT_SYSTEM_SCHEMAS.includes(x.schema))
     return {
       ...role,
-      grants
+      grants,
     }
   })
 }

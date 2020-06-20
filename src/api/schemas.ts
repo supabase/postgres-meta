@@ -1,5 +1,5 @@
-const { Router } = require('express')
-const router = new Router()
+import { Router } from 'express'
+const router = Router()
 const { schemas } = require('../lib/sql')
 const RunQuery = require('../lib/connectionPool')
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants/schemas'
@@ -25,11 +25,8 @@ router.get('/', async (req, res) => {
   }
 })
 
-
 const removeSystemSchemas = (data: Schemas.Schema[]) => {
   return data.filter((x) => !DEFAULT_SYSTEM_SCHEMAS.includes(x.name))
 }
-
-
 
 module.exports = router
