@@ -1,7 +1,7 @@
 var assert = require('assert')
 const CryptoJS = require('crypto-js')
 import axios from 'axios'
-import { PG_API_URL, PG_API_PORT, PG_CONNECTION, CRYPTO_KEY } from '../../src/lib/constants'
+import { PG_API_URL, PG_API_PORT, PG_CONNECTION, CRYPTO_KEY } from '../../dist/lib/constants'
 
 const URL = `${PG_API_URL}:${PG_API_PORT}`
 const STATUS = {
@@ -151,7 +151,7 @@ describe('/tables', async () => {
     const tables = await axios.get(`${URL}/tables`)
     const datum = tables.data.find((x) => x.table_id == 'public.users')
     const relationships = datum.relationships
-    const relationship = relationships.find(x => x.source_table_id == 'public.todos')
+    const relationship = relationships.find((x) => x.source_table_id == 'public.todos')
     assert.equal(relationships.length > 0, true)
     assert.equal(true, relationship.target_table_id == 'public.users')
   })
