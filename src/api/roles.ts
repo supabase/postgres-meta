@@ -9,7 +9,7 @@ import { Roles } from '../lib/interfaces/roles'
  * @param {boolean} [includeSystemSchemas=false] - Return system schemas as well as user schemas
  */
 interface GetRolesQueryParams {
-  includeSystemSchemas: boolean
+  includeSystemSchemas?: boolean
 }
 router.get('/', async (req, res) => {
   try {
