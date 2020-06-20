@@ -11,20 +11,20 @@ app.get('/', (req, res) =>
     status: 200,
     name: project.name,
     version: project.version,
-    documentation: 'https://supabase.github.io/pg-api/'
+    documentation: 'https://supabase.github.io/pg-api/',
   })
 )
 app.get('/health', (req, res) => res.status(200).json({ date: new Date() }))
 
 let Server = {
   start(port) {
-    Server = app.listen(port, () => {
+    this.server = app.listen(port, () => {
       console.log(`App started on port ${port}`)
     })
     return app
   },
   stop() {
-    Server.close()
+    this.server.close()
   },
 }
 

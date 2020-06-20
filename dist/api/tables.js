@@ -36,8 +36,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var Router = require('express').Router;
-var router = new Router();
+var express_1 = require("express");
+var router = express_1.Router();
 var tables = require('../lib/sql').tables;
 var RunQuery = require('../lib/connectionPool');
 var schemas_1 = require("../lib/constants/schemas");
