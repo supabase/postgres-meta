@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34,11 +35,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _this = this;
-var pg = require('pg');
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RunQuery = void 0;
+var pg = require("pg");
 pg.types.setTypeParser(20, 'text', parseInt);
-var Pool = require('pg').Pool;
-var RunQuery = function (connectionString, sql) { return __awaiter(_this, void 0, void 0, function () {
+var Pool = pg.Pool;
+exports.RunQuery = function (connectionString, sql) { return __awaiter(void 0, void 0, void 0, function () {
     var pool, results, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -69,4 +71,3 @@ var RunQuery = function (connectionString, sql) { return __awaiter(_this, void 0
         }
     });
 }); };
-module.exports = RunQuery;

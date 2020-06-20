@@ -1,5 +1,6 @@
-var fs = require('fs');
-var path = require('path');
+"use strict";
+var fs = require("fs");
+var path = require("path");
 module.exports = {
     columns: {
         list: fs.readFileSync(path.join(__dirname, '/columns/list.sql')).toString(),

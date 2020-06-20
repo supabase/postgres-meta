@@ -1,8 +1,8 @@
-var pg = require('pg')
+import pg = require('pg')
 pg.types.setTypeParser(20, 'text', parseInt)
-const { Pool } = require('pg')
+const { Pool } = pg
 
-const RunQuery = async (connectionString, sql) => {
+export const RunQuery = async (connectionString, sql) => {
   const pool = new Pool({ connectionString })
   try {
     const results = await pool.query(sql)
@@ -20,5 +20,3 @@ const RunQuery = async (connectionString, sql) => {
     }
   }
 }
-
-module.exports = RunQuery

@@ -1,4 +1,4 @@
-const CryptoJS = require('crypto-js')
+import CryptoJS = require('crypto-js')
 import { PG_CONNECTION, CRYPTO_KEY } from './constants'
 
 /**
@@ -17,11 +17,10 @@ export const addConnectionToRequest = async (req, res, next) => {
         CryptoJS.enc.Utf8
       )
     }
-    
+
     return next()
   } catch (error) {
     console.log('error', error)
     return res.status(500).json({ status: 500, error: 'Server error.' })
   }
 }
-
