@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34,12 +35,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _this = this;
-var Router = require('express').Router;
-var router = new Router();
+Object.defineProperty(exports, "__esModule", { value: true });
+var express_1 = require("express");
+var router = express_1.Router();
 var columns = require('../lib/sql').columns;
 var RunQuery = require('../lib/connectionPool');
-router.get('/', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+router.get('/', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var data, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {

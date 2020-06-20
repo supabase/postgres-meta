@@ -33,6 +33,6 @@ namespace Fetch {
    * @param {boolean} [includeSystemSchemas=false] - Return system schemas as well as user schemas
    */
   export interface QueryParams {
-    includeSystemSchemas: boolean
+    includeSystemSchemas?: boolean
   }
 }
