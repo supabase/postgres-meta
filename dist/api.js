@@ -1,10 +1,8 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var express = require('express');
-var cors = require('cors');
-var Router = express.Router;
+var express_1 = require("express");
+var cors = require("cors");
 var connectionMiddleware_1 = require("./lib/connectionMiddleware");
-var router = new Router();
+var router = express_1.Router();
 router.use(cors());
 router.use('/config', connectionMiddleware_1.addConnectionToRequest, require('./api/config'));
 router.use('/columns', connectionMiddleware_1.addConnectionToRequest, require('./api/columns'));

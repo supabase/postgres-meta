@@ -1,7 +1,8 @@
 import { Router } from 'express'
-const router = Router()
-const { roles } = require('../lib/sql')
-const RunQuery = require('../lib/connectionPool')
+
+import sql = require('../lib/sql')
+const { roles } = sql
+import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants/schemas'
 import { Roles } from '../lib/interfaces/roles'
 
@@ -11,6 +12,8 @@ import { Roles } from '../lib/interfaces/roles'
 interface GetRolesQueryParams {
   includeSystemSchemas?: boolean
 }
+
+const router = Router()
 router.get('/', async (req, res) => {
   try {
     const { data } = await RunQuery(req.headers.pg, roles.list)
@@ -35,4 +38,4 @@ const removeSystemSchemas = (data: Roles.Role[]) => {
   })
 }
 
-module.exports = router
+export = router
