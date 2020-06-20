@@ -1,5 +1,5 @@
-const { Router } = require('express')
-const router = new Router()
+import { Router } from 'express'
+const router = Router()
 const { tables } = require('../lib/sql')
 const RunQuery = require('../lib/connectionPool')
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants/schemas'
