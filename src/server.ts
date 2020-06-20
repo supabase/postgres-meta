@@ -1,12 +1,13 @@
-const express = require('express')
-const app = express()
+import express = require('express')
+
 const api = require('./api')
 const project = require('../package.json')
 
+const app = express()
 app.use(express.json())
 app.use(api)
 
-app.get('/', (req, res) =>
+app.get('/', (_req, res) =>
   res.status(200).json({
     status: 200,
     name: project.name,
@@ -14,10 +15,10 @@ app.get('/', (req, res) =>
     documentation: 'https://supabase.github.io/pg-api/',
   })
 )
-app.get('/health', (req, res) => res.status(200).json({ date: new Date() }))
+app.get('/health', (_req, res) => res.status(200).json({ date: new Date() }))
 
 let Server = {
-  start(port) {
+  start(port: number) {
     this.server = app.listen(port, () => {
       console.log(`App started on port ${port}`)
     })

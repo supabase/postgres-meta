@@ -1,8 +1,10 @@
 import { Router } from 'express'
-const router = Router()
-const { config } = require('../lib/sql')
-const RunQuery = require('../lib/connectionPool')
 
+import { RunQuery } from '../lib/connectionPool'
+import sql = require('../lib/sql')
+const { config } = sql
+
+const router = Router()
 router.get('/', async (req, res) => {
   try {
     const { data } = await RunQuery(req.headers.pg, config.list)
@@ -22,4 +24,4 @@ router.get('/version', async (req, res) => {
   }
 })
 
-module.exports = router
+export = router

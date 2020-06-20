@@ -35,19 +35,19 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
-var router = express_1.Router();
-var tables = require('../lib/sql').tables;
-var RunQuery = require('../lib/connectionPool');
+var sql = require("../lib/sql");
+var tables = sql.tables;
+var connectionPool_1 = require("../lib/connectionPool");
 var schemas_1 = require("../lib/constants/schemas");
+var router = express_1.Router();
 router.get('/', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var data, query, payload, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, RunQuery(req.headers.pg, tables.list)];
+                return [4 /*yield*/, connectionPool_1.RunQuery(req.headers.pg, tables.list)];
             case 1:
                 data = (_a.sent()).data;
                 query = req.query;
@@ -64,7 +64,7 @@ router.get('/', function (req, res) { return __awaiter(void 0, void 0, void 0, f
         }
     });
 }); });
-module.exports = router;
 var removeSystemSchemas = function (data) {
     return data.filter(function (x) { return !schemas_1.DEFAULT_SYSTEM_SCHEMAS.includes(x.schema); });
 };
+module.exports = router;

@@ -1,10 +1,12 @@
 import { Router } from 'express'
-const router = Router()
-const { tables } = require('../lib/sql')
-const RunQuery = require('../lib/connectionPool')
+
+import sql = require('../lib/sql')
+const { tables } = sql
+import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants/schemas'
 import { Tables } from '../lib/interfaces/tables'
 
+const router = Router()
 router.get('/', async (req, res) => {
   try {
     const { data } = await RunQuery(req.headers.pg, tables.list)
@@ -18,7 +20,7 @@ router.get('/', async (req, res) => {
   }
 })
 
-module.exports = router
+export = router
 
 const removeSystemSchemas = (data: Tables.Table[]) => {
   return data.filter((x) => !DEFAULT_SYSTEM_SCHEMAS.includes(x.schema))

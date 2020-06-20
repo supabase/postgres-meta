@@ -37,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addConnectionToRequest = void 0;
-var CryptoJS = require('crypto-js');
+var CryptoJS = require("crypto-js");
 var constants_1 = require("./constants");
 /**
  * Adds a "pg" object to the request if it doesn't exist

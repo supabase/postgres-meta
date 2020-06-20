@@ -1,7 +1,8 @@
 import { Router } from 'express'
-const router = Router()
-const RunQuery = require('../lib/connectionPool')
 
+import { RunQuery } from '../lib/connectionPool'
+
+const router = Router()
 router.post('/', async (req, res) => {
   try {
     const { query } = req.body
@@ -14,4 +15,4 @@ router.post('/', async (req, res) => {
   }
 })
 
-module.exports = router
+export = router
