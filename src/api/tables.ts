@@ -1,7 +1,8 @@
 import { Router } from 'express'
 
 import sql = require('../lib/sql')
-const { tables } = sql
+const { columns, grants, primary_keys, relationships, tables } = sql
+import { coalesceRowsToArray } from '../lib/helpers'
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants/schemas'
 import { Tables } from '../lib/interfaces/tables'
@@ -9,7 +10,36 @@ import { Tables } from '../lib/interfaces/tables'
 const router = Router()
 router.get('/', async (req, res) => {
   try {
-    const { data } = await RunQuery(req.headers.pg, tables.list)
+    const sql = `
+WITH tables AS ( ${tables} ),
+columns AS ( ${columns} ),
+grants AS ( ${grants} ),
+primary_keys AS ( ${primary_keys} ),
+relationships AS ( ${relationships} )
+SELECT
+  *,
+  ${coalesceRowsToArray(
+    'columns',
+    'SELECT * FROM columns WHERE columns.table_id = tables.table_id'
+  )},
+  ${coalesceRowsToArray('grants', 'SELECT * FROM grants WHERE grants.table_id = tables.table_id')},
+  ${coalesceRowsToArray(
+    'primary_keys',
+    'SELECT * FROM primary_keys WHERE primary_keys.table_id = tables.table_id'
+  )},
+  ${coalesceRowsToArray(
+    'relationships',
+    `SELECT
+       *
+     FROM
+       relationships
+     WHERE
+       relationships.source_table_id = tables.table_id
+       OR relationships.target_table_id = tables.table_id`
+  )}
+FROM
+  tables`
+    const { data } = await RunQuery(req.headers.pg, sql)
     const query: Fetch.QueryParams = req.query
     let payload: Tables.Table[] = data
     if (!query?.includeSystemSchemas) payload = removeSystemSchemas(data)
