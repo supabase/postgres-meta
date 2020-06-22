@@ -1,0 +1,12 @@
+SELECT
+  *
+FROM
+  pg_stat_replication;
+SELECT
+  *
+FROM
+  pg_stat_wal_receiver;
+SELECT
+  *
+FROM
+  pg_publication;

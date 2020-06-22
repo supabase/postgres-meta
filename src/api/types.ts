@@ -9,7 +9,7 @@ import { Types } from '../lib/interfaces/types'
 const router = Router()
 router.get('/', async (req, res) => {
   try {
-    const { data } = await RunQuery(req.headers.pg, types.list)
+    const { data } = await RunQuery(req.headers.pg, types)
     const query: Fetch.QueryParams = req.query
     let payload: Types.Type[] = data
     if (!query?.includeSystemSchemas) payload = removeSystemSchemas(data)

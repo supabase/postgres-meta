@@ -2,44 +2,21 @@ import * as fs from 'fs'
 import * as path from 'path'
 
 export = {
-  columns: {
-    list: fs.readFileSync(path.join(__dirname, '/columns/list.sql')).toString(),
-  },
-  config: {
-    list: fs.readFileSync(path.join(__dirname, '/config/list.sql')).toString(),
-    version: fs.readFileSync(path.join(__dirname, '/config/version.sql')).toString(),
-  },
-  constraints: {
-    list: fs.readFileSync(path.join(__dirname, '/constraints/list.sql')).toString(),
-  },
-  joins: {
-    list: fs.readFileSync(path.join(__dirname, '/joins/list.sql')).toString(),
-  },
-  extensions: {
-    list: fs.readFileSync(path.join(__dirname, '/extensions/list.sql')).toString(),
-  },
-  policies: {
-    list: fs.readFileSync(path.join(__dirname, '/policies/list.sql')).toString(),
-  },
-  stats: {
-    tableSize: fs.readFileSync(path.join(__dirname, '/stats/table_size.sql')).toString(),
-  },
-  sequences: {
-    list: fs.readFileSync(path.join(__dirname, '/sequences/list.sql')).toString(),
-  },
-  schemas: {
-    list: fs.readFileSync(path.join(__dirname, '/schemas/list.sql')).toString(),
-  },
-  types: {
-    list: fs.readFileSync(path.join(__dirname, '/types/list.sql')).toString(),
-  },
-  tables: {
-    list: fs.readFileSync(path.join(__dirname, '/tables/list.sql')).toString(),
-  },
-  roles: {
-    list: fs.readFileSync(path.join(__dirname, '/roles/list.sql')).toString(),
-  },
-  views: {
-    list: fs.readFileSync(path.join(__dirname, '/views/list.sql')).toString(),
-  },
+  columns: fs.readFileSync(path.join(__dirname, '/columns.sql')).toString(),
+  config: fs.readFileSync(path.join(__dirname, '/config.sql')).toString(),
+  constraints: fs.readFileSync(path.join(__dirname, '/constraints.sql')).toString(),
+  extensions: fs.readFileSync(path.join(__dirname, '/extensions.sql')).toString(),
+  grants: fs.readFileSync(path.join(__dirname, '/grants.sql')).toString(),
+  joins: fs.readFileSync(path.join(__dirname, '/joins.sql')).toString(),
+  pk_list: fs.readFileSync(path.join(__dirname, '/pk_list.sql')).toString(),
+  policies: fs.readFileSync(path.join(__dirname, '/policies.sql')).toString(),
+  relationships: fs.readFileSync(path.join(__dirname, '/relationships.sql')).toString(),
+  roles: fs.readFileSync(path.join(__dirname, '/roles.sql')).toString(),
+  schemas: fs.readFileSync(path.join(__dirname, '/schemas.sql')).toString(),
+  sequences: fs.readFileSync(path.join(__dirname, '/sequences.sql')).toString(),
+  tableSize: fs.readFileSync(path.join(__dirname, '/table_size.sql')).toString(),
+  tables: fs.readFileSync(path.join(__dirname, '/tables.sql')).toString(),
+  types: fs.readFileSync(path.join(__dirname, '/types.sql')).toString(),
+  version: fs.readFileSync(path.join(__dirname, '/version.sql')).toString(),
+  views: fs.readFileSync(path.join(__dirname, '/views.sql')).toString(),
 }

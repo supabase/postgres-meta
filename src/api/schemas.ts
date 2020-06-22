@@ -16,7 +16,7 @@ interface GetSchemasQueryParams {
 const router = Router()
 router.get('/', async (req, res) => {
   try {
-    const { data } = await RunQuery(req.headers.pg, schemas.list)
+    const { data } = await RunQuery(req.headers.pg, schemas)
     const query: GetSchemasQueryParams = req.query
     let payload: Schemas.Schema[] = data
     if (!query?.includeSystemSchemas) payload = removeSystemSchemas(data)

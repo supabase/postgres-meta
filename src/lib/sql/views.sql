@@ -1,5 +1,5 @@
-select 
-  table_schema, 
+SELECT
+  table_schema,
   table_name,
   check_option,
   is_updatable,
@@ -7,6 +7,8 @@ select
   is_trigger_updatable,
   is_trigger_deletable,
   is_trigger_insertable_into
-  
-from information_schema.views
-where table_schema = ? and table_schema not in ('information_schema', 'pg_catalog')
+FROM
+  information_schema.views
+WHERE
+  table_schema = ?
+  AND table_schema NOT IN ('information_schema', 'pg_catalog')
