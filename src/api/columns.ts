@@ -7,7 +7,7 @@ const { columns } = sql
 const router = Router()
 router.get('/', async (req, res) => {
   try {
-    const { data } = await RunQuery(req.headers.pg, columns.list)
+    const { data } = await RunQuery(req.headers.pg, columns)
     return res.status(200).json(data)
   } catch (error) {
     console.log('throwing error')

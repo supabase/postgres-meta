@@ -7,7 +7,7 @@ const { extensions } = sql
 const router = Router()
 router.get('/', async (req, res) => {
   try {
-    const { data } = await RunQuery(req.headers.pg, extensions.list)
+    const { data } = await RunQuery(req.headers.pg, extensions)
     return res.status(200).json(data)
   } catch (error) {
     console.log('throwing error')
