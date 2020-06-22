@@ -8,7 +8,7 @@ export = {
   extensions: fs.readFileSync(path.join(__dirname, '/extensions.sql')).toString(),
   grants: fs.readFileSync(path.join(__dirname, '/grants.sql')).toString(),
   joins: fs.readFileSync(path.join(__dirname, '/joins.sql')).toString(),
-  pk_list: fs.readFileSync(path.join(__dirname, '/pk_list.sql')).toString(),
+  primary_keys: fs.readFileSync(path.join(__dirname, '/primary_keys.sql')).toString(),
   policies: fs.readFileSync(path.join(__dirname, '/policies.sql')).toString(),
   relationships: fs.readFileSync(path.join(__dirname, '/relationships.sql')).toString(),
   roles: fs.readFileSync(path.join(__dirname, '/roles.sql')).toString(),
