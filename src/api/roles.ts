@@ -5,7 +5,7 @@ const { grants, roles } = sql
 import { coalesceRowsToArray } from '../lib/helpers'
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants/schemas'
-import { Roles } from '../lib/interfaces/roles'
+import { Roles } from '../lib/interfaces'
 
 /**
  * @param {boolean} [includeSystemSchemas=false] - Return system schemas as well as user schemas

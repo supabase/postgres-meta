@@ -4,7 +4,7 @@ import sql = require('../lib/sql')
 const { types } = sql
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants/schemas'
-import { Types } from '../lib/interfaces/types'
+import { Types } from '../lib/interfaces'
 
 const router = Router()
 router.get('/', async (req, res) => {
