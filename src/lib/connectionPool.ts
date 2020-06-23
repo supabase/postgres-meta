@@ -1,4 +1,7 @@
 import pg = require('pg')
+// HACK: Number has 53 bits of precision, may overflow with bigint (64 bits).
+// Maybe use BigInt?
+// TODO: Use Date object for timestamptz?
 pg.types.setTypeParser(20, 'text', parseInt)
 const { Pool } = pg
 
