@@ -4,7 +4,7 @@ import sql = require('../lib/sql')
 const { schemas } = sql
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants/schemas'
-import { Schemas } from '../lib/interfaces/schemas'
+import { Schemas } from '../lib/interfaces'
 
 /**
  * @param {boolean} [includeSystemSchemas=false] - Return system schemas as well as user schemas

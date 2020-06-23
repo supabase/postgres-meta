@@ -5,7 +5,7 @@ const { columns, grants, primary_keys, relationships, tables } = sql
 import { coalesceRowsToArray } from '../lib/helpers'
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants/schemas'
-import { Tables } from '../lib/interfaces/tables'
+import { Tables } from '../lib/interfaces'
 
 const router = Router()
 router.get('/', async (req, res) => {
