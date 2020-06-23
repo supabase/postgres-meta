@@ -155,12 +155,33 @@ describe('/tables', async () => {
     assert.equal(relationships.length > 0, true)
     assert.equal(true, relationship.target_table_id == 'public.users')
   })
-
   it('GET with system tables', async () => {
     const res = await axios.get(`${URL}/tables?includeSystemSchemas=true`)
     const included = res.data.find((x) => x.table_id == 'pg_catalog.pg_type')
     assert.equal(res.status, STATUS.SUCCESS)
     assert.equal(true, !!included)
+  })
+  it('POST', async () => {
+    await axios.post(`${URL}/tables`, {
+      schema: 'public',
+      name: 'test',
+      columns: [
+        { name: 'id', is_identity: true, is_nullable: false, data_type: 'bigint' },
+        { name: 'data', data_type: 'text' },
+      ],
+      primary_keys: ['id'],
+    })
+    const { data: tables } = await axios.get(`${URL}/tables`)
+    const test = tables.find((table) => table.table_id === 'public.test')
+    const id = test.columns.find((column) => column.name === 'id')
+    const data = test.columns.find((column) => column.name === 'data')
+    assert.equal(id.is_identity, true)
+    assert.equal(id.is_nullable, false)
+    assert.equal(id.data_type, 'bigint')
+    assert.equal(data.is_identity, false)
+    assert.equal(data.is_nullable, true)
+    assert.equal(data.data_type, 'text')
+    await axios.post(`${URL}/query`, { query: 'DROP TABLE public.test' })
   })
 })
 describe('/extensions', () => {
@@ -183,4 +204,24 @@ describe('/roles', () => {
     assert.equal(hasSystemSchema, false)
     assert.equal(hasPublicSchema, true)
   })
+  // it('POST', async () => {
+  //   await axios.post(`${URL}/roles`, {
+  //     name: 'test',
+  //     is_super_user: true,
+  //     has_create_db_privileges: true,
+  //     has_replication_privileges: true,
+  //     can_bypass_rls: true,
+  //     connections: 100,
+  //     valid_until: '2020-01-01',
+  //   })
+  //   const { data: roles } = await axios.get(`${URL}/roles`)
+  //   const test = roles.find((role) => role.name === 'test')
+  //   assert.equal(test.is_super_user, true)
+  //   assert.equal(test.has_create_db_privileges, true)
+  //   assert.equal(test.has_replication_privileges, true)
+  //   assert.equal(test.can_bypass_rls, true)
+  //   assert.equal(test.connections, 100)
+  //   assert.equal(test.valid_until, '2020-01-01')
+  //   await axios.post(`${URL}/roles`, { query: 'DROP ROLE test' })
+  // })
 })
