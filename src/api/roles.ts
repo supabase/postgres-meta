@@ -40,31 +40,51 @@ router.post('/', async (req, res) => {
   try {
     const {
       name,
-      is_super_user = false,
-      has_create_db_privileges = false,
-      has_replication_privileges = false,
+      is_superuser = false,
+      can_create_db = false,
+      can_create_role = false,
+      inherit_role = true,
+      can_login = false,
+      is_replication_role = false,
       can_bypass_rls = false,
-      connections = -1,
+      connection_limit = -1,
+      password,
       valid_until,
+      member_of,
+      members,
+      admins,
     } = req.body as {
       name: string
-      is_super_user?: boolean
-      has_create_db_privileges?: boolean
-      has_replication_privileges?: boolean
+      is_superuser?: boolean
+      can_create_db?: boolean
+      can_create_role?: boolean
+      inherit_role?: boolean
+      can_login?: boolean
+      is_replication_role?: boolean
       can_bypass_rls?: boolean
-      connections?: number
+      connection_limit?: number
+      password?: string
       valid_until?: string
+      member_of?: string[]
+      members?: string[]
+      admins?: string[]
     }
     const sql = `
 CREATE ROLE ${name}
 WITH
-  ${is_super_user ? 'SUPERUSER' : 'NOSUPERUSER'}
-  ${has_create_db_privileges ? 'CREATEDB' : 'NOCREATEDB'}
-  ${has_replication_privileges ? 'REPLICATION' : 'NOREPLICATION'}
+  ${is_superuser ? 'SUPERUSER' : 'NOSUPERUSER'}
+  ${can_create_db ? 'CREATEDB' : 'NOCREATEDB'}
+  ${can_create_role ? 'CREATEROLE' : 'NOCREATEROLE'}
+  ${inherit_role ? 'INHERIT' : 'NOINHERIT'}
+  ${can_login ? 'LOGIN' : 'NOLOGIN'}
+  ${is_replication_role ? 'REPLICATION' : 'NOREPLICATION'}
   ${can_bypass_rls ? 'BYPASSRLS' : 'NOBYPASSRLS'}
-  CONNECTION LIMIT ${connections}
-  ${valid_until === undefined ? '' : `VALID UNTIL '${valid_until}'`}`
-    console.log(sql)
+  CONNECTION LIMIT ${connection_limit}
+  ${password === undefined ? '' : `PASSWORD '${password}'`}
+  ${valid_until === undefined ? '' : `VALID UNTIL '${valid_until}'`}
+  ${member_of === undefined ? '' : `IN ROLE ${member_of.join(',')}`}
+  ${members === undefined ? '' : `ROLE ${members.join(',')}`}
+  ${admins === undefined ? '' : `ADMIN ${admins.join(',')}`}`
     const { data } = await RunQuery(req.headers.pg, sql)
     return res.status(200).json(data)
   } catch (error) {
