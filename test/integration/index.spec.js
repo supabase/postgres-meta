@@ -197,31 +197,31 @@ describe('/roles', () => {
   it('GET', async () => {
     const res = await axios.get(`${URL}/roles`)
     const datum = res.data.find((x) => x.name == 'postgres')
-    const hasSystemSchema = res.data[0].grants.some((x) => x.schema == 'information_schema')
-    const hasPublicSchema = res.data[0].grants.some((x) => x.schema == 'public')
+    const hasSystemSchema = datum.grants.some((x) => x.schema == 'information_schema')
+    const hasPublicSchema = datum.grants.some((x) => x.schema == 'public')
     assert.equal(res.status, STATUS.SUCCESS)
     assert.equal(true, !!datum)
     assert.equal(hasSystemSchema, false)
     assert.equal(hasPublicSchema, true)
   })
-  // it('POST', async () => {
-  //   await axios.post(`${URL}/roles`, {
-  //     name: 'test',
-  //     is_super_user: true,
-  //     has_create_db_privileges: true,
-  //     has_replication_privileges: true,
-  //     can_bypass_rls: true,
-  //     connections: 100,
-  //     valid_until: '2020-01-01',
-  //   })
-  //   const { data: roles } = await axios.get(`${URL}/roles`)
-  //   const test = roles.find((role) => role.name === 'test')
-  //   assert.equal(test.is_super_user, true)
-  //   assert.equal(test.has_create_db_privileges, true)
-  //   assert.equal(test.has_replication_privileges, true)
-  //   assert.equal(test.can_bypass_rls, true)
-  //   assert.equal(test.connections, 100)
-  //   assert.equal(test.valid_until, '2020-01-01')
-  //   await axios.post(`${URL}/roles`, { query: 'DROP ROLE test' })
-  // })
+  it('POST', async () => {
+    await axios.post(`${URL}/roles`, {
+      name: 'test',
+      is_superuser: true,
+      can_create_db: true,
+      is_replication_role: true,
+      can_bypass_rls: true,
+      connection_limit: 100,
+      valid_until: '2020-01-01T00:00:00.000Z',
+    })
+    const { data: roles } = await axios.get(`${URL}/roles`)
+    const test = roles.find((role) => role.name === 'test')
+    assert.equal(test.is_superuser, true)
+    assert.equal(test.can_create_db, true)
+    assert.equal(test.is_replication_role, true)
+    assert.equal(test.can_bypass_rls, true)
+    assert.equal(test.connection_limit, 100)
+    assert.equal(test.valid_until, '2020-01-01T00:00:00.000Z')
+    await axios.post(`${URL}/query`, { query: 'DROP ROLE test;' })
+  })
 })
