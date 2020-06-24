@@ -1,16 +1,19 @@
 export namespace Roles {
   export interface Role {
     name: string
-    id: number
-    has_create_db_privileges: boolean
-    is_super_user: boolean
-    has_replication_privileges: boolean
+    is_superuser: boolean
+    can_create_db: boolean
+    can_create_role: boolean
+    inherit_role: boolean
+    can_login: boolean
+    is_replication_role: boolean
     can_bypass_rls: boolean
-    valid_until: string | null
-    user_config: string | null
-    connections: number
-    max_user_connections: number
-    max_db_connections: number
+    connection_limit: number
+    password: string
+    valid_until: string
+    config: string
+    oid: number
+
     grants: Grant[]
   }
 
