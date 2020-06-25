@@ -40,15 +40,6 @@ None. Please don't use this as a standalone server. We are assuming you are usin
 2. Run `npm run dev`
 3. Run `npm test` while you work
 
-**Deploy**
-
-Deploys are automated on tag:
-
-```sh
-git tag <version> # use package.json version
-git push origin --tags
-```
-
 ## Licence
 
 Apache 2.0
