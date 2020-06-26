@@ -3,7 +3,7 @@ import { Router } from 'express'
 import sql = require('../lib/sql')
 const { schemas } = sql
 import { RunQuery } from '../lib/connectionPool'
-import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants/schemas'
+import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
 import { Schemas } from '../lib/interfaces'
 
 /**

@@ -4,13 +4,14 @@ import sql = require('../lib/sql')
 const { grants, roles } = sql
 import { coalesceRowsToArray } from '../lib/helpers'
 import { RunQuery } from '../lib/connectionPool'
-import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants/schemas'
+import { DEFAULT_ROLES, DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
 import { Roles } from '../lib/interfaces'
 
 /**
  * @param {boolean} [includeSystemSchemas=false] - Return system schemas as well as user schemas
  */
 interface GetRolesQueryParams {
+  includeDefaultRoles?: boolean
   includeSystemSchemas?: boolean
 }
 
@@ -29,6 +30,7 @@ FROM
     const query: GetRolesQueryParams = req.query
     let payload: Roles.Role[] = data
     if (!query?.includeSystemSchemas) payload = removeSystemSchemas(data)
+    if (!query?.includeDefaultRoles) payload = removeDefaultRoles(payload)
 
     return res.status(200).json(payload)
   } catch (error) {
@@ -102,6 +104,10 @@ const removeSystemSchemas = (data: Roles.Role[]) => {
       grants,
     }
   })
+}
+
+const removeDefaultRoles = (data: Roles.Role[]) => {
+  return data.filter((role) => !DEFAULT_ROLES.includes(role.name))
 }
 
 export = router
