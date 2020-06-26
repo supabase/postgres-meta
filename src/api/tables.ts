@@ -4,7 +4,7 @@ import sql = require('../lib/sql')
 const { columns, grants, primary_keys, relationships, tables } = sql
 import { coalesceRowsToArray, formatColumns } from '../lib/helpers'
 import { RunQuery } from '../lib/connectionPool'
-import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants/schemas'
+import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
 import { Tables } from '../lib/interfaces'
 
 const router = Router()
