@@ -131,3 +131,15 @@ jobs:
           asset_path: ./pg-api-windows.tar.gz
           asset_name: pg-api-windows.tar.gz
           asset_content_type: application/gzip
+
+      - name: Get version
+        run: echo ::set-env name=VERSION::$(curl -s https://api.github.com/repos/supabase/pg-api/releases/latest | jq .name -r)
+
+      - name: Upload image to Docker Hub
+        if: env.HAS_NEW_RELEASE == 1
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: supabase/pg-api
+          tags: latest,${{ env.VERSION }}
