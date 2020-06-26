@@ -12,7 +12,7 @@ export namespace Roles {
     password: string
     valid_until: string
     config: string
-    oid: number
+    id: number
 
     grants: Grant[]
   }
