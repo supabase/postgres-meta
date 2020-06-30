@@ -18,14 +18,11 @@ primary_keys AS ( ${primary_keys} ),
 relationships AS ( ${relationships} )
 SELECT
   *,
-  ${coalesceRowsToArray(
-    'columns',
-    'SELECT * FROM columns WHERE columns.table_id = tables.table_id'
-  )},
-  ${coalesceRowsToArray('grants', 'SELECT * FROM grants WHERE grants.table_id = tables.table_id')},
+  ${coalesceRowsToArray('columns', 'SELECT * FROM columns WHERE columns.table_id = tables.id')},
+  ${coalesceRowsToArray('grants', 'SELECT * FROM grants WHERE grants.table_id = tables.id')},
   ${coalesceRowsToArray(
     'primary_keys',
-    'SELECT * FROM primary_keys WHERE primary_keys.table_id = tables.table_id'
+    'SELECT * FROM primary_keys WHERE primary_keys.table_id = tables.id'
   )},
   ${coalesceRowsToArray(
     'relationships',
@@ -34,8 +31,8 @@ SELECT
      FROM
        relationships
      WHERE
-       relationships.source_table_id = tables.table_id
-       OR relationships.target_table_id = tables.table_id`
+       (relationships.source_schema = tables.schema AND relationships.source_table_name = tables.name)
+       OR (relationships.target_table_schema = tables.schema AND relationships.target_table_name = tables.name)`
   )}
 FROM
   tables`

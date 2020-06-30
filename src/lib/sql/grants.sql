@@ -1,5 +1,5 @@
 SELECT
-  (table_schema || '.' || table_name) AS table_id,
+  c.oid AS table_id,
   grantor,
   grantee,
   table_catalog AS catalog,
@@ -10,3 +10,5 @@ SELECT
   with_hierarchy :: boolean
 FROM
   information_schema.role_table_grants
+  INNER JOIN pg_class c ON table_schema::text::regnamespace = c.relnamespace
+  AND table_name::text = c.relname

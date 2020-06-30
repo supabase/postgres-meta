@@ -18,7 +18,7 @@ export namespace Roles {
   }
 
   export interface Grant {
-    table_id: string
+    table_id: number
     grantor: string
     grantee: string
     catalog: string
@@ -32,6 +32,7 @@ export namespace Roles {
 
 export namespace Schemas {
   export interface Schema {
+    id: number
     catalog_name: string
     name: string
     owner: string
@@ -44,7 +45,7 @@ export namespace Schemas {
 
 export namespace Tables {
   export interface Table {
-    table_id: string
+    id: string
     catalog: string
     schema: string
     name: string
@@ -81,19 +82,19 @@ export namespace Tables {
   }
 
   export interface Column {
+    table_id: number
     schema: string
     table: string
+    ordinal_position: number
     name: string
     default_value: string | null
-    is_identity: boolean
-    is_nullable: boolean
-    is_updatable: boolean
     data_type: string
     format: string
-    identity_generation: string | null
-    table_id: string
     description: string | null
-    enums: string[]
+    is_identity: boolean
+    identity_generation: string | null
+    is_nullable: boolean
+    is_updatable: boolean
   }
 
   export interface PrimaryKey {
@@ -104,11 +105,9 @@ export namespace Tables {
   }
 
   export interface Relationship {
-    source_table_id: string
     source_schema: string
     source_table_name: string
     source_column_name: string
-    target_table_id: string
     target_table_schema: string
     target_table_name: string
     target_column_name: string
@@ -118,7 +117,7 @@ export namespace Tables {
 
 export namespace Types {
   export interface Type {
-    type_id: string
+    id: number
     name: string
     schema: string
     format: string

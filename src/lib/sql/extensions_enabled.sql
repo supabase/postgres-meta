@@ -1,4 +1,5 @@
 SELECT
+  e.oid AS id,
   e.extname AS name,
   e.extversion AS version,
   n.nspname AS schema,
