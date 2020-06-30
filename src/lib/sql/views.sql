@@ -1,4 +1,5 @@
 SELECT
+  c.oid AS id,
   table_schema,
   table_name,
   check_option,
@@ -9,6 +10,5 @@ SELECT
   is_trigger_insertable_into
 FROM
   information_schema.views
-WHERE
-  table_schema = ?
-  AND table_schema NOT IN ('information_schema', 'pg_catalog')
+  INNER JOIN pg_class c ON table_schema::text::regnamespace = c.relnamespace
+  AND table_name::text = c.relname

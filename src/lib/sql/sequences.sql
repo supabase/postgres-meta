@@ -1,23 +1,23 @@
+-- Adapted from the source for information_schema.sequences
 SELECT
-  table_schema,
-  table_name,
-  column_name,
-  sequence_name,
-  start_value,
-  minimum_value,
-  increment
-FROM
-  information_schema.columns
-  INNER JOIN information_schema.sequences ON (
-    table_schema = sequence_schema
-    AND pg_get_serial_sequence(
-      table_schema || '."' || table_name || '"',
-      column_name
-    ) = sequence_schema || '.' || sequence_name
-  )
-WHERE
-  sequence_schema = ?
-ORDER BY
-  table_schema,
-  table_name,
-  ordinal_position
+  c.oid AS id,
+  nc.nspname::information_schema.sql_identifier AS sequence_schema,
+  c.relname::information_schema.sql_identifier AS sequence_name,
+  s.seqstart::information_schema.character_data AS start_value,
+  s.seqmin::information_schema.character_data AS minimum_value,
+  s.seqmax::information_schema.character_data AS maximum_value,
+  s.seqincrement::information_schema.character_data AS increment
+FROM pg_namespace nc,
+  pg_class c,
+  pg_sequence s
+WHERE c.relnamespace = nc.oid AND c.relkind = 'S'::"char" AND NOT (EXISTS (
+  SELECT 1
+  FROM pg_depend
+  WHERE pg_depend.classid = 'pg_class'::regclass::oid
+  AND pg_depend.objid = c.oid
+  AND pg_depend.deptype = 'i'::"char"))
+  AND NOT pg_is_other_temp_schema(nc.oid)
+  AND c.oid = s.seqrelid
+  AND (pg_has_role(c.relowner, 'USAGE'::text)
+  OR has_sequence_privilege(c.oid, 'SELECT, UPDATE, USAGE'::text)
+)

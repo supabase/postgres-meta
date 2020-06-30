@@ -1,5 +1,5 @@
 SELECT
-  (n.nspname || '.' || t.typname) AS type_id,
+  t.oid AS id,
   t.typname AS name,
   n.nspname AS schema,
   pg_catalog.Format_type (t.oid, NULL) AS format,
