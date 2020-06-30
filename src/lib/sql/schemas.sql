@@ -1,4 +1,5 @@
 SELECT
+  nsp.oid AS id,
   catalog_name,
   schema_name AS name,
   schema_owner AS owner,
@@ -8,3 +9,4 @@ SELECT
   sql_path
 FROM
   information_schema.schemata
+  JOIN pg_namespace nsp ON schema_name::text::regnamespace = nsp.oid

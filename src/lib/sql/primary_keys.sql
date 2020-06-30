@@ -1,18 +1,16 @@
 SELECT
-  pg_namespace.nspname AS schema,
-  pg_class.oid :: regclass AS table_name,
-  pg_attribute.attname AS name,
-  (
-    pg_namespace.nspname || '.' || (pg_class.oid :: regclass)
-  ) AS table_id
+  n.nspname AS schema,
+  c.oid :: regclass AS table_name,
+  a.attname AS name,
+  c.oid AS table_id
 FROM
-  pg_index,
-  pg_class,
-  pg_attribute,
-  pg_namespace
+  pg_index i,
+  pg_class c,
+  pg_attribute a,
+  pg_namespace n
 WHERE
-  indrelid = pg_class.oid
-  AND pg_class.relnamespace = pg_namespace.oid
-  AND pg_attribute.attrelid = pg_class.oid
-  AND pg_attribute.attnum = ANY (pg_index.indkey)
-  AND indisprimary
+  i.indrelid = c.oid
+  AND c.relnamespace = n.oid
+  AND a.attrelid = c.oid
+  AND a.attnum = ANY (i.indkey)
+  AND i.indisprimary

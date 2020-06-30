@@ -1,5 +1,5 @@
 SELECT
-  (table_schema || '.' || table_name) AS table_id,
+  c.oid AS id,
   table_catalog AS catalog,
   table_schema AS schema,
   table_name AS name,
@@ -30,6 +30,8 @@ SELECT
   autoanalyze_count :: bigint
 FROM
   information_schema.tables
+  JOIN pg_class c ON c.relnamespace = table_schema::text::regnamespace
+  AND c.relname = table_name::text
   LEFT JOIN pg_stat_user_tables ON pg_stat_user_tables.schemaname = tables.table_schema
   AND pg_stat_user_tables.relname = tables.table_name
 WHERE
