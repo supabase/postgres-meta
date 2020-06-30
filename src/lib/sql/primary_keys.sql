@@ -15,3 +15,4 @@ WHERE
   AND pg_class.relnamespace = pg_namespace.oid
   AND pg_attribute.attrelid = pg_class.oid
   AND pg_attribute.attnum = ANY (pg_index.indkey)
+  AND indisprimary
