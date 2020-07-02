@@ -3,6 +3,7 @@ SELECT
   c.oid AS table_id,
   table_schema AS schema,
   table_name AS table,
+  (c.oid || '.' || ordinal_position) AS id,
   ordinal_position,
   column_name AS name,
   column_default AS default_value,
