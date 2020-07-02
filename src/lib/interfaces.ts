@@ -85,6 +85,7 @@ export namespace Tables {
     table_id: number
     schema: string
     table: string
+    id: string
     ordinal_position: number
     name: string
     default_value: string | null
