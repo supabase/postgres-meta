@@ -24,7 +24,8 @@
     "cors": "^2.8.5",
     "crypto-js": "^4.0.0",
     "express": "^4.17.1",
-    "pg": "^7.18.2"
+    "pg": "^7.18.2",
+    "sql-template-strings": "^2.2.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.6",

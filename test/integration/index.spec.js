@@ -8,6 +8,7 @@ const STATUS = {
   SUCCESS: 200,
   ERROR: 500,
 }
+const PUBLIC_SCHEMA_ID = 2200
 
 console.log('Running tests on ', URL)
 
@@ -97,6 +98,18 @@ describe('/schemas', () => {
     assert.equal(res.status, STATUS.SUCCESS)
     assert.equal(true, !!datum)
     assert.equal(true, !!included)
+  })
+  it('POST & PATCH', async () => {
+    const res = await axios.post(`${URL}/schemas`, { name: 'api' })
+    assert.equal('api', res.data.name)
+    const newSchemaId = res.data.id
+    const res2 = await axios.patch(`${URL}/schemas/${newSchemaId}`, { name: 'api_updated' })
+    assert.equal('api_updated', res2.data.name)
+    const res3 = await axios.patch(`${URL}/schemas/${newSchemaId}`, {
+      name: 'api',
+      owner: 'postgres',
+    })
+    assert.equal('api', res3.data.name)
   })
 })
 describe('/types', () => {
@@ -197,6 +210,7 @@ describe('/extensions', () => {
 describe('/roles', () => {
   it('GET', async () => {
     const res = await axios.get(`${URL}/roles`)
+    // console.log('res', res)
     const datum = res.data.find((x) => x.name == 'postgres')
     const hasSystemSchema = datum.grants.some((x) => x.schema == 'information_schema')
     const hasPublicSchema = datum.grants.some((x) => x.schema == 'public')
