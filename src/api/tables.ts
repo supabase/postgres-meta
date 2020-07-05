@@ -1,8 +1,8 @@
 import { Router } from 'express'
-
-import sql = require('../lib/sql')
-const { columns, grants, primary_keys, relationships, tables } = sql
-import { coalesceRowsToArray, formatColumns } from '../lib/helpers'
+import SQL from 'sql-template-strings'
+import sqlTemplates = require('../lib/sql')
+const { columns, grants, primary_keys, relationships, tables } = sqlTemplates
+import { coalesceRowsToArray } from '../lib/helpers'
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
 import { Tables } from '../lib/interfaces'
@@ -48,18 +48,47 @@ FROM
 })
 router.post('/', async (req, res) => {
   try {
-    const { schema = 'public', name, columns, primary_keys = [] } = req.body as {
+    const { schema = 'public', name } = req.body as {
       schema?: string
       name: string
-      columns: Tables.Column[]
-      primary_keys?: Tables.PrimaryKey[]
     }
-    const sql = `
-CREATE TABLE ${schema}.${name} (
-  ${formatColumns({ columns, primary_keys })}
-)`
-    const { data } = await RunQuery(req.headers.pg, sql)
-    return res.status(200).json(data)
+
+    // Create the table
+    const createTableSql = createTable(name, schema)
+    await RunQuery(req.headers.pg, createTableSql)
+
+    // Return fresh details
+    const getTable = selectSingleByName(schema, name)
+    const { data: newTableResults } = await RunQuery(req.headers.pg, getTable)
+    let newTable: Tables.Table = newTableResults[0]
+    return res.status(200).json(newTable)
+  } catch (error) {
+    // For this one, we always want to give back the error to the customer
+    console.log('Soft error!', error)
+    res.status(200).json([{ error: error.toString() }])
+  }
+})
+router.patch('/:id', async (req, res) => {
+  try {
+    const id: number = parseInt(req.params.id)
+    const name: string = req.body.name
+
+    // Get table
+    const getTableSql = selectSingleSql(id)
+    const { data: getTableResults } = await RunQuery(req.headers.pg, getTableSql)
+    let previousTable: Tables.Table = getTableResults[0]
+
+    // Update fields
+    // NB: Run name updates last
+    if (name) {
+      const updateName = alterTableName(previousTable.name, name, previousTable.schema)
+      await RunQuery(req.headers.pg, updateName)
+    }
+
+    // Return fresh details
+    const { data: updatedResults } = await RunQuery(req.headers.pg, getTableSql)
+    let updated: Tables.Table = updatedResults[0]
+    return res.status(200).json(updated)
   } catch (error) {
     // For this one, we always want to give back the error to the customer
     console.log('Soft error!', error)
@@ -69,6 +98,20 @@ CREATE TABLE ${schema}.${name} (
 
 export = router
 
+const selectSingleSql = (id: number) => {
+  return SQL``.append(tables).append(SQL` and c.oid = ${id}`)
+}
+const selectSingleByName = (schema: string, name: string) => {
+  return SQL``.append(tables).append(SQL` and table_schema = ${schema} and table_name = ${name}`)
+}
+const createTable = (name: string, schema: string = 'postgres') => {
+  const query = SQL``.append(`CREATE TABLE ${schema}.${name} ()`)
+  return query
+}
+const alterTableName = (previousName: string, newName: string, schema: string) => {
+  const query = SQL``.append(`ALTER SCHEMA ${previousName} RENAME TO ${newName}`)
+  return query
+}
 const removeSystemSchemas = (data: Tables.Table[]) => {
   return data.filter((x) => !DEFAULT_SYSTEM_SCHEMAS.includes(x.schema))
 }
@@ -76,7 +119,6 @@ const removeSystemSchemas = (data: Tables.Table[]) => {
 /**
  * Types
  */
-
 namespace Fetch {
   /**
    * @param {boolean} [includeSystemSchemas=false] - Return system schemas as well as user schemas

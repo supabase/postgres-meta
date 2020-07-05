@@ -64,15 +64,16 @@ router.patch('/:id', async (req, res) => {
       const updateOwner = alterSchemaOwner(previousSchema.name, owner)
       await RunQuery(req.headers.pg, updateOwner)
     }
+    // NB: Run name updates last
     if (name) {
       const updateName = alterSchemaName(previousSchema.name, name)
       await RunQuery(req.headers.pg, updateName)
     }
 
     // Return fresh details
-    const { data: updatedSchemaResults } = await RunQuery(req.headers.pg, getSchema)
-    let updatedSchema: Schemas.Schema = updatedSchemaResults[0]
-    return res.status(200).json(updatedSchema)
+    const { data: updatedResults } = await RunQuery(req.headers.pg, getSchema)
+    let updated: Schemas.Schema = updatedResults[0]
+    return res.status(200).json(updated)
   } catch (error) {
     console.log('throwing error', error)
     res.status(500).json({ error: 'Database error', status: 500 })

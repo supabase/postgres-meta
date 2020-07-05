@@ -132,8 +132,8 @@ describe('/types', () => {
     assert.equal(true, !!included)
   })
 })
-describe('/tables', async () => {
-  it('GET', async () => {
+describe('/tables & /columns', async () => {
+  it('GET /tables', async () => {
     const tables = await axios.get(`${URL}/tables`)
     const datum = tables.data.find((x) => `${x.schema}.${x.name}` === 'public.users')
     const notIncluded = tables.data.find((x) => `${x.schema}.${x.name}` === 'pg_catalog.pg_type')
@@ -141,7 +141,7 @@ describe('/tables', async () => {
     assert.equal(true, !!datum)
     assert.equal(true, !notIncluded)
   })
-  it('should return the columns', async () => {
+  it('/tables should return the columns', async () => {
     const tables = await axios.get(`${URL}/tables`)
     const datum = tables.data.find((x) => `${x.schema}.${x.name}` === 'public.users')
     const idColumn = datum.columns.find((x) => x.name === 'id')
@@ -153,12 +153,12 @@ describe('/tables', async () => {
     assert.equal(idColumn.is_identity, true)
     assert.equal(nameColumn.is_identity, false)
   })
-  it('should return the grants', async () => {
+  it('/tables should return the grants', async () => {
     const tables = await axios.get(`${URL}/tables`)
     const datum = tables.data.find((x) => `${x.schema}.${x.name}` === 'public.users')
     assert.equal(datum.grants.length > 0, true)
   })
-  it('should return the relationships', async () => {
+  it('/tables should return the relationships', async () => {
     const tables = await axios.get(`${URL}/tables`)
     const datum = tables.data.find((x) => `${x.schema}.${x.name}` === 'public.users')
     const relationships = datum.relationships
@@ -169,32 +169,54 @@ describe('/tables', async () => {
     assert.equal(true, relationship.target_table_schema === 'public')
     assert.equal(true, relationship.target_table_name === 'users')
   })
-  it('GET with system tables', async () => {
+  it('GET /tabls with system tables', async () => {
     const res = await axios.get(`${URL}/tables?includeSystemSchemas=true`)
     const included = res.data.find((x) => `${x.schema}.${x.name}` === 'pg_catalog.pg_type')
     assert.equal(res.status, STATUS.SUCCESS)
     assert.equal(true, !!included)
   })
-  it('POST', async () => {
-    await axios.post(`${URL}/tables`, {
+  it('GET /columns', async () => {
+    const res = await axios.get(`${URL}/columns`)
+    // console.log('res.data', res.data)
+    const datum = res.data.find((x) => x.schema == 'public')
+    const notIncluded = res.data.find((x) => x.schema == 'pg_catalog')
+    assert.equal(res.status, STATUS.SUCCESS)
+    assert.equal(true, !!datum)
+    assert.equal(true, !notIncluded)
+  })
+  it('GET /columns with system types', async () => {
+    const res = await axios.get(`${URL}/columns?includeSystemSchemas=true`)
+    // console.log('res.data', res.data)
+    const datum = res.data.find((x) => x.schema == 'public')
+    const included = res.data.find((x) => x.schema == 'pg_catalog')
+    assert.equal(res.status, STATUS.SUCCESS)
+    assert.equal(true, !!datum)
+    assert.equal(true, !!included)
+  })
+  it('POST /tables should create a table', async () => {
+    await axios.post(`${URL}/query`, { query: 'DROP TABLE IF EXISTS public.test' })
+    let {data: newTable} = await axios.post(`${URL}/tables`, {
       schema: 'public',
       name: 'test',
-      columns: [
-        { name: 'id', is_identity: true, is_nullable: false, data_type: 'bigint' },
-        { name: 'data', data_type: 'text' },
-      ],
-      primary_keys: ['id'],
+      // columns: [
+      //   { name: 'id', is_identity: true, is_nullable: false, data_type: 'bigint' },
+      //   { name: 'data', data_type: 'text' },
+      // ],
+      // primary_keys: ['id'],
     })
-    const { data: tables } = await axios.get(`${URL}/tables`)
-    const test = tables.find((table) => `${table.schema}.${table.name}` === 'public.test')
-    const id = test.columns.find((column) => column.name === 'id')
-    const data = test.columns.find((column) => column.name === 'data')
-    assert.equal(id.is_identity, true)
-    assert.equal(id.is_nullable, false)
-    assert.equal(id.data_type, 'bigint')
-    assert.equal(data.is_identity, false)
-    assert.equal(data.is_nullable, true)
-    assert.equal(data.data_type, 'text')
+    // console.log('newTable', newTable)
+    const newTableId = newTable.id
+    assert.equal(newTableId > 0, true)
+    // const { data: tables } = await axios.get(`${URL}/tables`)
+    // const test = tables.find((table) => `${table.schema}.${table.name}` === 'public.test')
+    // const id = test.columns.find((column) => column.name === 'id')
+    // const data = test.columns.find((column) => column.name === 'data')
+    // assert.equal(id.is_identity, true)
+    // assert.equal(id.is_nullable, false)
+    // assert.equal(id.data_type, 'bigint')
+    // assert.equal(data.is_identity, false)
+    // assert.equal(data.is_nullable, true)
+    // assert.equal(data.data_type, 'text')
     await axios.post(`${URL}/query`, { query: 'DROP TABLE public.test' })
   })
 })
