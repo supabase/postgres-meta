@@ -5,9 +5,9 @@ SELECT
   table_name AS name,
   is_insertable_into,
   is_typed,
-  pg_total_relation_size(table_schema || '.' || table_name) :: bigint AS bytes,
+  pg_total_relation_size(format('%I.%I', table_schema, table_name))::bigint AS bytes,
   pg_size_pretty(
-    pg_total_relation_size(table_schema || '.' || table_name)
+    pg_total_relation_size(format('%I.%I', table_schema, table_name))
   ) AS size,
   seq_scan :: bigint AS seq_scan_count,
   seq_tup_read :: bigint AS seq_row_read_count,
@@ -30,8 +30,8 @@ SELECT
   autoanalyze_count :: bigint
 FROM
   information_schema.tables
-  JOIN pg_class c ON c.relnamespace = table_schema::text::regnamespace
-  AND c.relname = table_name::text
+  JOIN pg_class c ON quote_ident(table_schema)::regnamespace = c.relnamespace
+  AND c.relname = table_name
   LEFT JOIN pg_stat_user_tables ON pg_stat_user_tables.schemaname = tables.table_schema
   AND pg_stat_user_tables.relname = tables.table_name
 WHERE
