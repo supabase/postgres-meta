@@ -10,5 +10,5 @@ SELECT
   is_trigger_insertable_into
 FROM
   information_schema.views
-  INNER JOIN pg_class c ON table_schema::text::regnamespace = c.relnamespace
-  AND table_name::text = c.relname
+  JOIN pg_class c ON quote_ident(table_schema)::regnamespace = c.relnamespace
+  AND table_name = c.relname
