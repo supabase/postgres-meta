@@ -8,14 +8,15 @@ import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
 import { Tables } from '../lib/interfaces'
 
 const router = Router()
+
 router.get('/', async (req, res) => {
   try {
     const sql = `
 WITH tables AS ( ${tables} ),
-columns AS ( ${columns} ),
-grants AS ( ${grants} ),
-primary_keys AS ( ${primary_keys} ),
-relationships AS ( ${relationships} )
+  columns AS ( ${columns} ),
+  grants AS ( ${grants} ),
+  primary_keys AS ( ${primary_keys} ),
+  relationships AS ( ${relationships} )
 SELECT
   *,
   ${coalesceRowsToArray('columns', 'SELECT * FROM columns WHERE columns.table_id = tables.id')},
@@ -46,6 +47,7 @@ FROM
     res.status(500).json({ error: 'Database error', status: 500 })
   }
 })
+
 router.post('/', async (req, res) => {
   try {
     const { schema = 'public', name } = req.body as {
@@ -68,6 +70,7 @@ router.post('/', async (req, res) => {
     res.status(200).json([{ error: error.toString() }])
   }
 })
+
 router.patch('/:id', async (req, res) => {
   try {
     const id: number = parseInt(req.params.id)
@@ -96,6 +99,24 @@ router.patch('/:id', async (req, res) => {
   }
 })
 
+router.delete('/:id', async (req, res) => {
+  try {
+    const id = req.params.id
+    const getTableQuery = SQL``.append(tables).append(SQL` AND c.oid = ${id}`)
+    const table = (await RunQuery(req.headers.pg, getTableQuery)).data[0]
+    const { name, schema } = table
+
+    const cascade = req.query.cascade
+    const query = `DROP TABLE "${schema}"."${name}" ${cascade === 'true' ? 'CASCADE' : 'RESTRICT'}`
+    await RunQuery(req.headers.pg, query)
+
+    return res.status(200).json(table)
+  } catch (error) {
+    console.log('throwing error', error)
+    res.status(500).json({ error: 'Database error', status: 500 })
+  }
+})
+
 export = router
 
 const selectSingleSql = (id: number) => {
@@ -105,11 +126,11 @@ const selectSingleByName = (schema: string, name: string) => {
   return SQL``.append(tables).append(SQL` and table_schema = ${schema} and table_name = ${name}`)
 }
 const createTable = (name: string, schema: string = 'postgres') => {
-  const query = SQL``.append(`CREATE TABLE ${schema}.${name} ()`)
+  const query = SQL``.append(`CREATE TABLE "${schema}"."${name}" ()`)
   return query
 }
 const alterTableName = (previousName: string, newName: string, schema: string) => {
-  const query = SQL``.append(`ALTER SCHEMA ${previousName} RENAME TO ${newName}`)
+  const query = SQL``.append(`ALTER TABLE "${schema}"."${previousName}" RENAME TO "${newName}"`)
   return query
 }
 const removeSystemSchemas = (data: Tables.Table[]) => {
