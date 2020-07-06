@@ -1,7 +1,7 @@
 import { Router } from 'express'
 
 import sql = require('../lib/sql')
-const { columns, grants, primary_keys, relationships, tables } = sql
+const { columns, grants, policies, primary_keys, relationships, tables } = sql
 import { coalesceRowsToArray, formatColumns } from '../lib/helpers'
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
@@ -15,11 +15,13 @@ WITH tables AS ( ${tables} ),
 columns AS ( ${columns} ),
 grants AS ( ${grants} ),
 primary_keys AS ( ${primary_keys} ),
+policies AS ( ${policies} ),
 relationships AS ( ${relationships} )
 SELECT
   *,
   ${coalesceRowsToArray('columns', 'SELECT * FROM columns WHERE columns.table_id = tables.id')},
   ${coalesceRowsToArray('grants', 'SELECT * FROM grants WHERE grants.table_id = tables.id')},
+  ${coalesceRowsToArray('policies', 'SELECT * FROM policies WHERE policies.table_id = tables.id')},
   ${coalesceRowsToArray(
     'primary_keys',
     'SELECT * FROM primary_keys WHERE primary_keys.table_id = tables.id'

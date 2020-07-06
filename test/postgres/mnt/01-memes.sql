@@ -1,7 +1,19 @@
+
+
 CREATE TABLE public.category (
 	id serial NOT NULL PRIMARY KEY,
 	name text NOT NULL
 );
+
+-- Fake policies
+grant select, update(name)
+on category
+to postgres;
+
+create policy categories_update_policy
+on category for update 
+to postgres
+using(current_setting('my.username') IN (name));
 
 INSERT INTO public.category (id, name) VALUES
 (1, 'Funny'),

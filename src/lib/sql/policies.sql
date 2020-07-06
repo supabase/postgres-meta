@@ -1,14 +1,17 @@
-SELECT
-  n.nspname AS schemaname,
-  c.relname AS tablename,
-  pol.polname AS policyname,
+select
+  n.oid as id,
+  n.nspname AS schema,
+  c.relname AS table,
+  c.oid AS table_id,
+  pol.polname AS name,
   CASE
     WHEN pol.polpermissive THEN 'PERMISSIVE' :: text
     ELSE 'RESTRICTIVE' :: text
   END AS permissive,
   CASE
-    WHEN pol.polroles = '{0}' :: oid [] THEN string_to_array('public' :: text, '' :: text) :: name []
-    ELSE ARRAY(
+    WHEN pol.polroles = '{0}' :: oid [] 
+    THEN array_to_json(string_to_array('public' :: text, '' :: text) :: name [])
+    ELSE array_to_json(ARRAY(
       SELECT
         pg_authid.rolname
       FROM
@@ -17,7 +20,7 @@ SELECT
         pg_authid.oid = ANY (pol.polroles)
       ORDER BY
         pg_authid.rolname
-    )
+    ))
   END AS roles,
   CASE
     pol.polcmd

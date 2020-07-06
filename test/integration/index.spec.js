@@ -141,7 +141,7 @@ describe('/tables', async () => {
     assert.equal(true, !!datum)
     assert.equal(true, !notIncluded)
   })
-  it('should return the columns', async () => {
+  it('should return the columns, grants, and policies', async () => {
     const tables = await axios.get(`${URL}/tables`)
     const datum = tables.data.find((x) => `${x.schema}.${x.name}` === 'public.users')
     const idColumn = datum.columns.find((x) => x.name === 'id')
@@ -152,11 +152,8 @@ describe('/tables', async () => {
     assert.equal(idColumn.is_updatable, true)
     assert.equal(idColumn.is_identity, true)
     assert.equal(nameColumn.is_identity, false)
-  })
-  it('should return the grants', async () => {
-    const tables = await axios.get(`${URL}/tables`)
-    const datum = tables.data.find((x) => `${x.schema}.${x.name}` === 'public.users')
     assert.equal(datum.grants.length > 0, true)
+    assert.equal(datum.policies.length == 0, true)
   })
   it('should return the relationships', async () => {
     const tables = await axios.get(`${URL}/tables`)
