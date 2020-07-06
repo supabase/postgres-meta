@@ -9,4 +9,4 @@ SELECT
   sql_path
 FROM
   information_schema.schemata
-  JOIN pg_namespace nsp ON schema_name::text::regnamespace = nsp.oid
+  JOIN pg_namespace nsp ON schema_name = nsp.nspname

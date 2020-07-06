@@ -99,7 +99,7 @@ describe('/schemas', () => {
     assert.equal(true, !!datum)
     assert.equal(true, !!included)
   })
-  it('POST & PATCH', async () => {
+  it('POST & PATCH & DELETE', async () => {
     const res = await axios.post(`${URL}/schemas`, { name: 'api' })
     assert.equal('api', res.data.name)
     const newSchemaId = res.data.id
@@ -110,6 +110,15 @@ describe('/schemas', () => {
       owner: 'postgres',
     })
     assert.equal('api', res3.data.name)
+
+    const res4 = await axios.delete(`${URL}/schemas/${newSchemaId}`)
+    assert.equal(res4.data.name, 'api')
+
+    const res5 = await axios.get(`${URL}/schemas`)
+    assert.equal(
+      res5.data.some((x) => x.id === newSchemaId),
+      false
+    )
   })
 })
 describe('/types', () => {
@@ -175,7 +184,7 @@ describe('/tables', async () => {
     assert.equal(datum.grants.length > 0, true)
     assert.equal(datum.policies.length == 0, true)
   })
-  it('should return the relationships', async () => {
+  it('/tables should return the relationships', async () => {
     const tables = await axios.get(`${URL}/tables`)
     const datum = tables.data.find((x) => `${x.schema}.${x.name}` === 'public.users')
     const relationships = datum.relationships
@@ -186,33 +195,116 @@ describe('/tables', async () => {
     assert.equal(true, relationship.target_table_schema === 'public')
     assert.equal(true, relationship.target_table_name === 'users')
   })
-  it('GET with system tables', async () => {
+  it('GET /tables with system tables', async () => {
     const res = await axios.get(`${URL}/tables?includeSystemSchemas=true`)
     const included = res.data.find((x) => `${x.schema}.${x.name}` === 'pg_catalog.pg_type')
     assert.equal(res.status, STATUS.SUCCESS)
     assert.equal(true, !!included)
   })
-  it('POST', async () => {
-    await axios.post(`${URL}/tables`, {
-      schema: 'public',
-      name: 'test',
-      columns: [
-        { name: 'id', is_identity: true, is_nullable: false, data_type: 'bigint' },
-        { name: 'data', data_type: 'text' },
-      ],
-      primary_keys: ['id'],
-    })
+  // FIXME: Bad handling of query param in /tables & /columns & /schemas & /types
+  // it('GET /tables without system tables (explicit)', async () => {
+  //   const res = await axios.get(`${URL}/tables?includeSystemSchemas=false`)
+  //   const isIncluded = res.data.some((x) => `${x.schema}.${x.name}` === 'pg_catalog.pg_type')
+  //   assert.equal(res.status, STATUS.SUCCESS)
+  //   assert.equal(isIncluded, false)
+  // })
+  it('GET /columns', async () => {
+    const res = await axios.get(`${URL}/columns`)
+    // console.log('res.data', res.data)
+    const datum = res.data.find((x) => x.schema == 'public')
+    const notIncluded = res.data.find((x) => x.schema == 'pg_catalog')
+    assert.equal(res.status, STATUS.SUCCESS)
+    assert.equal(true, !!datum)
+    assert.equal(true, !notIncluded)
+  })
+  it('GET /columns with system types', async () => {
+    const res = await axios.get(`${URL}/columns?includeSystemSchemas=true`)
+    // console.log('res.data', res.data)
+    const datum = res.data.find((x) => x.schema == 'public')
+    const included = res.data.find((x) => x.schema == 'pg_catalog')
+    assert.equal(res.status, STATUS.SUCCESS)
+    assert.equal(true, !!datum)
+    assert.equal(true, !!included)
+  })
+  it('POST /tables should create a table', async () => {
+    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'test' })
+    assert.equal(`${newTable.schema}.${newTable.name}`, 'public.test')
+
     const { data: tables } = await axios.get(`${URL}/tables`)
-    const test = tables.find((table) => `${table.schema}.${table.name}` === 'public.test')
-    const id = test.columns.find((column) => column.name === 'id')
-    const data = test.columns.find((column) => column.name === 'data')
-    assert.equal(id.is_identity, true)
-    assert.equal(id.is_nullable, false)
-    assert.equal(id.data_type, 'bigint')
-    assert.equal(data.is_identity, false)
-    assert.equal(data.is_nullable, true)
-    assert.equal(data.data_type, 'text')
-    await axios.post(`${URL}/query`, { query: 'DROP TABLE public.test' })
+    assert.equal(
+      tables.some((table) => table.id === newTable.id),
+      true
+    )
+
+    await axios.delete(`${URL}/tables/${newTable.id}`)
+  })
+  it('PATCH /tables', async () => {
+    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'test' })
+    await axios.patch(`${URL}/tables/${newTable.id}`, { name: 'test a' })
+    const { data: tables } = await axios.get(`${URL}/tables`)
+    assert.equal(
+      tables.some((table) => `${table.schema}.${table.name}` === `public.test a`),
+      true
+    )
+
+    await axios.delete(`${URL}/tables/${newTable.id}`)
+  })
+  it('DELETE /tables', async () => {
+    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'test' })
+
+    await axios.delete(`${URL}/tables/${newTable.id}`)
+    const { data: tables } = await axios.get(`${URL}/tables`)
+    assert.equal(
+      tables.some((table) => `${table.schema}.${table.name}` === `public.test`),
+      false
+    )
+  })
+  it('POST /column', async () => {
+    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'foo bar' })
+    await axios.post(`${URL}/columns`, { tableId: newTable.id, name: 'foo bar', type: 'int2' })
+
+    const { data: columns } = await axios.get(`${URL}/columns`)
+    assert.equal(
+      columns.some(
+        (column) =>
+          column.id === `${newTable.id}.1` && column.name === 'foo bar' && column.format === 'int2'
+      ),
+      true
+    )
+
+    await axios.delete(`${URL}/columns/${newTable.id}.1`)
+    await axios.delete(`${URL}/tables/${newTable.id}`)
+  })
+  it('PATCH /columns', async () => {
+    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'foo bar' })
+    await axios.post(`${URL}/columns`, { tableId: newTable.id, name: 'foo', type: 'int2' })
+
+    await axios.patch(`${URL}/columns/${newTable.id}.1`, { name: 'foo bar', type: 'int4' })
+
+    const { data: columns } = await axios.get(`${URL}/columns`)
+    assert.equal(
+      columns.some(
+        (column) =>
+          column.id === `${newTable.id}.1` && column.name === 'foo bar' && column.format === 'int4'
+      ),
+      true
+    )
+
+    await axios.delete(`${URL}/columns/${newTable.id}.1`)
+    await axios.delete(`${URL}/tables/${newTable.id}`)
+  })
+  it('DELETE /columns', async () => {
+    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'foo bar' })
+    await axios.post(`${URL}/columns`, { tableId: newTable.id, name: 'foo bar', type: 'int2' })
+
+    await axios.delete(`${URL}/columns/${newTable.id}.1`)
+    const { data: columns } = await axios.get(`${URL}/columns`)
+    assert.equal(
+      columns.some((column) => column.id === `${newTable.id}.1`),
+      false
+    )
+
+    await axios.delete(`${URL}/tables/${newTable.id}`)
   })
 })
 describe('/extensions', () => {

@@ -1,4 +1,3 @@
--- We can uniquely point to a specific column using table_id + ordinal_position.
 SELECT
   c.oid AS table_id,
   table_schema AS schema,
@@ -19,5 +18,5 @@ SELECT
   is_updatable::boolean
 FROM
   information_schema.columns
-  JOIN pg_class c ON c.relnamespace = table_schema::text::regnamespace
-  AND c.relname = table_name::text
+  JOIN pg_class c ON quote_ident(table_schema)::regnamespace = c.relnamespace
+  AND c.relname = table_name

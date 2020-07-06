@@ -29,6 +29,7 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: 'Database error', status: 500 })
   }
 })
+
 router.post('/', async (req, res) => {
   try {
     const name: string = req.body.name
@@ -37,7 +38,7 @@ router.post('/', async (req, res) => {
     // Create the schema
     const schemqQuery = createSchema(name, owner)
     await RunQuery(req.headers.pg, schemqQuery)
-  
+
     // Return fresh details
     const getSchema = selectSingleByName(name)
     const { data } = await RunQuery(req.headers.pg, getSchema)
@@ -48,6 +49,7 @@ router.post('/', async (req, res) => {
     res.status(500).json({ error: 'Database error', status: 500 })
   }
 })
+
 router.patch('/:id', async (req, res) => {
   try {
     const id: number = parseInt(req.params.id)
@@ -64,15 +66,33 @@ router.patch('/:id', async (req, res) => {
       const updateOwner = alterSchemaOwner(previousSchema.name, owner)
       await RunQuery(req.headers.pg, updateOwner)
     }
+    // NB: Run name updates last
     if (name) {
       const updateName = alterSchemaName(previousSchema.name, name)
       await RunQuery(req.headers.pg, updateName)
     }
 
     // Return fresh details
-    const { data: updatedSchemaResults } = await RunQuery(req.headers.pg, getSchema)
-    let updatedSchema: Schemas.Schema = updatedSchemaResults[0]
-    return res.status(200).json(updatedSchema)
+    const { data: updatedResults } = await RunQuery(req.headers.pg, getSchema)
+    let updated: Schemas.Schema = updatedResults[0]
+    return res.status(200).json(updated)
+  } catch (error) {
+    console.log('throwing error', error)
+    res.status(500).json({ error: 'Database error', status: 500 })
+  }
+})
+
+router.delete('/:id', async (req, res) => {
+  try {
+    const id = req.params.id
+    const getNameQuery = SQL``.append(schemas).append(SQL` WHERE nsp.oid = ${id}`)
+    const schema = (await RunQuery(req.headers.pg, getNameQuery)).data[0]
+
+    const cascade = req.query.cascade
+    const query = `DROP SCHEMA "${schema.name}" ${cascade === 'true' ? 'CASCADE' : 'RESTRICT'}`
+    await RunQuery(req.headers.pg, query)
+
+    return res.status(200).json(schema)
   } catch (error) {
     console.log('throwing error', error)
     res.status(500).json({ error: 'Database error', status: 500 })
@@ -89,7 +109,7 @@ const selectSingleByName = (name: string) => {
   return query
 }
 const createSchema = (name: string, owner: string = 'postgres') => {
-  const query = SQL``.append(`CREATE SCHEMA IF NOT EXISTS ${name} AUTHORIZATION ${owner}`)
+  const query = SQL``.append(`CREATE SCHEMA IF NOT EXISTS "${name}" AUTHORIZATION ${owner}`)
   return query
 }
 const alterSchemaName = (previousName: string, newName: string) => {

@@ -10,5 +10,5 @@ SELECT
   with_hierarchy :: boolean
 FROM
   information_schema.role_table_grants
-  INNER JOIN pg_class c ON table_schema::text::regnamespace = c.relnamespace
-  AND table_name::text = c.relname
+  JOIN pg_class c ON quote_ident(table_schema)::regnamespace = c.relnamespace
+  AND table_name = c.relname
