@@ -6,6 +6,7 @@ export = {
   config: fs.readFileSync(path.join(__dirname, '/config.sql')).toString(),
   constraints: fs.readFileSync(path.join(__dirname, '/constraints.sql')).toString(),
   extensions: fs.readFileSync(path.join(__dirname, '/extensions.sql')).toString(),
+  functions: fs.readFileSync(path.join(__dirname, '/functions.sql')).toString(),
   grants: fs.readFileSync(path.join(__dirname, '/grants.sql')).toString(),
   joins: fs.readFileSync(path.join(__dirname, '/joins.sql')).toString(),
   primary_keys: fs.readFileSync(path.join(__dirname, '/primary_keys.sql')).toString(),
