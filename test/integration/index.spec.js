@@ -141,8 +141,28 @@ describe('/types', () => {
     assert.equal(true, !!included)
   })
 })
-describe('/tables & /columns', async () => {
-  it('GET /tables', async () => {
+describe('/functions', () => {
+  it('GET', async () => {
+    const res = await axios.get(`${URL}/functions`)
+    // console.log('res.data', res.data)
+    const datum = res.data.find((x) => x.schema == 'public')
+    const notIncluded = res.data.find((x) => x.schema == 'pg_toast')
+    assert.equal(res.status, STATUS.SUCCESS)
+    assert.equal(true, !!datum)
+    assert.equal(true, !notIncluded)
+  })
+  it('GET with system functions', async () => {
+    const res = await axios.get(`${URL}/functions?includeSystemSchemas=true`)
+    // console.log('res.data', res.data)
+    const datum = res.data.find((x) => x.schema == 'public')
+    const included = res.data.find((x) => x.schema == 'pg_catalog')
+    assert.equal(res.status, STATUS.SUCCESS)
+    assert.equal(true, !!datum)
+    assert.equal(true, !!included)
+  })
+})
+describe('/tables', async () => {
+  it('GET', async () => {
     const tables = await axios.get(`${URL}/tables`)
     const datum = tables.data.find((x) => `${x.schema}.${x.name}` === 'public.users')
     const notIncluded = tables.data.find((x) => `${x.schema}.${x.name}` === 'pg_catalog.pg_type')
@@ -150,7 +170,7 @@ describe('/tables & /columns', async () => {
     assert.equal(true, !!datum)
     assert.equal(true, !notIncluded)
   })
-  it('/tables should return the columns', async () => {
+  it('should return the columns, grants, and policies', async () => {
     const tables = await axios.get(`${URL}/tables`)
     const datum = tables.data.find((x) => `${x.schema}.${x.name}` === 'public.users')
     const idColumn = datum.columns.find((x) => x.name === 'id')
@@ -161,11 +181,8 @@ describe('/tables & /columns', async () => {
     assert.equal(idColumn.is_updatable, true)
     assert.equal(idColumn.is_identity, true)
     assert.equal(nameColumn.is_identity, false)
-  })
-  it('/tables should return the grants', async () => {
-    const tables = await axios.get(`${URL}/tables`)
-    const datum = tables.data.find((x) => `${x.schema}.${x.name}` === 'public.users')
     assert.equal(datum.grants.length > 0, true)
+    assert.equal(datum.policies.length == 0, true)
   })
   it('/tables should return the relationships', async () => {
     const tables = await axios.get(`${URL}/tables`)

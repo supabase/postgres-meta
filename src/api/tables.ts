@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import SQL from 'sql-template-strings'
 import sqlTemplates = require('../lib/sql')
-const { columns, grants, primary_keys, relationships, tables } = sqlTemplates
+const { columns, grants, policies, primary_keys, relationships, tables } = sqlTemplates
 import { coalesceRowsToArray } from '../lib/helpers'
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
@@ -15,12 +15,14 @@ router.get('/', async (req, res) => {
 WITH tables AS ( ${tables} ),
   columns AS ( ${columns} ),
   grants AS ( ${grants} ),
+  policies AS ( ${policies} ),
   primary_keys AS ( ${primary_keys} ),
   relationships AS ( ${relationships} )
 SELECT
   *,
   ${coalesceRowsToArray('columns', 'SELECT * FROM columns WHERE columns.table_id = tables.id')},
   ${coalesceRowsToArray('grants', 'SELECT * FROM grants WHERE grants.table_id = tables.id')},
+  ${coalesceRowsToArray('policies', 'SELECT * FROM policies WHERE policies.table_id = tables.id')},
   ${coalesceRowsToArray(
     'primary_keys',
     'SELECT * FROM primary_keys WHERE primary_keys.table_id = tables.id'
