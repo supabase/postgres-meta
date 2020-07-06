@@ -30,6 +30,18 @@ export namespace Roles {
   }
 }
 
+export namespace Functions {
+  export interface Function {
+    id: number
+    schema: string
+    name: string
+    language: string
+    definition: string
+    argument_types: string
+    return_type: string
+  }
+}
+
 export namespace Schemas {
   export interface Schema {
     id: number
@@ -96,6 +108,18 @@ export namespace Tables {
     identity_generation: string | null
     is_nullable: boolean
     is_updatable: boolean
+  }
+
+  export interface Policy {
+    id: number
+    schema: string
+    table: string
+    table_id: number
+    permissive: boolean
+    roles: string[]
+    cmd: string
+    definition: string
+    with_check: string
   }
 
   export interface PrimaryKey {

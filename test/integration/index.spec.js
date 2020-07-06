@@ -132,6 +132,26 @@ describe('/types', () => {
     assert.equal(true, !!included)
   })
 })
+describe('/functions', () => {
+  it('GET', async () => {
+    const res = await axios.get(`${URL}/functions`)
+    // console.log('res.data', res.data)
+    const datum = res.data.find((x) => x.schema == 'public')
+    const notIncluded = res.data.find((x) => x.schema == 'pg_toast')
+    assert.equal(res.status, STATUS.SUCCESS)
+    assert.equal(true, !!datum)
+    assert.equal(true, !notIncluded)
+  })
+  it('GET with system functions', async () => {
+    const res = await axios.get(`${URL}/functions?includeSystemSchemas=true`)
+    // console.log('res.data', res.data)
+    const datum = res.data.find((x) => x.schema == 'public')
+    const included = res.data.find((x) => x.schema == 'pg_catalog')
+    assert.equal(res.status, STATUS.SUCCESS)
+    assert.equal(true, !!datum)
+    assert.equal(true, !!included)
+  })
+})
 describe('/tables', async () => {
   it('GET', async () => {
     const tables = await axios.get(`${URL}/tables`)

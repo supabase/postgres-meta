@@ -25,3 +25,10 @@ INSERT INTO
 VALUES 
     ('Star the repo', 1),
     ('Watch the releases', 2);
+
+
+CREATE FUNCTION add(integer, integer) RETURNS integer
+    AS 'select $1 + $2;'
+    LANGUAGE SQL
+    IMMUTABLE
+    RETURNS NULL ON NULL INPUT;
