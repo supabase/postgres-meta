@@ -1,11 +1,13 @@
 import { Router } from 'express'
+import SQL from 'sql-template-strings'
 import { RunQuery } from '../lib/connectionPool'
 import sql = require('../lib/sql')
-const { columns } = sql
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
 import { Tables } from '../lib/interfaces'
 
 const router = Router()
+const { columns, tables } = sql
+
 router.get('/', async (req, res) => {
   try {
     const { data } = await RunQuery(req.headers.pg, columns)
@@ -18,25 +20,87 @@ router.get('/', async (req, res) => {
     res.status(500).send('Database error.')
   }
 })
+
 router.post('/', async (req, res) => {
   try {
+    const { tableId, name, type } = req.body as {
+      tableId: number
+      name: string
+      type: string
+    }
+    const getTableQuery = SQL``.append(tables).append(SQL` AND c.oid = ${tableId}`)
+    const { name: table, schema } = (await RunQuery(req.headers.pg, getTableQuery)).data[0]
+
+    const query = `ALTER TABLE "${schema}"."${table}" ADD COLUMN "${name}" "${type}"`
+    await RunQuery(req.headers.pg, query)
+
+    const getColumnQuery = SQL``
+      .append(columns)
+      .append(SQL` WHERE c.oid = ${tableId} AND column_name = ${name}`)
+    const column = (await RunQuery(req.headers.pg, getColumnQuery)).data[0]
+
+    return res.status(200).json(column)
   } catch (error) {
-    console.log('throwing error')
-    res.status(500).send('Database error.')
+    console.log('throwing error', error)
+    res.status(500).json({ error: 'Database error', status: 500 })
   }
 })
+
 router.patch('/:id', async (req, res) => {
   try {
+    const [tableId, ordinalPos] = req.params.id.split('.')
+    const getColumnQuery = SQL``
+      .append(columns)
+      .append(SQL` WHERE c.oid = ${tableId} AND ordinal_position = ${ordinalPos}`)
+    const { schema, table, name: oldName } = (
+      await RunQuery(req.headers.pg, getColumnQuery)
+    ).data[0]
+
+    const { name, type } = req.body as {
+      name?: string
+      type?: string
+    }
+
+    const query = `
+BEGIN;
+  ${
+    type === undefined
+      ? ''
+      : `ALTER TABLE "${schema}"."${table}" ALTER COLUMN "${oldName}" SET DATA TYPE "${type}";`
+  }
+  ${
+    name === undefined
+      ? ''
+      : `ALTER TABLE "${schema}"."${table}" RENAME COLUMN "${oldName}" TO "${name}";`
+  }
+COMMIT;`
+    await RunQuery(req.headers.pg, query)
+
+    const updated = (await RunQuery(req.headers.pg, getColumnQuery)).data[0]
+    return res.status(200).json(updated)
   } catch (error) {
-    console.log('throwing error')
-    res.status(500).send('Database error.')
+    console.log('throwing error', error)
+    res.status(500).json({ error: 'Database error', status: 500 })
   }
 })
+
 router.delete('/:id', async (req, res) => {
   try {
+    const [tableId, ordinalPos] = req.params.id.split('.')
+
+    const getColumnQuery = SQL``
+      .append(columns)
+      .append(SQL` WHERE c.oid = ${tableId} AND ordinal_position = ${ordinalPos} `)
+    const column = (await RunQuery(req.headers.pg, getColumnQuery)).data[0]
+    const { schema, table, name } = column
+
+    const query = `ALTER TABLE "${schema}"."${table}" DROP COLUMN "${name}"`
+    await RunQuery(req.headers.pg, query)
+
+    return res.status(200).json(column)
   } catch (error) {
-    console.log('throwing error')
-    res.status(500).send('Database error.')
+    console.log('throwing error', error)
+    res.status(500).json({ error: 'Database error', status: 500 })
   }
 })
 
