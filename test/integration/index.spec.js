@@ -324,12 +324,12 @@ describe('/roles', () => {
   it('POST', async () => {
     await axios.post(`${URL}/roles`, {
       name: 'test',
-      is_superuser: true,
-      can_create_db: true,
-      is_replication_role: true,
-      can_bypass_rls: true,
-      connection_limit: 100,
-      valid_until: '2020-01-01T00:00:00.000Z',
+      isSuperuser: true,
+      canCreateDb: true,
+      isReplicationRole: true,
+      canBypassRls: true,
+      connectionLimit: 100,
+      validUntil: '2020-01-01T00:00:00.000Z',
     })
     const { data: roles } = await axios.get(`${URL}/roles`)
     const test = roles.find((role) => role.name === 'test')

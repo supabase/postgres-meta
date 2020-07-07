@@ -19,14 +19,7 @@ const router = Router()
 
 router.get('/', async (req, res) => {
   try {
-    const sql = `
-WITH roles AS ( ${roles} ),
-grants AS ( ${grants} )
-SELECT
-  *,
-  ${coalesceRowsToArray('grants', 'SELECT * FROM grants WHERE grants.grantee = roles.name')}
-FROM
-  roles`
+    const sql = getRolesSqlize(roles, grants)
     const { data } = await RunQuery(req.headers.pg, sql)
     const query: QueryParams = req.query
     const includeSystemSchemas = query?.includeSystemSchemas === 'true'
@@ -44,53 +37,7 @@ FROM
 
 router.post('/', async (req, res) => {
   try {
-    const {
-      name,
-      is_superuser = false,
-      can_create_db = false,
-      can_create_role = false,
-      inherit_role = true,
-      can_login = false,
-      is_replication_role = false,
-      can_bypass_rls = false,
-      connection_limit = -1,
-      password,
-      valid_until,
-      member_of,
-      members,
-      admins,
-    } = req.body as {
-      name: string
-      is_superuser?: boolean
-      can_create_db?: boolean
-      can_create_role?: boolean
-      inherit_role?: boolean
-      can_login?: boolean
-      is_replication_role?: boolean
-      can_bypass_rls?: boolean
-      connection_limit?: number
-      password?: string
-      valid_until?: string
-      member_of?: string[]
-      members?: string[]
-      admins?: string[]
-    }
-    const sql = `
-CREATE ROLE ${name}
-WITH
-  ${is_superuser ? 'SUPERUSER' : 'NOSUPERUSER'}
-  ${can_create_db ? 'CREATEDB' : 'NOCREATEDB'}
-  ${can_create_role ? 'CREATEROLE' : 'NOCREATEROLE'}
-  ${inherit_role ? 'INHERIT' : 'NOINHERIT'}
-  ${can_login ? 'LOGIN' : 'NOLOGIN'}
-  ${is_replication_role ? 'REPLICATION' : 'NOREPLICATION'}
-  ${can_bypass_rls ? 'BYPASSRLS' : 'NOBYPASSRLS'}
-  CONNECTION LIMIT ${connection_limit}
-  ${password === undefined ? '' : `PASSWORD '${password}'`}
-  ${valid_until === undefined ? '' : `VALID UNTIL '${valid_until}'`}
-  ${member_of === undefined ? '' : `IN ROLE ${member_of.join(',')}`}
-  ${members === undefined ? '' : `ROLE ${members.join(',')}`}
-  ${admins === undefined ? '' : `ADMIN ${admins.join(',')}`}`
+    const sql = createRoleSqlize(req.body)
     const { data } = await RunQuery(req.headers.pg, sql)
     return res.status(200).json(data)
   } catch (error) {
@@ -100,6 +47,78 @@ WITH
   }
 })
 
+const getRolesSqlize = (roles: string, grants: string) => {
+  return `
+WITH roles AS ( ${roles} ),
+  grants AS ( ${grants} )
+SELECT
+  *,
+  ${coalesceRowsToArray('grants', 'SELECT * FROM grants WHERE grants.grantee = roles.name')}
+FROM
+  roles`
+}
+const createRoleSqlize = ({
+  name,
+  isSuperuser = false,
+  canCreateDb = false,
+  canCreateRole = false,
+  inheritRole = true,
+  canLogin = false,
+  isReplicationRole = false,
+  canBypassRls = false,
+  connectionLimit = -1,
+  password,
+  validUntil,
+  memberOf,
+  members,
+  admins,
+}: {
+  name: string
+  isSuperuser?: boolean
+  canCreateDb?: boolean
+  canCreateRole?: boolean
+  inheritRole?: boolean
+  canLogin?: boolean
+  isReplicationRole?: boolean
+  canBypassRls?: boolean
+  connectionLimit?: number
+  password?: string
+  validUntil?: string
+  memberOf?: string[]
+  members?: string[]
+  admins?: string[]
+}) => {
+  const isSuperuserSql = isSuperuser ? 'SUPERUSER' : 'NOSUPERUSER'
+  const canCreateDbSql = canCreateDb ? 'CREATEDB' : 'NOCREATEDB'
+  const canCreateRoleSql = canCreateRole ? 'CREATEROLE' : 'NOCREATEROLE'
+  const inheritRoleSql = inheritRole ? 'INHERIT' : 'NOINHERIT'
+  const canLoginSql = canLogin ? 'LOGIN' : 'NOLOGIN'
+  const isReplicationRoleSql = isReplicationRole ? 'REPLICATION' : 'NOREPLICATION'
+  const canBypassRlsSql = canBypassRls ? 'BYPASSRLS' : 'NOBYPASSRLS'
+  const connectionLimitSql = `CONNECTION LIMIT ${connectionLimit}`
+  const passwordSql = password === undefined ? '' : `PASSWORD '${password}'`
+  const validUntilSql = validUntil === undefined ? '' : `VALID UNTIL '${validUntil}'`
+  const memberOfSql = memberOf === undefined ? '' : `IN ROLE ${memberOf.join(',')}`
+  const membersSql = members === undefined ? '' : `ROLE ${members.join(',')}`
+  const adminsSql = admins === undefined ? '' : `ADMIN ${admins.join(',')}`
+
+  return `
+CREATE ROLE ${name}
+WITH
+  ${isSuperuserSql}
+  ${canCreateDbSql}
+  ${canCreateRoleSql}
+  ${inheritRoleSql}
+  ${canLoginSql}
+  ${isReplicationRoleSql}
+  ${canBypassRlsSql}
+  ${connectionLimitSql}
+  ${passwordSql}
+  ${validUntilSql}
+  ${memberOfSql}
+  ${membersSql}
+  ${adminsSql}`
+}
 const removeSystemSchemas = (data: Roles.Role[]) => {
   return data.map((role) => {
     let grants = role.grants.filter((x) => !DEFAULT_SYSTEM_SCHEMAS.includes(x.schema))
@@ -109,7 +128,6 @@ const removeSystemSchemas = (data: Roles.Role[]) => {
     }
   })
 }
-
 const removeDefaultRoles = (data: Roles.Role[]) => {
   return data.filter((role) => !DEFAULT_ROLES.includes(role.name))
 }
