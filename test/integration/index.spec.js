@@ -121,10 +121,8 @@ describe('/schemas', () => {
     assert.equal(res4.data.name, 'api')
 
     const res5 = await axios.get(`${URL}/schemas`)
-    assert.equal(
-      res5.data.some((x) => x.id === newSchemaId),
-      false
-    )
+    const newSchemaExists = res5.data.some((x) => x.id === newSchemaId)
+    assert.equal(newSchemaExists, false)
   })
 })
 describe('/types', () => {
@@ -236,10 +234,8 @@ describe('/tables', async () => {
     assert.equal(`${newTable.schema}.${newTable.name}`, 'public.test')
 
     const { data: tables } = await axios.get(`${URL}/tables`)
-    assert.equal(
-      tables.some((table) => table.id === newTable.id),
-      true
-    )
+    const newTableExists = tables.some((table) => table.id === newTable.id)
+    assert.equal(newTableExists, true)
 
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })
@@ -247,10 +243,10 @@ describe('/tables', async () => {
     const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'test' })
     await axios.patch(`${URL}/tables/${newTable.id}`, { name: 'test a' })
     const { data: tables } = await axios.get(`${URL}/tables`)
-    assert.equal(
-      tables.some((table) => `${table.schema}.${table.name}` === `public.test a`),
-      true
+    const updatedTableExists = tables.some(
+      (table) => `${table.schema}.${table.name}` === `public.test a`
     )
+    assert.equal(updatedTableExists, true)
 
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })
@@ -259,23 +255,19 @@ describe('/tables', async () => {
 
     await axios.delete(`${URL}/tables/${newTable.id}`)
     const { data: tables } = await axios.get(`${URL}/tables`)
-    assert.equal(
-      tables.some((table) => `${table.schema}.${table.name}` === `public.test`),
-      false
-    )
+    const newTableExists = tables.some((table) => table.id === newTable.id)
+    assert.equal(newTableExists, false)
   })
-  it('POST /column', async () => {
+  it('POST /columns', async () => {
     const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'foo bar' })
     await axios.post(`${URL}/columns`, { tableId: newTable.id, name: 'foo bar', type: 'int2' })
 
     const { data: columns } = await axios.get(`${URL}/columns`)
-    assert.equal(
-      columns.some(
-        (column) =>
-          column.id === `${newTable.id}.1` && column.name === 'foo bar' && column.format === 'int2'
-      ),
-      true
+    const newColumnExists = columns.some(
+      (column) =>
+        column.id === `${newTable.id}.1` && column.name === 'foo bar' && column.format === 'int2'
     )
+    assert.equal(newColumnExists, true)
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
@@ -287,13 +279,11 @@ describe('/tables', async () => {
     await axios.patch(`${URL}/columns/${newTable.id}.1`, { name: 'foo bar', type: 'int4' })
 
     const { data: columns } = await axios.get(`${URL}/columns`)
-    assert.equal(
-      columns.some(
-        (column) =>
-          column.id === `${newTable.id}.1` && column.name === 'foo bar' && column.format === 'int4'
-      ),
-      true
+    const updatedColumnExists = columns.some(
+      (column) =>
+        column.id === `${newTable.id}.1` && column.name === 'foo bar' && column.format === 'int4'
     )
+    assert.equal(updatedColumnExists, true)
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
@@ -304,10 +294,8 @@ describe('/tables', async () => {
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     const { data: columns } = await axios.get(`${URL}/columns`)
-    assert.equal(
-      columns.some((column) => column.id === `${newTable.id}.1`),
-      false
-    )
+    const newColumnExists = columns.some((column) => column.id === `${newTable.id}.1`)
+    assert.equal(newColumnExists, false)
 
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })
