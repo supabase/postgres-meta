@@ -5,15 +5,23 @@ import sql = require('../lib/sql')
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
 import { Tables } from '../lib/interfaces'
 
+/**
+ * @param {boolean} [includeSystemSchemas=false] - Return system schemas as well as user schemas
+ */
+interface QueryParams {
+  includeSystemSchemas?: string
+}
+
 const router = Router()
 const { columns, tables } = sql
 
 router.get('/', async (req, res) => {
   try {
     const { data } = await RunQuery(req.headers.pg, columns)
-    const query: Fetch.QueryParams = req.query
+    const query: QueryParams = req.query
+    const includeSystemSchemas = query?.includeSystemSchemas === 'true'
     let payload: Tables.Column[] = data
-    if (!query?.includeSystemSchemas) payload = removeSystemSchemas(data)
+    if (!includeSystemSchemas) payload = removeSystemSchemas(data)
     return res.status(200).json(payload)
   } catch (error) {
     console.log('throwing error')
@@ -104,8 +112,6 @@ router.delete('/:id', async (req, res) => {
   }
 })
 
-export = router
-
 const removeSystemSchemas = (data: Tables.Column[]) => {
   return data.filter((x) => !DEFAULT_SYSTEM_SCHEMAS.includes(x.schema))
 }
@@ -132,14 +138,4 @@ ${is_nullable ? '' : 'NOT NULL'}
 ${is_primary_key ? 'PRIMARY KEY' : ''}`
 }
 
-/**
- * Types
- */
-namespace Fetch {
-  /**
-   * @param {boolean} [includeSystemSchemas=false] - Return system schemas as well as user schemas
-   */
-  export interface QueryParams {
-    includeSystemSchemas?: boolean
-  }
-}
+export = router
