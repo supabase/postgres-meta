@@ -10,12 +10,13 @@ import { Roles } from '../lib/interfaces'
 /**
  * @param {boolean} [includeSystemSchemas=false] - Return system schemas as well as user schemas
  */
-interface GetRolesQueryParams {
-  includeDefaultRoles?: boolean
-  includeSystemSchemas?: boolean
+interface QueryParams {
+  includeDefaultRoles?: string
+  includeSystemSchemas?: string
 }
 
 const router = Router()
+
 router.get('/', async (req, res) => {
   try {
     const sql = `
@@ -27,10 +28,12 @@ SELECT
 FROM
   roles`
     const { data } = await RunQuery(req.headers.pg, sql)
-    const query: GetRolesQueryParams = req.query
+    const query: QueryParams = req.query
+    const includeSystemSchemas = query?.includeSystemSchemas === 'true'
+    const includeDefaultRoles = query?.includeDefaultRoles === 'true'
     let payload: Roles.Role[] = data
-    if (!query?.includeSystemSchemas) payload = removeSystemSchemas(data)
-    if (!query?.includeDefaultRoles) payload = removeDefaultRoles(payload)
+    if (!includeSystemSchemas) payload = removeSystemSchemas(data)
+    if (!includeDefaultRoles) payload = removeDefaultRoles(payload)
 
     return res.status(200).json(payload)
   } catch (error) {
@@ -38,6 +41,7 @@ FROM
     res.status(500).json({ error: 'Database error', status: 500 })
   }
 })
+
 router.post('/', async (req, res) => {
   try {
     const {

@@ -10,8 +10,8 @@ const { schemas } = sqlTemplates
 /**
  * @param {boolean} [includeSystemSchemas=false] - Return system schemas as well as user schemas
  */
-interface GetSchemasQueryParams {
-  includeSystemSchemas?: boolean
+interface QueryParams {
+  includeSystemSchemas?: string
 }
 
 const router = Router()
@@ -19,9 +19,10 @@ const router = Router()
 router.get('/', async (req, res) => {
   try {
     const { data } = await RunQuery(req.headers.pg, schemas)
-    const query: GetSchemasQueryParams = req.query
+    const query: QueryParams = req.query
+    const includeSystemSchemas = query?.includeSystemSchemas === 'true'
     let payload: Schemas.Schema[] = data
-    if (!query?.includeSystemSchemas) payload = removeSystemSchemas(data)
+    if (!includeSystemSchemas) payload = removeSystemSchemas(data)
 
     return res.status(200).json(payload)
   } catch (error) {
