@@ -85,12 +85,12 @@ router.patch('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   try {
-    const id = req.params.id
-    const getNameQuery = SQL``.append(schemas).append(SQL` WHERE nsp.oid = ${id}`)
+    const id = parseInt(req.params.id)
+    const getNameQuery = selectSingleSql(id)
     const schema = (await RunQuery(req.headers.pg, getNameQuery)).data[0]
 
-    const cascade = req.query.cascade
-    const query = `DROP SCHEMA "${schema.name}" ${cascade === 'true' ? 'CASCADE' : 'RESTRICT'}`
+    const cascade = req.query.cascade === 'true'
+    const query = dropSchemaSqlize(schema.name, cascade)
     await RunQuery(req.headers.pg, query)
 
     return res.status(200).json(schema)
@@ -119,6 +119,10 @@ const alterSchemaName = (previousName: string, newName: string) => {
 }
 const alterSchemaOwner = (schemaName: string, newOwner: string) => {
   const query = SQL``.append(`ALTER SCHEMA ${schemaName} OWNER TO ${newOwner}`)
+  return query
+}
+const dropSchemaSqlize = (name: string, cascade: boolean) => {
+  const query = `DROP SCHEMA "${name}" ${cascade ? 'CASCADE' : 'RESTRICT'}`
   return query
 }
 const removeSystemSchemas = (data: Schemas.Schema[]) => {

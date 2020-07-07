@@ -18,34 +18,7 @@ const router = Router()
 
 router.get('/', async (req, res) => {
   try {
-    const sql = `
-WITH tables AS ( ${tables} ),
-  columns AS ( ${columns} ),
-  grants AS ( ${grants} ),
-  policies AS ( ${policies} ),
-  primary_keys AS ( ${primary_keys} ),
-  relationships AS ( ${relationships} )
-SELECT
-  *,
-  ${coalesceRowsToArray('columns', 'SELECT * FROM columns WHERE columns.table_id = tables.id')},
-  ${coalesceRowsToArray('grants', 'SELECT * FROM grants WHERE grants.table_id = tables.id')},
-  ${coalesceRowsToArray('policies', 'SELECT * FROM policies WHERE policies.table_id = tables.id')},
-  ${coalesceRowsToArray(
-    'primary_keys',
-    'SELECT * FROM primary_keys WHERE primary_keys.table_id = tables.id'
-  )},
-  ${coalesceRowsToArray(
-    'relationships',
-    `SELECT
-       *
-     FROM
-       relationships
-     WHERE
-       (relationships.source_schema = tables.schema AND relationships.source_table_name = tables.name)
-       OR (relationships.target_table_schema = tables.schema AND relationships.target_table_name = tables.name)`
-  )}
-FROM
-  tables`
+    const sql = getTablesSqlize({ tables, columns, grants, policies, primary_keys, relationships })
     const { data } = await RunQuery(req.headers.pg, sql)
     const query: QueryParams = req.query
     const includeSystemSchemas = query?.includeSystemSchemas === 'true'
@@ -111,13 +84,13 @@ router.patch('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   try {
-    const id = req.params.id
-    const getTableQuery = SQL``.append(tables).append(SQL` AND c.oid = ${id}`)
+    const id = parseInt(req.params.id)
+    const getTableQuery = selectSingleSql(id)
     const table = (await RunQuery(req.headers.pg, getTableQuery)).data[0]
     const { name, schema } = table
 
-    const cascade = req.query.cascade
-    const query = `DROP TABLE "${schema}"."${name}" ${cascade === 'true' ? 'CASCADE' : 'RESTRICT'}`
+    const cascade = req.query.cascade === 'true'
+    const query = dropTableSqlize(schema, name, cascade)
     await RunQuery(req.headers.pg, query)
 
     return res.status(200).json(table)
@@ -127,6 +100,50 @@ router.delete('/:id', async (req, res) => {
   }
 })
 
+const getTablesSqlize = ({
+  tables,
+  columns,
+  grants,
+  policies,
+  primary_keys,
+  relationships,
+}: {
+  tables: string
+  columns: string
+  grants: string
+  policies: string
+  primary_keys: string
+  relationships: string
+}) => {
+  return `
+WITH tables AS ( ${tables} ),
+  columns AS ( ${columns} ),
+  grants AS ( ${grants} ),
+  policies AS ( ${policies} ),
+  primary_keys AS ( ${primary_keys} ),
+  relationships AS ( ${relationships} )
+SELECT
+  *,
+  ${coalesceRowsToArray('columns', 'SELECT * FROM columns WHERE columns.table_id = tables.id')},
+  ${coalesceRowsToArray('grants', 'SELECT * FROM grants WHERE grants.table_id = tables.id')},
+  ${coalesceRowsToArray('policies', 'SELECT * FROM policies WHERE policies.table_id = tables.id')},
+  ${coalesceRowsToArray(
+    'primary_keys',
+    'SELECT * FROM primary_keys WHERE primary_keys.table_id = tables.id'
+  )},
+  ${coalesceRowsToArray(
+    'relationships',
+    `SELECT
+       *
+     FROM
+       relationships
+     WHERE
+       (relationships.source_schema = tables.schema AND relationships.source_table_name = tables.name)
+       OR (relationships.target_table_schema = tables.schema AND relationships.target_table_name = tables.name)`
+  )}
+FROM
+  tables`
+}
 const selectSingleSql = (id: number) => {
   return SQL``.append(tables).append(SQL` and c.oid = ${id}`)
 }
@@ -140,6 +157,9 @@ const createTable = (name: string, schema: string = 'postgres') => {
 const alterTableName = (previousName: string, newName: string, schema: string) => {
   const query = SQL``.append(`ALTER TABLE "${schema}"."${previousName}" RENAME TO "${newName}"`)
   return query
+}
+const dropTableSqlize = (schema: string, name: string, cascade: boolean) => {
+  return `DROP TABLE "${schema}"."${name}" ${cascade ? 'CASCADE' : 'RESTRICT'}`
 }
 const removeSystemSchemas = (data: Tables.Table[]) => {
   return data.filter((x) => !DEFAULT_SYSTEM_SCHEMAS.includes(x.schema))
