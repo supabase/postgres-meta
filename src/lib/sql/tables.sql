@@ -4,6 +4,8 @@ SELECT
   table_schema AS schema,
   table_name AS name,
   is_insertable_into,
+  relrowsecurity::bool as rls_enabled, 
+  relforcerowsecurity as rls_forced,
   is_typed,
   pg_total_relation_size(format('%I.%I', table_schema, table_name))::bigint AS bytes,
   pg_size_pretty(
