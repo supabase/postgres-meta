@@ -99,6 +99,12 @@ describe('/schemas', () => {
     assert.equal(true, !!datum)
     assert.equal(true, !!included)
   })
+  it('GET without system schemas (explicit)', async () => {
+    const res = await axios.get(`${URL}/schemas?includeSystemSchemas=false`)
+    const isIncluded = res.data.some((x) => x.name === 'pg_catalog')
+    assert.equal(res.status, STATUS.SUCCESS)
+    assert.equal(isIncluded, false)
+  })
   it('POST & PATCH & DELETE', async () => {
     const res = await axios.post(`${URL}/schemas`, { name: 'api' })
     assert.equal('api', res.data.name)
@@ -201,13 +207,12 @@ describe('/tables', async () => {
     assert.equal(res.status, STATUS.SUCCESS)
     assert.equal(true, !!included)
   })
-  // FIXME: Bad handling of query param in /tables & /columns & /schemas & /types
-  // it('GET /tables without system tables (explicit)', async () => {
-  //   const res = await axios.get(`${URL}/tables?includeSystemSchemas=false`)
-  //   const isIncluded = res.data.some((x) => `${x.schema}.${x.name}` === 'pg_catalog.pg_type')
-  //   assert.equal(res.status, STATUS.SUCCESS)
-  //   assert.equal(isIncluded, false)
-  // })
+  it('GET /tables without system tables (explicit)', async () => {
+    const res = await axios.get(`${URL}/tables?includeSystemSchemas=false`)
+    const isIncluded = res.data.some((x) => `${x.schema}.${x.name}` === 'pg_catalog.pg_type')
+    assert.equal(res.status, STATUS.SUCCESS)
+    assert.equal(isIncluded, false)
+  })
   it('GET /columns', async () => {
     const res = await axios.get(`${URL}/columns`)
     // console.log('res.data', res.data)
