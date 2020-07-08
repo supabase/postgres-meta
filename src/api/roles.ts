@@ -1,7 +1,8 @@
 import { Router } from 'express'
 
-import sql = require('../lib/sql')
-const { grants, roles } = sql
+import SQL from 'sql-template-strings'
+import sqlTemplates = require('../lib/sql')
+const { grants, roles } = sqlTemplates
 import { coalesceRowsToArray } from '../lib/helpers'
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_ROLES, DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
@@ -37,13 +38,53 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const sql = createRoleSqlize(req.body)
-    const { data } = await RunQuery(req.headers.pg, sql)
-    return res.status(200).json(data)
+    const query = createRoleSqlize(req.body)
+    await RunQuery(req.headers.pg, query)
+
+    const getRoleQuery = singleRoleByNameSqlize(roles, req.body.name)
+    const role = (await RunQuery(req.headers.pg, getRoleQuery)).data[0]
+
+    return res.status(200).json(role)
   } catch (error) {
-    // For this one, we always want to give back the error to the customer
-    console.log('Soft error!', error)
-    res.status(200).json([{ error: error.toString() }])
+    console.log('throwing error', error)
+    res.status(500).json({ error: 'Database error', status: 500 })
+  }
+})
+
+router.patch('/:id', async (req, res) => {
+  try {
+    const id = req.params.id
+    const getRoleQuery = singleRoleSqlize(roles, id)
+    const role = (await RunQuery(req.headers.pg, getRoleQuery)).data[0]
+    const { name: oldName } = role
+
+    const alterRoleArgs = req.body
+    alterRoleArgs.oldName = oldName
+    const query = alterRoleSqlize(alterRoleArgs)
+    await RunQuery(req.headers.pg, query)
+
+    const updated = (await RunQuery(req.headers.pg, getRoleQuery)).data[0]
+    return res.status(200).json(updated)
+  } catch (error) {
+    console.log('throwing error', error)
+    res.status(500).json({ error: 'Database error', status: 500 })
+  }
+})
+
+router.delete('/:id', async (req, res) => {
+  try {
+    const id = req.params.id
+    const getRoleQuery = singleRoleSqlize(roles, id)
+    const role = (await RunQuery(req.headers.pg, getRoleQuery)).data[0]
+    const { name } = role
+
+    const query = dropRoleSqlize(name)
+    await RunQuery(req.headers.pg, query)
+
+    return res.status(200).json(role)
+  } catch (error) {
+    console.log('throwing error', error)
+    res.status(500).json({ error: 'Database error', status: 500 })
   }
 })
 
@@ -103,7 +144,7 @@ const createRoleSqlize = ({
   const adminsSql = admins === undefined ? '' : `ADMIN ${admins.join(',')}`
 
   return `
-CREATE ROLE ${name}
+CREATE ROLE "${name}"
 WITH
   ${isSuperuserSql}
   ${canCreateDbSql}
@@ -118,6 +159,92 @@ WITH
   ${memberOfSql}
   ${membersSql}
   ${adminsSql}`
+}
+const singleRoleSqlize = (roles: string, id: string) => {
+  return SQL``.append(roles).append(SQL` WHERE oid = ${id}`)
+}
+const singleRoleByNameSqlize = (roles: string, name: string) => {
+  return SQL``.append(roles).append(SQL` WHERE rolname = ${name}`)
+}
+const alterRoleSqlize = ({
+  oldName,
+  name,
+  isSuperuser,
+  canCreateDb,
+  canCreateRole,
+  inheritRole,
+  canLogin,
+  isReplicationRole,
+  canBypassRls,
+  connectionLimit,
+  password,
+  validUntil,
+}: {
+  oldName: string
+  name?: string
+  isSuperuser?: boolean
+  canCreateDb?: boolean
+  canCreateRole?: boolean
+  inheritRole?: boolean
+  canLogin?: boolean
+  isReplicationRole?: boolean
+  canBypassRls?: boolean
+  connectionLimit?: number
+  password?: string
+  validUntil?: string
+}) => {
+  const nameSql = name === undefined ? '' : `ALTER ROLE "${oldName}" RENAME TO "${name}";`
+  let isSuperuserSql = ''
+  if (isSuperuser !== undefined) {
+    isSuperuserSql = isSuperuser ? 'SUPERUSER' : 'NOSUPERUSER'
+  }
+  let canCreateDbSql = ''
+  if (canCreateDb !== undefined) {
+    canCreateDbSql = canCreateDb ? 'CREATEDB' : 'NOCREATEDB'
+  }
+  let canCreateRoleSql = ''
+  if (canCreateRole !== undefined) {
+    canCreateRoleSql = canCreateRole ? 'CREATEROLE' : 'NOCREATEROLE'
+  }
+  let inheritRoleSql = ''
+  if (inheritRole !== undefined) {
+    inheritRoleSql = inheritRole ? 'INHERIT' : 'NOINHERIT'
+  }
+  let canLoginSql = ''
+  if (canLogin !== undefined) {
+    canLoginSql = canLogin ? 'LOGIN' : 'NOLOGIN'
+  }
+  let isReplicationRoleSql = ''
+  if (isReplicationRole !== undefined) {
+    isReplicationRoleSql = isReplicationRole ? 'REPLICATION' : 'NOREPLICATION'
+  }
+  let canBypassRlsSql = ''
+  if (canBypassRls !== undefined) {
+    canBypassRlsSql = canBypassRls ? 'BYPASSRLS' : 'NOBYPASSRLS'
+  }
+  const connectionLimitSql =
+    connectionLimit === undefined ? '' : `CONNECTION LIMIT ${connectionLimit}`
+  let passwordSql = password === undefined ? '' : `PASSWORD '${password}'`
+  let validUntilSql = validUntil === undefined ? '' : `VALID UNTIL '${validUntil}'`
+
+  return `
+BEGIN;
+  ALTER ROLE "${oldName}"
+    ${isSuperuserSql}
+    ${canCreateDbSql}
+    ${canCreateRoleSql}
+    ${inheritRoleSql}
+    ${canLoginSql}
+    ${isReplicationRoleSql}
+    ${canBypassRlsSql}
+    ${connectionLimitSql}
+    ${passwordSql}
+    ${validUntilSql};
+  ${nameSql}
+COMMIT;`
+}
+const dropRoleSqlize = (name: string) => {
+  return `DROP ROLE "${name}"`
 }
 const removeSystemSchemas = (data: Roles.Role[]) => {
   return data.map((role) => {

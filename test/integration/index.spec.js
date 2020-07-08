@@ -347,6 +347,9 @@ describe('/roles', () => {
       name: 'test',
       isSuperuser: true,
       canCreateDb: true,
+      canCreateRole: true,
+      inheritRole: false,
+      canLogin: true,
       isReplicationRole: true,
       canBypassRls: true,
       connectionLimit: 100,
@@ -356,10 +359,52 @@ describe('/roles', () => {
     const test = roles.find((role) => role.name === 'test')
     assert.equal(test.is_superuser, true)
     assert.equal(test.can_create_db, true)
+    assert.equal(test.can_create_role, true)
+    assert.equal(test.inherit_role, false)
+    assert.equal(test.can_login, true)
     assert.equal(test.is_replication_role, true)
     assert.equal(test.can_bypass_rls, true)
     assert.equal(test.connection_limit, 100)
     assert.equal(test.valid_until, '2020-01-01T00:00:00.000Z')
     await axios.post(`${URL}/query`, { query: 'DROP ROLE test;' })
+  })
+  it('PATCH', async () => {
+    const { data: newRole } = await axios.post(`${URL}/roles`, { name: 'foo' })
+
+    await axios.patch(`${URL}/roles/${newRole.id}`, {
+      name: 'bar',
+      isSuperuser: true,
+      canCreateDb: true,
+      canCreateRole: true,
+      inheritRole: false,
+      canLogin: true,
+      isReplicationRole: true,
+      canBypassRls: true,
+      connectionLimit: 100,
+      validUntil: '2020-01-01T00:00:00.000Z',
+    })
+
+    const { data: roles } = await axios.get(`${URL}/roles`)
+    const updatedRole = roles.find((role) => role.id === newRole.id)
+    assert.equal(updatedRole.name, 'bar')
+    assert.equal(updatedRole.is_superuser, true)
+    assert.equal(updatedRole.can_create_db, true)
+    assert.equal(updatedRole.can_create_role, true)
+    assert.equal(updatedRole.inherit_role, false)
+    assert.equal(updatedRole.can_login, true)
+    assert.equal(updatedRole.is_replication_role, true)
+    assert.equal(updatedRole.can_bypass_rls, true)
+    assert.equal(updatedRole.connection_limit, 100)
+    assert.equal(updatedRole.valid_until, '2020-01-01T00:00:00.000Z')
+
+    await axios.delete(`${URL}/roles/${newRole.id}`)
+  })
+  it('DELETE', async () => {
+    const { data: newRole } = await axios.post(`${URL}/roles`, { name: 'foo bar' })
+
+    await axios.delete(`${URL}/roles/${newRole.id}`)
+    const { data: roles } = await axios.get(`${URL}/roles`)
+    const newRoleExists = roles.some((role) => role.id === newRole.id)
+    assert.equal(newRoleExists, false)
   })
 })
