@@ -260,30 +260,51 @@ describe('/tables', async () => {
   })
   it('POST /columns', async () => {
     const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'foo bar' })
-    await axios.post(`${URL}/columns`, { tableId: newTable.id, name: 'foo bar', type: 'int2' })
+    await axios.post(`${URL}/columns`, {
+      tableId: newTable.id,
+      name: 'foo bar',
+      type: 'int2',
+      defaultValue: 42,
+      isNullable: false,
+      // Currently no way to test these:
+      //   isPrimaryKey: true,
+      //   isUnique: true,
+    })
 
     const { data: columns } = await axios.get(`${URL}/columns`)
-    const newColumnExists = columns.some(
+    const newColumn = columns.find(
       (column) =>
         column.id === `${newTable.id}.1` && column.name === 'foo bar' && column.format === 'int2'
     )
-    assert.equal(newColumnExists, true)
+    assert.equal(newColumn.default_value, 42)
+    assert.equal(newColumn.is_nullable, false)
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })
   it('PATCH /columns', async () => {
     const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'foo bar' })
-    await axios.post(`${URL}/columns`, { tableId: newTable.id, name: 'foo', type: 'int2' })
+    await axios.post(`${URL}/columns`, {
+      tableId: newTable.id,
+      name: 'foo',
+      type: 'int2',
+      defaultValue: 42,
+    })
 
-    await axios.patch(`${URL}/columns/${newTable.id}.1`, { name: 'foo bar', type: 'int4' })
+    await axios.patch(`${URL}/columns/${newTable.id}.1`, {
+      name: 'foo bar',
+      type: 'int4',
+      dropDefault: true,
+      isNullable: false,
+    })
 
     const { data: columns } = await axios.get(`${URL}/columns`)
-    const updatedColumnExists = columns.some(
+    const updatedColumn = columns.find(
       (column) =>
         column.id === `${newTable.id}.1` && column.name === 'foo bar' && column.format === 'int4'
     )
-    assert.equal(updatedColumnExists, true)
+    assert.equal(updatedColumn.default_value, null)
+    assert.equal(updatedColumn.is_nullable, false)
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
