@@ -1,3 +1,4 @@
+-- TODO: Consider using pg_authid vs. pg_roles for unencrypted password field
 SELECT
   rolname AS name,
   rolsuper AS is_superuser,
