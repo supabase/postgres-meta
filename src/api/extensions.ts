@@ -1,18 +1,123 @@
 import { Router } from 'express'
-
+import SQL from 'sql-template-strings'
+import sqlTemplates = require('../lib/sql')
+const { extensions } = sqlTemplates
 import { RunQuery } from '../lib/connectionPool'
-import sql = require('../lib/sql')
-const { extensions } = sql
 
 const router = Router()
+
 router.get('/', async (req, res) => {
   try {
-    const { data } = await RunQuery(req.headers.pg, extensions)
+    const getExtensionsQuery = getExtensionsSqlize(extensions)
+    const { data } = await RunQuery(req.headers.pg, getExtensionsQuery)
     return res.status(200).json(data)
   } catch (error) {
     console.log('throwing error')
     res.status(500).json({ error: 'Database error', status: 500 })
   }
 })
+
+router.post('/', async (req, res) => {
+  try {
+    const query = createExtensionSqlize(req.body)
+    await RunQuery(req.headers.pg, query)
+
+    const getExtensionQuery = singleExtensionSqlize(extensions, req.body.name)
+    const extension = (await RunQuery(req.headers.pg, getExtensionQuery)).data[0]
+
+    return res.status(200).json(extension)
+  } catch (error) {
+    console.log('throwing error')
+    res.status(500).json({ error: 'Database error', status: 500 })
+  }
+})
+
+router.patch('/:name', async (req, res) => {
+  try {
+    const name = req.params.name
+    req.body.name = name
+
+    const alterExtensionQuery = alterExtensionSqlize(req.body)
+    await RunQuery(req.headers.pg, alterExtensionQuery)
+
+    const getExtensionQuery = singleExtensionSqlize(extensions, name)
+    const updated = (await RunQuery(req.headers.pg, getExtensionQuery)).data[0]
+
+    return res.status(200).json(updated)
+  } catch (error) {
+    console.log('throwing error')
+    res.status(500).json({ error: 'Database error', status: 500 })
+  }
+})
+
+router.delete('/:name', async (req, res) => {
+  try {
+    const name = req.params.name
+    const cascade = req.query.cascade === 'true'
+
+    const getExtensionQuery = singleExtensionSqlize(extensions, name)
+    const deleted = (await RunQuery(req.headers.pg, getExtensionQuery)).data[0]
+
+    const query = dropExtensionSqlize(name, cascade)
+    await RunQuery(req.headers.pg, query)
+
+    return res.status(200).json(deleted)
+  } catch (error) {
+    console.log('throwing error')
+    res.status(500).json({ error: 'Database error', status: 500 })
+  }
+})
+
+const getExtensionsSqlize = (extensions: string) => {
+  return `${extensions} ORDER BY name ASC`
+}
+const createExtensionSqlize = ({
+  name,
+  schema,
+  version,
+  cascade = false,
+}: {
+  name: string
+  schema?: string
+  version?: string
+  cascade?: boolean
+}) => {
+  return `
+CREATE EXTENSION "${name}"
+  ${schema === undefined ? '' : `SCHEMA ${schema}`}
+  ${version === undefined ? '' : `VERSION '${version}'`}
+  ${cascade ? 'CASCADE' : ''}`
+}
+const singleExtensionSqlize = (extensions: string, name: string) => {
+  return SQL``.append(extensions).append(SQL` WHERE name = ${name}`)
+}
+const alterExtensionSqlize = ({
+  name,
+  update = false,
+  version,
+  schema,
+}: {
+  name: string
+  update?: boolean
+  version?: string
+  schema?: string
+}) => {
+  let updateSql = ''
+  if (update) {
+    updateSql = `ALTER EXTENSION "${name}" UPDATE ${version === undefined ? '' : version};`
+  }
+  const schemaSql = schema === undefined ? '' : `ALTER EXTENSION "${name}" SET SCHEMA "${schema}";`
+
+  return `
+BEGIN;
+  ${updateSql}
+  ${schemaSql}
+COMMIT;`
+}
+const dropExtensionSqlize = (name: string, cascade: boolean) => {
+  return `
+DROP EXTENSION ${name}
+  ${cascade ? 'CASCADE' : 'RESTRICT'}`
+}
 
 export = router
