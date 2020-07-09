@@ -321,6 +321,7 @@ describe('/tables', async () => {
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })
 })
+// TODO: Test for schema (currently checked manually). Need a different SQL template.
 describe('/extensions', () => {
   it('GET', async () => {
     const res = await axios.get(`${URL}/extensions`)
@@ -328,6 +329,38 @@ describe('/extensions', () => {
     const datum = res.data.find((x) => x.name == 'uuid-ossp')
     assert.equal(res.status, STATUS.SUCCESS)
     assert.equal(true, !!datum)
+  })
+  it('POST', async () => {
+    const { data: extSchema } = await axios.post(`${URL}/schemas`, { name: 'extensions' })
+    await axios.post(`${URL}/extensions`, { name: 'hstore', schema: 'extensions', version: '1.4' })
+
+    const { data: extensions } = await axios.get(`${URL}/extensions`)
+    const newExtension = extensions.find((ext) => ext.name === 'hstore')
+    assert.equal(newExtension.installed_version, '1.4')
+
+    await axios.delete(`${URL}/extensions/hstore`)
+    await axios.delete(`${URL}/schemas/${extSchema.id}`)
+  })
+  it('PATCH', async () => {
+    const { data: extSchema } = await axios.post(`${URL}/schemas`, { name: 'extensions' })
+    await axios.post(`${URL}/extensions`, { name: 'hstore', version: '1.4' })
+
+    await axios.patch(`${URL}/extensions/hstore`, { update: true, schema: 'extensions' })
+
+    const { data: extensions } = await axios.get(`${URL}/extensions`)
+    const updatedExtension = extensions.find((ext) => ext.name === 'hstore')
+    assert.equal(updatedExtension.installed_version, updatedExtension.default_version)
+
+    await axios.delete(`${URL}/extensions/hstore`)
+    await axios.delete(`${URL}/schemas/${extSchema.id}`)
+  })
+  it('DELETE', async () => {
+    await axios.post(`${URL}/extensions`, { name: 'hstore', version: '1.4' })
+
+    await axios.delete(`${URL}/extensions/hstore`)
+    const { data: extensions } = await axios.get(`${URL}/extensions`)
+    const deletedExtension = extensions.find((ext) => ext.name === 'hstore')
+    assert.equal(deletedExtension.installed_version, null)
   })
 })
 describe('/roles', () => {
