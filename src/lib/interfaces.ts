@@ -93,6 +93,7 @@ export namespace Tables {
     grants: Roles.Grant[]
     primary_keys: PrimaryKey[]
     relationships: Relationship[]
+    enums: any[]
   }
 
   export interface Column {

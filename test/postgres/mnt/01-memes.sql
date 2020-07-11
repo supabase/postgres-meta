@@ -22,12 +22,15 @@ INSERT INTO public.category (id, name) VALUES
 (4, 'Cute'),
 (5, 'Interesting');
 
+CREATE TYPE meme_status AS ENUM ('new', 'old', 'retired');
+
 CREATE TABLE public.memes (
 	id serial NOT NULL PRIMARY KEY,
 	name text NOT NULL,
 	category INTEGER REFERENCES category(id),
 	metadata jsonb,
-	created_at TIMESTAMP NOT NULL
+	created_at TIMESTAMP NOT NULL,
+	status meme_status DEFAULT 'old'
 );
 
 INSERT INTO public.memes (name, category, created_at) VALUES
