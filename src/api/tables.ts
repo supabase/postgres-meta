@@ -2,7 +2,7 @@ import { Router } from 'express'
 import SQL from 'sql-template-strings'
 import sqlTemplates = require('../lib/sql')
 const { columns, grants, policies, primary_keys, relationships, tables } = sqlTemplates
-import { coalesceRowsToArray } from '../lib/helpers'
+import { coalesceRowsToArray, toTransaction } from '../lib/helpers'
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
 import { Tables } from '../lib/interfaces'
@@ -18,7 +18,7 @@ const router = Router()
 
 router.get('/', async (req, res) => {
   try {
-    const sql = getTablesSqlize({ tables, columns, grants, policies, primary_keys, relationships })
+    const sql = getTablesSql({ tables, columns, grants, policies, primary_keys, relationships })
     const { data } = await RunQuery(req.headers.pg, sql)
     const query: QueryParams = req.query
     const includeSystemSchemas = query?.includeSystemSchemas === 'true'
@@ -40,7 +40,9 @@ router.post('/', async (req, res) => {
 
     // Create the table
     const createTableSql = createTable(name, schema)
-    await RunQuery(req.headers.pg, createTableSql)
+    const alterSql = alterTableSql(req.body)
+    const transaction = toTransaction([createTableSql, alterSql])
+    await RunQuery(req.headers.pg, transaction)
 
     // Return fresh details
     const getTable = selectSingleByName(schema, name)
@@ -57,23 +59,26 @@ router.post('/', async (req, res) => {
 router.patch('/:id', async (req, res) => {
   try {
     const id: number = parseInt(req.params.id)
+    if (!(id > 0)) throw new Error('id is required')
+
     const name: string = req.body.name
+    const payload: any = { ...req.body }
 
     // Get table
     const getTableSql = selectSingleSql(id)
     const { data: getTableResults } = await RunQuery(req.headers.pg, getTableSql)
     let previousTable: Tables.Table = getTableResults[0]
 
-    // Update fields
-    // NB: Run name updates last
-    if (name) {
-      const updateName = alterTableName(previousTable.name, name, previousTable.schema)
-      await RunQuery(req.headers.pg, updateName)
-    }
+    // Update fields and name
+    const nameSql = !name ? '' : alterTableName(previousTable.name, name, previousTable.schema)
+    if (!name) payload.name = previousTable.name
+    const alterSql = alterTableSql(payload)
+    const transaction = toTransaction([nameSql, alterSql])
+    await RunQuery(req.headers.pg, transaction)
 
     // Return fresh details
-    const { data: updatedResults } = await RunQuery(req.headers.pg, getTableSql)
-    let updated: Tables.Table = updatedResults[0]
+    const { data: freshTableData } = await RunQuery(req.headers.pg, getTableSql)
+    let updated: Tables.Table = freshTableData[0]
     return res.status(200).json(updated)
   } catch (error) {
     // For this one, we always want to give back the error to the customer
@@ -90,7 +95,7 @@ router.delete('/:id', async (req, res) => {
     const { name, schema } = table
 
     const cascade = req.query.cascade === 'true'
-    const query = dropTableSqlize(schema, name, cascade)
+    const query = dropTableSql(schema, name, cascade)
     await RunQuery(req.headers.pg, query)
 
     return res.status(200).json(table)
@@ -100,7 +105,7 @@ router.delete('/:id', async (req, res) => {
   }
 })
 
-const getTablesSqlize = ({
+const getTablesSql = ({
   tables,
   columns,
   grants,
@@ -142,24 +147,51 @@ SELECT
        OR (relationships.target_table_schema = tables.schema AND relationships.target_table_name = tables.name)`
   )}
 FROM
-  tables`
+  tables;`.trim()
 }
 const selectSingleSql = (id: number) => {
-  return SQL``.append(tables).append(SQL` and c.oid = ${id}`)
+  return `${tables} and c.oid = ${id};`.trim()
 }
 const selectSingleByName = (schema: string, name: string) => {
-  return SQL``.append(tables).append(SQL` and table_schema = ${schema} and table_name = ${name}`)
+  return `${tables} and table_schema = '${schema}' and table_name = '${name}';`.trim()
 }
 const createTable = (name: string, schema: string = 'postgres') => {
-  const query = SQL``.append(`CREATE TABLE "${schema}"."${name}" ()`)
-  return query
+  return `CREATE TABLE IF NOT EXISTS "${schema}"."${name}" ();`.trim()
 }
 const alterTableName = (previousName: string, newName: string, schema: string) => {
-  const query = SQL``.append(`ALTER TABLE "${schema}"."${previousName}" RENAME TO "${newName}"`)
-  return query
+  return `ALTER TABLE "${schema}"."${previousName}" RENAME TO "${newName}";`.trim()
 }
-const dropTableSqlize = (schema: string, name: string, cascade: boolean) => {
-  return `DROP TABLE "${schema}"."${name}" ${cascade ? 'CASCADE' : 'RESTRICT'}`
+const alterTableSql = ({
+  schema = 'public',
+  name,
+  rls_enabled,
+  rls_forced,
+}: {
+  schema?: string
+  name: string
+  rls_enabled?: boolean
+  rls_forced?: boolean
+}) => {
+  let alter = `ALTER table "${schema}"."${name}"`
+  let enableRls = ''
+  if (rls_enabled !== undefined) {
+    let enable = `${alter} ENABLE ROW LEVEL SECURITY;`
+    let disable = `${alter} DISABLE ROW LEVEL SECURITY;`
+    enableRls = rls_enabled ? enable : disable
+  }
+  let forceRls = ''
+  if (rls_forced !== undefined) {
+    let enable = `${alter} FORCE ROW LEVEL SECURITY;`
+    let disable = `${alter} NO FORCE ROW LEVEL SECURITY;`
+    forceRls = rls_forced ? enable : disable
+  }
+  return `
+    ${enableRls}
+    ${forceRls}
+  `.trim()
+}
+const dropTableSql = (schema: string, name: string, cascade: boolean) => {
+  return `DROP TABLE "${schema}"."${name}" ${cascade ? 'CASCADE' : 'RESTRICT'};`.trim()
 }
 const removeSystemSchemas = (data: Tables.Table[]) => {
   return data.filter((x) => !DEFAULT_SYSTEM_SCHEMAS.includes(x.schema))

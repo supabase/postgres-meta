@@ -8,7 +8,6 @@ const STATUS = {
   SUCCESS: 200,
   ERROR: 500,
 }
-const PUBLIC_SCHEMA_ID = 2200
 
 console.log('Running tests on ', URL)
 
@@ -173,6 +172,8 @@ describe('/tables', async () => {
     assert.equal(tables.status, STATUS.SUCCESS)
     assert.equal(true, !!datum)
     assert.equal(true, !notIncluded)
+    assert.equal(datum['rls_enabled'], false)
+    assert.equal(datum['rls_forced'], false)
   })
   it('should return the columns, grants, and policies', async () => {
     const tables = await axios.get(`${URL}/tables`)
@@ -240,14 +241,17 @@ describe('/tables', async () => {
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })
   it('PATCH /tables', async () => {
-    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'test' })
-    await axios.patch(`${URL}/tables/${newTable.id}`, { name: 'test a' })
-    const { data: tables } = await axios.get(`${URL}/tables`)
-    const updatedTableExists = tables.some(
-      (table) => `${table.schema}.${table.name}` === `public.test a`
-    )
-    assert.equal(updatedTableExists, true)
-
+    const { data: newTable } = await axios.post(`${URL}/tables`, {
+      name: 'test',
+    })
+    let { data: updatedTable } = await axios.patch(`${URL}/tables/${newTable.id}`, {
+      name: 'test a',
+      rls_enabled: true,
+      rls_forced: true,
+    })
+    assert.equal(updatedTable.name, `test a`)
+    assert.equal(updatedTable.rls_enabled, true)
+    assert.equal(updatedTable.rls_forced, true)
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })
   it('DELETE /tables', async () => {
