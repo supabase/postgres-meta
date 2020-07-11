@@ -1,14 +1,12 @@
 import { Router } from 'express'
-import SQL from 'sql-template-strings'
-import sqlTemplates = require('../lib/sql')
-const { columns, grants, policies, primary_keys, relationships, tables } = sqlTemplates
 import { coalesceRowsToArray, toTransaction } from '../lib/helpers'
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
 import { Tables } from '../lib/interfaces'
+import sqlTemplates = require('../lib/sql')
 
 /**
- * @param {boolean} [includeSystemSchemas=false] - Return system schemas as well as user schemas
+ * @param {string} [includeSystemSchemas=false] - Return system schemas as well as user schemas
  */
 interface QueryParams {
   includeSystemSchemas?: string
@@ -18,7 +16,7 @@ const router = Router()
 
 router.get('/', async (req, res) => {
   try {
-    const sql = getTablesSql({ tables, columns, grants, policies, primary_keys, relationships })
+    const sql = getTablesSql(sqlTemplates)
     const { data } = await RunQuery(req.headers.pg, sql)
     const query: QueryParams = req.query
     const includeSystemSchemas = query?.includeSystemSchemas === 'true'
@@ -33,20 +31,19 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const { schema = 'public', name } = req.body as {
-      schema?: string
-      name: string
-    }
-
+    const pcConnection: string = req.headers.pg.toString()
+    const schema: string = req.body.schema || 'public'
+    const name: string = req.body.name
+    
     // Create the table
     const createTableSql = createTable(name, schema)
     const alterSql = alterTableSql(req.body)
     const transaction = toTransaction([createTableSql, alterSql])
-    await RunQuery(req.headers.pg, transaction)
+    await RunQuery(pcConnection, transaction)
 
     // Return fresh details
-    const getTable = selectSingleByName(schema, name)
-    const { data: newTableResults } = await RunQuery(req.headers.pg, getTable)
+    const getTable = selectSingleByName(sqlTemplates, schema, name)
+    const { data: newTableResults } = await RunQuery(pcConnection, getTable)
     let newTable: Tables.Table = newTableResults[0]
     return res.status(200).json(newTable)
   } catch (error) {
@@ -58,6 +55,7 @@ router.post('/', async (req, res) => {
 
 router.patch('/:id', async (req, res) => {
   try {
+    const pcConnection: string = req.headers.pg.toString()
     const id: number = parseInt(req.params.id)
     if (!(id > 0)) throw new Error('id is required')
 
@@ -65,8 +63,8 @@ router.patch('/:id', async (req, res) => {
     const payload: any = { ...req.body }
 
     // Get table
-    const getTableSql = selectSingleSql(id)
-    const { data: getTableResults } = await RunQuery(req.headers.pg, getTableSql)
+    const getTableSql = selectSingleSql(sqlTemplates, id)
+    const { data: getTableResults } = await RunQuery(pcConnection, getTableSql)
     let previousTable: Tables.Table = getTableResults[0]
 
     // Update fields and name
@@ -74,10 +72,10 @@ router.patch('/:id', async (req, res) => {
     if (!name) payload.name = previousTable.name
     const alterSql = alterTableSql(payload)
     const transaction = toTransaction([nameSql, alterSql])
-    await RunQuery(req.headers.pg, transaction)
+    await RunQuery(pcConnection, transaction)
 
     // Return fresh details
-    const { data: freshTableData } = await RunQuery(req.headers.pg, getTableSql)
+    const { data: freshTableData } = await RunQuery(pcConnection, getTableSql)
     let updated: Tables.Table = freshTableData[0]
     return res.status(200).json(updated)
   } catch (error) {
@@ -90,7 +88,7 @@ router.patch('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id)
-    const getTableQuery = selectSingleSql(id)
+    const getTableQuery = selectSingleSql(sqlTemplates, id)
     const table = (await RunQuery(req.headers.pg, getTableQuery)).data[0]
     const { name, schema } = table
 
@@ -105,54 +103,45 @@ router.delete('/:id', async (req, res) => {
   }
 })
 
-const getTablesSql = ({
-  tables,
-  columns,
-  grants,
-  policies,
-  primary_keys,
-  relationships,
-}: {
-  tables: string
-  columns: string
-  grants: string
-  policies: string
-  primary_keys: string
-  relationships: string
-}) => {
+const getTablesSql = (sqlTemplates) => {
+  const { columns, grants, policies, primary_keys, relationships, tables } = sqlTemplates
   return `
-WITH tables AS ( ${tables} ),
-  columns AS ( ${columns} ),
-  grants AS ( ${grants} ),
-  policies AS ( ${policies} ),
-  primary_keys AS ( ${primary_keys} ),
-  relationships AS ( ${relationships} )
-SELECT
-  *,
-  ${coalesceRowsToArray('columns', 'SELECT * FROM columns WHERE columns.table_id = tables.id')},
-  ${coalesceRowsToArray('grants', 'SELECT * FROM grants WHERE grants.table_id = tables.id')},
-  ${coalesceRowsToArray('policies', 'SELECT * FROM policies WHERE policies.table_id = tables.id')},
-  ${coalesceRowsToArray(
-    'primary_keys',
-    'SELECT * FROM primary_keys WHERE primary_keys.table_id = tables.id'
-  )},
-  ${coalesceRowsToArray(
-    'relationships',
-    `SELECT
-       *
-     FROM
-       relationships
-     WHERE
-       (relationships.source_schema = tables.schema AND relationships.source_table_name = tables.name)
-       OR (relationships.target_table_schema = tables.schema AND relationships.target_table_name = tables.name)`
-  )}
-FROM
-  tables;`.trim()
+  WITH tables AS ( ${tables} ),
+    columns AS ( ${columns} ),
+    grants AS ( ${grants} ),
+    policies AS ( ${policies} ),
+    primary_keys AS ( ${primary_keys} ),
+    relationships AS ( ${relationships} )
+  SELECT
+    *,
+    ${coalesceRowsToArray('columns', 'SELECT * FROM columns WHERE columns.table_id = tables.id')},
+    ${coalesceRowsToArray('grants', 'SELECT * FROM grants WHERE grants.table_id = tables.id')},
+    ${coalesceRowsToArray(
+      'policies',
+      'SELECT * FROM policies WHERE policies.table_id = tables.id'
+    )},
+    ${coalesceRowsToArray(
+      'primary_keys',
+      'SELECT * FROM primary_keys WHERE primary_keys.table_id = tables.id'
+    )},
+    ${coalesceRowsToArray(
+      'relationships',
+      `SELECT
+        *
+      FROM
+        relationships
+      WHERE
+        (relationships.source_schema = tables.schema AND relationships.source_table_name = tables.name)
+        OR (relationships.target_table_schema = tables.schema AND relationships.target_table_name = tables.name)`
+    )}
+  FROM tables;`.trim()
 }
-const selectSingleSql = (id: number) => {
+const selectSingleSql = (sqlTemplates, id: number) => {
+  const { tables } = sqlTemplates
   return `${tables} and c.oid = ${id};`.trim()
 }
-const selectSingleByName = (schema: string, name: string) => {
+const selectSingleByName = (sqlTemplates, schema: string, name: string) => {
+  const { tables } = sqlTemplates
   return `${tables} and table_schema = '${schema}' and table_name = '${name}';`.trim()
 }
 const createTable = (name: string, schema: string = 'postgres') => {
