@@ -17,7 +17,7 @@ COALESCE(
 export const toTransaction = (statements: string[]) => {
   let cleansed = statements.map((x) => {
     let sql = x.trim()
-    if (x.slice(-1) !== ';') sql += ';'
+    if (sql.length > 0 && x.slice(-1) !== ';') sql += ';'
     return sql
   })
   let allStatements = cleansed.join('')

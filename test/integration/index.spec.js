@@ -174,18 +174,18 @@ describe('/tables', async () => {
     const nameColumn = datum.columns.find((x) => x.name === 'name')
     const statusColumn = memes.columns.find((x) => x.name ==='status')
     assert.equal(tables.status, STATUS.SUCCESS)
-    assert.equal(true, !!datum)
-    assert.equal(true, !notIncluded)
-    assert.equal(datum['rls_enabled'], false)
-    assert.equal(datum['rls_forced'], false)
-    assert.equal(datum.columns.length > 0, true)
-    assert.equal(datum.primary_keys.length > 0, true)
-    assert.equal(idColumn.is_updatable, true)
-    assert.equal(idColumn.is_identity, true)
-    assert.equal(nameColumn.is_identity, false)
-    assert.equal(datum.grants.length > 0, true)
-    assert.equal(datum.policies.length == 0, true)
-    assert.equal(statusColumn.enums[0], 'new')
+    assert.equal(true, !!datum, 'Table included')
+    assert.equal(true, !notIncluded, 'System table not included')
+    assert.equal(datum['rls_enabled'], false, 'RLS false')
+    assert.equal(datum['rls_forced'], false, 'RLS Forced')
+    assert.equal(datum.columns.length > 0, true, 'Has columns')
+    assert.equal(datum.primary_keys.length > 0, true, 'Has PK')
+    assert.equal(idColumn.is_updatable, true, 'Is updatable')
+    assert.equal(idColumn.is_identity, true, 'ID is Identity')
+    assert.equal(nameColumn.is_identity, false, 'Name is not identity')
+    assert.equal(datum.grants.length > 0, true, 'Has grants')
+    assert.equal(datum.policies.length == 0, true, 'Has no policies')
+    assert.equal(statusColumn.enums[0], 'new', 'Has enums')
   })
   it('/tables should return the relationships', async () => {
     const tables = await axios.get(`${URL}/tables`)
@@ -441,5 +441,64 @@ describe('/roles', () => {
     const { data: roles } = await axios.get(`${URL}/roles`)
     const newRoleExists = roles.some((role) => role.id === newRole.id)
     assert.equal(newRoleExists, false)
+  })
+})
+describe('/policies', () => {
+  var policy = {
+    id: null,
+    name: 'test policy',
+    schema: 'public',
+    table: 'memes',
+    action: 'RESTRICTIVE'
+  }
+  before(async () => {
+    await axios.post(`${URL}/query`, {
+      query: `DROP POLICY IF EXISTS "${policy.name}" on "${policy.schema}"."${policy.table}" `,
+    })
+  })
+  it('GET', async () => {
+    const res = await axios.get(`${URL}/policies`)
+    // console.log('res', res)
+    const policy = res.data[0]
+    assert.equal('id' in policy, true, 'Has ID')
+    assert.equal('name' in policy, true, 'Has name')
+    assert.equal('action' in policy, true, 'Has action')
+    assert.equal('table' in policy, true, 'Has table')
+    assert.equal('table_id' in policy, true, 'Has table_id')
+    assert.equal('roles' in policy, true, 'Has roles')
+    assert.equal('command' in policy, true, 'Has command')
+    assert.equal('definition' in policy, true, 'Has definition')
+    assert.equal('check' in policy, true, 'Has check')
+  })
+  it('POST', async () => {
+    const { data: newPolicy } = await axios.post(`${URL}/policies`, policy)
+    assert.equal(newPolicy.name, 'test policy')
+    assert.equal(newPolicy.schema, 'public')
+    assert.equal(newPolicy.table, 'memes')
+    assert.equal(newPolicy.action, 'RESTRICTIVE')
+    assert.equal(newPolicy.roles[0], 'public')
+    assert.equal(newPolicy.command, 'ALL')
+    assert.equal(newPolicy.definition, null)
+    assert.equal(newPolicy.check, null)
+    policy.id = newPolicy.id
+  })
+  it('PATCH', async () => {
+    const updates = {
+      name: 'policy updated',
+      definition: `current_setting('my.username') IN (name)`,
+      check: `current_setting('my.username') IN (name)`,
+    }
+    let { data: updated } = await axios.patch(`${URL}/policies/${policy.id}`, updates)
+    // console.log('updated', updated)
+    assert.equal(updated.id, policy.id)
+    assert.equal(updated.name, 'policy updated', 'name updated')
+    assert.notEqual(updated.definition, null, 'definition updated')
+    assert.notEqual(updated.check, null, 'check updated')
+  })
+  it('DELETE', async () => {
+    await axios.delete(`${URL}/policies/${policy.id}`)
+    const { data: policies } = await axios.get(`${URL}/policies`)
+    const stillExists = policies.some((x) => policy.id === x.id)
+    assert.equal(stillExists, false, 'Policy is deleted')
   })
 })
