@@ -1,5 +1,5 @@
 select
-  n.oid as id,
+  pol.oid as id,
   n.nspname AS schema,
   c.relname AS table,
   c.oid AS table_id,
@@ -7,7 +7,7 @@ select
   CASE
     WHEN pol.polpermissive THEN 'PERMISSIVE' :: text
     ELSE 'RESTRICTIVE' :: text
-  END AS permissive,
+  END AS action,
   CASE
     WHEN pol.polroles = '{0}' :: oid [] 
     THEN array_to_json(string_to_array('public' :: text, '' :: text) :: name [])
@@ -30,9 +30,9 @@ select
     WHEN 'd' :: "char" THEN 'DELETE' :: text
     WHEN '*' :: "char" THEN 'ALL' :: text
     ELSE NULL :: text
-  END AS cmd,
-  pg_get_expr(pol.polqual, pol.polrelid) AS qual,
-  pg_get_expr(pol.polwithcheck, pol.polrelid) AS with_check
+  END AS command,
+  pg_get_expr(pol.polqual, pol.polrelid) AS definition,
+  pg_get_expr(pol.polwithcheck, pol.polrelid) AS check
 FROM
   pg_policy pol
   JOIN pg_class c ON c.oid = pol.polrelid

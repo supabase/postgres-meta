@@ -115,14 +115,15 @@ export namespace Tables {
 
   export interface Policy {
     id: number
+    name: string
     schema: string
     table: string
     table_id: number
-    permissive: boolean
+    action: 'PERMISSIVE' | 'RESTRICTIVE'
     roles: string[]
-    cmd: string
+    command: string
     definition: string
-    with_check: string
+    check: string
   }
 
   export interface PrimaryKey {
