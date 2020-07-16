@@ -140,7 +140,7 @@ const createSql = ({
   table,
   definition,
   check,
-  schema = 'postgres',
+  schema = 'public',
   action = 'PERMISSIVE',
   command = 'ALL',
   roles = ['PUBLIC'],
