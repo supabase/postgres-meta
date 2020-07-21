@@ -11,7 +11,10 @@
     "update": "node shins --unsafe",
     "build": "node shins",
     "start": "node arapaho -l",
-    "serve": "node arapaho"
+    "serve": "node arapaho",
+    "widdershins": "npx widdershins --summary -o source/index.html.md api.yml",
+    "dev:watch": "nodemon",
+    "dev": "npm run widdershins && npm run build && npm run serve"
   },
   "bin": {
     "shins": "./shins.js"
@@ -20,15 +23,7 @@
     "type": "git",
     "url": "git+https://github.com/Mermade/shins.git"
   },
-  "keywords": [
-    "shins",
-    "slate",
-    "swagger",
-    "openapi",
-    "api",
-    "documentation",
-    "docs"
-  ],
+  "keywords": ["shins", "slate", "swagger", "openapi", "api", "documentation", "docs"],
   "author": "Mike Ralphson",
   "license": "Apache-2.0",
   "bugs": {
@@ -56,6 +51,12 @@
   "devDependencies": {
     "ejs-lint": "^1.1.0",
     "node-sass": "^4.14.1",
-    "node-sass-asset-functions": "^0.1.0"
+    "node-sass-asset-functions": "^0.1.0",
+    "nodemon": "^2.0.4",
+    "widdershins": "^4.0.1"
+  },
+  "nodemonConfig": {
+    "exec": "npm run dev",
+    "watch": ["api.yml"]
   }
 }
