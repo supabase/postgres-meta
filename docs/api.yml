@@ -1,0 +1,1114 @@
+openapi: 3
+
+info:
+  title: Postgres API
+  description: |
+    Manage your PostgreSQL database using a RESTful API.
+
+    This is still in early development, so most of the functionality is read-only.
+
+    The goal of this API is to enable the full management of a Postgres database using a RESTful interface. This includes adding tables, columns, roles, and users at runtime, as well as running ad-hoc queries.
+
+    Made by Supabase: https://supabase.io
+
+    # Getting started
+
+    ## Usage
+
+    > Basic usage
+
+    ```sh
+    curl -X GET http://localhost:1337/ \
+    -H 'Content-Type: application/json' \
+    -H 'X-Connection-Encrypted: ENCRYPTED_STRING'
+    ```
+    ```js
+    const data = await fetch('http://localhost:1337', {
+    method: 'GET',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-Connection-Encrypted': 'ENCRYPTED_STRING'
+    }
+    })
+    ```
+
+    For security reasons, this API is best self-hosted and set up with ENV_VARS with the default connection string.
+
+    If you want to use this with multiple Postgres instances, you can pass the connection string as a header but it must be encrypted.
+
+
+    ## Self Hosting
+
+    ```
+    https://github.com/supabase/pg-api
+    ```
+
+    We support several different methods for self-hosting, detailed in the [repository](https://github.com/supabase/pg-api).
+
+
+    ## Authentication
+
+    Authentication is not provided. Make sure you use this inside a secure network or behind a secure API proxy.
+  contact:
+    name: Support
+    url: https://github.com/supabase/pg-api/issues/new/choose
+    email: support@supabase.io
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.0
+
+paths:
+  /config:
+    get:
+      tags: [/config]
+      summary: Get all configs
+      operationId: getConfigs
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Config'
+
+  /config/version:
+    get:
+      tags: [/config/version]
+      summary: Get version
+      operationId: getVersion
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+
+  /query:
+    post:
+      tags: [/query]
+      summary: Make a query
+      operationId: query
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+  /columns:
+    get:
+      tags: [/columns]
+      summary: Get all columns
+      operationId: getColumns
+      parameters:
+        - name: include_system_schemas
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Column'
+
+    post:
+      tags: [/columns]
+      summary: Add a column
+      operationId: createColumn
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                table_id:
+                  type: integer
+                type:
+                  type: string
+                default_value:
+                  type: string
+                is_identity:
+                  type: boolean
+                is_nullable:
+                  type: boolean
+                is_primary_key:
+                  type: boolean
+                is_unique:
+                  type: boolean
+              required: [name, table_id, type]
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Column'
+
+  /columns/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '\d+\.\d+'
+
+    patch:
+      tags: [/columns]
+      summary: Update a column by ID
+      operationId: updateColumn
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                type:
+                  type: string
+                drop_default:
+                  type: boolean
+                default_value:
+                  type: string
+                is_nullable:
+                  type: boolean
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Column'
+
+    delete:
+      tags: [/columns]
+      summary: Delete a column by ID
+      operationId: deleteColumn
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Column'
+
+  /extensions:
+    get:
+      tags: [/extensions]
+      summary: Get all extensions
+      operationId: getExtensions
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Extension'
+
+    post:
+      tags: [/extensions]
+      summary: Install an extension
+      operationId: createExtension
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                schema:
+                  type: string
+                version:
+                  type: string
+                cascade:
+                  type: boolean
+              required: [name]
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Extension'
+
+  /extensions/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+    patch:
+      tags: [/extensions]
+      summary: Update/modify an extension by ID
+      operationId: updateExtension
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                update:
+                  type: boolean
+                version:
+                  type: string
+                schema:
+                  type: string
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Extension'
+
+    delete:
+      tags: [/extensions]
+      summary: Uninstall an extension by ID
+      operationId: deleteExtension
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Extension'
+
+  /functions:
+    get:
+      tags: [/functions]
+      summary: Get all functions
+      operationId: getFunctions
+      parameters:
+        - name: include_system_schemas
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Function'
+
+  /policies:
+    get:
+      tags: [/policies]
+      summary: Get all policies
+      operationId: getPolicies
+      parameters:
+        - name: include_system_schemas
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Policy'
+
+    post:
+      tags: [/policies]
+      summary: Create a policy
+      operationId: createPolicy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                schema:
+                  type: string
+                table:
+                  type: string
+              required: [name, table]
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Policy'
+
+  /policies/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+    patch:
+      tags: [/policies]
+      summary: Update a policy by ID
+      operationId: updatePolicy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                schema:
+                  type: string
+                table:
+                  type: string
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Policy'
+
+    delete:
+      tags: [/policies]
+      summary: Delete a policy by ID
+      operationId: deletePolicy
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Policy'
+
+  /roles:
+    get:
+      tags: [/roles]
+      summary: Get all roles
+      operationId: getRoles
+      parameters:
+        - name: include_system_schemas
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
+
+    post:
+      tags: [/roles]
+      summary: Create a role
+      operationId: createRole
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                is_superuser:
+                  type: boolean
+                can_create_db:
+                  type: boolean
+                can_create_role:
+                  type: boolean
+                inherit_role:
+                  type: boolean
+                can_login:
+                  type: boolean
+                is_replication_role:
+                  type: boolean
+                can_bypass_rls:
+                  type: boolean
+                connection_limit:
+                  type: integer
+                password:
+                  type: string
+                valid_until:
+                  type: string
+                member_of:
+                  type: array
+                  items:
+                    type: string
+                members:
+                  type: array
+                  items:
+                    type: string
+                admins:
+                  type: array
+                  items:
+                    type: string
+              required: [name]
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+
+  /roles/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+    patch:
+      tags: [/roles]
+      summary: Update a role by ID
+      operationId: updateRole
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                is_superuser:
+                  type: boolean
+                can_create_db:
+                  type: boolean
+                can_create_role:
+                  type: boolean
+                inherit_role:
+                  type: boolean
+                can_login:
+                  type: boolean
+                is_replication_role:
+                  type: boolean
+                can_bypass_rls:
+                  type: boolean
+                connection_limit:
+                  type: integer
+                password:
+                  type: string
+                valid_until:
+                  type: string
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+
+    delete:
+      tags: [/roles]
+      summary: Delete a role by ID
+      operationId: deleteRole
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+
+  /schemas:
+    get:
+      tags: [/schemas]
+      summary: Get all schemas
+      operationId: getSchemas
+      parameters:
+        - name: include_system_schemas
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Schema'
+
+    post:
+      tags: [/schemas]
+      summary: Create a schema
+      operationId: createSchema
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                owner:
+                  type: string
+              required: [name, owner]
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schema'
+
+  /schemas/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+    patch:
+      tags: [/schemas]
+      summary: Update a schema by ID
+      operationId: updateSchema
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                owner:
+                  type: string
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schema'
+
+    delete:
+      tags: [/schemas]
+      summary: Delete a schema by ID
+      operationId: deleteSchema
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schema'
+
+  /tables:
+    get:
+      tags: [/tables]
+      summary: Get all tables
+      operationId: getTables
+      parameters:
+        - name: include_system_schemas
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Table'
+
+    post:
+      tags: [/tables]
+      summary: Create a table
+      operationId: createTable
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                schema:
+                  type: string
+              required: [name]
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+
+  /tables/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+    patch:
+      tags: [/tables]
+      summary: Update a table by ID
+      operationId: updateTable
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                schema:
+                  type: string
+                name:
+                  type: string
+                rls_enabled:
+                  type: boolean
+                rls_forced:
+                  type: boolean
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+
+    delete:
+      tags: [/tables]
+      summary: Delete a table by ID
+      operationId: deleteTable
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Table'
+
+  /types:
+    get:
+      tags: [/types]
+      summary: Get all types
+      operationId: getTypes
+      parameters:
+        - name: include_system_schemas
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Type'
+
+components:
+  schemas:
+    Column:
+      type: object
+      properties:
+        table_id:
+          type: integer
+        schema:
+          type: string
+        table:
+          type: string
+        id:
+          type: string
+          pattern: '\d+\.\d+'
+        ordinal_position:
+          type: integer
+        name:
+          type: string
+        default_value:
+          type: string
+        data_type:
+          type: string
+        format:
+          type: string
+        description:
+          type: string
+        is_identity:
+          type: boolean
+        identity_generation:
+          type: string
+        is_nullable:
+          type: boolean
+        is_updatable:
+          type: boolean
+        enums:
+          type: array
+          items:
+            type: string
+
+    Config:
+      type: object
+      properties:
+        name:
+          type: string
+        setting:
+          type: string
+        category:
+          type: string
+        group:
+          type: string
+        subgroup:
+          type: string
+        unit:
+          type: string
+          nullable: true
+        short_desc:
+          type: string
+        extra_desc:
+          type: string
+          nullable: true
+        context:
+          type: string
+        vartype:
+          type: string
+        source:
+          type: string
+        min_val:
+          type: string
+          nullable: true
+        max_val:
+          type: string
+          nullable: true
+        enumvals:
+          type: array
+          items:
+            type: string
+          nullable: true
+        boot_val:
+          type: string
+        reset_val:
+          type: string
+        sourcefile:
+          type: string
+          nullable: true
+        sourceline:
+          type: integer
+          nullable: true
+        pending_restart:
+          type: boolean
+
+    Extension:
+      type: object
+      properties:
+        name:
+          type: string
+        comment:
+          type: string
+        default_version:
+          type: string
+        installed_version:
+          type: string
+
+    Function:
+      type: object
+      properties:
+        id:
+          type: integer
+        schema:
+          type: string
+        name:
+          type: string
+        language:
+          type: string
+        definition:
+          type: string
+        argument_types:
+          type: string
+        return_type:
+          type: string
+
+    Grant:
+      type: object
+      properties:
+        table_id:
+          type: integer
+        grantor:
+          type: string
+        grantee:
+          type: string
+        catalog:
+          type: string
+        schema:
+          type: string
+        table_name:
+          type: string
+        privilege_type:
+          type: string
+        is_grantable:
+          type: boolean
+        with_hierarchy:
+          type: boolean
+
+    Policy:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        schema:
+          type: string
+        table:
+          type: string
+        table_id:
+          type: integer
+        action:
+          type: string
+          enum: [PERMISSIVE, RESTRICTIVE]
+        roles:
+          type: array
+          items:
+            type: string
+        command:
+          type: string
+        definition:
+          type: string
+        check:
+          type: string
+          nullable: true
+
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        is_superuser:
+          type: boolean
+        can_create_db:
+          type: boolean
+        can_create_role:
+          type: boolean
+        inherit_role:
+          type: boolean
+        can_login:
+          type: boolean
+        is_replication_role:
+          type: boolean
+        can_bypass_rls:
+          type: boolean
+        active_connections:
+          type: integer
+        connection_limit:
+          type: integer
+        password:
+          type: string
+        valid_until:
+          type: string
+          nullable: true
+        config:
+          type: string
+          nullable: true
+        grants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Grant'
+
+    Schema:
+      type: object
+      properties:
+        id:
+          type: integer
+        catalog_name:
+          type: string
+        name:
+          type: string
+        owner:
+          type: string
+        default_character_set_catalog:
+          type: string
+          nullable: true
+        default_character_set_schema:
+          type: string
+          nullable: true
+        default_character_set_name:
+          type: string
+          nullable: true
+        sql_path:
+          type: string
+          nullable: true
+
+    Table:
+      type: object
+      properties:
+        id:
+          type: integer
+        catalog:
+          type: string
+        schema:
+          type: string
+        name:
+          type: string
+        is_insertable_into:
+          type: boolean
+        rls_enabled:
+          type: boolean
+        rls_forced:
+          type: boolean
+        is_typed:
+          type: boolean
+        bytes:
+          type: integer
+        size:
+          type: string
+        seq_scan_count:
+          type: integer
+        seq_row_read_count:
+          type: integer
+        idx_scan_count:
+          type: integer
+        idx_row_read_count:
+          type: integer
+        row_ins_count:
+          type: integer
+        row_upd_count:
+          type: integer
+        row_del_count:
+          type: integer
+        row_hot_upd_count:
+          type: integer
+        live_row_count:
+          type: integer
+        dead_row_count:
+          type: integer
+        rows_mod_since_analyze:
+          type: integer
+        last_vacuum:
+          type: string
+          nullable: true
+        last_autovacuum:
+          type: string
+          nullable: true
+        last_analyze:
+          type: string
+          nullable: true
+        last_autoanalyze:
+          type: string
+          nullable: true
+        vacuum_count:
+          type: integer
+        autovacuum_count:
+          type: integer
+        analyze_count:
+          type: integer
+        autoanalyze_count:
+          type: integer
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/Column'
+        grants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Grant'
+        policies:
+          type: array
+          items:
+            $ref: '#/components/schemas/Policy'
+        primary_keys:
+          type: array
+          items:
+            type: object
+            properties:
+              schema:
+                type: string
+              table_name:
+                type: string
+              name:
+                type: string
+              table_id:
+                type: integer
+        relationships:
+          type: array
+          items:
+            type: object
+            properties:
+              source_schema:
+                type: string
+              source_table_name:
+                type: string
+              source_column_name:
+                type: string
+              target_table_schema:
+                type: string
+              target_table_name:
+                type: string
+              target_column_name:
+                type: string
+              constraint_name:
+                type: string
+
+    Type:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        schema:
+          type: string
+        format:
+          type: string
+        description:
+          type: string
+          nullable: true
+        enums:
+          type: array
+          items:
+            type: string
+
+    Version:
+      type: object
+      properties:
+        version:
+          type: string
+        version_number:
+          type: integer
+        active_connections:
+          type: integer
+        max_connections:
+          type: integer
