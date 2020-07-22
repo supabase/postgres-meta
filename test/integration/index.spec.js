@@ -90,7 +90,7 @@ describe('/schemas', () => {
     assert.equal(true, !notIncluded)
   })
   it('GET with system schemas', async () => {
-    const res = await axios.get(`${URL}/schemas?includeSystemSchemas=true`)
+    const res = await axios.get(`${URL}/schemas?include_system_schemas=true`)
     // console.log('res.data', res.data)
     const datum = res.data.find((x) => x.name == 'public')
     const included = res.data.find((x) => x.name == 'pg_toast')
@@ -99,7 +99,7 @@ describe('/schemas', () => {
     assert.equal(true, !!included)
   })
   it('GET without system schemas (explicit)', async () => {
-    const res = await axios.get(`${URL}/schemas?includeSystemSchemas=false`)
+    const res = await axios.get(`${URL}/schemas?include_system_schemas=false`)
     const isIncluded = res.data.some((x) => x.name === 'pg_catalog')
     assert.equal(res.status, STATUS.SUCCESS)
     assert.equal(isIncluded, false)
@@ -135,7 +135,7 @@ describe('/types', () => {
     assert.equal(true, !notIncluded)
   })
   it('GET with system types', async () => {
-    const res = await axios.get(`${URL}/types?includeSystemSchemas=true`)
+    const res = await axios.get(`${URL}/types?include_system_schemas=true`)
     // console.log('res.data', res.data)
     const datum = res.data.find((x) => x.schema == 'public')
     const included = res.data.find((x) => x.schema == 'pg_catalog')
@@ -155,7 +155,7 @@ describe('/functions', () => {
     assert.equal(true, !notIncluded)
   })
   it('GET with system functions', async () => {
-    const res = await axios.get(`${URL}/functions?includeSystemSchemas=true`)
+    const res = await axios.get(`${URL}/functions?include_system_schemas=true`)
     // console.log('res.data', res.data)
     const datum = res.data.find((x) => x.schema == 'public')
     const included = res.data.find((x) => x.schema == 'pg_catalog')
@@ -172,7 +172,7 @@ describe('/tables', async () => {
     const notIncluded = tables.data.find((x) => `${x.schema}.${x.name}` === 'pg_catalog.pg_type')
     const idColumn = datum.columns.find((x) => x.name === 'id')
     const nameColumn = datum.columns.find((x) => x.name === 'name')
-    const statusColumn = memes.columns.find((x) => x.name ==='status')
+    const statusColumn = memes.columns.find((x) => x.name === 'status')
     assert.equal(tables.status, STATUS.SUCCESS)
     assert.equal(true, !!datum, 'Table included')
     assert.equal(true, !notIncluded, 'System table not included')
@@ -199,13 +199,13 @@ describe('/tables', async () => {
     assert.equal(true, relationship.target_table_name === 'users')
   })
   it('GET /tables with system tables', async () => {
-    const res = await axios.get(`${URL}/tables?includeSystemSchemas=true`)
+    const res = await axios.get(`${URL}/tables?include_system_schemas=true`)
     const included = res.data.find((x) => `${x.schema}.${x.name}` === 'pg_catalog.pg_type')
     assert.equal(res.status, STATUS.SUCCESS)
     assert.equal(true, !!included)
   })
   it('GET /tables without system tables (explicit)', async () => {
-    const res = await axios.get(`${URL}/tables?includeSystemSchemas=false`)
+    const res = await axios.get(`${URL}/tables?include_system_schemas=false`)
     const isIncluded = res.data.some((x) => `${x.schema}.${x.name}` === 'pg_catalog.pg_type')
     assert.equal(res.status, STATUS.SUCCESS)
     assert.equal(isIncluded, false)
@@ -220,7 +220,7 @@ describe('/tables', async () => {
     assert.equal(true, !notIncluded)
   })
   it('GET /columns with system types', async () => {
-    const res = await axios.get(`${URL}/columns?includeSystemSchemas=true`)
+    const res = await axios.get(`${URL}/columns?include_system_schemas=true`)
     // console.log('res.data', res.data)
     const datum = res.data.find((x) => x.schema == 'public')
     const included = res.data.find((x) => x.schema == 'pg_catalog')
@@ -263,11 +263,11 @@ describe('/tables', async () => {
   it('POST /columns', async () => {
     const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'foo bar' })
     await axios.post(`${URL}/columns`, {
-      tableId: newTable.id,
+      table_id: newTable.id,
       name: 'foo bar',
       type: 'int2',
-      defaultValue: 42,
-      isNullable: false,
+      default_value: 42,
+      is_nullable: false,
       // Currently no way to test these:
       //   isPrimaryKey: true,
       //   isUnique: true,
@@ -287,17 +287,17 @@ describe('/tables', async () => {
   it('PATCH /columns', async () => {
     const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'foo bar' })
     await axios.post(`${URL}/columns`, {
-      tableId: newTable.id,
+      table_id: newTable.id,
       name: 'foo',
       type: 'int2',
-      defaultValue: 42,
+      default_value: 42,
     })
 
     await axios.patch(`${URL}/columns/${newTable.id}.1`, {
       name: 'foo bar',
       type: 'int4',
-      dropDefault: true,
-      isNullable: false,
+      drop_default: true,
+      is_nullable: false,
     })
 
     const { data: columns } = await axios.get(`${URL}/columns`)
@@ -313,7 +313,7 @@ describe('/tables', async () => {
   })
   it('DELETE /columns', async () => {
     const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'foo bar' })
-    await axios.post(`${URL}/columns`, { tableId: newTable.id, name: 'foo bar', type: 'int2' })
+    await axios.post(`${URL}/columns`, { table_id: newTable.id, name: 'foo bar', type: 'int2' })
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     const { data: columns } = await axios.get(`${URL}/columns`)
@@ -380,15 +380,15 @@ describe('/roles', () => {
   it('POST', async () => {
     await axios.post(`${URL}/roles`, {
       name: 'test',
-      isSuperuser: true,
-      canCreateDb: true,
-      canCreateRole: true,
-      inheritRole: false,
-      canLogin: true,
-      isReplicationRole: true,
-      canBypassRls: true,
-      connectionLimit: 100,
-      validUntil: '2020-01-01T00:00:00.000Z',
+      is_superuser: true,
+      can_create_db: true,
+      can_create_role: true,
+      inherit_role: false,
+      can_login: true,
+      is_replication_role: true,
+      can_bypass_rls: true,
+      connection_limit: 100,
+      valid_until: '2020-01-01T00:00:00.000Z',
     })
     const { data: roles } = await axios.get(`${URL}/roles`)
     const test = roles.find((role) => role.name === 'test')
@@ -408,15 +408,15 @@ describe('/roles', () => {
 
     await axios.patch(`${URL}/roles/${newRole.id}`, {
       name: 'bar',
-      isSuperuser: true,
-      canCreateDb: true,
-      canCreateRole: true,
-      inheritRole: false,
-      canLogin: true,
-      isReplicationRole: true,
-      canBypassRls: true,
-      connectionLimit: 100,
-      validUntil: '2020-01-01T00:00:00.000Z',
+      is_superuser: true,
+      can_create_db: true,
+      can_create_role: true,
+      inherit_role: false,
+      can_login: true,
+      is_replication_role: true,
+      can_bypass_rls: true,
+      connection_limit: 100,
+      valid_until: '2020-01-01T00:00:00.000Z',
     })
 
     const { data: roles } = await axios.get(`${URL}/roles`)
@@ -449,7 +449,7 @@ describe('/policies', () => {
     name: 'test policy',
     schema: 'public',
     table: 'memes',
-    action: 'RESTRICTIVE'
+    action: 'RESTRICTIVE',
   }
   before(async () => {
     await axios.post(`${URL}/query`, {

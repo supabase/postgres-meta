@@ -6,10 +6,10 @@ import { Tables } from '../lib/interfaces'
 import sqlTemplates = require('../lib/sql')
 
 /**
- * @param {string} [includeSystemSchemas=false] - Return system schemas as well as user schemas
+ * @param {string} [include_system_schemas=false] - Return system schemas as well as user schemas
  */
 interface QueryParams {
-  includeSystemSchemas?: string
+  include_system_schemas?: string
 }
 
 const router = Router()
@@ -19,9 +19,9 @@ router.get('/', async (req, res) => {
     const sql = getAllSql(sqlTemplates)
     const { data } = await RunQuery(req.headers.pg, sql)
     const query: QueryParams = req.query
-    const includeSystemSchemas = query?.includeSystemSchemas === 'true'
+    const include_system_schemas = query?.include_system_schemas === 'true'
     let payload: Tables.Policy[] = data
-    if (!includeSystemSchemas) payload = removeSystemSchemas(data)
+    if (!include_system_schemas) payload = removeSystemSchemas(data)
     return res.status(200).json(payload)
   } catch (error) {
     console.log('throwing error', error)
