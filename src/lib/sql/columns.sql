@@ -24,7 +24,8 @@ SELECT
       ORDER BY
         enums.enumsortorder
     )
-  ) AS enums
+  ) AS enums,
+  col_description(c.oid, ordinal_position) AS comment
 FROM
   information_schema.columns
   JOIN pg_class c ON quote_ident(table_schema) :: regnamespace = c.relnamespace
