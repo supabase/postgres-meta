@@ -29,7 +29,8 @@ SELECT
   vacuum_count :: bigint,
   autovacuum_count :: bigint,
   analyze_count :: bigint,
-  autoanalyze_count :: bigint
+  autoanalyze_count :: bigint,
+  obj_description(c.oid) AS comment
 FROM
   information_schema.tables
   JOIN pg_class c ON quote_ident(table_schema)::regnamespace = c.relnamespace
