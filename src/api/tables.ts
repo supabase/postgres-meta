@@ -32,11 +32,10 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const pcConnection: string = req.headers.pg.toString()
-    const schema: string = req.body.schema || 'public'
-    const name: string = req.body.name
+    const { schema = 'public', name } = req.body
 
     // Create the table
-    const createTableSql = createTable(name, schema)
+    const createTableSql = createTableSqlize(req.body)
     const alterSql = alterTableSql(req.body)
     const transaction = toTransaction([createTableSql, alterSql])
     await RunQuery(pcConnection, transaction)
@@ -144,8 +143,19 @@ const selectSingleByName = (sqlTemplates, schema: string, name: string) => {
   const { tables } = sqlTemplates
   return `${tables} and table_schema = '${schema}' and table_name = '${name}';`.trim()
 }
-const createTable = (name: string, schema: string = 'postgres') => {
-  return `CREATE TABLE IF NOT EXISTS "${schema}"."${name}" ();`.trim()
+const createTableSqlize = ({
+  name,
+  schema = 'public',
+  comment,
+}: {
+  name: string
+  schema?: string
+  comment?: string
+}) => {
+  const tableSql = `CREATE TABLE IF NOT EXISTS "${schema}"."${name}" ();`
+  const commentSql =
+    comment === undefined ? '' : `COMMENT ON TABLE "${schema}"."${name}" IS '${comment}';`
+  return `${tableSql} ${commentSql}`
 }
 const alterTableName = (previousName: string, newName: string, schema: string) => {
   return `ALTER TABLE "${schema}"."${previousName}" RENAME TO "${newName}";`.trim()
@@ -155,11 +165,13 @@ const alterTableSql = ({
   name,
   rls_enabled,
   rls_forced,
+  comment,
 }: {
   schema?: string
   name: string
   rls_enabled?: boolean
   rls_forced?: boolean
+  comment?: string
 }) => {
   let alter = `ALTER table "${schema}"."${name}"`
   let enableRls = ''
@@ -174,9 +186,12 @@ const alterTableSql = ({
     let disable = `${alter} NO FORCE ROW LEVEL SECURITY;`
     forceRls = rls_forced ? enable : disable
   }
+  const commentSql =
+    comment === undefined ? '' : `COMMENT ON TABLE "${schema}"."${name}" IS '${comment}';`
   return `
     ${enableRls}
     ${forceRls}
+    ${commentSql}
   `.trim()
 }
 const dropTableSql = (schema: string, name: string, cascade: boolean) => {

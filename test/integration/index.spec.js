@@ -229,8 +229,9 @@ describe('/tables', async () => {
     assert.equal(true, !!included)
   })
   it('POST /tables should create a table', async () => {
-    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'test' })
+    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'test', comment: 'foo' })
     assert.equal(`${newTable.schema}.${newTable.name}`, 'public.test')
+    assert.equal(newTable.comment, 'foo')
 
     const { data: tables } = await axios.get(`${URL}/tables`)
     const newTableExists = tables.some((table) => table.id === newTable.id)
@@ -246,10 +247,12 @@ describe('/tables', async () => {
       name: 'test a',
       rls_enabled: true,
       rls_forced: true,
+      comment: 'foo',
     })
     assert.equal(updatedTable.name, `test a`)
     assert.equal(updatedTable.rls_enabled, true)
     assert.equal(updatedTable.rls_forced, true)
+    assert.equal(updatedTable.comment, 'foo')
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })
   it('DELETE /tables', async () => {
@@ -268,6 +271,7 @@ describe('/tables', async () => {
       type: 'int2',
       default_value: 42,
       is_nullable: false,
+      comment: 'foo',
       // Currently no way to test these:
       //   isPrimaryKey: true,
       //   isUnique: true,
@@ -280,6 +284,7 @@ describe('/tables', async () => {
     )
     assert.equal(newColumn.default_value, 42)
     assert.equal(newColumn.is_nullable, false)
+    assert.equal(newColumn.comment, 'foo')
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
@@ -291,6 +296,7 @@ describe('/tables', async () => {
       name: 'foo',
       type: 'int2',
       default_value: 42,
+      comment: 'foo',
     })
 
     await axios.patch(`${URL}/columns/${newTable.id}.1`, {
@@ -298,6 +304,7 @@ describe('/tables', async () => {
       type: 'int4',
       drop_default: true,
       is_nullable: false,
+      comment: 'bar',
     })
 
     const { data: columns } = await axios.get(`${URL}/columns`)
@@ -307,6 +314,7 @@ describe('/tables', async () => {
     )
     assert.equal(updatedColumn.default_value, null)
     assert.equal(updatedColumn.is_nullable, false)
+    assert.equal(updatedColumn.comment, 'bar')
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
