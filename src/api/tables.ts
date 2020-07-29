@@ -29,6 +29,23 @@ router.get('/', async (req, res) => {
   }
 })
 
+router.get('/:id', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id)
+
+    const sql = selectSingleSql(sqlTemplates, id)
+    const table = (await RunQuery(req.headers.pg, sql)).data[0]
+    if (typeof table === 'undefined') {
+      return res.status(404).json({ error: `No table exists with ID ${id}.` })
+    }
+
+    return res.status(200).json(table)
+  } catch (error) {
+    console.log('throwing error', error)
+    res.status(500).json({ error: 'Database error', status: 500 })
+  }
+})
+
 router.post('/', async (req, res) => {
   try {
     const pcConnection: string = req.headers.pg.toString()
