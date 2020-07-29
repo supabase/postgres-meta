@@ -187,6 +187,13 @@ describe('/tables', async () => {
     assert.equal(datum.policies.length == 0, true, 'Has no policies')
     assert.equal(statusColumn.enums[0], 'new', 'Has enums')
   })
+  it('GET single by ID', async () => {
+    const tables = await axios.get(`${URL}/tables`)
+    const { id } = tables.data.find((table) => `${table.schema}.${table.name}` === 'public.users')
+    const { data: table } = await axios.get(`${URL}/tables/${id}`)
+
+    assert.equal(`${table.schema}.${table.name}`, 'public.users')
+  })
   it('/tables should return the relationships', async () => {
     const tables = await axios.get(`${URL}/tables`)
     const datum = tables.data.find((x) => `${x.schema}.${x.name}` === 'public.users')
