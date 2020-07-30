@@ -122,12 +122,12 @@ router.delete('/:id', async (req, res) => {
 const getTablesSql = (sqlTemplates) => {
   const { columns, grants, policies, primary_keys, relationships, tables } = sqlTemplates
   return `
-  WITH tables AS ( ${tables} ),
-    columns AS ( ${columns} ),
-    grants AS ( ${grants} ),
-    policies AS ( ${policies} ),
-    primary_keys AS ( ${primary_keys} ),
-    relationships AS ( ${relationships} )
+  WITH tables AS MATERIALIZED ( ${tables} ),
+    columns AS MATERIALIZED ( ${columns} ),
+    grants AS MATERIALIZED ( ${grants} ),
+    policies AS MATERIALIZED ( ${policies} ),
+    primary_keys AS MATERIALIZED ( ${primary_keys} ),
+    relationships AS MATERIALIZED ( ${relationships} )
   SELECT
     *,
     ${coalesceRowsToArray('columns', 'SELECT * FROM columns WHERE columns.table_id = tables.id')},
