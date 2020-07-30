@@ -5,21 +5,6 @@ import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
 import { Tables } from '../lib/interfaces'
 import sqlTemplates = require('../lib/sql')
 
-// const { PerformanceObserver, performance } = require('perf_hooks')
-
-// const obs = new PerformanceObserver((items) => {
-//   console.log(items.getEntries()[0].duration)
-//   performance.clearMarks()
-// })
-// obs.observe({ entryTypes: ['measure'] })
-// performance.measure('Start to Now')
-
-// performance.mark('A')
-// performance.measure('A to Now', 'A')
-
-// performance.mark('B')
-// performance.measure('A to B', 'A', 'B')
-
 /**
  * @param {string} [include_system_schemas=false] - Return system schemas as well as user schemas
  */
@@ -30,28 +15,17 @@ interface QueryParams {
 const router = Router()
 
 router.get('/', async (req, res) => {
-  console.time('Total: GET tables')
   try {
-    console.time('\n\nbuild sql')
     const sql = getTablesSql(sqlTemplates)
-    console.timeEnd('\n\nbuild sql')
-
-    console.time('GET table data')
     const { data } = await RunQuery(req.headers.pg, sql)
-    console.timeEnd('GET table data')
     const query: QueryParams = req.query
-
-    console.time('remove system tables')
     const include_system_schemas = query?.include_system_schemas === 'true'
     let payload: Tables.Table[] = data
     if (!include_system_schemas) payload = removeSystemSchemas(data)
-    console.timeEnd('remove system tables')
     return res.status(200).json(payload)
   } catch (error) {
     console.log('throwing error', error)
     res.status(500).json({ error: 'Database error', status: 500 })
-  } finally {
-    console.timeEnd('Total: GET tables')
   }
 })
 
