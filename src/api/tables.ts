@@ -36,7 +36,7 @@ router.get('/:id', async (req, res) => {
     const sql = selectSingleSql(sqlTemplates, id)
     const table = (await RunQuery(req.headers.pg, sql)).data[0]
     if (typeof table === 'undefined') {
-      return res.status(404).json({ error: `No table exists with ID ${id}.` })
+      return res.status(404).json({ error: `No table exists with ID ${id}.`, status: 404 })
     }
 
     return res.status(200).json(table)
@@ -65,7 +65,7 @@ router.post('/', async (req, res) => {
   } catch (error) {
     // For this one, we always want to give back the error to the customer
     console.log('Soft error!', error)
-    res.status(200).json([{ error: error.toString() }])
+    res.status(200).json([{ error: error.toString(), status: 200 }])
   }
 })
 
@@ -97,7 +97,7 @@ router.patch('/:id', async (req, res) => {
   } catch (error) {
     // For this one, we always want to give back the error to the customer
     console.log('Soft error!', error)
-    res.status(200).json([{ error: error.toString() }])
+    res.status(200).json([{ error: error.toString(), status: 200 }])
   }
 })
 
