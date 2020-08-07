@@ -168,7 +168,7 @@ const alterColumnSqlize = ({
   comment?: string
 }) => {
   const nameSql =
-    name === undefined
+    typeof name === 'undefined' || name === oldName
       ? ''
       : `ALTER TABLE "${schema}"."${table}" RENAME COLUMN "${oldName}" TO "${name}";`
   const typeSql =
