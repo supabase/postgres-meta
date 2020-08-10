@@ -262,6 +262,16 @@ describe('/tables', async () => {
     assert.equal(updatedTable.comment, 'foo')
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })
+  it('PATCH /tables same name', async () => {
+    const { data: newTable } = await axios.post(`${URL}/tables`, {
+      name: 'test',
+    })
+    let { data: updatedTable } = await axios.patch(`${URL}/tables/${newTable.id}`, {
+      name: 'test',
+    })
+    assert.equal(updatedTable.name, `test`)
+    await axios.delete(`${URL}/tables/${newTable.id}`)
+  })
   it('DELETE /tables', async () => {
     const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'test' })
 
@@ -322,6 +332,23 @@ describe('/tables', async () => {
     assert.equal(updatedColumn.default_value, null)
     assert.equal(updatedColumn.is_nullable, false)
     assert.equal(updatedColumn.comment, 'bar')
+
+    await axios.delete(`${URL}/columns/${newTable.id}.1`)
+    await axios.delete(`${URL}/tables/${newTable.id}`)
+  })
+  it('PATCH /columns same name', async () => {
+    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'foo' })
+    await axios.post(`${URL}/columns`, {
+      table_id: newTable.id,
+      name: 'bar',
+      type: 'int2',
+    })
+
+    const { data: updatedColumn } = await axios.patch(`${URL}/columns/${newTable.id}.1`, {
+      name: 'bar',
+    })
+
+    assert.equal(updatedColumn.name, 'bar')
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)

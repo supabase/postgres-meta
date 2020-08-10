@@ -84,7 +84,10 @@ router.patch('/:id', async (req, res) => {
     let previousTable: Tables.Table = getTableResults[0]
 
     // Update fields and name
-    const nameSql = !name ? '' : alterTableName(previousTable.name, name, previousTable.schema)
+    const nameSql =
+      typeof name === 'undefined' || name === previousTable.name
+        ? ''
+        : alterTableName(previousTable.name, name, previousTable.schema)
     if (!name) payload.name = previousTable.name
     const alterSql = alterTableSql(payload)
     const transaction = toTransaction([nameSql, alterSql])
