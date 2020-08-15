@@ -171,10 +171,11 @@ const alterColumnSqlize = ({
     typeof name === 'undefined' || name === oldName
       ? ''
       : `ALTER TABLE "${schema}"."${table}" RENAME COLUMN "${oldName}" TO "${name}";`
+  // We use USING to allow implicit conversion of incompatible types (e.g. int4 -> text).
   const typeSql =
     type === undefined
       ? ''
-      : `ALTER TABLE "${schema}"."${table}" ALTER COLUMN "${oldName}" SET DATA TYPE "${type}";`
+      : `ALTER TABLE "${schema}"."${table}" ALTER COLUMN "${oldName}" SET DATA TYPE "${type}" USING "${oldName}"::"${type}";`
   let defaultValueSql = ''
   if (drop_default) {
     defaultValueSql = `ALTER TABLE "${schema}"."${table}" ALTER COLUMN "${oldName}" DROP DEFAULT;`
