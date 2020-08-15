@@ -355,6 +355,23 @@ describe('/tables', async () => {
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })
+  it('PATCH /columns "incompatible" types', async () => {
+    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'foo' })
+    await axios.post(`${URL}/columns`, {
+      table_id: newTable.id,
+      name: 'bar',
+      type: 'text',
+    })
+
+    const { data: updatedColumn } = await axios.patch(`${URL}/columns/${newTable.id}.1`, {
+      type: 'int4',
+    })
+
+    assert.strictEqual(updatedColumn.format, 'int4')
+
+    await axios.delete(`${URL}/columns/${newTable.id}.1`)
+    await axios.delete(`${URL}/tables/${newTable.id}`)
+  })
   it('DELETE /columns', async () => {
     const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'foo bar' })
     await axios.post(`${URL}/columns`, { table_id: newTable.id, name: 'foo bar', type: 'int2' })
