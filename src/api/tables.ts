@@ -155,14 +155,78 @@ const getTablesSql = (sqlTemplates) => {
     )}
   FROM tables;`.trim()
 }
-const selectSingleSql = (sqlTemplates, id: number) => {
-  const { tables } = sqlTemplates
-  return `${tables} and c.oid = ${id};`.trim()
+const selectSingleSql = (sqlTemplates: { [key: string]: string }, id: number) => {
+  const { columns, grants, policies, primary_keys, relationships, tables } = sqlTemplates
+  return `
+  WITH tables AS ( ${tables} AND c.oid = ${id} ),
+    columns AS ( ${columns} ),
+    grants AS ( ${grants} ),
+    policies AS ( ${policies} ),
+    primary_keys AS ( ${primary_keys} ),
+    relationships AS ( ${relationships} )
+  SELECT
+    *,
+    ${coalesceRowsToArray('columns', 'SELECT * FROM columns WHERE columns.table_id = tables.id')},
+    ${coalesceRowsToArray('grants', 'SELECT * FROM grants WHERE grants.table_id = tables.id')},
+    ${coalesceRowsToArray(
+      'policies',
+      'SELECT * FROM policies WHERE policies.table_id = tables.id'
+    )},
+    ${coalesceRowsToArray(
+      'primary_keys',
+      'SELECT * FROM primary_keys WHERE primary_keys.table_id = tables.id'
+    )},
+    ${coalesceRowsToArray(
+      'relationships',
+      `SELECT
+        *
+      FROM
+        relationships
+      WHERE
+        (relationships.source_schema = tables.schema AND relationships.source_table_name = tables.name)
+        OR (relationships.target_table_schema = tables.schema AND relationships.target_table_name = tables.name)`
+    )}
+  FROM tables;`.trim()
 }
-const selectSingleByName = (sqlTemplates, schema: string, name: string) => {
-  const { tables } = sqlTemplates
-  return `${tables} and table_schema = '${schema}' and table_name = '${name}';`.trim()
+
+const selectSingleByName = (
+  sqlTemplates: { [key: string]: string },
+  schema: string,
+  name: string
+) => {
+  const { columns, grants, policies, primary_keys, relationships, tables } = sqlTemplates
+  return `
+  WITH tables AS ( ${tables} AND table_schema = '${schema}' AND table_name = '${name}' ),
+    columns AS ( ${columns} ),
+    grants AS ( ${grants} ),
+    policies AS ( ${policies} ),
+    primary_keys AS ( ${primary_keys} ),
+    relationships AS ( ${relationships} )
+  SELECT
+    *,
+    ${coalesceRowsToArray('columns', 'SELECT * FROM columns WHERE columns.table_id = tables.id')},
+    ${coalesceRowsToArray('grants', 'SELECT * FROM grants WHERE grants.table_id = tables.id')},
+    ${coalesceRowsToArray(
+      'policies',
+      'SELECT * FROM policies WHERE policies.table_id = tables.id'
+    )},
+    ${coalesceRowsToArray(
+      'primary_keys',
+      'SELECT * FROM primary_keys WHERE primary_keys.table_id = tables.id'
+    )},
+    ${coalesceRowsToArray(
+      'relationships',
+      `SELECT
+        *
+      FROM
+        relationships
+      WHERE
+        (relationships.source_schema = tables.schema AND relationships.source_table_name = tables.name)
+        OR (relationships.target_table_schema = tables.schema AND relationships.target_table_name = tables.name)`
+    )}
+  FROM tables;`.trim()
 }
+
 const createTableSqlize = ({
   name,
   schema = 'public',
