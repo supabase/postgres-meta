@@ -189,10 +189,12 @@ describe('/tables', async () => {
   })
   it('GET single by ID', async () => {
     const tables = await axios.get(`${URL}/tables`)
-    const { id } = tables.data.find((table) => `${table.schema}.${table.name}` === 'public.users')
-    const { data: table } = await axios.get(`${URL}/tables/${id}`)
+    const tableFiltered = tables.data.find(
+      (table) => `${table.schema}.${table.name}` === 'public.users'
+    )
+    const { data: tableById } = await axios.get(`${URL}/tables/${tableFiltered.id}`)
 
-    assert.equal(`${table.schema}.${table.name}`, 'public.users')
+    assert.deepStrictEqual(tableById, tableFiltered)
   })
   it('/tables should return the relationships', async () => {
     const tables = await axios.get(`${URL}/tables`)
