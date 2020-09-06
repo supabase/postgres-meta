@@ -4,7 +4,8 @@
     "allowJs": true,
     "checkJs": false,
     "module": "commonjs",
-    "target": "es5"
+    "target": "es5",
+    "esModuleInterop": true
   },
   "exclude": ["node_modules", "test", "dist", "docs", "bin"]
 }
