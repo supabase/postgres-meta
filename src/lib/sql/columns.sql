@@ -1,5 +1,5 @@
 SELECT
-  c.oid AS table_id,
+  c.oid :: int8 AS table_id,
   table_schema AS schema,
   table_name AS table,
   (c.oid || '.' || ordinal_position) AS id,
