@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import format from 'pg-format'
 import { coalesceRowsToArray, toTransaction } from '../lib/helpers'
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
@@ -196,7 +197,9 @@ const selectSingleByName = (
 ) => {
   const { columns, grants, policies, primary_keys, relationships, tables } = sqlTemplates
   return `
-  WITH tables AS ( ${tables} AND table_schema = '${schema}' AND table_name = '${name}' ),
+  WITH tables AS ( ${tables} AND table_schema = ${format.literal(
+    schema
+  )} AND table_name = ${format.literal(name)} ),
     columns AS ( ${columns} ),
     grants AS ( ${grants} ),
     policies AS ( ${policies} ),
@@ -236,13 +239,13 @@ const createTableSqlize = ({
   schema?: string
   comment?: string
 }) => {
-  const tableSql = `CREATE TABLE IF NOT EXISTS "${schema}"."${name}" ();`
+  const tableSql = format('CREATE TABLE IF NOT EXISTS %I.%I ();', schema, name)
   const commentSql =
-    comment === undefined ? '' : `COMMENT ON TABLE "${schema}"."${name}" IS '${comment}';`
+    comment === undefined ? '' : format('COMMENT ON TABLE %I.%I IS %L;', schema, name, comment)
   return `${tableSql} ${commentSql}`
 }
 const alterTableName = (previousName: string, newName: string, schema: string) => {
-  return `ALTER TABLE "${schema}"."${previousName}" RENAME TO "${newName}";`.trim()
+  return format('ALTER TABLE %I.%I RENAME TO %I;', schema, previousName, newName)
 }
 const alterTableSql = ({
   schema = 'public',
@@ -257,7 +260,7 @@ const alterTableSql = ({
   rls_forced?: boolean
   comment?: string
 }) => {
-  let alter = `ALTER table "${schema}"."${name}"`
+  let alter = format('ALTER table %I.%I', schema, name)
   let enableRls = ''
   if (rls_enabled !== undefined) {
     let enable = `${alter} ENABLE ROW LEVEL SECURITY;`
@@ -271,7 +274,7 @@ const alterTableSql = ({
     forceRls = rls_forced ? enable : disable
   }
   const commentSql =
-    comment === undefined ? '' : `COMMENT ON TABLE "${schema}"."${name}" IS '${comment}';`
+    comment === undefined ? '' : format('COMMENT ON TABLE %I.%I IS %L;', schema, name, comment)
   return `
     ${enableRls}
     ${forceRls}
@@ -279,7 +282,7 @@ const alterTableSql = ({
   `.trim()
 }
 const dropTableSql = (schema: string, name: string, cascade: boolean) => {
-  return `DROP TABLE "${schema}"."${name}" ${cascade ? 'CASCADE' : 'RESTRICT'};`.trim()
+  return format(`DROP TABLE %I.%I ${cascade ? 'CASCADE' : 'RESTRICT'};`, schema, name)
 }
 const removeSystemSchemas = (data: Tables.Table[]) => {
   return data.filter((x) => !DEFAULT_SYSTEM_SCHEMAS.includes(x.schema))

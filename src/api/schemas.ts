@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import format from 'pg-format'
 import SQL from 'sql-template-strings'
 import sqlTemplates = require('../lib/sql')
 import { RunQuery } from '../lib/connectionPool'
@@ -110,7 +111,7 @@ const selectSingleByName = (name: string) => {
   return query
 }
 const createSchema = (name: string, owner: string = 'postgres') => {
-  const query = SQL``.append(`CREATE SCHEMA IF NOT EXISTS "${name}" AUTHORIZATION ${owner}`)
+  const query = SQL``.append(`CREATE SCHEMA IF NOT EXISTS ${name} AUTHORIZATION ${owner}`)
   return query
 }
 const alterSchemaName = (previousName: string, newName: string) => {
@@ -122,7 +123,7 @@ const alterSchemaOwner = (schemaName: string, newOwner: string) => {
   return query
 }
 const dropSchemaSqlize = (name: string, cascade: boolean) => {
-  const query = `DROP SCHEMA "${name}" ${cascade ? 'CASCADE' : 'RESTRICT'}`
+  const query = `DROP SCHEMA ${format.ident(name)} ${cascade ? 'CASCADE' : 'RESTRICT'}`
   return query
 }
 const removeSystemSchemas = (data: Schemas.Schema[]) => {

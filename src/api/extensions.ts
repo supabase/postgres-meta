@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import format from 'pg-format'
 import SQL from 'sql-template-strings'
 import sqlTemplates = require('../lib/sql')
 const { extensions } = sqlTemplates
@@ -83,9 +84,9 @@ const createExtensionSqlize = ({
   cascade?: boolean
 }) => {
   return `
-CREATE EXTENSION "${name}"
-  ${schema === undefined ? '' : `SCHEMA ${schema}`}
-  ${version === undefined ? '' : `VERSION '${version}'`}
+CREATE EXTENSION ${format.ident(name)}
+  ${schema === undefined ? '' : `SCHEMA ${format.ident(schema)}`}
+  ${version === undefined ? '' : `VERSION ${format.literal(version)}`}
   ${cascade ? 'CASCADE' : ''}`
 }
 const singleExtensionSqlize = (extensions: string, name: string) => {
@@ -104,9 +105,12 @@ const alterExtensionSqlize = ({
 }) => {
   let updateSql = ''
   if (update) {
-    updateSql = `ALTER EXTENSION "${name}" UPDATE ${version === undefined ? '' : version};`
+    updateSql = `ALTER EXTENSION ${format.ident(name)} UPDATE ${
+      version === undefined ? '' : `TO ${format.literal(version)}`
+    };`
   }
-  const schemaSql = schema === undefined ? '' : `ALTER EXTENSION "${name}" SET SCHEMA "${schema}";`
+  const schemaSql =
+    schema === undefined ? '' : format('ALTER EXTENSION %I SET SCHEMA %I;', name, schema)
 
   return `
 BEGIN;
@@ -116,7 +120,7 @@ COMMIT;`
 }
 const dropExtensionSqlize = (name: string, cascade: boolean) => {
   return `
-DROP EXTENSION ${name}
+DROP EXTENSION ${format.ident(name)}
   ${cascade ? 'CASCADE' : 'RESTRICT'}`
 }
 

@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import format from 'pg-format'
 import { coalesceRowsToArray, toTransaction } from '../lib/helpers'
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
@@ -118,7 +119,7 @@ const getPolicyById = async (connection: string, id: number) => {
   let sql = `
     with policies as (${policies}) 
     select * from policies
-    where policies.id = '${id}'
+    where policies.id = ${id}
     limit 1
   `.trim()
   const { data } = await RunQuery(connection, sql)
@@ -126,12 +127,17 @@ const getPolicyById = async (connection: string, id: number) => {
 }
 const getPolicyByName = async (connection: string, name: string, schema: string, table: string) => {
   const { policies } = sqlTemplates
-  let sql = `
-    with policies as (${policies}) 
+  let sql = format(
+    `
+    with policies as (${policies})
     select * from policies
-    where policies.name = '${name}' and policies.schema = '${schema}' and policies.table = '${table}'
+    where policies.name = %L and policies.schema = %L and policies.table = %L
     limit 1
-  `.trim()
+  `,
+    name,
+    schema,
+    table
+  )
   const { data } = await RunQuery(connection, sql)
   return data[0]
 }
@@ -154,17 +160,22 @@ const createSql = ({
   command?: string
   roles?: string[]
 }) => {
-  let sql = ` CREATE POLICY "${name}" ON "${schema}"."${table}"
+  let sql = format(
+    `CREATE POLICY %I ON %I.%I
     AS ${action}
     FOR ${command}
-    TO ${roles.join(',')} `.trim()
+    TO ${roles.join(',')} `,
+    name,
+    schema,
+    table
+  )
   if (definition) sql += ` USING (${definition}) `
   if (check) sql += ` WITH CHECK (${check}) `
   sql += ';'
   return sql
 }
 const alterPolicyNameSql = (oldName: string, newName: string, schema: string, table: string) => {
-  return `ALTER POLICY "${oldName}" ON "${schema}"."${table}" RENAME TO "${newName}";`.trim()
+  return format(`ALTER POLICY %I ON %I.%I RENAME TO %I;`, oldName, schema, table, newName)
 }
 const alterSql = ({
   name,
@@ -181,7 +192,7 @@ const alterSql = ({
   check?: string
   roles?: string[]
 }) => {
-  let alter = `ALTER POLICY "${name}" ON "${schema}"."${table}"`
+  let alter = format(`ALTER POLICY %I ON %I.%I`, name, schema, table)
   let newDefinition = definition !== undefined ? `${alter} USING (${definition});` : ''
   let newCheck = check !== undefined ? `${alter} WITH CHECK (${check});` : ''
   let newRoles = roles !== undefined ? `${alter} TO (${roles.join(',')});` : ''
@@ -192,7 +203,7 @@ const alterSql = ({
     ${newRoles}`.trim()
 }
 const dropSql = (name: string, schema: string, table: string) => {
-  return `DROP POLICY "${name}" ON "${schema}"."${table}";`.trim()
+  return format(`DROP POLICY %I ON %I.%I;`, name, schema, table)
 }
 const removeSystemSchemas = (data: Tables.Policy[]) => {
   return data.filter((x) => !DEFAULT_SYSTEM_SCHEMAS.includes(x.schema))
