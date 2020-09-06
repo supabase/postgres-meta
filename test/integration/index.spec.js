@@ -383,6 +383,28 @@ describe('/tables', async () => {
 
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })
+
+  it("allows ' in COMMENTs", async () => {
+    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'foo', comment: "'" })
+    assert.equal(newTable.comment, "'")
+
+    await axios.post(`${URL}/columns`, {
+      table_id: newTable.id,
+      name: 'bar',
+      type: 'int2',
+      comment: "'",
+    })
+
+    const { data: columns } = await axios.get(`${URL}/columns`)
+    const newColumn = columns.find(
+      (column) =>
+        column.id === `${newTable.id}.1` && column.name === 'bar' && column.format === 'int2'
+    )
+    assert.equal(newColumn.comment, "'")
+
+    await axios.delete(`${URL}/columns/${newTable.id}.1`)
+    await axios.delete(`${URL}/tables/${newTable.id}`)
+  })
 })
 // TODO: Test for schema (currently checked manually). Need a different SQL template.
 describe('/extensions', () => {

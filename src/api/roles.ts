@@ -1,5 +1,6 @@
 import { Router } from 'express'
 
+import format from 'pg-format'
 import SQL from 'sql-template-strings'
 import sqlTemplates = require('../lib/sql')
 const { grants, roles } = sqlTemplates
@@ -137,14 +138,15 @@ const createRoleSqlize = ({
   const isReplicationRoleSql = is_replication_role ? 'REPLICATION' : 'NOREPLICATION'
   const canBypassRlsSql = can_bypass_rls ? 'BYPASSRLS' : 'NOBYPASSRLS'
   const connectionLimitSql = `CONNECTION LIMIT ${connection_limit}`
-  const passwordSql = password === undefined ? '' : `PASSWORD '${password}'`
-  const validUntilSql = valid_until === undefined ? '' : `VALID UNTIL '${valid_until}'`
+  const passwordSql = password === undefined ? '' : `PASSWORD ${format.literal(password)}`
+  const validUntilSql =
+    valid_until === undefined ? '' : `VALID UNTIL ${format.literal(valid_until)}`
   const memberOfSql = member_of === undefined ? '' : `IN ROLE ${member_of.join(',')}`
   const membersSql = members === undefined ? '' : `ROLE ${members.join(',')}`
   const adminsSql = admins === undefined ? '' : `ADMIN ${admins.join(',')}`
 
   return `
-CREATE ROLE "${name}"
+CREATE ROLE ${format.ident(name)}
 WITH
   ${isSuperuserSql}
   ${canCreateDbSql}
@@ -193,7 +195,7 @@ const alterRoleSqlize = ({
   password?: string
   valid_until?: string
 }) => {
-  const nameSql = name === undefined ? '' : `ALTER ROLE "${oldName}" RENAME TO "${name}";`
+  const nameSql = name === undefined ? '' : format('ALTER ROLE %I RENAME TO %I;', oldName, name)
   let isSuperuserSql = ''
   if (is_superuser !== undefined) {
     isSuperuserSql = is_superuser ? 'SUPERUSER' : 'NOSUPERUSER'
@@ -224,12 +226,12 @@ const alterRoleSqlize = ({
   }
   const connectionLimitSql =
     connection_limit === undefined ? '' : `CONNECTION LIMIT ${connection_limit}`
-  let passwordSql = password === undefined ? '' : `PASSWORD '${password}'`
-  let validUntilSql = valid_until === undefined ? '' : `VALID UNTIL '${valid_until}'`
+  let passwordSql = password === undefined ? '' : `PASSWORD ${format.literal(password)}`
+  let validUntilSql = valid_until === undefined ? '' : `VALID UNTIL ${format.literal(valid_until)}`
 
   return `
 BEGIN;
-  ALTER ROLE "${oldName}"
+  ALTER ROLE ${format.ident(oldName)}
     ${isSuperuserSql}
     ${canCreateDbSql}
     ${canCreateRoleSql}
@@ -244,7 +246,7 @@ BEGIN;
 COMMIT;`
 }
 const dropRoleSqlize = (name: string) => {
-  return `DROP ROLE "${name}"`
+  return `DROP ROLE ${format.ident(name)}`
 }
 const removeSystemSchemas = (data: Roles.Role[]) => {
   return data.map((role) => {
