@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import format from 'pg-format'
 import SQL from 'sql-template-strings'
 import { RunQuery } from '../lib/connectionPool'
 import sql = require('../lib/sql')
@@ -126,17 +127,22 @@ const addColumnSqlize = ({
   const commentSql =
     comment === undefined
       ? ''
-      : `COMMENT ON COLUMN "${schema}"."${table}"."${name}" IS '${comment}';`
+      : format('COMMENT ON COLUMN %I.%I.%I IS %L;', schema, table, name, comment)
 
-  return `
-ALTER TABLE "${schema}"."${table}" ADD COLUMN "${name}" "${type}"
+  return format(
+    `
+ALTER TABLE %I.%I ADD COLUMN %I %I
   ${defaultValueSql}
   ${isIdentitySql}
   ${isNullableSql}
   ${isPrimaryKeySql}
   ${isUniqueSql};
-
-  ${commentSql}`
+${commentSql}`,
+    schema,
+    table,
+    name,
+    type
+  )
 }
 const getColumnSqlize = (tableId: number, name: string) => {
   return SQL``.append(columns).append(SQL` WHERE c.oid = ${tableId} AND column_name = ${name}`)
@@ -168,30 +174,48 @@ const alterColumnSqlize = ({
   comment?: string
 }) => {
   const nameSql =
-    typeof name === 'undefined' || name === oldName
+    name === undefined || name === oldName
       ? ''
-      : `ALTER TABLE "${schema}"."${table}" RENAME COLUMN "${oldName}" TO "${name}";`
+      : format('ALTER TABLE %I.%I RENAME COLUMN %I TO %I;', schema, table, oldName, name)
   // We use USING to allow implicit conversion of incompatible types (e.g. int4 -> text).
   const typeSql =
     type === undefined
       ? ''
-      : `ALTER TABLE "${schema}"."${table}" ALTER COLUMN "${oldName}" SET DATA TYPE "${type}" USING "${oldName}"::"${type}";`
+      : format(
+          'ALTER TABLE %I.%I ALTER COLUMN %I SET DATA TYPE %I USING %I::%I;',
+          schema,
+          table,
+          oldName,
+          type,
+          oldName,
+          type
+        )
   let defaultValueSql = ''
   if (drop_default) {
-    defaultValueSql = `ALTER TABLE "${schema}"."${table}" ALTER COLUMN "${oldName}" DROP DEFAULT;`
+    defaultValueSql = format(
+      'ALTER TABLE %I.%I ALTER COLUMN %I DROP DEFAULT;',
+      schema,
+      table,
+      oldName
+    )
   } else if (default_value !== undefined) {
-    defaultValueSql = `ALTER TABLE "${schema}"."${table}" ALTER COLUMN "${oldName}" SET DEFAULT ${default_value};`
+    defaultValueSql = format(
+      `ALTER TABLE %I.%I ALTER COLUMN %I SET DEFAULT ${default_value};`,
+      schema,
+      table,
+      oldName
+    )
   }
   let isNullableSql = ''
   if (is_nullable !== undefined) {
     isNullableSql = is_nullable
-      ? `ALTER TABLE "${schema}"."${table}" ALTER COLUMN "${oldName}" DROP NOT NULL;`
-      : `ALTER TABLE "${schema}"."${table}" ALTER COLUMN "${oldName}" SET NOT NULL;`
+      ? format('ALTER TABLE %I.%I ALTER COLUMN %I DROP NOT NULL;', schema, table, oldName)
+      : format('ALTER TABLE %I.%I ALTER COLUMN %I SET NOT NULL;', schema, table, oldName)
   }
   const commentSql =
     comment === undefined
       ? ''
-      : `COMMENT ON COLUMN "${schema}"."${table}"."${oldName}" IS '${comment}';`
+      : format('COMMENT ON COLUMN %I.%I.%I IS %L;', schema, table, oldName, comment)
 
   // nameSql must be last.
   return `
@@ -204,7 +228,7 @@ BEGIN;
 COMMIT;`
 }
 const dropColumnSqlize = (schema: string, table: string, name: string) => {
-  return `ALTER TABLE "${schema}"."${table}" DROP COLUMN "${name}"`
+  return format('ALTER TABLE %I.%I DROP COLUMN %I', schema, table, name)
 }
 const removeSystemSchemas = (data: Tables.Column[]) => {
   return data.filter((x) => !DEFAULT_SYSTEM_SCHEMAS.includes(x.schema))
