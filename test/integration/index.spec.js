@@ -53,6 +53,12 @@ describe('When passing an encrypted connection header', () => {
     }
   })
 })
+describe('should give meaningful errors', () => {
+  it('POST', async () => {
+    const { data } = await axios.post(`${URL}/query`, { query: 'drop table fake_table' })
+    assert.equal(data.error, 'error: table "fake_table" does not exist')
+  })
+})
 describe('/query', () => {
   it('POST', async () => {
     const res = await axios.post(`${URL}/query`, { query: 'SELECT * FROM USERS' })
