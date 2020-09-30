@@ -105,3 +105,6 @@ typings/
 
 # TypeScript output files
 dist/
+
+# Binaries
+bin/
