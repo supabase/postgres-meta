@@ -66,7 +66,7 @@ router.post('/', async (req, res) => {
   } catch (error) {
     // For this one, we always want to give back the error to the customer
     console.log('Soft error!', error)
-    res.status(400).json({ error: error.toString() })
+    res.status(400).json({ error: error.message })
   }
 })
 
@@ -101,7 +101,7 @@ router.patch('/:id', async (req, res) => {
   } catch (error) {
     // For this one, we always want to give back the error to the customer
     console.log('Soft error!', error)
-    res.status(400).json({ error: error.toString() })
+    res.status(400).json({ error: error.message })
   }
 })
 
