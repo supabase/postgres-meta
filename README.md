@@ -20,13 +20,7 @@ PG_API_DB_PASSWORD="postgres"
 PG_API_DB_SSL=false
 ```
 
-Then run any of the bin files in the `bin` directory
-
-```
-./bin/pg-api-linux
-./bin/pg-api-macos
-./bin/pg-api-windows.exe
-```
+Then run any of the binaries in the releases.
 
 ## FAQs
 
