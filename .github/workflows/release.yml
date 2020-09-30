@@ -91,9 +91,9 @@ jobs:
         run: |
           npm ci
           npm run dist
-          tar -czvf pg-api-linux.tar.gz -C ./bin start-linux
-          tar -czvf pg-api-macos.tar.gz -C ./bin start-macos
-          tar -czvf pg-api-windows.tar.gz -C ./bin start-win.exe
+          tar -czvf pg-api-linux.tar.gz -C ./bin pg-api-linux
+          tar -czvf pg-api-macos.tar.gz -C ./bin pg-api-macos
+          tar -czvf pg-api-windows.tar.gz -C ./bin pg-api-win.exe
 
       - name: Get upload url
         if: env.HAS_NEW_RELEASE == 1
