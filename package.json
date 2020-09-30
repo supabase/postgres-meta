@@ -25,6 +25,7 @@
     "crypto-js": "^4.0.0",
     "express": "^4.17.1",
     "pg": "^7.18.2",
+    "pg-format": "^1.0.4",
     "sql-template-strings": "^2.2.2"
   },
   "devDependencies": {
@@ -38,7 +39,6 @@
     "mocha": "^7.1.2",
     "nodemon": "^1.19.4",
     "npm-run-all": "^4.1.5",
-    "pg-format": "^1.0.4",
     "pkg": "^4.4.8",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.2",
