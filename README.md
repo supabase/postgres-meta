@@ -23,16 +23,16 @@ PG_API_DB_SSL=false
 Then run any of the bin files in the `bin` directory
 
 ```
-./bin/start-linux
-./bin/start-macos
-./bin/start-windows.exe
+./bin/pg-api-linux
+./bin/pg-api-macos
+./bin/pg-api-windows.exe
 ```
 
 ## FAQs
 
 **What security does this use?**
 
-None. Please don't use this as a standalone server. We are assuming you are using this behind a proxy which brings it's own security, on your local machine, or using this internally with no access to the outside world. This is designed to be used as a part of a larger system.  
+None. Please don't use this as a standalone server. We are assuming you are using this behind a proxy which brings it's own security, on your local machine, or using this internally with no access to the outside world. This is designed to be used as a part of a larger system.
 
 ## Developers
 
@@ -50,4 +50,3 @@ We are building the features of Firebase using enterprise-grade, open source pro
 
 [![Worklife VC](https://user-images.githubusercontent.com/10214025/90451355-34d71200-e11e-11ea-81f9-1592fd1e9146.png)](https://www.worklife.vc)
 [![New Sponsor](https://user-images.githubusercontent.com/10214025/90518111-e74bbb00-e198-11ea-8f88-c9e3c1aa4b5b.png)](https://github.com/sponsors/supabase)
-

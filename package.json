@@ -2,8 +2,8 @@
   "name": "@supabase/pg-api",
   "version": "0.0.0",
   "description": "A RESTful API for managing your Postgres.",
-  "main": "src/start.js",
-  "bin": "src/start.js",
+  "main": "dist/start.js",
+  "bin": "dist/start.js",
   "private": false,
   "scripts": {
     "build": "npm-run-all build:clean build:transpile build:copy",
@@ -13,7 +13,7 @@
     "docker:build": "docker build -t supabase/pg-api:0.6.0 .",
     "docker:deploy": "docker push supabase/pg-api:0.6.0",
     "dist": "NODE_ENV=production npm-run-all build dist:pkg",
-    "dist:pkg": "rimraf bin && pkg --out-path ./bin dist/start.js",
+    "dist:pkg": "rimraf bin && pkg --out-path ./bin package.json",
     "dev": "NODE_ENV=development npm-run-all build server",
     "dev:watch": "nodemon",
     "pretty": "prettier --write \"./src/**/*.{js,json,yml,md,vue,css,scss}\"",
@@ -62,6 +62,11 @@
       "**/__tests__/**",
       "*.test.js",
       "*.spec.js"
+    ]
+  },
+  "pkg": {
+    "scripts": [
+      "node_modules/pg-format/lib/reserved.js"
     ]
   }
 }
