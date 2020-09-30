@@ -61,7 +61,7 @@ describe('should give meaningful errors', () => {
     } catch (error) {
       let { status, data } = error.response
       assert.equal(status, 400)
-      assert.equal(data.error, 'error: table "fake_table" does not exist')
+      assert.equal(data.error, 'table "fake_table" does not exist')
     }
   })
 })
