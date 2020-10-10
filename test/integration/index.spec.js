@@ -611,3 +611,49 @@ describe('/policies', () => {
     assert.equal(stillExists, false, 'Policy is deleted')
   })
 })
+describe('/publications', () => {
+  const publication = {
+    name: 'a',
+    publish_insert: true,
+    publish_update: true,
+    publish_delete: true,
+    publish_truncate: false,
+    tables: ['users'],
+  }
+  it('POST', async () => {
+    const { data: newPublication } = await axios.post(`${URL}/publications`, publication)
+    assert.equal(newPublication.name, publication.name)
+    assert.equal(newPublication.publish_insert, publication.publish_insert)
+    assert.equal(newPublication.publish_update, publication.publish_update)
+    assert.equal(newPublication.publish_delete, publication.publish_delete)
+    assert.equal(newPublication.publish_truncate, publication.publish_truncate)
+    assert.equal(newPublication.tables.includes('users'), true)
+  })
+  it('GET', async () => {
+    const res = await axios.get(`${URL}/publications`)
+    const newPublication = res.data[0]
+    assert.equal(newPublication.name, publication.name)
+  })
+  it('PATCH', async () => {
+    const res = await axios.get(`${URL}/publications`)
+    const { id } = res.data[0]
+
+    const { data: updated } = await axios.patch(`${URL}/publications/${id}`, {
+      name: 'b',
+      publish_insert: false,
+      tables: [],
+    })
+    assert.equal(updated.name, 'b')
+    assert.equal(updated.publish_insert, false)
+    assert.equal(updated.tables.includes('users'), false)
+  })
+  it('DELETE', async () => {
+    const res = await axios.get(`${URL}/publications`)
+    const { id } = res.data[0]
+
+    await axios.delete(`${URL}/publications/${id}`)
+    const { data: publications } = await axios.get(`${URL}/publications`)
+    const stillExists = publications.some((x) => x.id === id)
+    assert.equal(stillExists, false)
+  })
+})
