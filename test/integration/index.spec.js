@@ -313,23 +313,24 @@ describe('/tables', async () => {
       (column) =>
         column.id === `${newTable.id}.1` && column.name === 'foo bar' && column.format === 'int2'
     )
-    assert.equal(newColumn.default_value, 42)
+    assert.equal(newColumn.default_value, "'42'::smallint")
     assert.equal(newColumn.is_nullable, false)
     assert.equal(newColumn.comment, 'foo')
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })
-  it('/columns default_value for type text', async () => {
+  it('/columns default_value with expressions', async () => {
     const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'a' })
     const { data: newColumn } = await axios.post(`${URL}/columns`, {
       table_id: newTable.id,
       name: 'a',
-      type: 'text',
-      default_value: 'a',
+      type: 'timestamptz',
+      default_value: 'NOW()',
+      default_value_format: 'expression',
     })
 
-    assert.equal(newColumn.default_value, `'a'::text`)
+    assert.equal(newColumn.default_value, 'now()')
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
