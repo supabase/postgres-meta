@@ -6,6 +6,11 @@ SELECT
   is_insertable_into,
   relrowsecurity::bool as rls_enabled, 
   relforcerowsecurity as rls_forced,
+  CASE WHEN relreplident = 'd' THEN 'DEFAULT'
+       WHEN relreplident = 'i' THEN 'INDEX'
+       WHEN relreplident = 'f' THEN 'FULL'
+       ELSE 'NOTHING'
+  END AS replica_identity,
   is_typed,
   pg_total_relation_size(format('%I.%I', table_schema, table_name))::bigint AS bytes,
   pg_size_pretty(
