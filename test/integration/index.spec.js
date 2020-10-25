@@ -349,6 +349,8 @@ describe('/tables', async () => {
       name: 'foo bar',
       type: 'int4',
       drop_default: true,
+      is_identity: true,
+      identity_generation: 'ALWAYS',
       is_nullable: false,
       comment: 'bar',
     })
@@ -359,6 +361,7 @@ describe('/tables', async () => {
         column.id === `${newTable.id}.1` && column.name === 'foo bar' && column.format === 'int4'
     )
     assert.equal(updatedColumn.default_value, null)
+    assert.equal(updatedColumn.identity_generation, 'ALWAYS')
     assert.equal(updatedColumn.is_nullable, false)
     assert.equal(updatedColumn.comment, 'bar')
 
