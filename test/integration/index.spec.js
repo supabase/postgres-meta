@@ -250,8 +250,9 @@ describe('/tables', async () => {
     assert.equal(true, !!included)
   })
   it('POST /tables should create a table', async () => {
-    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'test', comment: 'foo' })
+    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'test', replica_identity: 'FULL', comment: 'foo' })
     assert.equal(`${newTable.schema}.${newTable.name}`, 'public.test')
+    assert.equal(newTable.replica_identity, 'FULL')
     assert.equal(newTable.comment, 'foo')
 
     const { data: tables } = await axios.get(`${URL}/tables`)
@@ -268,11 +269,13 @@ describe('/tables', async () => {
       name: 'test a',
       rls_enabled: true,
       rls_forced: true,
+      replica_identity: 'NOTHING',
       comment: 'foo',
     })
     assert.equal(updatedTable.name, `test a`)
     assert.equal(updatedTable.rls_enabled, true)
     assert.equal(updatedTable.rls_forced, true)
+    assert.equal(updatedTable.replica_identity, 'NOTHING')
     assert.equal(updatedTable.comment, 'foo')
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })

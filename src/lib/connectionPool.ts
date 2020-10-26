@@ -6,7 +6,7 @@ import { SQLStatement } from 'sql-template-strings'
 pg.types.setTypeParser(20, 'text', parseInt)
 const { Pool } = pg
 
-export const RunQuery = async (connectionString: any, sql: string|SQLStatement) => {
+export const RunQuery = async (connectionString: any, sql: string | SQLStatement) => {
   const pool = new Pool({ connectionString })
   try {
     const results = await pool.query(sql)
