@@ -16,7 +16,7 @@
     "dist:pkg": "rimraf bin && pkg --out-path ./bin package.json",
     "dev": "NODE_ENV=development npm-run-all build server",
     "dev:watch": "nodemon",
-    "pretty": "prettier --write \"./src/**/*.{js,json,yml,md,vue,css,scss}\"",
+    "pretty": "prettier --write \"{src,test}/**/*.ts\"",
     "server": "node ./dist/start.js",
     "test": "node -r esm ./node_modules/.bin/mocha 'test/**/*.js' --recursive "
   },

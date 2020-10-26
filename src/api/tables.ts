@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import format from 'pg-format'
+import format, { ident } from 'pg-format'
 import { coalesceRowsToArray, toTransaction } from '../lib/helpers'
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
@@ -233,16 +233,35 @@ const selectSingleByName = (
 const createTableSqlize = ({
   name,
   schema = 'public',
+  replica_identity,
+  replica_identity_index,
   comment,
 }: {
   name: string
   schema?: string
+  replica_identity?: 'DEFAULT' | 'INDEX' | 'FULL' | 'NOTHING'
+  replica_identity_index?: string
   comment?: string
 }) => {
   const tableSql = format('CREATE TABLE IF NOT EXISTS %I.%I ();', schema, name)
+  let replicaSql: string
+  if (replica_identity === undefined) {
+    replicaSql = ''
+  } else if (replica_identity === 'INDEX') {
+    replicaSql = `ALTER TABLE ${ident(schema)}.${ident(
+      name
+    )} REPLICA IDENTITY USING INDEX ${replica_identity_index};`
+  } else {
+    replicaSql = `ALTER TABLE ${ident(schema)}.${ident(name)} REPLICA IDENTITY ${replica_identity};`
+  }
   const commentSql =
     comment === undefined ? '' : format('COMMENT ON TABLE %I.%I IS %L;', schema, name, comment)
-  return `${tableSql} ${commentSql}`
+  return `
+BEGIN;
+  ${tableSql}
+  ${replicaSql}
+  ${commentSql}
+COMMIT;`
 }
 const alterTableName = (previousName: string, newName: string, schema: string) => {
   return format('ALTER TABLE %I.%I RENAME TO %I;', schema, previousName, newName)
@@ -252,15 +271,19 @@ const alterTableSql = ({
   name,
   rls_enabled,
   rls_forced,
+  replica_identity,
+  replica_identity_index,
   comment,
 }: {
   schema?: string
   name: string
   rls_enabled?: boolean
   rls_forced?: boolean
+  replica_identity?: 'DEFAULT' | 'INDEX' | 'FULL' | 'NOTHING'
+  replica_identity_index?: string
   comment?: string
 }) => {
-  let alter = format('ALTER table %I.%I', schema, name)
+  let alter = format('ALTER TABLE %I.%I', schema, name)
   let enableRls = ''
   if (rls_enabled !== undefined) {
     let enable = `${alter} ENABLE ROW LEVEL SECURITY;`
@@ -273,13 +296,23 @@ const alterTableSql = ({
     let disable = `${alter} NO FORCE ROW LEVEL SECURITY;`
     forceRls = rls_forced ? enable : disable
   }
+  let replicaSql: string
+  if (replica_identity === undefined) {
+    replicaSql = ''
+  } else if (replica_identity === 'INDEX') {
+    replicaSql = `${alter} REPLICA IDENTITY USING INDEX ${replica_identity_index};`
+  } else {
+    replicaSql = `${alter} REPLICA IDENTITY ${replica_identity};`
+  }
   const commentSql =
     comment === undefined ? '' : format('COMMENT ON TABLE %I.%I IS %L;', schema, name, comment)
   return `
+BEGIN;
     ${enableRls}
     ${forceRls}
+    ${replicaSql}
     ${commentSql}
-  `.trim()
+COMMIT;`
 }
 const dropTableSql = (schema: string, name: string, cascade: boolean) => {
   return format(`DROP TABLE %I.%I ${cascade ? 'CASCADE' : 'RESTRICT'};`, schema, name)
