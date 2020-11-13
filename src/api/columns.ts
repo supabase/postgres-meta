@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
     return res.status(200).json(payload)
   } catch (error) {
     console.log('throwing error')
-    res.status(500).json({ error: 'Database error.', status: 500 })
+    res.status(500).json({ error: error.message })
   }
 })
 
@@ -50,7 +50,7 @@ router.post('/', async (req, res) => {
     return res.status(200).json(column)
   } catch (error) {
     console.log('throwing error', error)
-    res.status(500).json({ error: 'Database error', status: 500 })
+    res.status(400).json({ error: error.message })
   }
 })
 
@@ -68,7 +68,11 @@ router.patch('/:id', async (req, res) => {
     return res.status(200).json(updated)
   } catch (error) {
     console.log('throwing error', error)
-    res.status(500).json({ error: 'Database error', status: 500 })
+    if (error instanceof TypeError) {
+      res.status(404).json({ error: 'Cannot find a column with that id' })
+    } else {
+      res.status(400).json({ error: error.message })
+    }
   }
 })
 
@@ -85,7 +89,11 @@ router.delete('/:id', async (req, res) => {
     return res.status(200).json(column)
   } catch (error) {
     console.log('throwing error', error)
-    res.status(500).json({ error: 'Database error', status: 500 })
+    if (error instanceof TypeError) {
+      res.status(404).json({ error: 'Cannot find a column with that id' })
+    } else {
+      res.status(400).json({ error: error.message })
+    }
   }
 })
 
