@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
     return res.status(200).json(payload)
   } catch (error) {
     console.log('throwing error', error)
-    res.status(500).json({ error: 'Database error', status: 500 })
+    res.status(500).json({ error: error.message })
   }
 })
 
@@ -43,7 +43,7 @@ router.get('/:id', async (req, res) => {
     return res.status(200).json(table)
   } catch (error) {
     console.log('throwing error', error)
-    res.status(500).json({ error: 'Database error', status: 500 })
+    res.status(400).json({ error: error.message })
   }
 })
 
@@ -119,7 +119,7 @@ router.delete('/:id', async (req, res) => {
     return res.status(200).json(table)
   } catch (error) {
     console.log('throwing error', error)
-    res.status(500).json({ error: 'Database error', status: 500 })
+    res.status(400).json({ error: error.message })
   }
 })
 
