@@ -26,7 +26,7 @@ Then run any of the binaries in the releases.
 
 **What security does this use?**
 
-None. Please don't use this as a standalone server. We are assuming you are using this behind a proxy which brings it's own security, on your local machine, or using this internally with no access to the outside world. This is designed to be used as a part of a larger system.
+None. Please don't use this as a standalone server. We are assuming you are using this behind a proxy which brings its own security, on your local machine, or using this internally with no access to the outside world. This is designed to be used as a part of a larger system.
 
 ## Developers
 
