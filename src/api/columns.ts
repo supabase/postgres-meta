@@ -108,7 +108,7 @@ const addColumnSqlize = ({
   default_value,
   default_value_format = 'literal',
   is_identity = false,
-  identity_generation,
+  identity_generation = 'BY DEFAULT',
   is_nullable = true,
   is_primary_key = false,
   is_unique = false,
