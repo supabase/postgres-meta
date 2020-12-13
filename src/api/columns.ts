@@ -160,12 +160,10 @@ ${commentSql}`,
   )
 }
 const getColumnSqlize = (tableId: number, name: string) => {
-  return SQL``.append(columns).append(SQL` WHERE c.oid = ${tableId} AND column_name = ${name}`)
+  return SQL``.append(columns).append(SQL` AND c.oid = ${tableId} AND a.attname = ${name}`)
 }
 const getColumnByPosSqlize = (tableId: number, ordinalPos: number) => {
-  return SQL``
-    .append(columns)
-    .append(SQL` WHERE c.oid = ${tableId} AND ordinal_position = ${ordinalPos}`)
+  return SQL``.append(columns).append(SQL` AND c.oid = ${tableId} AND a.attnum = ${ordinalPos}`)
 }
 const alterColumnSqlize = (
   old: any,

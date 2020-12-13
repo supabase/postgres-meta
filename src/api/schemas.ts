@@ -103,11 +103,11 @@ router.delete('/:id', async (req, res) => {
 
 // Helpers
 const selectSingleSql = (id: number) => {
-  const query = SQL``.append(schemas).append(SQL` where nsp.oid = ${id}`)
+  const query = SQL``.append(schemas).append(SQL` AND n.oid = ${id}`)
   return query
 }
 const selectSingleByName = (name: string) => {
-  const query = SQL``.append(schemas).append(SQL` where schema_name = ${name}`)
+  const query = SQL``.append(schemas).append(SQL` AND n.nspname = ${name}`)
   return query
 }
 const createSchema = (name: string, owner: string = 'postgres') => {
