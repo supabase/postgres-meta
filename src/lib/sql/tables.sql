@@ -1,46 +1,33 @@
 SELECT
-  c.oid AS id,
-  table_catalog AS catalog,
-  table_schema AS schema,
-  table_name AS name,
-  is_insertable_into,
-  relrowsecurity::bool as rls_enabled, 
-  relforcerowsecurity as rls_forced,
-  CASE WHEN relreplident = 'd' THEN 'DEFAULT'
-       WHEN relreplident = 'i' THEN 'INDEX'
-       WHEN relreplident = 'f' THEN 'FULL'
-       ELSE 'NOTHING'
+  c.oid :: int8 AS id,
+  nc.nspname AS schema,
+  c.relname AS name,
+  c.relrowsecurity AS rls_enabled,
+  c.relforcerowsecurity AS rls_forced,
+  CASE
+    WHEN c.relreplident = 'd' THEN 'DEFAULT'
+    WHEN c.relreplident = 'i' THEN 'INDEX'
+    WHEN c.relreplident = 'f' THEN 'FULL'
+    ELSE 'NOTHING'
   END AS replica_identity,
-  is_typed,
-  pg_total_relation_size(format('%I.%I', table_schema, table_name))::bigint AS bytes,
+  pg_total_relation_size(format('%I.%I', nc.nspname, c.relname)) :: int8 AS bytes,
   pg_size_pretty(
-    pg_total_relation_size(format('%I.%I', table_schema, table_name))
+    pg_total_relation_size(format('%I.%I', nc.nspname, c.relname))
   ) AS size,
-  seq_scan :: bigint AS seq_scan_count,
-  seq_tup_read :: bigint AS seq_row_read_count,
-  idx_scan :: bigint AS idx_scan_count,
-  idx_tup_fetch :: bigint AS idx_row_read_count,
-  n_tup_ins :: bigint AS row_ins_count,
-  n_tup_upd :: bigint AS row_upd_count,
-  n_tup_del :: bigint AS row_del_count,
-  n_tup_hot_upd :: bigint AS row_hot_upd_count,
-  n_live_tup :: bigint AS live_row_count,
-  n_dead_tup :: bigint AS dead_row_count,
-  n_mod_since_analyze :: bigint AS rows_mod_since_analyze,
-  last_vacuum,
-  last_autovacuum,
-  last_analyze,
-  last_autoanalyze,
-  vacuum_count :: bigint,
-  autovacuum_count :: bigint,
-  analyze_count :: bigint,
-  autoanalyze_count :: bigint,
+  pg_stat_get_live_tuples(c.oid) AS live_row_count,
+  pg_stat_get_dead_tuples(c.oid) AS dead_row_count,
   obj_description(c.oid) AS comment
 FROM
-  information_schema.tables
-  JOIN pg_class c ON quote_ident(table_schema)::regnamespace = c.relnamespace
-  AND c.relname = table_name
-  LEFT JOIN pg_stat_user_tables ON pg_stat_user_tables.schemaname = tables.table_schema
-  AND pg_stat_user_tables.relname = tables.table_name
+  pg_namespace nc
+  JOIN pg_class c ON nc.oid = c.relnamespace
 WHERE
-  table_type = 'BASE TABLE'
+  c.relkind IN ('r', 'p')
+  AND NOT pg_is_other_temp_schema(nc.oid)
+  AND (
+    pg_has_role(c.relowner, 'USAGE')
+    OR has_table_privilege(
+      c.oid,
+      'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER'
+    )
+    OR has_any_column_privilege(c.oid, 'SELECT, INSERT, UPDATE, REFERENCES')
+  )
