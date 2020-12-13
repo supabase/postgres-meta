@@ -126,12 +126,12 @@ router.delete('/:id', async (req, res) => {
 const getTablesSql = (sqlTemplates) => {
   const { columns, grants, policies, primary_keys, relationships, tables } = sqlTemplates
   return `
-  WITH tables AS MATERIALIZED ( ${tables} ),
-    columns AS MATERIALIZED ( ${columns} ),
-    grants AS MATERIALIZED ( ${grants} ),
-    policies AS MATERIALIZED ( ${policies} ),
-    primary_keys AS MATERIALIZED ( ${primary_keys} ),
-    relationships AS MATERIALIZED ( ${relationships} )
+  WITH tables AS ( ${tables} ),
+    columns AS ( ${columns} ),
+    grants AS ( ${grants} ),
+    policies AS ( ${policies} ),
+    primary_keys AS ( ${primary_keys} ),
+    relationships AS ( ${relationships} )
   SELECT
     *,
     ${coalesceRowsToArray('columns', 'SELECT * FROM columns WHERE columns.table_id = tables.id')},
@@ -151,8 +151,8 @@ const getTablesSql = (sqlTemplates) => {
       FROM
         relationships
       WHERE
-        (relationships.source_schema = tables.schema AND relationships.source_table_name = tables.name)
-        OR (relationships.target_table_schema = tables.schema AND relationships.target_table_name = tables.name)`
+        (relationships.source_schema :: text = tables.schema AND relationships.source_table_name :: text = tables.name)
+        OR (relationships.target_table_schema :: text = tables.schema AND relationships.target_table_name :: text = tables.name)`
     )}
   FROM tables;`.trim()
 }
@@ -184,8 +184,8 @@ const selectSingleSql = (sqlTemplates: { [key: string]: string }, id: number) =>
       FROM
         relationships
       WHERE
-        (relationships.source_schema = tables.schema AND relationships.source_table_name = tables.name)
-        OR (relationships.target_table_schema = tables.schema AND relationships.target_table_name = tables.name)`
+        (relationships.source_schema :: text = tables.schema AND relationships.source_table_name :: text = tables.name)
+        OR (relationships.target_table_schema :: text = tables.schema AND relationships.target_table_name :: text = tables.name)`
     )}
   FROM tables;`.trim()
 }
@@ -197,9 +197,9 @@ const selectSingleByName = (
 ) => {
   const { columns, grants, policies, primary_keys, relationships, tables } = sqlTemplates
   return `
-  WITH tables AS ( ${tables} AND table_schema = ${format.literal(
+  WITH tables AS ( ${tables} AND nc.nspname = ${format.literal(
     schema
-  )} AND table_name = ${format.literal(name)} ),
+  )} AND c.relname = ${format.literal(name)} ),
     columns AS ( ${columns} ),
     grants AS ( ${grants} ),
     policies AS ( ${policies} ),
@@ -224,8 +224,8 @@ const selectSingleByName = (
       FROM
         relationships
       WHERE
-        (relationships.source_schema = tables.schema AND relationships.source_table_name = tables.name)
-        OR (relationships.target_table_schema = tables.schema AND relationships.target_table_name = tables.name)`
+        (relationships.source_schema :: text = tables.schema AND relationships.source_table_name :: text = tables.name)
+        OR (relationships.target_table_schema :: text = tables.schema AND relationships.target_table_name :: text = tables.name)`
     )}
   FROM tables;`.trim()
 }
