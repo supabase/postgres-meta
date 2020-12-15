@@ -146,7 +146,7 @@ const addColumnSqlize = ({
 
   return format(
     `
-ALTER TABLE %I.%I ADD COLUMN %I %I
+ALTER TABLE %I.%I ADD COLUMN %I ${type}
   ${defaultValueSql}
   ${isIdentitySql}
   ${isNullableSql}
@@ -155,8 +155,7 @@ ALTER TABLE %I.%I ADD COLUMN %I %I
 ${commentSql}`,
     schema,
     table,
-    name,
-    type
+    name
   )
 }
 const getColumnSqlize = (tableId: number, name: string) => {
@@ -198,13 +197,11 @@ const alterColumnSqlize = (
     type === undefined
       ? ''
       : format(
-          'ALTER TABLE %I.%I ALTER COLUMN %I SET DATA TYPE %I USING %I::%I;',
+          `ALTER TABLE %I.%I ALTER COLUMN %I SET DATA TYPE ${type} USING %I::${type};`,
           old.schema,
           old.table,
           old.name,
-          type,
-          old.name,
-          type
+          old.name
         )
   let defaultValueSql: string
   if (drop_default) {

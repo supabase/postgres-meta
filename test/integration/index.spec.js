@@ -323,6 +323,24 @@ describe('/tables', async () => {
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })
+  it('POST /columns array type', async () => {
+    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'a' })
+    await axios.post(`${URL}/columns`, {
+      table_id: newTable.id,
+      name: 'b',
+      type: 'int2[]',
+    })
+
+    const { data: columns } = await axios.get(`${URL}/columns`)
+    const newColumn = columns.find(
+      (column) =>
+        column.id === `${newTable.id}.1` && column.name === 'b' && column.format === '_int2'
+    )
+    assert.equal(newColumn.name, 'b')
+
+    await axios.delete(`${URL}/columns/${newTable.id}.1`)
+    await axios.delete(`${URL}/tables/${newTable.id}`)
+  })
   it('/columns default_value with expressions', async () => {
     const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'a' })
     const { data: newColumn } = await axios.post(`${URL}/columns`, {
