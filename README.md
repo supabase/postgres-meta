@@ -17,7 +17,6 @@ PG_API_DB_NAME="postgres"
 PG_API_DB_USER="postgres"
 PG_API_DB_PORT=5432
 PG_API_DB_PASSWORD="postgres"
-PG_API_DB_SSL=false
 ```
 
 Then run any of the binaries in the releases.
