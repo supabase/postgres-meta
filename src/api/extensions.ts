@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
     const { data } = await RunQuery(req.headers.pg, getExtensionsQuery)
     return res.status(200).json(data)
   } catch (error) {
-    console.log('throwing error')
+    console.log('throwing error', error)
     res.status(500).json({ error: error.message })
   }
 })
@@ -28,7 +28,7 @@ router.post('/', async (req, res) => {
 
     return res.status(200).json(extension)
   } catch (error) {
-    console.log('throwing error')
+    console.log('throwing error', error)
     res.status(400).json({ error: error.message })
   }
 })
@@ -46,7 +46,7 @@ router.patch('/:name', async (req, res) => {
 
     return res.status(200).json(updated)
   } catch (error) {
-    console.log('throwing error')
+    console.log('throwing error', error)
     res.status(400).json({ error: error.message })
   }
 })
@@ -64,7 +64,7 @@ router.delete('/:name', async (req, res) => {
 
     return res.status(200).json(deleted)
   } catch (error) {
-    console.log('throwing error')
+    console.log('throwing error', error)
     res.status(400).json({ error: error.message })
   }
 })
