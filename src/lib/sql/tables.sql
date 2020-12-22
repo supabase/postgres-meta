@@ -14,8 +14,8 @@ SELECT
   pg_size_pretty(
     pg_total_relation_size(format('%I.%I', nc.nspname, c.relname))
   ) AS size,
-  pg_stat_get_live_tuples(c.oid) AS live_row_count,
-  pg_stat_get_dead_tuples(c.oid) AS dead_row_count,
+  pg_stat_get_live_tuples(c.oid) AS live_rows_estimate,
+  pg_stat_get_dead_tuples(c.oid) AS dead_rows_estimate,
   obj_description(c.oid) AS comment
 FROM
   pg_namespace nc
