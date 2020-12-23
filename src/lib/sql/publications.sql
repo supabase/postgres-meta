@@ -1,5 +1,5 @@
 SELECT
-  p.oid AS id,
+  p.oid :: int8 AS id,
   p.pubname AS name,
   p.pubowner :: regrole AS owner,
   p.pubinsert AS publish_insert,
