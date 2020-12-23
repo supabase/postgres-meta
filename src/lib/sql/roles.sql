@@ -1,5 +1,6 @@
 -- TODO: Consider using pg_authid vs. pg_roles for unencrypted password field
 SELECT
+  oid :: int8 AS id,
   rolname AS name,
   rolsuper AS is_superuser,
   rolcreatedb AS can_create_db,
@@ -14,8 +15,7 @@ SELECT
   END AS connection_limit,
   rolpassword AS password,
   rolvaliduntil AS valid_until,
-  rolconfig AS config,
-  oid AS id
+  rolconfig AS config
 FROM
   pg_catalog.pg_roles
   INNER JOIN LATERAL (

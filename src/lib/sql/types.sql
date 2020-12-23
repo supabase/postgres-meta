@@ -1,5 +1,5 @@
 SELECT
-  t.oid AS id,
+  t.oid :: int8 AS id,
   t.typname AS name,
   n.nspname AS schema,
   pg_catalog.Format_type (t.oid, NULL) AS format,

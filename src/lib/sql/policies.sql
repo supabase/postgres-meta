@@ -1,5 +1,5 @@
 select
-  pol.oid as id,
+  pol.oid :: int8 as id,
   n.nspname AS schema,
   c.relname AS table,
   c.oid :: int8 AS table_id,

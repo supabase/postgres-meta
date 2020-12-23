@@ -1,5 +1,5 @@
 select
-    p.oid as id,
+    p.oid :: int8 as id,
     n.nspname as schema,
     p.proname as name,
     l.lanname as language,
