@@ -1,5 +1,6 @@
 import express = require('express')
 
+import { logger } from './lib/logger'
 const api = require('./api')
 const project = require('../package.json')
 
@@ -20,7 +21,7 @@ app.get('/health', (_req, res) => res.status(200).json({ date: new Date() }))
 let Server = {
   start(port: number) {
     this.server = app.listen(port, () => {
-      console.log(`App started on port ${port}`)
+      logger.info(`App started on port ${port}`)
     })
     return app
   },
