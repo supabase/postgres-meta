@@ -7,7 +7,12 @@ pg.types.setTypeParser(20, 'text', parseInt)
 const { Pool } = pg
 
 export const RunQuery = async (connectionString: any, sql: string | SQLStatement) => {
-  const pool = new Pool({ connectionString, ssl: false })
+  const pool = new Pool({
+    connectionString,
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  })
   try {
     const results = await pool.query(sql)
     return { data: results.rows, error: null }
