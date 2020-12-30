@@ -5,6 +5,7 @@ import sqlTemplates = require('../lib/sql')
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
 import { Schemas } from '../lib/interfaces'
+import { logger } from '../lib/logger'
 
 const { schemas } = sqlTemplates
 
@@ -27,7 +28,7 @@ router.get('/', async (req, res) => {
 
     return res.status(200).json(payload)
   } catch (error) {
-    console.log('throwing error', error)
+    logger.error({ error, req: req.body })
     res.status(500).json({ error: error.message })
   }
 })
@@ -47,7 +48,7 @@ router.post('/', async (req, res) => {
     let schema: Schemas.Schema = data[0]
     return res.status(200).json(schema)
   } catch (error) {
-    console.log('throwing error', error)
+    logger.error({ error, req: req.body })
     res.status(400).json({ error: error.message })
   }
 })
@@ -79,7 +80,7 @@ router.patch('/:id', async (req, res) => {
     let updated: Schemas.Schema = updatedResults[0]
     return res.status(200).json(updated)
   } catch (error) {
-    console.log('throwing error', error)
+    logger.error({ error, req: req.body })
     res.status(400).json({ error: error.message })
   }
 })
@@ -96,7 +97,7 @@ router.delete('/:id', async (req, res) => {
 
     return res.status(200).json(schema)
   } catch (error) {
-    console.log('throwing error', error)
+    logger.error({ error, req: req.body })
     res.status(400).json({ error: error.message })
   }
 })

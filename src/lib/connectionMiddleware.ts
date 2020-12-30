@@ -1,5 +1,6 @@
 import CryptoJS = require('crypto-js')
 import { PG_CONNECTION, CRYPTO_KEY } from './constants'
+import { logger } from './logger'
 
 /**
  * Adds a "pg" object to the request if it doesn't exist
@@ -20,7 +21,7 @@ export const addConnectionToRequest = async (req, res, next) => {
 
     return next()
   } catch (error) {
-    console.log('error', error)
+    logger.error({ error })
     return res.status(500).json({ error: 'Server error.', status: 500 })
   }
 }

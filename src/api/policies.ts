@@ -5,6 +5,7 @@ import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
 import { Tables } from '../lib/interfaces'
 import sqlTemplates = require('../lib/sql')
+import { logger } from '../lib/logger'
 
 /**
  * @param {string} [include_system_schemas=false] - Return system schemas as well as user schemas
@@ -25,7 +26,7 @@ router.get('/', async (req, res) => {
     if (!include_system_schemas) payload = removeSystemSchemas(data)
     return res.status(200).json(payload)
   } catch (error) {
-    console.log('throwing error', error)
+    logger.error({ error, req: req.body })
     res.status(500).json({ error: error.message })
   }
 })
@@ -46,8 +47,7 @@ router.post('/', async (req, res) => {
     const newPolicy = await getPolicyByName(pcConnection, name, schema, table)
     return res.status(200).json(newPolicy)
   } catch (error) {
-    // For this one, we always want to give back the error to the customer
-    console.log('POST error!', error)
+    logger.error({ error, req: req.body })
     res.status(400).json({ error: error.message })
   }
 })
@@ -83,8 +83,7 @@ router.patch('/:id', async (req, res) => {
     const updated = await getPolicyById(pcConnection, id)
     return res.status(200).json(updated)
   } catch (error) {
-    // For this one, we always want to give back the error to the customer
-    console.log('Soft error!', error)
+    logger.error({ error, req: req.body })
     res.status(400).json({ error: error.message })
   }
 })
@@ -105,7 +104,7 @@ router.delete('/:id', async (req, res) => {
 
     return res.status(200).json(policy)
   } catch (error) {
-    console.log('throwing error', error)
+    logger.error({ error, req: req.body })
     res.status(400).json({ error: error.message })
   }
 })

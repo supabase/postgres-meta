@@ -8,6 +8,7 @@ import { coalesceRowsToArray } from '../lib/helpers'
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_ROLES, DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
 import { Roles } from '../lib/interfaces'
+import { logger } from '../lib/logger'
 
 /**
  * @param {boolean} [include_system_schemas=false] - Return system schemas as well as user schemas
@@ -32,7 +33,7 @@ router.get('/', async (req, res) => {
 
     return res.status(200).json(payload)
   } catch (error) {
-    console.log('throwing error', error)
+    logger.error({ error, req: req.body })
     res.status(500).json({ error: error.message })
   }
 })
@@ -47,7 +48,7 @@ router.post('/', async (req, res) => {
 
     return res.status(200).json(role)
   } catch (error) {
-    console.log('throwing error', error)
+    logger.error({ error, req: req.body })
     res.status(400).json({ error: error.message })
   }
 })
@@ -67,7 +68,7 @@ router.patch('/:id', async (req, res) => {
     const updated = (await RunQuery(req.headers.pg, getRoleQuery)).data[0]
     return res.status(200).json(updated)
   } catch (error) {
-    console.log('throwing error', error)
+    logger.error({ error, req: req.body })
     res.status(400).json({ error: error.message })
   }
 })
@@ -84,7 +85,7 @@ router.delete('/:id', async (req, res) => {
 
     return res.status(200).json(role)
   } catch (error) {
-    console.log('throwing error', error)
+    logger.error({ error, req: req.body })
     res.status(400).json({ error: error.message })
   }
 })
