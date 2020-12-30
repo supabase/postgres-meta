@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { ident, literal } from 'pg-format'
 import sql = require('../lib/sql')
 import { RunQuery } from '../lib/connectionPool'
+import { logger } from '../lib/logger'
 
 const { publications } = sql
 const router = Router()
@@ -11,6 +12,7 @@ router.get('/', async (req, res) => {
     const { data } = await RunQuery(req.headers.pg, publications)
     return res.status(200).json(data)
   } catch (error) {
+    logger.error({ error, req: req.body })
     res.status(500).json({ error: error.message })
   }
 })
@@ -24,6 +26,7 @@ router.post('/', async (req, res) => {
     const newPublication = (await RunQuery(req.headers.pg, getPublicationSql)).data[0]
     return res.status(200).json(newPublication)
   } catch (error) {
+    logger.error({ error, req: req.body })
     res.status(400).json({ error: error.message })
   }
 })
@@ -41,7 +44,7 @@ router.patch('/:id', async (req, res) => {
     const updatedPublication = (await RunQuery(req.headers.pg, getPublicationSql)).data[0]
     return res.status(200).json(updatedPublication)
   } catch (error) {
-    console.log(error.message)
+    logger.error({ error, req: req.body })
     if (error instanceof TypeError) {
       res.status(404).json({ error: 'Cannot find a publication with that id' })
     } else {
@@ -62,6 +65,7 @@ router.delete('/:id', async (req, res) => {
 
     return res.status(200).json(publication)
   } catch (error) {
+    logger.error({ error, req: req.body })
     if (error instanceof TypeError) {
       res.status(404).json({ error: 'Cannot find a publication with that id' })
     } else {

@@ -17,7 +17,7 @@
     "dev": "NODE_ENV=development npm-run-all build server",
     "dev:watch": "nodemon",
     "pretty": "prettier --write \"{src,test}/**/*.ts\"",
-    "server": "node ./dist/start.js",
+    "server": "node ./dist/start.js | pino-pretty --colorize --levelFirst",
     "test": "node -r esm ./node_modules/.bin/mocha 'test/**/*.js' --recursive "
   },
   "dependencies": {
@@ -26,6 +26,7 @@
     "express": "^4.17.1",
     "pg": "^7.0.0",
     "pg-format": "^1.0.4",
+    "pino": "^6.8.0",
     "sql-template-strings": "^2.2.2"
   },
   "devDependencies": {
@@ -40,6 +41,7 @@
     "mocha": "^7.1.2",
     "nodemon": "^1.19.4",
     "npm-run-all": "^4.1.5",
+    "pino-pretty": "^4.3.0",
     "pkg": "^4.4.8",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.2",

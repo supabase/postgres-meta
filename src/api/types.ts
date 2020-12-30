@@ -5,6 +5,7 @@ const { types } = sql
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
 import { Types } from '../lib/interfaces'
+import { logger } from '../lib/logger'
 
 /**
  * @param {boolean} [include_system_schemas=false] - Return system schemas as well as user schemas
@@ -24,7 +25,7 @@ router.get('/', async (req, res) => {
     if (!include_system_schemas) payload = removeSystemSchemas(data)
     return res.status(200).json(payload)
   } catch (error) {
-    console.log('throwing error', error)
+    logger.error({ error, req: req.body })
     res.status(500).json({ error: error.message })
   }
 })

@@ -1,6 +1,7 @@
 import { Router } from 'express'
 
 import { RunQuery } from '../lib/connectionPool'
+import { logger } from '../lib/logger'
 
 const router = Router()
 router.post('/', async (req, res) => {
@@ -9,8 +10,7 @@ router.post('/', async (req, res) => {
     const { data } = await RunQuery(req.headers.pg, query)
     return res.status(200).json(data || [])
   } catch (error) {
-    // For this one, we always want to give back the error to the customer
-    console.log('Soft error!', error)
+    logger.error({ error, req: req.body })
     res.status(400).json({ error: error.message })
   }
 })
