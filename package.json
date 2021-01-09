@@ -2,8 +2,8 @@
   "name": "@supabase/pg-api",
   "version": "0.0.0",
   "description": "A RESTful API for managing your Postgres.",
-  "main": "src/start.js",
-  "bin": "src/start.js",
+  "main": "dist/start.js",
+  "bin": "dist/start.js",
   "private": false,
   "scripts": {
     "build": "npm-run-all build:clean build:transpile build:copy",
@@ -13,18 +13,20 @@
     "docker:build": "docker build -t supabase/pg-api:0.6.0 .",
     "docker:deploy": "docker push supabase/pg-api:0.6.0",
     "dist": "NODE_ENV=production npm-run-all build dist:pkg",
-    "dist:pkg": "rimraf bin && pkg --out-path ./bin dist/start.js",
+    "dist:pkg": "rimraf bin && pkg --out-path ./bin package.json",
     "dev": "NODE_ENV=development npm-run-all build server",
     "dev:watch": "nodemon",
-    "pretty": "prettier --write \"./src/**/*.{js,json,yml,md,vue,css,scss}\"",
-    "server": "node ./dist/start.js",
+    "pretty": "prettier --write \"{src,test}/**/*.ts\"",
+    "server": "node ./dist/start.js | pino-pretty --colorize --levelFirst",
     "test": "node -r esm ./node_modules/.bin/mocha 'test/**/*.js' --recursive "
   },
   "dependencies": {
     "cors": "^2.8.5",
     "crypto-js": "^4.0.0",
     "express": "^4.17.1",
-    "pg": "^7.18.2",
+    "pg": "^7.0.0",
+    "pg-format": "^1.0.4",
+    "pino": "^6.8.0",
     "sql-template-strings": "^2.2.2"
   },
   "devDependencies": {
@@ -33,12 +35,13 @@
     "@types/express": "^4.17.6",
     "@types/node": "^14.0.13",
     "@types/pg": "^7.14.3",
+    "@types/pg-format": "^1.0.1",
     "axios": "^0.19.2",
     "esm": "^3.2.25",
     "mocha": "^7.1.2",
     "nodemon": "^1.19.4",
     "npm-run-all": "^4.1.5",
-    "pg-format": "^1.0.4",
+    "pino-pretty": "^4.3.0",
     "pkg": "^4.4.8",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.2",
@@ -62,6 +65,11 @@
       "**/__tests__/**",
       "*.test.js",
       "*.spec.js"
+    ]
+  },
+  "pkg": {
+    "scripts": [
+      "node_modules/pg-format/lib/reserved.js"
     ]
   }
 }

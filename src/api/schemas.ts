@@ -3,6 +3,7 @@ import sqlTemplates = require('../lib/sql')
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
 import { Schemas as Interfaces } from '../lib/interfaces'
+import { logger } from '../lib/logger'
 
 const { schemas: allSchemasSql } = sqlTemplates
 const defaultSchemasList = DEFAULT_SYSTEM_SCHEMAS.map((x) => `'${x}'`).join(', ')
@@ -26,9 +27,11 @@ Promise<{ data: Interfaces.Schema[]; error: null | Error }> {
     if (!include_system_schemas) {
       query.append(`where schema_name not in (${defaultSchemasList})`)
     }
-    const { data } = await RunQuery<Interfaces.Schema>(connection, query)
-    return { data, error: null }
+    const { data, error } = await RunQuery<Interfaces.Schema>(connection, query)
+    if (error) throw error
+    else return { data, error: null }
   } catch (error) {
+    logger.error({ error })
     return { data: null, error }
   }
 }
@@ -48,6 +51,7 @@ Promise<{ data: Interfaces.Schema; error: null | Error }> {
     const { data } = await RunQuery<Interfaces.Schema>(connection, query)
     return { data: data[0], error: null }
   } catch (error) {
+    logger.error({ error })
     return { data: null, error }
   }
 }
@@ -67,6 +71,7 @@ Promise<{ data: Interfaces.Schema; error: null | Error }>  {
     const { data } = await RunQuery<Interfaces.Schema>(connection, query)
     return { data: data[0], error: null }
   } catch (error) {
+    logger.error({ error })
     return { data: null, error }
   }
 }

@@ -1,12 +1,15 @@
+-- Adapted from infromation_schema.schemata
+
 SELECT
-  nsp.oid AS id,
-  catalog_name,
-  schema_name AS name,
-  schema_owner AS owner,
-  default_character_set_catalog,
-  default_character_set_schema,
-  default_character_set_name,
-  sql_path
+  n.oid :: int8 AS id,
+  n.nspname AS name,
+  u.rolname AS owner
 FROM
-  information_schema.schemata
-  JOIN pg_namespace nsp ON schema_name = nsp.nspname
+  pg_namespace n,
+  pg_authid u
+WHERE
+  n.nspowner = u.oid
+  AND (
+    pg_has_role(n.nspowner, 'USAGE')
+    OR has_schema_privilege(n.oid, 'CREATE, USAGE')
+  )
