@@ -65,8 +65,8 @@ export namespace Tables {
     is_typed: boolean
     bytes: number
     size: string
-    rls_enabled: boolean          // determines where RLS has been turned on 
-    rls_forced: boolean           // determines whether RLS should be forced on the table owner
+    rls_enabled: boolean // determines where RLS has been turned on
+    rls_forced: boolean // determines whether RLS should be forced on the table owner
 
     // pg_stat_all_tables columns
     sequential_scans: number

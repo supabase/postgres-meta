@@ -1,8 +1,8 @@
 import pg = require('pg')
 import { SQLStatement } from 'sql-template-strings'
+// TODO: Use Date object for timestamptz?
 // HACK: Number has 53 bits of precision, may overflow with bigint (64 bits).
 // Maybe use BigInt?
-// TODO: Use Date object for timestamptz?
 pg.types.setTypeParser(20, 'text', parseInt)
 const { Pool } = pg
 
@@ -13,19 +13,9 @@ export async function RunQuery<T>(
 /** Returns an array of table data */
 Promise<{ data: T[] | any; error: null | Error }> {
   const pool = new Pool({ connectionString })
-  try {
-    const results = await pool.query(sql)
-    return { data: results.rows, error: null }
-  } catch (error) {
-    console.log('PG Error')
-    throw error
-  } finally {
-    // Try to close the connection
-    // Not necessary?
-    try {
-      pool.end()
-    } catch (error) {
-      console.log('pool.end error', error)
-    }
-  }
+  const results = await pool.query(sql)
+  // Try to close the connection
+  // Not necessary?
+  pool.end()
+  return { data: results.rows, error: null }
 }

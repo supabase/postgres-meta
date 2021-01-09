@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
 
 jobs:
   release:
@@ -23,7 +24,7 @@ jobs:
           node-version: ${{ matrix.node }}
 
       - name: Get version before
-        run: echo ::set-env name=VERSION_BEFORE::$(curl -s https://api.github.com/repos/supabase/pg-api/releases/latest | jq .name -r)
+        run: echo "VERSION_BEFORE=$(curl -s https://api.github.com/repos/supabase/pg-api/releases/latest | jq .name -r)" >> $GITHUB_ENV
 
       - name: Release on GitHub
         run: npx semantic-release -p        \
@@ -34,7 +35,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get version after
-        run: echo ::set-env name=VERSION_AFTER::$(curl -s https://api.github.com/repos/supabase/pg-api/releases/latest | jq .name -r)
+        run: echo "VERSION_AFTER=$(curl -s https://api.github.com/repos/supabase/pg-api/releases/latest | jq .name -r)" >> $GITHUB_ENV
 
       - name: Check version difference
         run: |
@@ -67,7 +68,7 @@ jobs:
           name: has-new-release
 
       - name: Check for new release
-        run: echo ::set-env name=HAS_NEW_RELEASE::$(cat has-new-release/has-new-release)
+        run: echo "HAS_NEW_RELEASE=$(cat has-new-release/has-new-release)" >> $GITHUB_ENV
 
       - uses: actions/checkout@v2
         if: env.HAS_NEW_RELEASE == 1
@@ -91,13 +92,13 @@ jobs:
         run: |
           npm ci
           npm run dist
-          tar -czvf pg-api-linux.tar.gz -C ./bin start-linux
-          tar -czvf pg-api-macos.tar.gz -C ./bin start-macos
-          tar -czvf pg-api-windows.tar.gz -C ./bin start-win.exe
+          tar -czvf pg-api-linux.tar.gz -C ./bin pg-api-linux
+          tar -czvf pg-api-macos.tar.gz -C ./bin pg-api-macos
+          tar -czvf pg-api-windows.tar.gz -C ./bin pg-api-win.exe
 
       - name: Get upload url
         if: env.HAS_NEW_RELEASE == 1
-        run: echo ::set-env name=UPLOAD_URL::$(curl -s https://api.github.com/repos/supabase/pg-api/releases/latest | jq .upload_url -r)
+        run: echo "UPLOAD_URL=$(curl -s https://api.github.com/repos/supabase/pg-api/releases/latest | jq .upload_url -r)" >> $GITHUB_ENV
 
       - name: Upload linux release asset
         if: env.HAS_NEW_RELEASE == 1
@@ -133,7 +134,7 @@ jobs:
           asset_content_type: application/gzip
 
       - name: Get version
-        run: echo ::set-env name=VERSION::$(curl -s https://api.github.com/repos/supabase/pg-api/releases/latest | jq .name -r)
+        run: echo "VERSION=$(curl -s https://api.github.com/repos/supabase/pg-api/releases/latest | jq .name -r)" >> $GITHUB_ENV
 
       - name: Upload image to Docker Hub
         if: env.HAS_NEW_RELEASE == 1

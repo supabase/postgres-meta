@@ -61,7 +61,7 @@ describe('should give meaningful errors', () => {
     } catch (error) {
       let { status, data } = error.response
       assert.equal(status, 400)
-      assert.equal(data.error, 'error: table "fake_table" does not exist')
+      assert.equal(data.error, 'table "fake_table" does not exist')
     }
   })
 })
@@ -250,8 +250,9 @@ describe('/tables', async () => {
     assert.equal(true, !!included)
   })
   it('POST /tables should create a table', async () => {
-    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'test', comment: 'foo' })
+    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'test', replica_identity: 'FULL', comment: 'foo' })
     assert.equal(`${newTable.schema}.${newTable.name}`, 'public.test')
+    assert.equal(newTable.replica_identity, 'FULL')
     assert.equal(newTable.comment, 'foo')
 
     const { data: tables } = await axios.get(`${URL}/tables`)
@@ -268,11 +269,13 @@ describe('/tables', async () => {
       name: 'test a',
       rls_enabled: true,
       rls_forced: true,
+      replica_identity: 'NOTHING',
       comment: 'foo',
     })
     assert.equal(updatedTable.name, `test a`)
     assert.equal(updatedTable.rls_enabled, true)
     assert.equal(updatedTable.rls_forced, true)
+    assert.equal(updatedTable.replica_identity, 'NOTHING')
     assert.equal(updatedTable.comment, 'foo')
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })
@@ -313,23 +316,42 @@ describe('/tables', async () => {
       (column) =>
         column.id === `${newTable.id}.1` && column.name === 'foo bar' && column.format === 'int2'
     )
-    assert.equal(newColumn.default_value, 42)
+    assert.equal(newColumn.default_value, "'42'::smallint")
     assert.equal(newColumn.is_nullable, false)
     assert.equal(newColumn.comment, 'foo')
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })
-  it('/columns default_value for type text', async () => {
+  it('POST /columns array type', async () => {
+    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'a' })
+    await axios.post(`${URL}/columns`, {
+      table_id: newTable.id,
+      name: 'b',
+      type: 'int2[]',
+    })
+
+    const { data: columns } = await axios.get(`${URL}/columns`)
+    const newColumn = columns.find(
+      (column) =>
+        column.id === `${newTable.id}.1` && column.name === 'b' && column.format === '_int2'
+    )
+    assert.equal(newColumn.name, 'b')
+
+    await axios.delete(`${URL}/columns/${newTable.id}.1`)
+    await axios.delete(`${URL}/tables/${newTable.id}`)
+  })
+  it('/columns default_value with expressions', async () => {
     const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'a' })
     const { data: newColumn } = await axios.post(`${URL}/columns`, {
       table_id: newTable.id,
       name: 'a',
-      type: 'text',
-      default_value: 'a',
+      type: 'timestamptz',
+      default_value: 'NOW()',
+      default_value_format: 'expression',
     })
 
-    assert.equal(newColumn.default_value, `'a'::text`)
+    assert.equal(newColumn.default_value, 'now()')
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
@@ -348,6 +370,8 @@ describe('/tables', async () => {
       name: 'foo bar',
       type: 'int4',
       drop_default: true,
+      is_identity: true,
+      identity_generation: 'ALWAYS',
       is_nullable: false,
       comment: 'bar',
     })
@@ -358,6 +382,7 @@ describe('/tables', async () => {
         column.id === `${newTable.id}.1` && column.name === 'foo bar' && column.format === 'int4'
     )
     assert.equal(updatedColumn.default_value, null)
+    assert.equal(updatedColumn.identity_generation, 'ALWAYS')
     assert.equal(updatedColumn.is_nullable, false)
     assert.equal(updatedColumn.comment, 'bar')
 
@@ -609,5 +634,51 @@ describe('/policies', () => {
     const { data: policies } = await axios.get(`${URL}/policies`)
     const stillExists = policies.some((x) => policy.id === x.id)
     assert.equal(stillExists, false, 'Policy is deleted')
+  })
+})
+describe('/publications', () => {
+  const publication = {
+    name: 'a',
+    publish_insert: true,
+    publish_update: true,
+    publish_delete: true,
+    publish_truncate: false,
+    tables: ['users'],
+  }
+  it('POST', async () => {
+    const { data: newPublication } = await axios.post(`${URL}/publications`, publication)
+    assert.equal(newPublication.name, publication.name)
+    assert.equal(newPublication.publish_insert, publication.publish_insert)
+    assert.equal(newPublication.publish_update, publication.publish_update)
+    assert.equal(newPublication.publish_delete, publication.publish_delete)
+    assert.equal(newPublication.publish_truncate, publication.publish_truncate)
+    assert.equal(newPublication.tables.includes('users'), true)
+  })
+  it('GET', async () => {
+    const res = await axios.get(`${URL}/publications`)
+    const newPublication = res.data[0]
+    assert.equal(newPublication.name, publication.name)
+  })
+  it('PATCH', async () => {
+    const res = await axios.get(`${URL}/publications`)
+    const { id } = res.data[0]
+
+    const { data: updated } = await axios.patch(`${URL}/publications/${id}`, {
+      name: 'b',
+      publish_insert: false,
+      tables: [],
+    })
+    assert.equal(updated.name, 'b')
+    assert.equal(updated.publish_insert, false)
+    assert.equal(updated.tables.includes('users'), false)
+  })
+  it('DELETE', async () => {
+    const res = await axios.get(`${URL}/publications`)
+    const { id } = res.data[0]
+
+    await axios.delete(`${URL}/publications/${id}`)
+    const { data: publications } = await axios.get(`${URL}/publications`)
+    const stillExists = publications.some((x) => x.id === id)
+    assert.equal(stillExists, false)
   })
 })
