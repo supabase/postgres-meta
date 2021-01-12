@@ -262,13 +262,14 @@ const alterColumnSqlize = (
       : format('COMMENT ON COLUMN %I.%I.%I IS %L;', old.schema, old.table, old.name, comment)
 
   // nameSql must be last.
+  // defaultValueSql must be after typeSql.
   // TODO: Can't set default if column is previously identity even if is_identity: false.
   // Must do two separate PATCHes (once to drop identity and another to set default).
   return `
 BEGIN;
   ${isNullableSql}
-  ${defaultValueSql}
   ${typeSql}
+  ${defaultValueSql}
   ${identitySql}
   ${commentSql}
   ${nameSql}
