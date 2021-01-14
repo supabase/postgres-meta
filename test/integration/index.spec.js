@@ -88,7 +88,7 @@ describe('/config/version', () => {
     const res = await axios.get(`${URL}/config/version`)
     // console.log('res.data', res.data)
     assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(true, res.data.version_number == '120003')
+    assert.equal(res.data.version_number, '120005')
   })
 })
 describe('/schemas', () => {
@@ -416,6 +416,7 @@ describe('/tables', async () => {
 
     const { data: updatedColumn } = await axios.patch(`${URL}/columns/${newTable.id}.1`, {
       type: 'int4',
+      default_value: 0
     })
 
     assert.strictEqual(updatedColumn.format, 'int4')
