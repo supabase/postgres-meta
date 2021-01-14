@@ -47,7 +47,7 @@ export async function byId(
 ): /**  Returns a single schemas */
 Promise<{ data: Interfaces.Schema; error: null | Error }> {
   try {
-    const query = SQL``.append(allSchemasSql).append(SQL` and nsp.oid = ${id}`)
+    const query = SQL``.append(allSchemasSql).append(SQL` and n.oid = ${id}`)
     const { data } = await RunQuery<Interfaces.Schema>(connection, query)
     return { data: data[0], error: null }
   } catch (error) {
