@@ -25,7 +25,8 @@ Promise<{ data: Interfaces.Schema[]; error: null | Error }> {
   try {
     let query = SQL``.append(allSchemasSql)
     if (!include_system_schemas) {
-      query.append(`where schema_name not in (${defaultSchemasList})`)
+      query.append(` and schema_name not in (${defaultSchemasList})`)
+      console.log('query', query)
     }
     const { data, error } = await RunQuery<Interfaces.Schema>(connection, query)
     if (error) throw error
@@ -59,13 +60,13 @@ Promise<{ data: Interfaces.Schema; error: null | Error }> {
 /**
  * Get a single schema by its name
  */
-export async function byName (
+export async function byName(
   /** A Postgres connection string */
   connection: string,
   /** The schema name */
   name: string
 ): /**  Returns a single schemas */
-Promise<{ data: Interfaces.Schema; error: null | Error }>  {
+Promise<{ data: Interfaces.Schema; error: null | Error }> {
   try {
     const query = SQL``.append(allSchemasSql).append(SQL` where schema_name = ${name}`)
     const { data } = await RunQuery<Interfaces.Schema>(connection, query)
