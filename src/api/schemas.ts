@@ -25,8 +25,7 @@ Promise<{ data: Interfaces.Schema[]; error: null | Error }> {
   try {
     let query = SQL``.append(allSchemasSql)
     if (!include_system_schemas) {
-      query.append(` and schema_name not in (${defaultSchemasList})`)
-      console.log('query', query)
+      query.append(` and n.nspname not in (${defaultSchemasList})`)
     }
     const { data, error } = await RunQuery<Interfaces.Schema>(connection, query)
     if (error) throw error
@@ -48,7 +47,7 @@ export async function byId(
 ): /**  Returns a single schemas */
 Promise<{ data: Interfaces.Schema; error: null | Error }> {
   try {
-    const query = SQL``.append(allSchemasSql).append(SQL` where nsp.oid = ${id}`)
+    const query = SQL``.append(allSchemasSql).append(SQL` and nsp.oid = ${id}`)
     const { data } = await RunQuery<Interfaces.Schema>(connection, query)
     return { data: data[0], error: null }
   } catch (error) {
@@ -68,7 +67,7 @@ export async function byName(
 ): /**  Returns a single schemas */
 Promise<{ data: Interfaces.Schema; error: null | Error }> {
   try {
-    const query = SQL``.append(allSchemasSql).append(SQL` where schema_name = ${name}`)
+    const query = SQL``.append(allSchemasSql).append(SQL` and n.nspname = ${name}`)
     const { data } = await RunQuery<Interfaces.Schema>(connection, query)
     return { data: data[0], error: null }
   } catch (error) {
