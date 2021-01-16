@@ -6,7 +6,12 @@ import { SQLStatement } from 'sql-template-strings'
 pg.types.setTypeParser(20, 'text', parseInt)
 const { Pool } = pg
 
-export const RunQuery = async (connectionString: any, sql: string | SQLStatement) => {
+export async function RunQuery<T>(
+  connectionString: any,
+  sql: string | SQLStatement
+): // Note once the refactor is completed we should remove "any" return
+/** Returns an array of table data */
+Promise<{ data: T[] | any; error: null | Error }> {
   const pool = new Pool({ connectionString })
   const results = await pool.query(sql)
   // Try to close the connection
