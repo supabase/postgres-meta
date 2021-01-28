@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import format from 'pg-format'
-import { coalesceRowsToArray, toTransaction } from '../lib/helpers'
+import { toTransaction } from '../lib/helpers'
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
 import { Tables } from '../lib/interfaces'
@@ -61,7 +61,7 @@ router.patch('/:id', async (req, res) => {
     const payload: Tables.Policy = { ...req.body }
     const previousPolicy: Tables.Policy = await getPolicyById(pcConnection, id)
     const nameChange = !!payload.name && payload.name != previousPolicy.name
-    let updates = { ...payload }
+    const updates = { ...payload }
     if (!updates.name) updates.name = previousPolicy.name
     if (!updates.schema) updates.schema = previousPolicy.schema
     if (!updates.table) updates.table = previousPolicy.table
@@ -115,7 +115,7 @@ const getAllSql = (sqlTemplates) => {
 }
 const getPolicyById = async (connection: string, id: number) => {
   const { policies } = sqlTemplates
-  let sql = `
+  const sql = `
     with policies as (${policies}) 
     select * from policies
     where policies.id = ${id}
@@ -191,10 +191,10 @@ const alterSql = ({
   check?: string
   roles?: string[]
 }) => {
-  let alter = format(`ALTER POLICY %I ON %I.%I`, name, schema, table)
-  let newDefinition = definition !== undefined ? `${alter} USING (${definition});` : ''
-  let newCheck = check !== undefined ? `${alter} WITH CHECK (${check});` : ''
-  let newRoles = roles !== undefined ? `${alter} TO (${roles.join(',')});` : ''
+  const alter = format(`ALTER POLICY %I ON %I.%I`, name, schema, table)
+  const newDefinition = definition !== undefined ? `${alter} USING (${definition});` : ''
+  const newCheck = check !== undefined ? `${alter} WITH CHECK (${check});` : ''
+  const newRoles = roles !== undefined ? `${alter} TO (${roles.join(',')});` : ''
 
   return `
     ${newDefinition}

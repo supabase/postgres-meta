@@ -62,7 +62,7 @@ router.post('/', async (req, res) => {
     // Return fresh details
     const getTable = selectSingleByName(sqlTemplates, schema, name)
     const { data: newTableResults } = await RunQuery(pcConnection, getTable)
-    let newTable: Tables.Table = newTableResults[0]
+    const newTable: Tables.Table = newTableResults[0]
     return res.status(200).json(newTable)
   } catch (error) {
     logger.error({ error, req: req.body })
@@ -82,7 +82,7 @@ router.patch('/:id', async (req, res) => {
     // Get table
     const getTableSql = selectSingleSql(sqlTemplates, id)
     const { data: getTableResults } = await RunQuery(pcConnection, getTableSql)
-    let previousTable: Tables.Table = getTableResults[0]
+    const previousTable: Tables.Table = getTableResults[0]
 
     // Update fields and name
     const nameSql =
@@ -243,16 +243,18 @@ const createTableSqlize = ({
   comment?: string
 }) => {
   const tableSql = format('CREATE TABLE IF NOT EXISTS %I.%I ();', schema, name)
-  let replicaSql: string
+  let replicaSql: string = `ALTER TABLE ${ident(schema)}.${ident(
+    name
+  )} REPLICA IDENTITY ${replica_identity};`
+
   if (replica_identity === undefined) {
     replicaSql = ''
   } else if (replica_identity === 'INDEX') {
     replicaSql = `ALTER TABLE ${ident(schema)}.${ident(
       name
     )} REPLICA IDENTITY USING INDEX ${replica_identity_index};`
-  } else {
-    replicaSql = `ALTER TABLE ${ident(schema)}.${ident(name)} REPLICA IDENTITY ${replica_identity};`
   }
+
   const commentSql =
     comment === undefined ? '' : format('COMMENT ON TABLE %I.%I IS %L;', schema, name, comment)
   return `

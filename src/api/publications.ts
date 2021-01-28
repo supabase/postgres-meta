@@ -89,16 +89,14 @@ const createPublicationSqlize = ({
   publish_truncate?: boolean
   tables?: string[]
 }) => {
-  let tableClause: string
+  let tableClause: string = `FOR TABLE ${tables.map(ident).join(',')}`
   if (tables === undefined) {
     tableClause = 'FOR ALL TABLES'
   } else if (tables.length === 0) {
     tableClause = ''
-  } else {
-    tableClause = `FOR TABLE ${tables.map(ident).join(',')}`
   }
 
-  let publishOps = []
+  const publishOps = []
   if (publish_insert) publishOps.push('insert')
   if (publish_update) publishOps.push('update')
   if (publish_delete) publishOps.push('delete')
