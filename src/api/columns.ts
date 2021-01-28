@@ -128,14 +128,13 @@ const addColumnSqlize = ({
   is_unique?: boolean
   comment?: string
 }) => {
-  let defaultValueSql: string
+  let defaultValueSql: string = `DEFAULT ${literal(default_value)}`
   if (default_value === undefined) {
     defaultValueSql = ''
   } else if (default_value_format === 'expression') {
     defaultValueSql = `DEFAULT ${default_value}`
-  } else {
-    defaultValueSql = `DEFAULT ${literal(default_value)}`
   }
+
   const isIdentitySql = is_identity ? `GENERATED ${identity_generation} AS IDENTITY` : ''
   const isNullableSql = is_nullable ? 'NULL' : 'NOT NULL'
   const isPrimaryKeySql = is_primary_key ? 'PRIMARY KEY' : ''
@@ -215,7 +214,7 @@ const alterColumnSqlize = (
   } else if (default_value === undefined) {
     defaultValueSql = ''
   } else {
-    let defaultValue =
+    const defaultValue =
       default_value_format === 'expression' ? default_value : literal(default_value)
     defaultValueSql = format(
       `ALTER TABLE %I.%I ALTER COLUMN %I SET DEFAULT ${defaultValue};`,
