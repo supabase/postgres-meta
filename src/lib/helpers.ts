@@ -21,6 +21,6 @@ export const toTransaction = (statements: string[]) => {
     if (sql.length > 0 && x.slice(-1) !== ';') sql += ';'
     return sql
   })
-  let allStatements = cleansed.join('')
+  const allStatements = cleansed.join('')
   return `BEGIN; ${allStatements} COMMIT;`
 }

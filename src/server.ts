@@ -18,7 +18,7 @@ app.get('/', (_req, res) =>
 )
 app.get('/health', (_req, res) => res.status(200).json({ date: new Date() }))
 
-let Server = {
+const Server = {
   start(port: number) {
     this.server = app.listen(port, () => {
       logger.info(`App started on port ${port}`)
