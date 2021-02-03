@@ -1,12 +1,9 @@
 {
-  "include": ["src/lib"],
-  "exclude": ["src/lib/connection*.ts"],
   "compilerOptions": {
     "declaration": true,
     "declarationMap": true,
     "module": "CommonJS",
-    "outDir": "dist/main",
-    "rootDir": "src/lib",
+    "outDir": "bin",
     "sourceMap": true,
     "target": "ES2015",
 
