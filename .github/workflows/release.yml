@@ -23,14 +23,15 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
+      - run: |
+          npm ci
+          npm run build
+
       - name: Get version before
         run: echo "VERSION_BEFORE=$(curl -s https://api.github.com/repos/supabase/pg-api/releases/latest | jq .name -r)" >> $GITHUB_ENV
 
       - name: Release on GitHub
-        run: npx semantic-release -p        \
-          @semantic-release/commit-analyzer \
-          @semantic-release/github         \
-          @semantic-release/release-notes-generator
+        run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -91,10 +92,10 @@ jobs:
         if: env.HAS_NEW_RELEASE == 1
         run: |
           npm ci
-          npm run dist
-          tar -czvf pg-api-linux.tar.gz -C ./bin pg-api-linux
-          tar -czvf pg-api-macos.tar.gz -C ./bin pg-api-macos
-          tar -czvf pg-api-windows.tar.gz -C ./bin pg-api-win.exe
+          npm run pkg
+          tar -czvf postgres-meta-linux.tar.gz -C ./bin postgres-meta-linux
+          tar -czvf postgres-meta-macos.tar.gz -C ./bin postgres-meta-macos
+          tar -czvf postgres-meta-windows.tar.gz -C ./bin postgres-meta-win.exe
 
       - name: Get upload url
         if: env.HAS_NEW_RELEASE == 1
@@ -107,8 +108,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ./pg-api-linux.tar.gz
-          asset_name: pg-api-linux.tar.gz
+          asset_path: ./postgres-meta-linux.tar.gz
+          asset_name: postgres-meta-linux.tar.gz
           asset_content_type: application/gzip
 
       - name: Upload macos release asset
@@ -118,8 +119,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ./pg-api-macos.tar.gz
-          asset_name: pg-api-macos.tar.gz
+          asset_path: ./postgres-meta-macos.tar.gz
+          asset_name: postgres-meta-macos.tar.gz
           asset_content_type: application/gzip
 
       - name: Upload windows release asset
@@ -129,8 +130,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ./pg-api-windows.tar.gz
-          asset_name: pg-api-windows.tar.gz
+          asset_path: ./postgres-meta-windows.tar.gz
+          asset_name: postgres-meta-windows.tar.gz
           asset_content_type: application/gzip
 
       - name: Get version

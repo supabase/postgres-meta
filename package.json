@@ -1,32 +1,36 @@
 {
-  "name": "@supabase/pg-api",
-  "version": "0.0.0",
+  "name": "@supabase/postgres-meta",
+  "version": "0.0.0-automated",
   "description": "A RESTful API for managing your Postgres.",
-  "main": "dist/start.js",
-  "bin": "dist/start.js",
-  "private": false,
+  "homepage": "https://github.com/supabase/pg-api",
+  "bugs": "https://github.com/supabase/pg-api/issues",
+  "license": "MIT",
+  "author": "Supabase",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/main/index.js",
+  "module": "dist/module/index.js",
+  "bin": {
+    "postgres-meta": "bin/src/server/app.js"
+  },
+  "repository": "supabase/pg-api",
   "scripts": {
-    "build": "npm-run-all build:clean build:transpile build:copy",
-    "build:clean": "rimraf dist",
-    "build:transpile": "./node_modules/.bin/tsc",
-    "build:copy": "cp -r ./src/lib/sql ./dist/lib/",
-    "docker:build": "docker build -t supabase/pg-api:0.6.0 .",
-    "docker:deploy": "docker push supabase/pg-api:0.6.0",
-    "dist": "NODE_ENV=production npm-run-all build dist:pkg",
-    "dist:pkg": "rimraf bin && pkg --out-path ./bin package.json",
-    "dev": "NODE_ENV=development npm-run-all build server",
+    "clean": "rimraf bin dist",
+    "format": "prettier --write \"{src,test}/**/*.ts\"",
+    "build": "run-s clean format build:*",
+    "build:main": "tsc -p tsconfig.json && cpy 'src/lib/sql/*.sql' dist/main/sql",
+    "build:module": "tsc -p tsconfig.module.json && cpy 'src/lib/sql/*.sql' dist/module/sql",
+    "build:server": "tsc -p tsconfig.server.json && cpy 'src/lib/sql/*.sql' bin/src/lib/sql",
+    "start": "node bin/src/server/app.js | pino-pretty --colorize --levelFirst",
+    "pkg": "NODE_ENV=production run-s build:server && pkg --out-path bin .",
+    "dev": "NODE_ENV=development run-s build start",
     "dev:watch": "nodemon",
-    "pretty": "prettier --write \"{src,test}/**/*.ts\"",
-    "server": "node ./dist/start.js | pino-pretty --colorize --levelFirst",
     "test": "node -r esm ./node_modules/.bin/mocha 'test/**/*.js' --recursive "
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "crypto-js": "^4.0.0",
-    "express": "^4.17.1",
     "pg": "^7.0.0",
     "pg-format": "^1.0.4",
-    "pino": "^6.8.0",
     "sql-template-strings": "^2.2.2"
   },
   "devDependencies": {
@@ -36,25 +40,22 @@
     "@types/node": "^14.0.13",
     "@types/pg": "^7.14.3",
     "@types/pg-format": "^1.0.1",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
+    "cors": "^2.8.5",
+    "cpy-cli": "^3.1.1",
+    "crypto-js": "^4.0.0",
     "esm": "^3.2.25",
+    "express": "^4.17.1",
     "mocha": "^7.1.2",
     "nodemon": "^1.19.4",
     "npm-run-all": "^4.1.5",
+    "pino": "^6.11.0",
     "pino-pretty": "^4.3.0",
     "pkg": "^4.4.8",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.2",
     "typescript": "^3.9.3"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/supabase/pg-api.git"
-  },
-  "bugs": {
-    "url": "https://github.com/supabase/pg-api/issues"
-  },
-  "homepage": "https://github.com/supabase/pg-api#readme",
   "nodemonConfig": {
     "exec": "npm run dev",
     "watch": [
