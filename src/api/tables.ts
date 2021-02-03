@@ -4,7 +4,7 @@ import { coalesceRowsToArray, toTransaction } from '../lib/helpers'
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
 import { Tables } from '../lib/interfaces'
-import { logger } from '../lib/logger'
+import logger from '../server/logger'
 import sqlTemplates = require('../lib/sql')
 
 /**

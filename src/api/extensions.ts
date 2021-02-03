@@ -4,7 +4,7 @@ import SQL from 'sql-template-strings'
 import sqlTemplates = require('../lib/sql')
 const { extensionsSql } = sqlTemplates
 import { RunQuery } from '../lib/connectionPool'
-import { logger } from '../lib/logger'
+import logger from '../server/logger'
 
 const router = Router()
 

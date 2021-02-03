@@ -5,7 +5,7 @@ import { RunQuery } from '../lib/connectionPool'
 import sql = require('../lib/sql')
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
 import { Tables } from '../lib/interfaces'
-import { logger } from '../lib/logger'
+import logger from '../server/logger'
 
 /**
  * @param {boolean} [include_system_schemas=false] - Return system schemas as well as user schemas
