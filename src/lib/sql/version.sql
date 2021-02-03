@@ -1,27 +1,10 @@
 SELECT
-  *
-FROM
+  version(),
+  current_setting('server_version_num') :: int8 AS version_number,
   (
     SELECT
-      version()
-  ) version,
-  (
-    SELECT
-      current_setting('server_version_num') AS version_number
-  ) version_number,
-  (
-    SELECT
-      count(pid) AS active_connections
+      COUNT(*) AS active_connections
     FROM
       pg_stat_activity
-    WHERE
-      state = 'active'
-  ) active_connections,
-  (
-    SELECT
-      setting AS max_connections
-    FROM
-      pg_settings
-    WHERE
-      name = 'max_connections'
-  ) max_connections
+  ) AS active_connections,
+  current_setting('max_connections') :: int8 AS max_connections
