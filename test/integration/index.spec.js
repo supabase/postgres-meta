@@ -1,9 +1,9 @@
 var assert = require('assert')
 const CryptoJS = require('crypto-js')
 import axios from 'axios'
-import { PG_API_URL, PG_API_PORT, PG_CONNECTION, CRYPTO_KEY } from '../../dist/lib/constants'
+import { PG_API_PORT, PG_CONNECTION, CRYPTO_KEY } from '../../bin/src/server/constants'
 
-const URL = `${PG_API_URL}:${PG_API_PORT}`
+const URL = `http://localhost:${PG_API_PORT}`
 const STATUS = {
   SUCCESS: 200,
   ERROR: 500,

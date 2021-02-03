@@ -1,7 +1,7 @@
 import { Router } from 'express'
 
 import { RunQuery } from '../lib/connectionPool'
-import { logger } from '../lib/logger'
+import logger from '../server/logger'
 
 const router = Router()
 router.post('/', async (req, res) => {

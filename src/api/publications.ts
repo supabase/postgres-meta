@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { ident, literal } from 'pg-format'
 import sql = require('../lib/sql')
 import { RunQuery } from '../lib/connectionPool'
-import { logger } from '../lib/logger'
+import logger from '../server/logger'
 
 const { publicationsSql } = sql
 const router = Router()
