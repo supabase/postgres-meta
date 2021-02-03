@@ -7,7 +7,7 @@ import { Schemas } from '../lib/interfaces'
 
 import { list, byId, byName } from '../api/schemas'
 
-const { schemas } = sqlTemplates
+const { schemasSql } = sqlTemplates
 
 /**
  * @param {boolean} [include_system_schemas=false] - Return system schemas as well as user schemas
@@ -18,7 +18,7 @@ interface QueryParams {
 
 const router = Router()
 
-router.get('/', async (req, res) => {
+router.get('/', async (req: any, res) => {
   try {
     let conn: string = req.headers.pg.toString()
     const query: QueryParams = req.query
@@ -32,7 +32,7 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.post('/', async (req, res) => {
+router.post('/', async (req: any, res) => {
   try {
     let conn: string = req.headers.pg.toString()
     const name: string = req.body.name
@@ -52,7 +52,7 @@ router.post('/', async (req, res) => {
   }
 })
 
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', async (req: any, res) => {
   try {
     let conn: string = req.headers.pg.toString()
     const id: number = +req.params.id
@@ -84,7 +84,7 @@ router.patch('/:id', async (req, res) => {
   }
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: any, res) => {
   try {
     let conn: string = req.headers.pg.toString()
     const id: number = +req.params.id

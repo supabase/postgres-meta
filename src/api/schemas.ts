@@ -5,7 +5,7 @@ import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
 import { Schemas as Interfaces } from '../lib/interfaces'
 import { logger } from '../lib/logger'
 
-const { schemas: allSchemasSql } = sqlTemplates
+const { schemasSql: allSchemasSql } = sqlTemplates
 const defaultSchemasList = DEFAULT_SYSTEM_SCHEMAS.map((x) => `'${x}'`).join(', ')
 
 /**
@@ -21,7 +21,7 @@ export async function list(
     include_system_schemas?: boolean
   }
 ): /**  Returns a list of schemas */
-Promise<{ data: Interfaces.Schema[]; error: null | Error }> {
+Promise<{ data: any; error: null | Error }> {
   try {
     let query = SQL``.append(allSchemasSql)
     if (!include_system_schemas) {
@@ -45,7 +45,7 @@ export async function byId(
   /** The schema `oid` */
   id: number
 ): /**  Returns a single schemas */
-Promise<{ data: Interfaces.Schema; error: null | Error }> {
+Promise<{ data: any; error: null | Error }> {
   try {
     const query = SQL``.append(allSchemasSql).append(SQL` and n.oid = ${id}`)
     const { data } = await RunQuery<Interfaces.Schema>(connection, query)
@@ -65,7 +65,7 @@ export async function byName(
   /** The schema name */
   name: string
 ): /**  Returns a single schemas */
-Promise<{ data: Interfaces.Schema; error: null | Error }> {
+Promise<{ data: any; error: null | Error }> {
   try {
     const query = SQL``.append(allSchemasSql).append(SQL` and n.nspname = ${name}`)
     const { data } = await RunQuery<Interfaces.Schema>(connection, query)

@@ -4,12 +4,12 @@ import sql = require('../lib/sql')
 import { RunQuery } from '../lib/connectionPool'
 import { logger } from '../lib/logger'
 
-const { publications } = sql
+const { publicationsSql } = sql
 const router = Router()
 
 router.get('/', async (req, res) => {
   try {
-    const { data } = await RunQuery(req.headers.pg, publications)
+    const { data } = await RunQuery(req.headers.pg, publicationsSql)
     return res.status(200).json(data)
   } catch (error) {
     logger.error({ error, req: req.body })
@@ -89,7 +89,7 @@ const createPublicationSqlize = ({
   publish_truncate?: boolean
   tables?: string[]
 }) => {
-  let tableClause: string = `FOR TABLE ${tables.map(ident).join(',')}`
+  let tableClause: string = `FOR TABLE ${tables!.map(ident).join(',')}`
   if (tables === undefined) {
     tableClause = 'FOR ALL TABLES'
   } else if (tables.length === 0) {
@@ -109,11 +109,11 @@ CREATE PUBLICATION ${ident(name)} ${tableClause}
 }
 
 const getPublicationByNameSqlize = (name: string) => {
-  return `${publications} WHERE p.pubname = ${literal(name)}`
+  return `${publicationsSql} WHERE p.pubname = ${literal(name)}`
 }
 
 const getPublicationByIdSqlize = (id: string) => {
-  return `${publications} WHERE p.oid = ${literal(id)}`
+  return `${publicationsSql} WHERE p.oid = ${literal(id)}`
 }
 
 const alterPublicationSqlize = ({
