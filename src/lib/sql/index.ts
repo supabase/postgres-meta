@@ -1,19 +1,17 @@
-import * as fs from 'fs'
-import * as path from 'path'
+import { readFileSync } from 'fs'
+import { resolve } from 'path'
 
-export = {
-  columns: fs.readFileSync(path.join(__dirname, '/columns.sql')).toString(),
-  config: fs.readFileSync(path.join(__dirname, '/config.sql')).toString(),
-  extensions: fs.readFileSync(path.join(__dirname, '/extensions.sql')).toString(),
-  functions: fs.readFileSync(path.join(__dirname, '/functions.sql')).toString(),
-  grants: fs.readFileSync(path.join(__dirname, '/grants.sql')).toString(),
-  policies: fs.readFileSync(path.join(__dirname, '/policies.sql')).toString(),
-  primary_keys: fs.readFileSync(path.join(__dirname, '/primary_keys.sql')).toString(),
-  publications: fs.readFileSync(path.join(__dirname, '/publications.sql')).toString(),
-  relationships: fs.readFileSync(path.join(__dirname, '/relationships.sql')).toString(),
-  roles: fs.readFileSync(path.join(__dirname, '/roles.sql')).toString(),
-  schemas: fs.readFileSync(path.join(__dirname, '/schemas.sql')).toString(),
-  tables: fs.readFileSync(path.join(__dirname, '/tables.sql')).toString(),
-  types: fs.readFileSync(path.join(__dirname, '/types.sql')).toString(),
-  version: fs.readFileSync(path.join(__dirname, '/version.sql')).toString(),
-}
+export const columnsSql = readFileSync(resolve(__dirname, 'columns.sql'), 'utf-8')
+export const configSql = readFileSync(resolve(__dirname, 'config.sql'), 'utf-8')
+export const extensionsSql = readFileSync(resolve(__dirname, 'extensions.sql'), 'utf-8')
+export const functionsSql = readFileSync(resolve(__dirname, 'functions.sql'), 'utf-8')
+export const grantsSql = readFileSync(resolve(__dirname, 'grants.sql'), 'utf-8')
+export const policiesSql = readFileSync(resolve(__dirname, 'policies.sql'), 'utf-8')
+export const primaryKeysSql = readFileSync(resolve(__dirname, 'primary_keys.sql'), 'utf-8')
+export const publicationsSql = readFileSync(resolve(__dirname, 'publications.sql'), 'utf-8')
+export const relationshipsSql = readFileSync(resolve(__dirname, 'relationships.sql'), 'utf-8')
+export const rolesSql = readFileSync(resolve(__dirname, 'roles.sql'), 'utf-8')
+export const schemasSql = readFileSync(resolve(__dirname, 'schemas.sql'), 'utf-8')
+export const tablesSql = readFileSync(resolve(__dirname, 'tables.sql'), 'utf-8')
+export const typesSql = readFileSync(resolve(__dirname, 'types.sql'), 'utf-8')
+export const versionSql = readFileSync(resolve(__dirname, 'version.sql'), 'utf-8')
