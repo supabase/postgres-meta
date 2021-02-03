@@ -2,7 +2,7 @@ import { Router } from 'express'
 
 import { RunQuery } from '../lib/connectionPool'
 import sql = require('../lib/sql')
-import { logger } from '../lib/logger'
+import logger from '../server/logger'
 const { configSql, versionSql } = sql
 
 const router = Router()

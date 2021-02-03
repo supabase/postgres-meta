@@ -1,11 +1,14 @@
+import cors from 'cors'
 import CryptoJS from 'crypto-js'
-import { PG_CONNECTION, CRYPTO_KEY } from '../server/constants'
-import logger from '../server/logger'
+import { Router } from 'express'
+import { PG_CONNECTION, CRYPTO_KEY } from '../constants'
+import logger from '../logger'
+import oldRoutes from '../../api'
 
 /**
  * Adds a "pg" object to the request if it doesn't exist
  */
-export const addConnectionToRequest = async (req: any, res: any, next: any) => {
+const addConnectionToRequest = async (req: any, res: any, next: any) => {
   try {
     req.headers['pg'] = PG_CONNECTION
 
@@ -25,3 +28,10 @@ export const addConnectionToRequest = async (req: any, res: any, next: any) => {
     return res.status(500).json({ error: 'Server error.', status: 500 })
   }
 }
+
+const router = Router()
+router.use(cors())
+// router.use('/schemas', addConnectionToRequest, require('./schemas'))
+router.use(oldRoutes)
+
+export default router
