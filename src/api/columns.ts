@@ -15,11 +15,11 @@ interface QueryParams {
 }
 
 const router = Router()
-const { columns, tables } = sql
+const { columnsSql, tablesSql } = sql
 
 router.get('/', async (req, res) => {
   try {
-    const { data } = await RunQuery(req.headers.pg, columns)
+    const { data } = await RunQuery(req.headers.pg, columnsSql)
     const query: QueryParams = req.query
     const include_system_schemas = query?.include_system_schemas === 'true'
     let payload: Tables.Column[] = data
@@ -99,7 +99,7 @@ router.delete('/:id', async (req, res) => {
 })
 
 const getTableSqlize = (id: number) => {
-  return SQL``.append(tables).append(SQL` AND c.oid = ${id}`)
+  return SQL``.append(tablesSql).append(SQL` AND c.oid = ${id}`)
 }
 const addColumnSqlize = ({
   schema,
@@ -159,10 +159,10 @@ ${commentSql}`,
   )
 }
 const getColumnSqlize = (tableId: number, name: string) => {
-  return SQL``.append(columns).append(SQL` AND c.oid = ${tableId} AND a.attname = ${name}`)
+  return SQL``.append(columnsSql).append(SQL` AND c.oid = ${tableId} AND a.attname = ${name}`)
 }
 const getColumnByPosSqlize = (tableId: number, ordinalPos: number) => {
-  return SQL``.append(columns).append(SQL` AND c.oid = ${tableId} AND a.attnum = ${ordinalPos}`)
+  return SQL``.append(columnsSql).append(SQL` AND c.oid = ${tableId} AND a.attnum = ${ordinalPos}`)
 }
 const alterColumnSqlize = (
   old: any,

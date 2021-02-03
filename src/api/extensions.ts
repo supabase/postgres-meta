@@ -2,7 +2,7 @@ import { Router } from 'express'
 import format from 'pg-format'
 import SQL from 'sql-template-strings'
 import sqlTemplates = require('../lib/sql')
-const { extensions } = sqlTemplates
+const { extensionsSql } = sqlTemplates
 import { RunQuery } from '../lib/connectionPool'
 import { logger } from '../lib/logger'
 
@@ -10,7 +10,7 @@ const router = Router()
 
 router.get('/', async (req, res) => {
   try {
-    const getExtensionsQuery = getExtensionsSqlize(extensions)
+    const getExtensionsQuery = getExtensionsSqlize(extensionsSql)
     const { data } = await RunQuery(req.headers.pg, getExtensionsQuery)
     return res.status(200).json(data)
   } catch (error) {
@@ -24,7 +24,7 @@ router.post('/', async (req, res) => {
     const query = createExtensionSqlize(req.body)
     await RunQuery(req.headers.pg, query)
 
-    const getExtensionQuery = singleExtensionSqlize(extensions, req.body.name)
+    const getExtensionQuery = singleExtensionSqlize(extensionsSql, req.body.name)
     const extension = (await RunQuery(req.headers.pg, getExtensionQuery)).data[0]
 
     return res.status(200).json(extension)
@@ -42,7 +42,7 @@ router.patch('/:name', async (req, res) => {
     const alterExtensionQuery = alterExtensionSqlize(req.body)
     await RunQuery(req.headers.pg, alterExtensionQuery)
 
-    const getExtensionQuery = singleExtensionSqlize(extensions, name)
+    const getExtensionQuery = singleExtensionSqlize(extensionsSql, name)
     const updated = (await RunQuery(req.headers.pg, getExtensionQuery)).data[0]
 
     return res.status(200).json(updated)
@@ -57,7 +57,7 @@ router.delete('/:name', async (req, res) => {
     const name = req.params.name
     const cascade = req.query.cascade === 'true'
 
-    const getExtensionQuery = singleExtensionSqlize(extensions, name)
+    const getExtensionQuery = singleExtensionSqlize(extensionsSql, name)
     const deleted = (await RunQuery(req.headers.pg, getExtensionQuery)).data[0]
 
     const query = dropExtensionSqlize(name, cascade)

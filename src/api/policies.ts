@@ -31,7 +31,7 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.post('/', async (req, res) => {
+router.post('/', async (req: any, res) => {
   try {
     const pcConnection: string = req.headers.pg.toString()
     const payload: Tables.Policy = { ...req.body }
@@ -52,7 +52,7 @@ router.post('/', async (req, res) => {
   }
 })
 
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', async (req: any, res) => {
   try {
     const pcConnection: string = req.headers.pg.toString()
     const id: number = parseInt(req.params.id)
@@ -88,7 +88,7 @@ router.patch('/:id', async (req, res) => {
   }
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: any, res) => {
   try {
     const pcConnection: string = req.headers.pg.toString()
     const id: number = parseInt(req.params.id)
@@ -109,14 +109,14 @@ router.delete('/:id', async (req, res) => {
   }
 })
 
-const getAllSql = (sqlTemplates) => {
-  const { policies } = sqlTemplates
-  return `${policies}`.trim()
+const getAllSql = (sqlTemplates: any) => {
+  const { policiesSql } = sqlTemplates
+  return `${policiesSql}`.trim()
 }
 const getPolicyById = async (connection: string, id: number) => {
-  const { policies } = sqlTemplates
+  const { policiesSql } = sqlTemplates
   const sql = `
-    with policies as (${policies}) 
+    with policies as (${policiesSql})
     select * from policies
     where policies.id = ${id}
     limit 1
@@ -125,10 +125,10 @@ const getPolicyById = async (connection: string, id: number) => {
   return data[0]
 }
 const getPolicyByName = async (connection: string, name: string, schema: string, table: string) => {
-  const { policies } = sqlTemplates
+  const { policiesSql } = sqlTemplates
   let sql = format(
     `
-    with policies as (${policies})
+    with policies as (${policiesSql})
     select * from policies
     where policies.name = %L and policies.schema = %L and policies.table = %L
     limit 1

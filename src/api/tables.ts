@@ -48,7 +48,7 @@ router.get('/:id', async (req, res) => {
   }
 })
 
-router.post('/', async (req, res) => {
+router.post('/', async (req: any, res) => {
   try {
     const pcConnection: string = req.headers.pg.toString()
     const { schema = 'public', name } = req.body
@@ -70,7 +70,7 @@ router.post('/', async (req, res) => {
   }
 })
 
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', async (req: any, res) => {
   try {
     const pcConnection: string = req.headers.pg.toString()
     const id: number = parseInt(req.params.id)
@@ -122,15 +122,22 @@ router.delete('/:id', async (req, res) => {
   }
 })
 
-const getTablesSql = (sqlTemplates) => {
-  const { columns, grants, policies, primary_keys, relationships, tables } = sqlTemplates
+const getTablesSql = (sqlTemplates: any) => {
+  const {
+    columnsSql,
+    grantsSql,
+    policiesSql,
+    primaryKeysSql,
+    relationshipsSql,
+    tablesSql,
+  } = sqlTemplates
   return `
-  WITH tables AS ( ${tables} ),
-    columns AS ( ${columns} ),
-    grants AS ( ${grants} ),
-    policies AS ( ${policies} ),
-    primary_keys AS ( ${primary_keys} ),
-    relationships AS ( ${relationships} )
+  WITH tables AS ( ${tablesSql} ),
+    columns AS ( ${columnsSql} ),
+    grants AS ( ${grantsSql} ),
+    policies AS ( ${policiesSql} ),
+    primary_keys AS ( ${primaryKeysSql} ),
+    relationships AS ( ${relationshipsSql} )
   SELECT
     *,
     ${coalesceRowsToArray('columns', 'SELECT * FROM columns WHERE columns.table_id = tables.id')},
@@ -156,14 +163,21 @@ const getTablesSql = (sqlTemplates) => {
   FROM tables;`.trim()
 }
 const selectSingleSql = (sqlTemplates: { [key: string]: string }, id: number) => {
-  const { columns, grants, policies, primary_keys, relationships, tables } = sqlTemplates
+  const {
+    columnsSql,
+    grantsSql,
+    policiesSql,
+    primaryKeysSql,
+    relationshipsSql,
+    tablesSql,
+  } = sqlTemplates
   return `
-  WITH tables AS ( ${tables} AND c.oid = ${id} ),
-    columns AS ( ${columns} ),
-    grants AS ( ${grants} ),
-    policies AS ( ${policies} ),
-    primary_keys AS ( ${primary_keys} ),
-    relationships AS ( ${relationships} )
+  WITH tables AS ( ${tablesSql} AND c.oid = ${id} ),
+    columns AS ( ${columnsSql} ),
+    grants AS ( ${grantsSql} ),
+    policies AS ( ${policiesSql} ),
+    primary_keys AS ( ${primaryKeysSql} ),
+    relationships AS ( ${relationshipsSql} )
   SELECT
     *,
     ${coalesceRowsToArray('columns', 'SELECT * FROM columns WHERE columns.table_id = tables.id')},
@@ -194,16 +208,23 @@ const selectSingleByName = (
   schema: string,
   name: string
 ) => {
-  const { columns, grants, policies, primary_keys, relationships, tables } = sqlTemplates
+  const {
+    columnsSql,
+    grantsSql,
+    policiesSql,
+    primaryKeysSql,
+    relationshipsSql,
+    tablesSql,
+  } = sqlTemplates
   return `
-  WITH tables AS ( ${tables} AND nc.nspname = ${format.literal(
+  WITH tables AS ( ${tablesSql} AND nc.nspname = ${format.literal(
     schema
   )} AND c.relname = ${format.literal(name)} ),
-    columns AS ( ${columns} ),
-    grants AS ( ${grants} ),
-    policies AS ( ${policies} ),
-    primary_keys AS ( ${primary_keys} ),
-    relationships AS ( ${relationships} )
+    columns AS ( ${columnsSql} ),
+    grants AS ( ${grantsSql} ),
+    policies AS ( ${policiesSql} ),
+    primary_keys AS ( ${primaryKeysSql} ),
+    relationships AS ( ${relationshipsSql} )
   SELECT
     *,
     ${coalesceRowsToArray('columns', 'SELECT * FROM columns WHERE columns.table_id = tables.id')},

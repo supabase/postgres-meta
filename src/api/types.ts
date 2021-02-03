@@ -1,7 +1,7 @@
 import { Router } from 'express'
 
 import sql = require('../lib/sql')
-const { types } = sql
+const { typesSql } = sql
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
 import { Types } from '../lib/interfaces'
@@ -18,7 +18,7 @@ const router = Router()
 
 router.get('/', async (req, res) => {
   try {
-    const { data } = await RunQuery(req.headers.pg, types)
+    const { data } = await RunQuery(req.headers.pg, typesSql)
     const query: QueryParams = req.query
     const include_system_schemas = query?.include_system_schemas === 'true'
     let payload: Types.Type[] = data

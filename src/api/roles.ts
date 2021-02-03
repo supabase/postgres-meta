@@ -3,7 +3,7 @@ import { Router } from 'express'
 import format from 'pg-format'
 import SQL from 'sql-template-strings'
 import sqlTemplates = require('../lib/sql')
-const { grants, roles } = sqlTemplates
+const { grantsSql, rolesSql } = sqlTemplates
 import { coalesceRowsToArray } from '../lib/helpers'
 import { RunQuery } from '../lib/connectionPool'
 import { DEFAULT_ROLES, DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
@@ -22,7 +22,7 @@ const router = Router()
 
 router.get('/', async (req, res) => {
   try {
-    const sql = getRolesSqlize(roles, grants)
+    const sql = getRolesSqlize(rolesSql, grantsSql)
     const { data } = await RunQuery(req.headers.pg, sql)
     const query: QueryParams = req.query
     const include_system_schemas = query?.include_system_schemas === 'true'
@@ -43,7 +43,7 @@ router.post('/', async (req, res) => {
     const query = createRoleSqlize(req.body)
     await RunQuery(req.headers.pg, query)
 
-    const getRoleQuery = singleRoleByNameSqlize(roles, req.body.name)
+    const getRoleQuery = singleRoleByNameSqlize(rolesSql, req.body.name)
     const role = (await RunQuery(req.headers.pg, getRoleQuery)).data[0]
 
     return res.status(200).json(role)
@@ -56,7 +56,7 @@ router.post('/', async (req, res) => {
 router.patch('/:id', async (req, res) => {
   try {
     const id = req.params.id
-    const getRoleQuery = singleRoleSqlize(roles, id)
+    const getRoleQuery = singleRoleSqlize(rolesSql, id)
     const role = (await RunQuery(req.headers.pg, getRoleQuery)).data[0]
     const { name: oldName } = role
 
@@ -76,7 +76,7 @@ router.patch('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const id = req.params.id
-    const getRoleQuery = singleRoleSqlize(roles, id)
+    const getRoleQuery = singleRoleSqlize(rolesSql, id)
     const role = (await RunQuery(req.headers.pg, getRoleQuery)).data[0]
     const { name } = role
 

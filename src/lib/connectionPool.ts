@@ -1,4 +1,4 @@
-import pg = require('pg')
+import pg from 'pg'
 import { SQLStatement } from 'sql-template-strings'
 // TODO: Use Date object for timestamptz?
 // HACK: Number has 53 bits of precision, may overflow with bigint (64 bits).
