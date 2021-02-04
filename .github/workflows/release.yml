@@ -28,7 +28,7 @@ jobs:
           npm run build
 
       - name: Get version before
-        run: echo "VERSION_BEFORE=$(curl -s https://api.github.com/repos/supabase/pg-api/releases/latest | jq .name -r)" >> $GITHUB_ENV
+        run: echo "VERSION_BEFORE=$(curl -s https://api.github.com/repos/supabase/postgres-meta/releases/latest | jq .name -r)" >> $GITHUB_ENV
 
       - name: Release on GitHub
         run: npx semantic-release
@@ -36,7 +36,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get version after
-        run: echo "VERSION_AFTER=$(curl -s https://api.github.com/repos/supabase/pg-api/releases/latest | jq .name -r)" >> $GITHUB_ENV
+        run: echo "VERSION_AFTER=$(curl -s https://api.github.com/repos/supabase/postgres-meta/releases/latest | jq .name -r)" >> $GITHUB_ENV
 
       - name: Check version difference
         run: |
@@ -99,7 +99,7 @@ jobs:
 
       - name: Get upload url
         if: env.HAS_NEW_RELEASE == 1
-        run: echo "UPLOAD_URL=$(curl -s https://api.github.com/repos/supabase/pg-api/releases/latest | jq .upload_url -r)" >> $GITHUB_ENV
+        run: echo "UPLOAD_URL=$(curl -s https://api.github.com/repos/supabase/postgres-meta/releases/latest | jq .upload_url -r)" >> $GITHUB_ENV
 
       - name: Upload linux release asset
         if: env.HAS_NEW_RELEASE == 1
@@ -135,7 +135,7 @@ jobs:
           asset_content_type: application/gzip
 
       - name: Get version
-        run: echo "VERSION=$(curl -s https://api.github.com/repos/supabase/pg-api/releases/latest | jq .name -r)" >> $GITHUB_ENV
+        run: echo "VERSION=$(curl -s https://api.github.com/repos/supabase/postgres-meta/releases/latest | jq .name -r)" >> $GITHUB_ENV
 
       - name: Upload image to Docker Hub
         if: env.HAS_NEW_RELEASE == 1
@@ -143,5 +143,5 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: supabase/pg-api
+          repository: supabase/postgres-meta
           tags: latest,${{ env.VERSION }}
