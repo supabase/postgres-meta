@@ -3,9 +3,9 @@ import { extensionsSql } from './sql'
 import { PostgresMetaResult, PostgresExtension } from './types'
 
 export default class PostgresMetaExtension {
-  query: Function
+  query: (sql: string) => Promise<PostgresMetaResult<any>>
 
-  constructor(query: Function) {
+  constructor(query: (sql: string) => Promise<PostgresMetaResult<any>>) {
     this.query = query
   }
 

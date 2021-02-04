@@ -4,9 +4,9 @@ import { schemasSql } from './sql'
 import { PostgresMetaResult, PostgresSchema } from './types'
 
 export default class PostgresMetaSchema {
-  query: Function
+  query: (sql: string) => Promise<PostgresMetaResult<any>>
 
-  constructor(query: Function) {
+  constructor(query: (sql: string) => Promise<PostgresMetaResult<any>>) {
     this.query = query
   }
 
