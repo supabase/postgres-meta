@@ -4,9 +4,9 @@ import { functionsSql } from './sql'
 import { PostgresMetaResult, PostgresFunction } from './types'
 
 export default class PostgresMetaFunction {
-  query: Function
+  query: (sql: string) => Promise<PostgresMetaResult<any>>
 
-  constructor(query: Function) {
+  constructor(query: (sql: string) => Promise<PostgresMetaResult<any>>) {
     this.query = query
   }
 

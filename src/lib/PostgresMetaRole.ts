@@ -5,9 +5,9 @@ import { grantsSql, rolesSql } from './sql'
 import { PostgresMetaResult, PostgresRole } from './types'
 
 export default class PostgresMetaRole {
-  query: Function
+  query: (sql: string) => Promise<PostgresMetaResult<any>>
 
-  constructor(query: Function) {
+  constructor(query: (sql: string) => Promise<PostgresMetaResult<any>>) {
     this.query = query
   }
 

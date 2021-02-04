@@ -11,9 +11,10 @@ import PostgresMetaTable from './PostgresMetaTable'
 import PostgresMetaType from './PostgresMetaType'
 import PostgresMetaVersion from './PostgresMetaVersion'
 import { init } from './db'
+import { PostgresMetaResult } from './types'
 
 export default class PostgresMeta {
-  query: Function
+  query: (sql: string) => Promise<PostgresMetaResult<any>>
   column: PostgresMetaColumn
   config: PostgresMetaConfig
   extension: PostgresMetaExtension

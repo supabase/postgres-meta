@@ -5,10 +5,10 @@ import { columnsSql } from './sql'
 import { PostgresMetaResult, PostgresColumn } from './types'
 
 export default class PostgresMetaColumn {
-  query: Function
+  query: (sql: string) => Promise<PostgresMetaResult<any>>
   metaTable: PostgresMetaTable
 
-  constructor(query: Function) {
+  constructor(query: (sql: string) => Promise<PostgresMetaResult<any>>) {
     this.query = query
     this.metaTable = new PostgresMetaTable(query)
   }
