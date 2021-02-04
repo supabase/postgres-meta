@@ -4,9 +4,9 @@ import { policiesSql } from './sql'
 import { PostgresMetaResult, PostgresPolicy } from './types'
 
 export default class PostgresMetaPolicy {
-  query: Function
+  query: (sql: string) => Promise<PostgresMetaResult<any>>
 
-  constructor(query: Function) {
+  constructor(query: (sql: string) => Promise<PostgresMetaResult<any>>) {
     this.query = query
   }
 

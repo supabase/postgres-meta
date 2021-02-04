@@ -2,9 +2,9 @@ import { versionSql } from './sql'
 import { PostgresMetaResult, PostgresVersion } from './types'
 
 export default class PostgresMetaVersion {
-  query: Function
+  query: (sql: string) => Promise<PostgresMetaResult<any>>
 
-  constructor(query: Function) {
+  constructor(query: (sql: string) => Promise<PostgresMetaResult<any>>) {
     this.query = query
   }
 

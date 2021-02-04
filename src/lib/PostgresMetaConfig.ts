@@ -2,9 +2,9 @@ import { configSql } from './sql'
 import { PostgresMetaResult, PostgresConfig } from './types'
 
 export default class PostgresMetaConfig {
-  query: Function
+  query: (sql: string) => Promise<PostgresMetaResult<any>>
 
-  constructor(query: Function) {
+  constructor(query: (sql: string) => Promise<PostgresMetaResult<any>>) {
     this.query = query
   }
 
