@@ -1,8 +1,8 @@
-# docker build -t pg-api .
-# docker run -t -i -p8080:8080 pg-api
+# docker build -t postgres-meta .
+# docker run -t -i -p8080:8080 postgres-meta
 
 FROM debian:stable-slim
-COPY ./bin/pg-api-linux /bin/
-ENV PG_API_PORT=8080
-ENTRYPOINT "/bin/pg-api-linux"
+COPY ./bin/postgres-meta-linux /bin/
+ENV PG_META_PORT=8080
+ENTRYPOINT "/bin/postgres-meta-linux"
 EXPOSE 8080
