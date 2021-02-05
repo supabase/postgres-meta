@@ -1,6 +1,6 @@
 SELECT
   n.nspname AS schema,
-  c.oid :: regclass AS table_name,
+  c.relname AS table_name,
   a.attname AS name,
   c.oid :: int8 AS table_id
 FROM

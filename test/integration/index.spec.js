@@ -219,6 +219,14 @@ describe('/tables', async () => {
     assert.equal(true, relationship.target_table_schema === 'public')
     assert.equal(true, relationship.target_table_name === 'users')
   })
+  it('/tables should return relationships for quoted names', async () => {
+    const tables = await axios.get(`${URL}/tables`)
+    const todos = tables.data.find((x) => `${x.schema}.${x.name}` === 'public.todos')
+    const relationship = todos.relationships.find(
+      (x) => x.source_schema === 'public' && x.source_table_name === 'todos'
+    )
+    assert.equal(true, relationship.source_column_name === 'user-id')
+  })
   it('GET /tables with system tables', async () => {
     const res = await axios.get(`${URL}/tables?include_system_schemas=true`)
     const included = res.data.find((x) => `${x.schema}.${x.name}` === 'pg_catalog.pg_type')
