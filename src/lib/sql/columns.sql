@@ -59,7 +59,7 @@ SELECT
       FROM
         pg_catalog.pg_enum enums
       WHERE
-        COALESCE(bt.typname, t.typname) = format_type(enums.enumtypid :: regclass, NULL)
+        COALESCE(bt.typname, t.typname) = format_type(enums.enumtypid, NULL)
       ORDER BY
         enums.enumsortorder
     )

@@ -1,7 +1,7 @@
 SELECT
   p.oid :: int8 AS id,
   p.pubname AS name,
-  p.pubowner :: regrole AS owner,
+  r.rolname AS owner,
   p.pubinsert AS publish_insert,
   p.pubupdate AS publish_update,
   p.pubdelete AS publish_delete,
@@ -15,14 +15,16 @@ FROM
   LEFT JOIN LATERAL (
     SELECT
       COALESCE(
-        array_agg(pr.prrelid :: regclass :: text) filter (
+        array_agg(c.relname :: text) filter (
           WHERE
-            pr.prrelid IS NOT NULL
+            c.relname IS NOT NULL
         ),
         '{}'
       ) AS tables
     FROM
       pg_catalog.pg_publication_rel AS pr
+      JOIN pg_class AS c ON pr.prrelid = c.oid
     WHERE
       pr.prpubid = p.oid
   ) AS pr ON 1 = 1
+  JOIN pg_roles AS r ON p.pubowner = r.oid
