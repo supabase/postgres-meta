@@ -212,7 +212,7 @@ SELECT
      FROM
        relationships
      WHERE
-       (relationships.source_schema :: text = tables.schema AND relationships.source_table_name :: text = tables.name)
-       OR (relationships.target_table_schema :: text = tables.schema AND relationships.target_table_name :: text = tables.name)`
+       (relationships.source_schema = tables.schema AND relationships.source_table_name = tables.name)
+       OR (relationships.target_table_schema = tables.schema AND relationships.target_table_name = tables.name)`
   )}
 FROM tables`
