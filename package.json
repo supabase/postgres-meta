@@ -7,14 +7,10 @@
   "license": "MIT",
   "author": "Supabase",
   "files": [
-    "dist",
-    "bin"
+    "dist"
   ],
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
-  "bin": {
-    "postgres-meta": "bin/src/server/app.js"
-  },
   "repository": "supabase/postgres-meta",
   "scripts": {
     "clean": "rimraf bin dist",
@@ -24,7 +20,7 @@
     "build:module": "tsc -p tsconfig.module.json && cpy 'src/lib/sql/*.sql' dist/module/sql",
     "build:server": "tsc -p tsconfig.server.json && cpy 'src/lib/sql/*.sql' bin/src/lib/sql",
     "start": "node bin/src/server/app.js | pino-pretty --colorize --levelFirst",
-    "pkg": "NODE_ENV=production run-s build:server && pkg --out-path bin .",
+    "pkg": "NODE_ENV=production run-s build:server && pkg --out-path bin bin/src/server/app.js",
     "dev": "NODE_ENV=development run-s build start",
     "dev:watch": "nodemon",
     "test": "node -r esm ./node_modules/.bin/mocha 'test/**/*.js' --recursive "
