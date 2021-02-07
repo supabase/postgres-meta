@@ -34,6 +34,7 @@ jobs:
         run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Get version after
         run: echo "VERSION_AFTER=$(curl -s https://api.github.com/repos/supabase/postgres-meta/releases/latest | jq .name -r)" >> $GITHUB_ENV
