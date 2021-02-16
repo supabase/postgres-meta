@@ -94,9 +94,9 @@ jobs:
         run: |
           npm ci
           npm run pkg
-          tar -czvf postgres-meta-linux.tar.gz -C ./bin app-linux
-          tar -czvf postgres-meta-macos.tar.gz -C ./bin app-macos
-          tar -czvf postgres-meta-windows.tar.gz -C ./bin app-win.exe
+          tar -czvf postgres-meta-linux.tar.gz -C ./bin postgres-meta-linux
+          tar -czvf postgres-meta-macos.tar.gz -C ./bin postgres-meta-macos
+          tar -czvf postgres-meta-windows.tar.gz -C ./bin postgres-meta-win.exe
 
       - name: Get upload url
         if: env.HAS_NEW_RELEASE == 1
