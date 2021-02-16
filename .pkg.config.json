@@ -1,0 +1,10 @@
+{
+  "name": "@supabase/postgres-meta",
+  "bin": {
+    "postgres-meta": "bin/src/server/app.js"
+  },
+  "pkg": {
+    "assets": ["bin/**/*.sql"],
+    "scripts": ["node_modules/pg-format/lib/reserved.js"]
+  }
+}
