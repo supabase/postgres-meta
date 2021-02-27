@@ -12,7 +12,7 @@ app.get('/', (_req, res) =>
     status: 200,
     name: pkg.name,
     version: pkg.version,
-    documentation: 'https://supabase.github.io/postgres-meta/',
+    documentation: 'https://github.com/supabase/postgres-meta',
   })
 )
 app.get('/health', (_req, res) => res.status(200).json({ date: new Date() }))

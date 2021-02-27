@@ -2,10 +2,6 @@
 
 A RESTful API for managing your Postgres. Fetch tables, add roles, and run queries (and more).
 
-## Usage
-
-Full documentation: https://supabase.github.io/postgres-meta/
-
 ## Quickstart
 
 Set the following ENV VARS:
