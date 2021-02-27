@@ -15,15 +15,22 @@ FROM
   LEFT JOIN LATERAL (
     SELECT
       COALESCE(
-        array_agg(c.relname :: text) filter (
-          WHERE
-            c.relname IS NOT NULL
+        array_agg(
+          json_build_object(
+            'id',
+            c.oid :: int8,
+            'name',
+            c.relname,
+            'schema',
+            nc.nspname
+          )
         ),
         '{}'
       ) AS tables
     FROM
       pg_catalog.pg_publication_rel AS pr
       JOIN pg_class AS c ON pr.prrelid = c.oid
+      join pg_namespace as nc on c.relnamespace = nc.oid
     WHERE
       pr.prpubid = p.oid
   ) AS pr ON 1 = 1
