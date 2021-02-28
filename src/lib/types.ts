@@ -110,7 +110,7 @@ export interface PostgresPublication {
   publish_update: boolean
   publish_delete: boolean
   publish_truncate: boolean
-  tables: string[] | null
+  tables: { id: number; name: string; schema: string }[] | null
 }
 
 export interface PostgresRelationship {

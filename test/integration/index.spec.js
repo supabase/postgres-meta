@@ -661,7 +661,7 @@ describe('/publications', () => {
     assert.equal(newPublication.publish_update, publication.publish_update)
     assert.equal(newPublication.publish_delete, publication.publish_delete)
     assert.equal(newPublication.publish_truncate, publication.publish_truncate)
-    assert.equal(newPublication.tables.includes('users'), true)
+    assert.equal(newPublication.tables.some(table => `${table.schema}.${table.name}` === 'public.users'), true)
   })
   it('GET', async () => {
     const res = await axios.get(`${URL}/publications`)
@@ -679,7 +679,7 @@ describe('/publications', () => {
     })
     assert.equal(updated.name, 'b')
     assert.equal(updated.publish_insert, false)
-    assert.equal(updated.tables.includes('users'), false)
+    assert.equal(updated.tables.some(table => `${table.schema}.${table.name}` === 'public.users'), false)
   })
   it('DELETE', async () => {
     const res = await axios.get(`${URL}/publications`)
