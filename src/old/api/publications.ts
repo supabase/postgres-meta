@@ -89,7 +89,7 @@ const createPublicationSqlize = ({
   publish_truncate?: boolean
   tables?: string[]
 }) => {
-  let tableClause: string = `FOR TABLE ${tables!.map(ident).join(',')}`
+  let tableClause: string = `FOR TABLE ${tables!.join(',')}`
   if (tables === undefined) {
     tableClause = 'FOR ALL TABLES'
   } else if (tables.length === 0) {
@@ -145,7 +145,7 @@ const alterPublicationSqlize = ({
   //             ---------|-----------|-----------------|
   //                 null |    ''     | 400 Bad Request |
   // old tables  ---------|-----------|-----------------|
-  //             string[] |    ''     |    See below    |
+  //             object[] |    ''     |    See below    |
   //
   //                              new tables
   //
@@ -161,15 +161,15 @@ const alterPublicationSqlize = ({
   } else if (oldPublication.tables === null) {
     throw Error('Tables cannot be added to or dropped from FOR ALL TABLES publications')
   } else if (tables.length > 0) {
-    tableSql = `ALTER PUBLICATION ${ident(oldPublication.name)} SET TABLE ${tables
-      .map(ident)
-      .join(',')}`
+    tableSql = `ALTER PUBLICATION ${ident(oldPublication.name)} SET TABLE ${tables.join(',')}`
   } else if (oldPublication.tables.length === 0) {
     tableSql = ''
   } else {
     tableSql = `ALTER PUBLICATION ${ident(
       oldPublication.name
-    )} DROP TABLE ${oldPublication.tables.map(ident).join(',')}`
+    )} DROP TABLE ${oldPublication.tables
+      .map((table: any) => `${ident(table.schema)}.${ident(table.name)}`)
+      .join(',')}`
   }
 
   let publishOps = []

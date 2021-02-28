@@ -68,7 +68,7 @@ export default class PostgresMetaPublications {
     } else if (tables.length === 0) {
       tableClause = ''
     } else {
-      tableClause = `FOR TABLE ${tables.map(ident).join(',')}`
+      tableClause = `FOR TABLE ${tables.join(',')}`
     }
 
     let publishOps = []
@@ -122,7 +122,7 @@ CREATE PUBLICATION ${ident(name)} ${tableClause}
     //             ---------|-----------|-----------------|
     //                 null |    ''     | 400 Bad Request |
     // old tables  ---------|-----------|-----------------|
-    //             string[] |    ''     |    See below    |
+    //             object[] |    ''     |    See below    |
     //
     //                              new tables
     //
@@ -138,12 +138,12 @@ CREATE PUBLICATION ${ident(name)} ${tableClause}
     } else if (old!.tables === null) {
       throw new Error('Tables cannot be added to or dropped from FOR ALL TABLES publications')
     } else if (tables.length > 0) {
-      tableSql = `ALTER PUBLICATION ${ident(old!.name)} SET TABLE ${tables.map(ident).join(',')};`
+      tableSql = `ALTER PUBLICATION ${ident(old!.name)} SET TABLE ${tables.join(',')};`
     } else if (old!.tables.length === 0) {
       tableSql = ''
     } else {
       tableSql = `ALTER PUBLICATION ${ident(old!.name)} DROP TABLE ${old!.tables
-        .map(ident)
+        .map((table) => `${ident(table.schema)}.${ident(table.name)}`)
         .join(',')};`
     }
 
