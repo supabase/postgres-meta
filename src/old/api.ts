@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import cors = require('cors')
-import { addConnectionToRequest } from './lib/connectionMiddleware'
+import { addConnectionToRequest } from './connectionMiddleware'
 
 const router = Router()
 router.use(cors())

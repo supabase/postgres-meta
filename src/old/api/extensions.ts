@@ -1,10 +1,10 @@
 import { Router } from 'express'
 import format from 'pg-format'
 import SQL from 'sql-template-strings'
-import sqlTemplates = require('../lib/sql')
+import sqlTemplates = require('../../lib/sql')
 const { extensionsSql } = sqlTemplates
-import { RunQuery } from '../lib/connectionPool'
-import logger from '../server/logger'
+import { RunQuery } from '../connectionPool'
+import logger from '../../server/logger'
 
 const router = Router()
 

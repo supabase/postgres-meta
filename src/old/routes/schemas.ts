@@ -1,9 +1,9 @@
 import { Router } from 'express'
 import format from 'pg-format'
 import SQL from 'sql-template-strings'
-import sqlTemplates = require('../lib/sql')
-import { RunQuery } from '../lib/connectionPool'
-import { Schemas } from '../lib/interfaces'
+import sqlTemplates = require('../../lib/sql')
+import { RunQuery } from '../connectionPool'
+import { Schemas } from '../interfaces'
 
 import { list, byId, byName } from '../api/schemas'
 

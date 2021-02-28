@@ -2,13 +2,13 @@ import { Router } from 'express'
 
 import format from 'pg-format'
 import SQL from 'sql-template-strings'
-import sqlTemplates = require('../lib/sql')
+import sqlTemplates = require('../../lib/sql')
 const { grantsSql, rolesSql } = sqlTemplates
-import { coalesceRowsToArray } from '../lib/helpers'
-import { RunQuery } from '../lib/connectionPool'
-import { DEFAULT_ROLES, DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
-import { Roles } from '../lib/interfaces'
-import logger from '../server/logger'
+import { coalesceRowsToArray } from '../../lib/helpers'
+import { RunQuery } from '../connectionPool'
+import { DEFAULT_ROLES, DEFAULT_SYSTEM_SCHEMAS } from '../../lib/constants'
+import { Roles } from '../interfaces'
+import logger from '../../server/logger'
 
 /**
  * @param {boolean} [include_system_schemas=false] - Return system schemas as well as user schemas
