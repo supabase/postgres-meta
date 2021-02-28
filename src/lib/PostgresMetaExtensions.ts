@@ -2,7 +2,7 @@ import { ident, literal } from 'pg-format'
 import { extensionsSql } from './sql'
 import { PostgresMetaResult, PostgresExtension } from './types'
 
-export default class PostgresMetaExtension {
+export default class PostgresMetaExtensions {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
 
   constructor(query: (sql: string) => Promise<PostgresMetaResult<any>>) {
