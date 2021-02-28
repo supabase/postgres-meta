@@ -11,7 +11,7 @@ import {
 } from './sql'
 import { PostgresMetaResult, PostgresTable } from './types'
 
-export default class PostgresMetaTable {
+export default class PostgresMetaTables {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
 
   constructor(query: (sql: string) => Promise<PostgresMetaResult<any>>) {

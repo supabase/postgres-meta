@@ -1,16 +1,16 @@
 import { ident, literal } from 'pg-format'
-import PostgresMetaTable from './PostgresMetaTable'
+import PostgresMetaTables from './PostgresMetaTables'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
 import { columnsSql } from './sql'
 import { PostgresMetaResult, PostgresColumn } from './types'
 
-export default class PostgresMetaColumn {
+export default class PostgresMetaColumns {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
-  metaTable: PostgresMetaTable
+  metaTable: PostgresMetaTables
 
   constructor(query: (sql: string) => Promise<PostgresMetaResult<any>>) {
     this.query = query
-    this.metaTable = new PostgresMetaTable(query)
+    this.metaTable = new PostgresMetaTables(query)
   }
 
   async list({ includeSystemSchemas = false } = {}): Promise<PostgresMetaResult<PostgresColumn[]>> {

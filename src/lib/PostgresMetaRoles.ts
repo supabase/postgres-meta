@@ -4,7 +4,7 @@ import { coalesceRowsToArray } from './helpers'
 import { grantsSql, rolesSql } from './sql'
 import { PostgresMetaResult, PostgresRole } from './types'
 
-export default class PostgresMetaRole {
+export default class PostgresMetaRoles {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
 
   constructor(query: (sql: string) => Promise<PostgresMetaResult<any>>) {

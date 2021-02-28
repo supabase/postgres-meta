@@ -3,7 +3,7 @@ import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
 import { typesSql } from './sql'
 import { PostgresMetaResult, PostgresType } from './types'
 
-export default class PostgresMetaType {
+export default class PostgresMetaTypes {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
 
   constructor(query: (sql: string) => Promise<PostgresMetaResult<any>>) {

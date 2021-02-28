@@ -3,7 +3,7 @@ import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
 import { policiesSql } from './sql'
 import { PostgresMetaResult, PostgresPolicy } from './types'
 
-export default class PostgresMetaPolicy {
+export default class PostgresMetaPolicies {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
 
   constructor(query: (sql: string) => Promise<PostgresMetaResult<any>>) {
