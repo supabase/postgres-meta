@@ -1,6 +1,6 @@
 import express from 'express'
 import { PG_META_PORT } from './constants'
-import routes from './routes'
+import routes from '../old/api'
 import pkg from '../../package.json'
 import logger from './logger'
 
@@ -12,7 +12,7 @@ app.get('/', (_req, res) =>
     status: 200,
     name: pkg.name,
     version: pkg.version,
-    documentation: 'https://supabase.github.io/postgres-meta/',
+    documentation: 'https://github.com/supabase/postgres-meta',
   })
 )
 app.get('/health', (_req, res) => res.status(200).json({ date: new Date() }))

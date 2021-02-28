@@ -21,7 +21,7 @@
     "build:server": "tsc -p tsconfig.server.json && cpy 'src/lib/sql/*.sql' bin/src/lib/sql",
     "start": "node bin/src/server/app.js | pino-pretty --colorize --levelFirst",
     "pkg": "NODE_ENV=production run-s build:server && pkg --out-path bin .pkg.config.json",
-    "dev": "NODE_ENV=development run-s build start",
+    "dev": "NODE_ENV=development run-s build:server start",
     "dev:watch": "nodemon",
     "test": "node -r esm ./node_modules/.bin/mocha 'test/**/*.js' --recursive "
   },
