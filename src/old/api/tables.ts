@@ -1,11 +1,11 @@
 import { Router } from 'express'
 import format, { ident } from 'pg-format'
-import { coalesceRowsToArray, toTransaction } from '../lib/helpers'
-import { RunQuery } from '../lib/connectionPool'
-import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
-import { Tables } from '../lib/interfaces'
-import logger from '../server/logger'
-import sqlTemplates = require('../lib/sql')
+import { coalesceRowsToArray, toTransaction } from '../../lib/helpers'
+import { RunQuery } from '../connectionPool'
+import { DEFAULT_SYSTEM_SCHEMAS } from '../../lib/constants'
+import { Tables } from '../interfaces'
+import logger from '../../server/logger'
+import sqlTemplates = require('../../lib/sql')
 
 /**
  * @param {string} [include_system_schemas=false] - Return system schemas as well as user schemas

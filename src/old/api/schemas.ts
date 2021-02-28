@@ -1,9 +1,9 @@
 import SQL from 'sql-template-strings'
-import sqlTemplates = require('../lib/sql')
-import { RunQuery } from '../lib/connectionPool'
-import { DEFAULT_SYSTEM_SCHEMAS } from '../lib/constants'
-import { Schemas as Interfaces } from '../lib/interfaces'
-import logger from '../server/logger'
+import sqlTemplates = require('../../lib/sql')
+import { RunQuery } from '../connectionPool'
+import { DEFAULT_SYSTEM_SCHEMAS } from '../../lib/constants'
+import { Schemas as Interfaces } from '../interfaces'
+import logger from '../../server/logger'
 
 const { schemasSql: allSchemasSql } = sqlTemplates
 const defaultSchemasList = DEFAULT_SYSTEM_SCHEMAS.map((x) => `'${x}'`).join(', ')
