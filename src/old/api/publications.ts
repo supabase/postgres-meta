@@ -89,7 +89,7 @@ const createPublicationSqlize = ({
   publish_truncate?: boolean
   tables?: string[]
 }) => {
-  let tableClause: string = `FOR TABLE ${tables!.join(',')}`
+  let tableClause: string = `FOR TABLE ${tables?.join(',')}`
   if (tables === undefined) {
     tableClause = 'FOR ALL TABLES'
   } else if (tables.length === 0) {
@@ -105,7 +105,7 @@ const createPublicationSqlize = ({
   return `
 CREATE PUBLICATION ${ident(name)} ${tableClause}
     WITH (publish = '${publishOps.join(',')}')
-`
+    `
 }
 
 const getPublicationByNameSqlize = (name: string) => {
