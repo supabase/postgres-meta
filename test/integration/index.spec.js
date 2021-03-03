@@ -645,7 +645,8 @@ describe('/policies', () => {
     assert.equal(stillExists, false, 'Policy is deleted')
   })
 })
-describe('/publications', () => {
+
+describe('/publications with tables', () => {
   const publication = {
     name: 'a',
     publish_insert: true,
@@ -680,6 +681,33 @@ describe('/publications', () => {
     assert.equal(updated.name, 'b')
     assert.equal(updated.publish_insert, false)
     assert.equal(updated.tables.some(table => `${table.schema}.${table.name}` === 'public.users'), false)
+  })
+  it('DELETE', async () => {
+    const res = await axios.get(`${URL}/publications`)
+    const { id } = res.data[0]
+
+    await axios.delete(`${URL}/publications/${id}`)
+    const { data: publications } = await axios.get(`${URL}/publications`)
+    const stillExists = publications.some((x) => x.id === id)
+    assert.equal(stillExists, false)
+  })
+})
+
+describe('/publications FOR ALL TABLES', () => {
+  const publication = {
+    name: 'for_all',
+    publish_insert: true,
+    publish_update: true,
+    publish_delete: true,
+    publish_truncate: false
+  }
+  it('POST', async () => {
+    const { data: newPublication } = await axios.post(`${URL}/publications`, publication)
+    assert.strictEqual(newPublication.name, publication.name)
+    assert.strictEqual(newPublication.publish_insert, publication.publish_insert)
+    assert.strictEqual(newPublication.publish_update, publication.publish_update)
+    assert.strictEqual(newPublication.publish_delete, publication.publish_delete)
+    assert.strictEqual(newPublication.publish_truncate, publication.publish_truncate)
   })
   it('DELETE', async () => {
     const res = await axios.get(`${URL}/publications`)
