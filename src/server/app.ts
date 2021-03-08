@@ -1,6 +1,6 @@
 import express from 'express'
 import { PG_META_PORT } from './constants'
-import routes from '../old/api'
+import routes from './routes'
 import pkg from '../../package.json'
 import logger from './logger'
 
