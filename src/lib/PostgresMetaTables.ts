@@ -124,9 +124,9 @@ export default class PostgresMetaTables {
     const alter = `ALTER TABLE ${ident(old!.schema)}.${ident(old!.name)}`
     const schemaSql = schema === undefined ? '' : `${alter} SET SCHEMA ${ident(schema)};`
     let nameSql = ''
-    if (name !== undefined) {
+    if (name !== undefined && name !== old!.name) {
       const currentSchema = schema === undefined ? old!.schema : schema
-      nameSql = `ALTER TABLE ${ident(currentSchema)}.${ident(old!.name)} RENAME TO ${ident(name)}`
+      nameSql = `ALTER TABLE ${ident(currentSchema)}.${ident(old!.name)} RENAME TO ${ident(name)};`
     }
     let enableRls = ''
     if (rls_enabled !== undefined) {
