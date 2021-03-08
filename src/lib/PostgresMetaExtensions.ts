@@ -14,7 +14,7 @@ export default class PostgresMetaExtensions {
   }
 
   async retrieve({ name }: { name: string }): Promise<PostgresMetaResult<PostgresExtension>> {
-    const sql = `${extensionsSql} WHERE name = ${name};`
+    const sql = `${extensionsSql} WHERE name = ${literal(name)};`
     const { data, error } = await this.query(sql)
     if (error) {
       return { data, error }
