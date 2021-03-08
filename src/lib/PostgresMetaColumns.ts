@@ -6,11 +6,11 @@ import { PostgresMetaResult, PostgresColumn } from './types'
 
 export default class PostgresMetaColumns {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
-  metaTable: PostgresMetaTables
+  metaTables: PostgresMetaTables
 
   constructor(query: (sql: string) => Promise<PostgresMetaResult<any>>) {
     this.query = query
-    this.metaTable = new PostgresMetaTables(query)
+    this.metaTables = new PostgresMetaTables(query)
   }
 
   async list({ includeSystemSchemas = false } = {}): Promise<PostgresMetaResult<PostgresColumn[]>> {
@@ -102,7 +102,7 @@ export default class PostgresMetaColumns {
     is_unique?: boolean
     comment?: string
   }): Promise<PostgresMetaResult<PostgresColumn>> {
-    const { data, error } = await this.metaTable.retrieve({ id: table_id })
+    const { data, error } = await this.metaTables.retrieve({ id: table_id })
     if (error) {
       return { data: null, error }
     }
@@ -176,28 +176,30 @@ COMMIT;`
     const nameSql =
       name === undefined || name === old!.name
         ? ''
-        : `ALTER TABLE ${old!.schema}.${old!.table} RENAME COLUMN ${old!.name} TO ${name};`
+        : `ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} RENAME COLUMN ${ident(
+            old!.name
+          )} TO ${ident(name)};`
     // We use USING to allow implicit conversion of incompatible types (e.g. int4 -> text).
     const typeSql =
       type === undefined
         ? ''
-        : `ALTER TABLE ${old!.schema}.${old!.table} ALTER COLUMN ${
+        : `ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} ALTER COLUMN ${ident(
             old!.name
-          } SET DATA TYPE ${type} USING ${old!.name}::${type};`
+          )} SET DATA TYPE ${type} USING ${ident(old!.name)}::${type};`
 
     let defaultValueSql: string
     if (drop_default) {
-      defaultValueSql = `ALTER TABLE ${old!.schema}.${old!.table} ALTER COLUMN ${
-        old!.name
-      } DROP DEFAULT;`
+      defaultValueSql = `ALTER TABLE ${ident(old!.schema)}.${ident(
+        old!.table
+      )} ALTER COLUMN ${ident(old!.name)} DROP DEFAULT;`
     } else if (default_value === undefined) {
       defaultValueSql = ''
     } else {
       const defaultValue =
         default_value_format === 'expression' ? default_value : literal(default_value)
-      defaultValueSql = `ALTER TABLE ${old!.schema}.${old!.table} ALTER COLUMN ${
-        old!.name
-      } SET DEFAULT ${defaultValue};`
+      defaultValueSql = `ALTER TABLE ${ident(old!.schema)}.${ident(
+        old!.table
+      )} ALTER COLUMN ${ident(old!.name)} SET DEFAULT ${defaultValue};`
     }
     // What identitySql does vary depending on the old and new values of
     // is_identity and identity_generation.
@@ -209,32 +211,38 @@ COMMIT;`
     // | false                  | -                  | add identity       | drop if exists |
     let identitySql = `ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} ALTER COLUMN ${ident(
       old!.name
-    )};`
+    )}`
     if (is_identity === false) {
-      identitySql += 'DROP IDENTITY IF EXISTS;'
+      identitySql += ' DROP IDENTITY IF EXISTS;'
     } else if (old!.is_identity === true) {
       if (identity_generation === undefined) {
         identitySql = ''
       } else {
-        identitySql += `SET GENERATED ${identity_generation};`
+        identitySql += ` SET GENERATED ${identity_generation};`
       }
     } else if (is_identity === undefined) {
       identitySql = ''
     } else {
-      identitySql += `ADD GENERATED ${identity_generation} AS IDENTITY;`
+      identitySql += ` ADD GENERATED ${identity_generation} AS IDENTITY;`
     }
     let isNullableSql: string
     if (is_nullable === undefined) {
       isNullableSql = ''
     } else {
       isNullableSql = is_nullable
-        ? `ALTER TABLE ${old!.schema}.${old!.table} ALTER COLUMN ${old!.name} DROP NOT NULL;`
-        : `ALTER TABLE ${old!.schema}.${old!.table} ALTER COLUMN ${old!.name} SET NOT NULL;`
+        ? `ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} ALTER COLUMN ${ident(
+            old!.name
+          )} DROP NOT NULL;`
+        : `ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} ALTER COLUMN ${ident(
+            old!.name
+          )} SET NOT NULL;`
     }
     const commentSql =
       comment === undefined
         ? ''
-        : `COMMENT ON COLUMN ${old!.schema}.${old!.table}.${old!.name} IS ${comment};`
+        : `COMMENT ON COLUMN ${ident(old!.schema)}.${ident(old!.table)}.${ident(
+            old!.name
+          )} IS ${literal(comment)};`
 
     // nameSql must be last.
     // defaultValueSql must be after typeSql.
@@ -263,7 +271,9 @@ COMMIT;`
     if (error) {
       return { data: null, error }
     }
-    const sql = `ALTER TABLE ${column!.schema}.${column!.table} DROP COLUMN ${column!.name};`
+    const sql = `ALTER TABLE ${ident(column!.schema)}.${ident(column!.table)} DROP COLUMN ${ident(
+      column!.name
+    )};`
     {
       const { error } = await this.query(sql)
       if (error) {
