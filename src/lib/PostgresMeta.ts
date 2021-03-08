@@ -1,4 +1,4 @@
-import { ClientConfig } from 'pg'
+import { PoolConfig } from 'pg'
 import PostgresMetaColumns from './PostgresMetaColumns'
 import PostgresMetaConfig from './PostgresMetaConfig'
 import PostgresMetaExtensions from './PostgresMetaExtensions'
@@ -15,6 +15,7 @@ import { PostgresMetaResult } from './types'
 
 export default class PostgresMeta {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
+  end: () => Promise<void>
   columns: PostgresMetaColumns
   config: PostgresMetaConfig
   extensions: PostgresMetaExtensions
@@ -27,8 +28,10 @@ export default class PostgresMeta {
   types: PostgresMetaTypes
   version: PostgresMetaVersion
 
-  constructor(config: ClientConfig) {
-    this.query = init(config)
+  constructor(config: PoolConfig) {
+    const { query, end } = init(config)
+    this.query = query
+    this.end = end
     this.columns = new PostgresMetaColumns(this.query)
     this.config = new PostgresMetaConfig(this.query)
     this.extensions = new PostgresMetaExtensions(this.query)
