@@ -258,9 +258,8 @@ describe('/tables', async () => {
     assert.equal(true, !!included)
   })
   it('POST /tables should create a table', async () => {
-    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'test', replica_identity: 'FULL', comment: 'foo' })
+    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'test', comment: 'foo' })
     assert.equal(`${newTable.schema}.${newTable.name}`, 'public.test')
-    assert.equal(newTable.replica_identity, 'FULL')
     assert.equal(newTable.comment, 'foo')
 
     const { data: tables } = await axios.get(`${URL}/tables`)
