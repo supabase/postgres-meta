@@ -1,45 +1,31 @@
-import cors from 'cors'
 import CryptoJS from 'crypto-js'
-import { Router } from 'express'
+import { FastifyInstance } from 'fastify'
 import { PG_CONNECTION, CRYPTO_KEY } from '../constants'
-import logger from '../logger'
 
-/**
- * Adds a "pg" object to the request if it doesn't exist
- */
-const addConnectionToRequest = async (req: any, res: any, next: any) => {
-  try {
-    req.headers['pg'] = PG_CONNECTION
-
+export default async (fastify: FastifyInstance) => {
+  // Adds a "pg" object to the request if it doesn't exist
+  fastify.addHook('onRequest', (request, _reply, done) => {
     // Node converts headers to lowercase
-    let encryptedHeader =
-      'x-connection-encrypted' in req.headers ? req.headers['x-connection-encrypted'] : null
-
+    const encryptedHeader = request.headers['x-connection-encrypted']?.toString()
     if (encryptedHeader) {
-      req.headers['pg'] = CryptoJS.AES.decrypt(encryptedHeader, CRYPTO_KEY).toString(
+      request.headers.pg = CryptoJS.AES.decrypt(encryptedHeader, CRYPTO_KEY).toString(
         CryptoJS.enc.Utf8
       )
+    } else {
+      request.headers.pg = PG_CONNECTION
     }
+    done()
+  })
 
-    return next()
-  } catch (error) {
-    logger.error({ error, req: req.body })
-    return res.status(500).json({ error: 'Server error.', status: 500 })
-  }
+  fastify.register(require('./config'), { prefix: '/config' })
+  fastify.register(require('./columns'), { prefix: '/columns' })
+  fastify.register(require('./extensions'), { prefix: '/extensions' })
+  fastify.register(require('./functions'), { prefix: '/functions' })
+  fastify.register(require('./policies'), { prefix: '/policies' })
+  fastify.register(require('./publications'), { prefix: '/publications' })
+  fastify.register(require('./query'), { prefix: '/query' })
+  fastify.register(require('./schemas'), { prefix: '/schemas' })
+  fastify.register(require('./tables'), { prefix: '/tables' })
+  fastify.register(require('./types'), { prefix: '/types' })
+  fastify.register(require('./roles'), { prefix: '/roles' })
 }
-
-const router = Router()
-router.use(cors())
-router.use('/config', addConnectionToRequest, require('./config'))
-router.use('/columns', addConnectionToRequest, require('./columns'))
-router.use('/extensions', addConnectionToRequest, require('./extensions'))
-router.use('/functions', addConnectionToRequest, require('./functions'))
-router.use('/policies', addConnectionToRequest, require('./policies'))
-router.use('/publications', addConnectionToRequest, require('./publications'))
-router.use('/query', addConnectionToRequest, require('./query'))
-router.use('/schemas', addConnectionToRequest, require('./schemas'))
-router.use('/tables', addConnectionToRequest, require('./tables'))
-router.use('/types', addConnectionToRequest, require('./types'))
-router.use('/roles', addConnectionToRequest, require('./roles'))
-
-export default router
