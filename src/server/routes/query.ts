@@ -1,21 +1,24 @@
-import { Router } from 'express'
-import logger from '../logger'
+import { FastifyInstance } from 'fastify'
 import { PostgresMeta } from '../../lib'
 
-const router = Router()
+export default async (fastify: FastifyInstance) => {
+  fastify.post<{
+    Headers: { pg: string }
+    Body: {
+      query: string
+    }
+  }>('/', async (request, reply) => {
+    const connectionString = request.headers.pg
 
-router.post('/', async (req, res) => {
-  const connectionString = req.headers?.pg?.toString() ?? ''
+    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const { data, error } = await pgMeta.query(request.body.query)
+    await pgMeta.end()
+    if (error) {
+      request.log.error(JSON.stringify({ error, req: request.body }))
+      reply.code(400)
+      return { error: error.message }
+    }
 
-  const pgMeta = new PostgresMeta({ connectionString, max: 1 })
-  const { data, error } = await pgMeta.query(req.body?.query)
-  await pgMeta.end()
-  if (error) {
-    logger.error({ error, req: req.body })
-    return res.status(400).json({ error: error.message })
-  }
-
-  return res.status(200).json(data)
-})
-
-export = router
+    return data
+  })
+}

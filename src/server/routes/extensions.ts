@@ -1,82 +1,106 @@
-import { Router } from 'express'
-import logger from '../logger'
+import { FastifyInstance } from 'fastify'
 import { PostgresMeta } from '../../lib'
 
-const router = Router()
+export default async (fastify: FastifyInstance) => {
+  fastify.get<{
+    Headers: { pg: string }
+  }>('/', async (request, reply) => {
+    const connectionString = request.headers.pg
 
-router.get('/', async (req, res) => {
-  const connectionString = req.headers?.pg?.toString() ?? ''
+    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const { data, error } = await pgMeta.extensions.list()
+    await pgMeta.end()
+    if (error) {
+      request.log.error(JSON.stringify({ error, req: request.body }))
+      reply.code(500)
+      return { error: error.message }
+    }
 
-  const pgMeta = new PostgresMeta({ connectionString, max: 1 })
-  const { data, error } = await pgMeta.extensions.list()
-  await pgMeta.end()
-  if (error) {
-    logger.error({ error, req: req.body })
-    return res.status(500).json({ error: error.message })
-  }
+    return data
+  })
 
-  return res.status(200).json(data)
-})
+  fastify.get<{
+    Headers: { pg: string }
+    Params: {
+      name: string
+    }
+  }>('/:name', async (request, reply) => {
+    const connectionString = request.headers.pg
 
-router.get('/:name', async (req, res) => {
-  const connectionString = req.headers?.pg?.toString() ?? ''
+    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const { data, error } = await pgMeta.extensions.retrieve({ name: request.params.name })
+    await pgMeta.end()
+    if (error) {
+      request.log.error(JSON.stringify({ error, req: request.body }))
+      reply.code(404)
+      return { error: error.message }
+    }
 
-  const pgMeta = new PostgresMeta({ connectionString, max: 1 })
-  const { data, error } = await pgMeta.extensions.retrieve({ name: req.params.name })
-  await pgMeta.end()
-  if (error) {
-    logger.error({ error, req: req.body })
-    return res.status(404).json({ error: error.message })
-  }
+    return data
+  })
 
-  return res.status(200).json(data)
-})
+  fastify.post<{
+    Headers: { pg: string }
+    Body: any
+  }>('/', async (request, reply) => {
+    const connectionString = request.headers.pg
 
-router.post('/', async (req, res) => {
-  const connectionString = req.headers?.pg?.toString() ?? ''
+    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const { data, error } = await pgMeta.extensions.create(request.body)
+    await pgMeta.end()
+    if (error) {
+      request.log.error(JSON.stringify({ error, req: request.body }))
+      reply.code(400)
+      return { error: error.message }
+    }
 
-  const pgMeta = new PostgresMeta({ connectionString, max: 1 })
-  const { data, error } = await pgMeta.extensions.create(req.body)
-  await pgMeta.end()
-  if (error) {
-    logger.error({ error, req: req.body })
-    return res.status(400).json({ error: error.message })
-  }
+    return data
+  })
 
-  return res.status(200).json(data)
-})
+  fastify.patch<{
+    Headers: { pg: string }
+    Params: {
+      name: string
+    }
+    Body: any
+  }>('/:name', async (request, reply) => {
+    const connectionString = request.headers.pg
 
-router.patch('/:name', async (req, res) => {
-  const connectionString = req.headers?.pg?.toString() ?? ''
+    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const { data, error } = await pgMeta.extensions.update(request.params.name, request.body)
+    await pgMeta.end()
+    if (error) {
+      request.log.error(JSON.stringify({ error, req: request.body }))
+      reply.code(400)
+      if (error.message.startsWith('Cannot find')) reply.code(404)
+      return { error: error.message }
+    }
 
-  const pgMeta = new PostgresMeta({ connectionString, max: 1 })
-  const { data, error } = await pgMeta.extensions.update(req.params.name, req.body)
-  await pgMeta.end()
-  if (error) {
-    logger.error({ error, req: req.body })
-    let statusCode = 400
-    if (error.message.startsWith('Cannot find')) statusCode = 404
-    return res.status(statusCode).json({ error: error.message })
-  }
+    return data
+  })
 
-  return res.status(200).json(data)
-})
+  fastify.delete<{
+    Headers: { pg: string }
+    Params: {
+      name: string
+    }
+    Querystring: {
+      cascade?: string
+    }
+  }>('/:name', async (request, reply) => {
+    const connectionString = request.headers.pg
+    const cascade = request.query.cascade === 'true'
 
-router.delete('/:name', async (req, res) => {
-  const connectionString = req.headers?.pg?.toString() ?? ''
-  const cascade = req.query?.cascade === 'true'
+    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const { data, error } = await pgMeta.extensions.remove(request.params.name, { cascade })
+    await pgMeta.end()
+    if (error) {
+      request.log.error(JSON.stringify({ error, req: request.body }))
+      reply.code(400)
+      if (error.message.startsWith('Cannot find')) reply.code(404)
+      return { error: error.message }
+    }
 
-  const pgMeta = new PostgresMeta({ connectionString, max: 1 })
-  const { data, error } = await pgMeta.extensions.remove(req.params.name, { cascade })
-  await pgMeta.end()
-  if (error) {
-    logger.error({ error, req: req.body })
-    let statusCode = 400
-    if (error.message.startsWith('Cannot find')) statusCode = 404
-    return res.status(statusCode).json({ error: error.message })
-  }
-
-  return res.status(200).json(data)
-})
-
-export = router
+    return data
+  })
+}

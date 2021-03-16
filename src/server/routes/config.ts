@@ -1,35 +1,38 @@
-import { Router } from 'express'
-import logger from '../logger'
+import { FastifyInstance } from 'fastify'
 import { PostgresMeta } from '../../lib'
 
-const router = Router()
+export default async (fastify: FastifyInstance) => {
+  fastify.get<{
+    Headers: { pg: string }
+  }>('/', async (request, reply) => {
+    const connectionString = request.headers.pg
 
-router.get('/', async (req, res) => {
-  const connectionString = req.headers?.pg?.toString() ?? ''
+    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const { data, error } = await pgMeta.config.list()
+    await pgMeta.end()
+    if (error) {
+      request.log.error(JSON.stringify({ error, req: request.body }))
+      reply.code(500)
+      return { error: error.message }
+    }
 
-  const pgMeta = new PostgresMeta({ connectionString, max: 1 })
-  const { data, error } = await pgMeta.config.list()
-  await pgMeta.end()
-  if (error) {
-    logger.error({ error, req: req.body })
-    return res.status(500).json({ error: error.message })
-  }
+    return data
+  })
 
-  return res.status(200).json(data)
-})
+  fastify.get<{
+    Headers: { pg: string }
+  }>('/version', async (request, reply) => {
+    const connectionString = request.headers.pg
 
-router.get('/version', async (req, res) => {
-  const connectionString = req.headers?.pg?.toString() ?? ''
+    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const { data, error } = await pgMeta.version.retrieve()
+    await pgMeta.end()
+    if (error) {
+      request.log.error(JSON.stringify({ error, req: request.body }))
+      reply.code(500)
+      return { error: error.message }
+    }
 
-  const pgMeta = new PostgresMeta({ connectionString, max: 1 })
-  const { data, error } = await pgMeta.version.retrieve()
-  await pgMeta.end()
-  if (error) {
-    logger.error({ error, req: req.body })
-    return res.status(500).json({ error: error.message })
-  }
-
-  return res.status(200).json(data)
-})
-
-export = router
+    return data
+  })
+}
