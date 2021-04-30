@@ -414,6 +414,21 @@ describe('/tables', async () => {
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })
+  it('POST /columns with constraint definition', async () => {
+    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'a' })
+    const { error } = await axios.post(`${URL}/columns`, {
+      table_id: newTable.id,
+      name: 'description',
+      type: 'text',
+      constraint: "CHECK (description <> '')",
+    })
+
+    // TODO: some way to check constraints?
+    assert.equal(error, undefined)
+
+    await axios.delete(`${URL}/columns/${newTable.id}.1`)
+    await axios.delete(`${URL}/tables/${newTable.id}`)
+  })
   it('PATCH /columns', async () => {
     const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'foo bar' })
     await axios.post(`${URL}/columns`, {
