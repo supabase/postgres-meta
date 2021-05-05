@@ -314,8 +314,7 @@ describe('/tables', async () => {
       is_nullable: false,
       comment: 'foo',
       // Currently no way to test these:
-      //   isPrimaryKey: true,
-      //   isUnique: true,
+      // is_unique: true
     })
 
     const { data: columns } = await axios.get(`${URL}/columns`)
@@ -326,6 +325,33 @@ describe('/tables', async () => {
     assert.equal(newColumn.default_value, "'42'::smallint")
     assert.equal(newColumn.is_nullable, false)
     assert.equal(newColumn.comment, 'foo')
+
+    await axios.delete(`${URL}/columns/${newTable.id}.1`)
+    await axios.delete(`${URL}/tables/${newTable.id}`)
+  })
+  it('POST /columns for primary key', async () => {
+    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'foo' })
+    await axios.post(`${URL}/columns`, {
+      table_id: newTable.id,
+      name: 'bar',
+      type: 'int2',
+      is_primary_key: true,
+    })
+
+    // https://wiki.postgresql.org/wiki/Retrieve_primary_key_columns
+    const { data: primaryKeys } = await axios.post(
+      `${URL}/query`,
+      { query: `
+        SELECT a.attname, format_type(a.atttypid, a.atttypmod) AS data_type
+        FROM   pg_index i
+        JOIN   pg_attribute a ON a.attrelid = i.indrelid
+                            AND a.attnum = ANY(i.indkey)
+        WHERE  i.indrelid = '${newTable.name}'::regclass
+        AND    i.indisprimary;
+      ` }
+    )
+    assert.equal(primaryKeys.length, 1)
+    assert.equal(primaryKeys[0].attname, 'bar')
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
