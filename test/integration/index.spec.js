@@ -342,7 +342,7 @@ describe('/tables', async () => {
     const { data: primaryKeys } = await axios.post(
       `${URL}/query`,
       { query: `
-        SELECT a.attname, format_type(a.atttypid, a.atttypmod) AS data_type
+        SELECT a.attname
         FROM   pg_index i
         JOIN   pg_attribute a ON a.attrelid = i.indrelid
                             AND a.attnum = ANY(i.indkey)
