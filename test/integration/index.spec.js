@@ -716,6 +716,16 @@ describe('/publications with tables', () => {
     const stillExists = publications.some((x) => x.id === id)
     assert.equal(stillExists, false)
   })
+  it('/publications for tables with uppercase', async () => {
+    const { data: table } = await axios.post(`${URL}/tables`, { name: 'T' })
+    const { data: publication } = await axios.post(`${URL}/publications`, { name: 'pub', tables: ['T'] })
+    assert.equal(publication.name, 'pub')
+    const { data: alteredPublication } = await axios.patch(`${URL}/publications/${publication.id}`, { tables: ['T'] })
+    assert.equal(alteredPublication.name, 'pub')
+
+    await axios.delete(`${URL}/publications/${publication.id}`)
+    await axios.delete(`${URL}/tables/${table.id}`)
+  })
 })
 
 describe('/publications FOR ALL TABLES', () => {
