@@ -312,9 +312,7 @@ describe('/tables', async () => {
       type: 'int2',
       default_value: 42,
       is_nullable: false,
-      comment: 'foo',
-      // Currently no way to test these:
-      // is_unique: true
+      comment: 'foo'
     })
 
     const { data: columns } = await axios.get(`${URL}/columns`)
@@ -352,6 +350,33 @@ describe('/tables', async () => {
     )
     assert.equal(primaryKeys.length, 1)
     assert.equal(primaryKeys[0].attname, 'bar')
+
+    await axios.delete(`${URL}/columns/${newTable.id}.1`)
+    await axios.delete(`${URL}/tables/${newTable.id}`)
+  })
+  it('POST /columns with unique constraint', async () => {
+    const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'foo' })
+    await axios.post(`${URL}/columns`, {
+      table_id: newTable.id,
+      name: 'bar',
+      type: 'int2',
+      is_unique: true,
+    })
+
+    const { data: uniqueColumns } = await axios.post(
+      `${URL}/query`,
+      { query: `
+        SELECT a.attname
+        FROM   pg_index i
+        JOIN   pg_constraint c ON c.conindid = i.indexrelid
+        JOIN   pg_attribute a ON a.attrelid = i.indrelid
+                            AND a.attnum = ANY(i.indkey)
+        WHERE  i.indrelid = '${newTable.name}'::regclass
+        AND    i.indisunique;
+      ` }
+    )
+    assert.equal(uniqueColumns.length, 1)
+    assert.equal(uniqueColumns[0].attname, 'bar')
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
