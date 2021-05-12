@@ -423,8 +423,18 @@ describe('/tables', async () => {
       constraint: "CHECK (description <> '')",
     })
 
-    // TODO: some way to check constraints?
-    assert.equal(error, undefined)
+    const { data: constraints } = await axios.post(
+      `${URL}/query`,
+      { query: `
+        SELECT pg_get_constraintdef((
+          SELECT c.oid
+          FROM   pg_constraint c
+          WHERE  c.conrelid = '${newTable.name}'::regclass
+        ));
+      ` }
+    )
+    assert.equal(constraints.length, 1)
+    assert.equal(constraints[0].pg_get_constraintdef, "CHECK ((description <> ''::text))")
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
