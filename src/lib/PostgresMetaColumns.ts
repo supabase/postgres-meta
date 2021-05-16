@@ -89,7 +89,7 @@ export default class PostgresMetaColumns {
     is_primary_key = false,
     is_unique = false,
     comment,
-    constraint,
+    check,
   }: {
     table_id: number
     name: string
@@ -102,7 +102,7 @@ export default class PostgresMetaColumns {
     is_primary_key?: boolean
     is_unique?: boolean
     comment?: string
-    constraint?: string
+    check?: string
   }): Promise<PostgresMetaResult<PostgresColumn>> {
     const { data, error } = await this.metaTables.retrieve({ id: table_id })
     if (error) {
@@ -122,10 +122,7 @@ export default class PostgresMetaColumns {
     const isNullableClause = is_nullable ? 'NULL' : 'NOT NULL'
     const isPrimaryKeyClause = is_primary_key ? 'PRIMARY KEY' : ''
     const isUniqueClause = is_unique ? 'UNIQUE' : ''
-    const constraintSql =
-      constraint === undefined
-        ? ''
-        : constraint
+    const checkSql = check === undefined ? '' : `CHECK (${check})`
     const commentSql =
       comment === undefined
         ? ''
@@ -139,7 +136,7 @@ BEGIN;
     ${isNullableClause}
     ${isPrimaryKeyClause}
     ${isUniqueClause}
-    ${constraintSql};
+    ${checkSql};
   ${commentSql};
 COMMIT;`
     {

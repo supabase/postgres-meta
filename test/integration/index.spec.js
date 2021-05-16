@@ -416,11 +416,11 @@ describe('/tables', async () => {
   })
   it('POST /columns with constraint definition', async () => {
     const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'a' })
-    const { error } = await axios.post(`${URL}/columns`, {
+    await axios.post(`${URL}/columns`, {
       table_id: newTable.id,
       name: 'description',
       type: 'text',
-      constraint: "CHECK (description <> '')",
+      check: "description <> ''",
     })
 
     const { data: constraints } = await axios.post(
