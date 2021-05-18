@@ -45,6 +45,7 @@
     "pkg": "^4.4.8",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.2",
+    "sinon": "^10.0.0",
     "ts-node-dev": "^1.1.6",
     "typescript": "^3.9.3"
   }
