@@ -22,11 +22,14 @@
     "start": "ts-node-dev src/server/app.ts | pino-pretty --colorize",
     "dev": "run-s clean format start",
     "pkg": "run-s clean format build:server && pkg --out-path bin .pkg.config.json",
-    "test": "run-s build:server && node -r esm ./node_modules/.bin/mocha 'test/**/*.js' --recursive"
+    "test": "run-s build:server && node -r esm ./node_modules/.bin/mocha 'test/**/*.js' --recursive",
+    "unit-test": "run-s build:server && node -r esm ./node_modules/.bin/mocha 'test/lib/*.js' --recursive"
   },
   "dependencies": {
+    "@types/prettier": "^2.2.3",
     "pg": "^7.0.0",
-    "pg-format": "^1.0.4"
+    "pg-format": "^1.0.4",
+    "prettier": "^2.0.5"
   },
   "devDependencies": {
     "@types/crypto-js": "^3.1.47",
@@ -43,7 +46,6 @@
     "npm-run-all": "^4.1.5",
     "pino-pretty": "^4.7.1",
     "pkg": "^4.4.8",
-    "prettier": "^2.0.5",
     "rimraf": "^3.0.2",
     "sinon": "^10.0.0",
     "ts-node-dev": "^1.1.6",
