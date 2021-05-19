@@ -1,4 +1,7 @@
 import { parse } from "path"
+import prettier from "prettier"
+import parserTypescript from "prettier/parser-typescript"
+
 import { PostgresMeta } from "."
 
 // TODO: move to it's own class/file later
@@ -35,7 +38,14 @@ export default class TypeScriptTypes {
       //   return prev
       // }, {} as { [key: string]: Array<any> })
 
-      return 'export interface definitions {\n  todos: {\n    ' + parseColumn(data[0]) + '\n  };\n}'
+      let output = 'export interface definitions { todos: {' + parseColumn(data[0]) + '}; };'
+
+      // Prettify output
+      let prettierOptions: prettier.Options = {
+        parser: "typescript",
+        plugins: [parserTypescript],
+      };
+      return prettier.format(output, prettierOptions);
     }
   }
 }

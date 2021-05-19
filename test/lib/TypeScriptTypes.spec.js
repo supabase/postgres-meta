@@ -35,10 +35,9 @@ describe('.dump()', () => {
 
     // TODO: ewww
     const expected = `export interface definitions {
-  todos: {
-    id: number;
-  };
-}`
+  todos: { id: number };
+}
+`
 
     assert.equal(await example.dump(), expected)
   })
