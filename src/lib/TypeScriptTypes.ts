@@ -3,11 +3,8 @@ import { PostgresMeta } from "."
 export default class TypeScriptTypes {
   pgMeta: PostgresMeta
 
-  constructor() {
-    this.pgMeta = new PostgresMeta({
-      connectionString: "postgres://postgres:postgres@localhost:5432/postgres",
-      max: 1
-    })
+  constructor({ pgMeta }: { pgMeta: PostgresMeta }) {
+    this.pgMeta = pgMeta;
   }
 
   async dump(): Promise<any> {
@@ -27,6 +24,3 @@ export default class TypeScriptTypes {
     }
   }
 }
-
-
-new TypeScriptTypes().dump().then(console.log)
