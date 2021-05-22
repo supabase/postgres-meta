@@ -73,6 +73,46 @@ describe('.dump()', () => {
     assert.equal(await example.dump(), expected)
   })
 
+  it.only('returns definitions for multiple tables', async () => {
+    const pgMeta = new PostgresMeta({ connectionString: '', max: 1 })
+    const columnsData = [
+      {
+        table: 'todos',
+        name: 'id',
+        default_value: null,
+        format: 'int8',
+        enums: [],
+      },
+      {
+        table: 'todos',
+        name: 'name',
+        default_value: null,
+        format: 'text',
+        enums: [],
+      },
+      {
+        table: 'memes',
+        name: 'id',
+        default_value: null,
+        format: 'int8',
+        enums: [],
+      }
+    ]
+    sinon
+      .stub(pgMeta.columns, "list")
+      .returns(Promise.resolve({ data: columnsData }))
+
+    const example = new TypeScriptTypes({ pgMeta: pgMeta });
+
+    const expected = `export interface definitions {
+  todos: { id: number; name: any };
+  memes: { id: number };
+}
+`
+
+    assert.equal(await example.dump(), expected)
+  })
+
   it('returns a string of TypeScript types', async () => {
     const pgMeta = new PostgresMeta({ connectionString: '', max: 1 })
     const columnsData = [

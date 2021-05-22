@@ -1,8 +1,10 @@
 import { parse } from "path"
+import { string } from "pg-format"
 import prettier from "prettier"
 import parserTypescript from "prettier/parser-typescript"
 
 import { PostgresMeta } from "."
+import { PostgresColumn } from "./types"
 
 // TODO: move to it's own class/file later
 const parseColumn = (columnData: { name: string, format: string }) => {
@@ -31,17 +33,23 @@ export default class TypeScriptTypes {
     // TODO: handle error
 
     if (data) {
-      // types = data.reduce((prev, current) => {
-      //   if (current.table in prev) {
-      //     prev[current.table].push(parseColumn(current))
-      //   } else {
-      //     prev[current.table] = [parseColumn(current)]
-      //   }
+      const tableGroupings = data.reduce((prev, current) => {
+        if (current.table in prev) {
+          prev[current.table].push(current)
+        } else {
+          prev[current.table] = [current]
+        }
 
-      //   return prev
-      // }, {} as { [key: string]: Array<any> })
+        return prev
+      }, {} as { [key: string]: PostgresColumn[] })
 
-      let output = 'export interface definitions { todos: {' + data.map(parseColumn).join(';') + '}; };'
+      const tableDefString = Object
+        .entries(tableGroupings)
+        .map(([table, columns]: [string, PostgresColumn[]]) => {
+          return `${table}: { ${columns.map(parseColumn).join(';')} };`
+        }).join('')
+
+      let output = `export interface definitions { ${tableDefString} };`
 
       // Prettify output
       let prettierOptions: prettier.Options = {
