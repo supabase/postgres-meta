@@ -6,68 +6,6 @@ import { PostgresMeta } from '../../bin/src/lib'
 
 
 describe('.dump()', () => {
-  it('returns definitions for multiple columns', async () => {
-    const pgMeta = new PostgresMeta({ connectionString: '', max: 1 })
-    const columnsData = [
-      {
-        table: 'todos',
-        name: 'id',
-        format: 'int8'
-      },
-      {
-        table: 'todos',
-        name: 'name',
-        format: 'text'
-      }
-    ]
-    sinon
-      .stub(pgMeta.columns, "list")
-      .returns(Promise.resolve({ data: columnsData }))
-
-    const example = new TypeScriptInterfaces({ pgMeta: pgMeta });
-
-    const expected = `export interface definitions {
-  todos: { id: number; name: string };
-}
-`
-
-    assert.equal(await example.dump(), expected)
-  })
-
-  it('returns definitions for multiple tables', async () => {
-    const pgMeta = new PostgresMeta({ connectionString: '', max: 1 })
-    const columnsData = [
-      {
-        table: 'todos',
-        name: 'id',
-        format: 'int8'
-      },
-      {
-        table: 'todos',
-        name: 'name',
-        format: 'text'
-      },
-      {
-        table: 'memes',
-        name: 'id',
-        format: 'int8'
-      }
-    ]
-    sinon
-      .stub(pgMeta.columns, "list")
-      .returns(Promise.resolve({ data: columnsData }))
-
-    const example = new TypeScriptInterfaces({ pgMeta: pgMeta });
-
-    const expected = `export interface definitions {
-  todos: { id: number; name: string };
-  memes: { id: number };
-}
-`
-
-    assert.equal(await example.dump(), expected)
-  })
-
   it('handles nullable columns', async () => {
     const pgMeta = new PostgresMeta({ connectionString: '', max: 1 })
     const columnsData = [
