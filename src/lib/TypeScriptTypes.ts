@@ -7,7 +7,7 @@ import { PostgresMeta } from "."
 import { PostgresColumn } from "./types"
 
 // TODO: move to it's own class/file later
-const parseColumn = (columnData: { name: string, format: string }) => {
+const parseColumn = (columnData: PostgresColumn) => {
   let dataType: string = ''
   switch (columnData.format) {
     case 'int8':
@@ -18,7 +18,9 @@ const parseColumn = (columnData: { name: string, format: string }) => {
       break
   }
 
-  return `${columnData.name}: ${dataType}`
+  const nullableSuffix = columnData.is_nullable ? '?' : ''
+
+  return `${columnData.name}${nullableSuffix}: ${dataType}`
 }
 
 export default class TypeScriptTypes {

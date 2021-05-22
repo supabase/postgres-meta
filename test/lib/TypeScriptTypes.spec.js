@@ -113,6 +113,30 @@ describe('.dump()', () => {
     assert.equal(await example.dump(), expected)
   })
 
+  it.only('handles nullable columns', async () => {
+    const pgMeta = new PostgresMeta({ connectionString: '', max: 1 })
+    const columnsData = [
+      {
+        table: 'todos',
+        name: 'name',
+        format: 'text',
+        is_nullable: true
+      }
+    ]
+    sinon
+      .stub(pgMeta.columns, "list")
+      .returns(Promise.resolve({ data: columnsData }))
+
+    const example = new TypeScriptTypes({ pgMeta: pgMeta });
+
+    const expected = `export interface definitions {
+  todos: { name?: any };
+}
+`
+
+    assert.equal(await example.dump(), expected)
+  })
+
   it('returns a string of TypeScript types', async () => {
     const pgMeta = new PostgresMeta({ connectionString: '', max: 1 })
     const columnsData = [
