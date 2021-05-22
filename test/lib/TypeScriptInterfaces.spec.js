@@ -6,57 +6,18 @@ import { PostgresMeta } from '../../bin/src/lib'
 
 
 describe('.dump()', () => {
-  it('returns definition for an int8 column', async () => {
-    const pgMeta = new PostgresMeta({ connectionString: '', max: 1 })
-    const columnsData = [
-      {
-        table_id: 16402,
-        schema: 'public',
-        table: 'todos',
-        id: '16402.1',
-        ordinal_position: 1,
-        name: 'id',
-        default_value: null,
-        data_type: 'bigint',
-        format: 'int8',
-        is_identity: true,
-        identity_generation: 'BY DEFAULT',
-        is_nullable: false,
-        is_updatable: true,
-        enums: [],
-        comment: null
-      }
-    ]
-    sinon
-      .stub(pgMeta.columns, "list")
-      .returns(Promise.resolve({ data: columnsData }))
-
-    const example = new TypeScriptInterfaces({ pgMeta: pgMeta });
-
-    const expected = `export interface definitions {
-  todos: { id: number };
-}
-`
-
-    assert.equal(await example.dump(), expected)
-  })
-
   it('returns definitions for multiple columns', async () => {
     const pgMeta = new PostgresMeta({ connectionString: '', max: 1 })
     const columnsData = [
       {
         table: 'todos',
         name: 'id',
-        default_value: null,
-        format: 'int8',
-        enums: [],
+        format: 'int8'
       },
       {
         table: 'todos',
         name: 'name',
-        default_value: null,
-        format: 'text',
-        enums: [],
+        format: 'text'
       }
     ]
     sinon
@@ -79,23 +40,17 @@ describe('.dump()', () => {
       {
         table: 'todos',
         name: 'id',
-        default_value: null,
-        format: 'int8',
-        enums: [],
+        format: 'int8'
       },
       {
         table: 'todos',
         name: 'name',
-        default_value: null,
-        format: 'text',
-        enums: [],
+        format: 'text'
       },
       {
         table: 'memes',
         name: 'id',
-        default_value: null,
-        format: 'int8',
-        enums: [],
+        format: 'int8'
       }
     ]
     sinon
@@ -143,14 +98,12 @@ describe('.dump()', () => {
       {
         table: 'todos',
         name: 'id',
-        format: 'int8',
-        enums: [],
+        format: 'int8'
       },
       {
         table: 'todos',
         name: 'done',
-        format: 'bool',
-        enums: [],
+        format: 'bool'
       },
       {
         table: 'todos',
