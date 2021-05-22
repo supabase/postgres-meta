@@ -6,7 +6,7 @@ import { PostgresMeta } from '../../bin/src/lib'
 
 
 describe('.dump()', () => {
-  it.only('returns definition for an int8 column', async () => {
+  it('returns definition for an int8 column', async () => {
     const pgMeta = new PostgresMeta({ connectionString: '', max: 1 })
     const columnsData = [
       {
@@ -41,7 +41,7 @@ describe('.dump()', () => {
     assert.equal(await example.dump(), expected)
   })
 
-  it.only('returns definitions for multiple columns', async () => {
+  it('returns definitions for multiple columns', async () => {
     const pgMeta = new PostgresMeta({ connectionString: '', max: 1 })
     const columnsData = [
       {
@@ -66,14 +66,14 @@ describe('.dump()', () => {
     const example = new TypeScriptTypes({ pgMeta: pgMeta });
 
     const expected = `export interface definitions {
-  todos: { id: number; name: any };
+  todos: { id: number; name: string };
 }
 `
 
     assert.equal(await example.dump(), expected)
   })
 
-  it.only('returns definitions for multiple tables', async () => {
+  it('returns definitions for multiple tables', async () => {
     const pgMeta = new PostgresMeta({ connectionString: '', max: 1 })
     const columnsData = [
       {
@@ -105,7 +105,7 @@ describe('.dump()', () => {
     const example = new TypeScriptTypes({ pgMeta: pgMeta });
 
     const expected = `export interface definitions {
-  todos: { id: number; name: any };
+  todos: { id: number; name: string };
   memes: { id: number };
 }
 `
@@ -113,7 +113,7 @@ describe('.dump()', () => {
     assert.equal(await example.dump(), expected)
   })
 
-  it.only('handles nullable columns', async () => {
+  it('handles nullable columns', async () => {
     const pgMeta = new PostgresMeta({ connectionString: '', max: 1 })
     const columnsData = [
       {
@@ -130,7 +130,7 @@ describe('.dump()', () => {
     const example = new TypeScriptTypes({ pgMeta: pgMeta });
 
     const expected = `export interface definitions {
-  todos: { name?: any };
+  todos: { name?: string };
 }
 `
 
@@ -141,56 +141,28 @@ describe('.dump()', () => {
     const pgMeta = new PostgresMeta({ connectionString: '', max: 1 })
     const columnsData = [
       {
-        table_id: 16402,
-        schema: 'public',
         table: 'todos',
-        id: '16402.1',
-        ordinal_position: 1,
         name: 'id',
-        default_value: null,
-        data_type: 'bigint',
         format: 'int8',
-        is_identity: true,
-        identity_generation: 'BY DEFAULT',
-        is_nullable: false,
-        is_updatable: true,
         enums: [],
-        comment: null
       },
       {
-        table_id: 16402,
-        schema: 'public',
         table: 'todos',
-        id: '16402.2',
-        ordinal_position: 2,
-        name: 'details',
-        default_value: null,
-        data_type: 'text',
-        format: 'text',
-        is_identity: false,
-        identity_generation: null,
+        name: 'done',
+        format: 'bool',
+        enums: [],
+      },
+      {
+        table: 'todos',
+        name: 'done_at',
         is_nullable: true,
-        is_updatable: true,
-        enums: [],
-        comment: null
+        format: 'date',
       },
       {
-        table_id: 16402,
-        schema: 'public',
-        table: 'todos',
-        id: '16402.3',
-        ordinal_position: 3,
-        name: 'user-id',
-        default_value: null,
-        data_type: 'bigint',
-        format: 'int8',
-        is_identity: false,
-        identity_generation: null,
-        is_nullable: false,
-        is_updatable: true,
-        enums: [],
-        comment: null
-      },
+        table: 'memes',
+        name: 'example',
+        format: 'some-invalid-format',
+      }
     ]
     sinon
       .stub(pgMeta.columns, "list")
@@ -198,14 +170,11 @@ describe('.dump()', () => {
 
     const example = new TypeScriptTypes({ pgMeta: pgMeta });
 
-    // TODO: ewww
     const expected = `export interface definitions {
-  todos: {
-    id: number;
-    details?: string;
-    user_id: number;
-  };
-}`
+  todos: { id: number; done: boolean; done_at?: Date };
+  memes: { example: any };
+}
+`
 
     assert.equal(await example.dump(), expected)
   })

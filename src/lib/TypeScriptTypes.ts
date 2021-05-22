@@ -27,8 +27,40 @@ const parseColumns = (columns: PostgresColumn[]) => {
 const parseColumn = (columnData: PostgresColumn) => {
   let dataType: string = ''
   switch (columnData.format) {
+    // adapted from https://github.com/jawj/zapatos/blob/master/src/generate/pgTypes.ts
     case 'int8':
+    case 'int2':
+    case 'int4':
+    case 'float4':
+    case 'float8':
+    case 'numeric':
+    case 'money':
+    case 'oid':
       dataType = 'number'
+      break
+    case 'date':
+    case 'timestamp':
+    case 'timestamptz':
+      dataType = 'Date'
+      break
+    case 'bpchar':
+    case 'char':
+    case 'varchar':
+    case 'text':
+    case 'citext':
+    case 'uuid':
+    case 'bytea':
+    case 'inet':
+    case 'time':
+    case 'timetz':
+    case 'interval':
+    case 'name':
+    case 'json':
+    case 'jsonb':
+      dataType = 'string'
+      break
+    case 'bool':
+      dataType = 'boolean'
       break
     default:
       dataType = 'any'
