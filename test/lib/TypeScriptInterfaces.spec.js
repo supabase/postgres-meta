@@ -1,7 +1,7 @@
 var assert = require('assert')
 var sinon = require('sinon')
 
-import TypeScriptTypes from '../../bin/src/lib/TypeScriptTypes'
+import TypeScriptInterfaces from '../../bin/src/lib/TypeScriptInterfaces'
 import { PostgresMeta } from '../../bin/src/lib'
 
 
@@ -31,7 +31,7 @@ describe('.dump()', () => {
       .stub(pgMeta.columns, "list")
       .returns(Promise.resolve({ data: columnsData }))
 
-    const example = new TypeScriptTypes({ pgMeta: pgMeta });
+    const example = new TypeScriptInterfaces({ pgMeta: pgMeta });
 
     const expected = `export interface definitions {
   todos: { id: number };
@@ -63,7 +63,7 @@ describe('.dump()', () => {
       .stub(pgMeta.columns, "list")
       .returns(Promise.resolve({ data: columnsData }))
 
-    const example = new TypeScriptTypes({ pgMeta: pgMeta });
+    const example = new TypeScriptInterfaces({ pgMeta: pgMeta });
 
     const expected = `export interface definitions {
   todos: { id: number; name: string };
@@ -102,7 +102,7 @@ describe('.dump()', () => {
       .stub(pgMeta.columns, "list")
       .returns(Promise.resolve({ data: columnsData }))
 
-    const example = new TypeScriptTypes({ pgMeta: pgMeta });
+    const example = new TypeScriptInterfaces({ pgMeta: pgMeta });
 
     const expected = `export interface definitions {
   todos: { id: number; name: string };
@@ -127,7 +127,7 @@ describe('.dump()', () => {
       .stub(pgMeta.columns, "list")
       .returns(Promise.resolve({ data: columnsData }))
 
-    const example = new TypeScriptTypes({ pgMeta: pgMeta });
+    const example = new TypeScriptInterfaces({ pgMeta: pgMeta });
 
     const expected = `export interface definitions {
   todos: { name?: string };
@@ -168,7 +168,7 @@ describe('.dump()', () => {
       .stub(pgMeta.columns, "list")
       .returns(Promise.resolve({ data: columnsData }))
 
-    const example = new TypeScriptTypes({ pgMeta: pgMeta });
+    const example = new TypeScriptInterfaces({ pgMeta: pgMeta });
 
     const expected = `export interface definitions {
   todos: { id: number; done: boolean; done_at?: Date };

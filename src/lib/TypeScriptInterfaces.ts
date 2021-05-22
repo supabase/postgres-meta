@@ -67,7 +67,7 @@ const postgresToTypescriptType = (format: string) => {
   }
 }
 
-export default class TypeScriptTypes {
+export default class TypeScriptInterfaces {
   pgMeta: PostgresMeta
 
   constructor({ pgMeta }: { pgMeta: PostgresMeta }) {
