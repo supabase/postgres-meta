@@ -1,5 +1,3 @@
-import { parse } from "path"
-import { string } from "pg-format"
 import prettier from "prettier"
 import parserTypescript from "prettier/parser-typescript"
 
