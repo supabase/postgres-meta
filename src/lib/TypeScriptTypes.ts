@@ -24,9 +24,15 @@ const parseColumns = (columns: PostgresColumn[]) => {
     }).join('')
 }
 
-const parseColumn = (columnData: PostgresColumn) => {
-  let dataType: string = ''
-  switch (columnData.format) {
+const parseColumn = (column: PostgresColumn) => {
+  const dataType = postgresToTypescriptType(column.format)
+  const nullableSuffix = column.is_nullable ? '?' : ''
+
+  return `${column.name}${nullableSuffix}: ${dataType}`
+}
+
+const postgresToTypescriptType = (format: string) => {
+  switch (format) {
     // adapted from https://github.com/jawj/zapatos/blob/master/src/generate/pgTypes.ts
     case 'int8':
     case 'int2':
@@ -36,13 +42,11 @@ const parseColumn = (columnData: PostgresColumn) => {
     case 'numeric':
     case 'money':
     case 'oid':
-      dataType = 'number'
-      break
+      return 'number'
     case 'date':
     case 'timestamp':
     case 'timestamptz':
-      dataType = 'Date'
-      break
+      return 'Date'
     case 'bpchar':
     case 'char':
     case 'varchar':
@@ -57,19 +61,12 @@ const parseColumn = (columnData: PostgresColumn) => {
     case 'name':
     case 'json':
     case 'jsonb':
-      dataType = 'string'
-      break
+      return 'string'
     case 'bool':
-      dataType = 'boolean'
-      break
+      return 'boolean'
     default:
-      dataType = 'any'
-      break
+      return 'any'
   }
-
-  const nullableSuffix = columnData.is_nullable ? '?' : ''
-
-  return `${columnData.name}${nullableSuffix}: ${dataType}`
 }
 
 export default class TypeScriptTypes {
