@@ -6,7 +6,24 @@ import parserTypescript from "prettier/parser-typescript"
 import { PostgresMeta } from "."
 import { PostgresColumn } from "./types"
 
-// TODO: move to it's own class/file later
+const parseColumns = (columns: PostgresColumn[]) => {
+  const tableGroupings = columns.reduce((prev, current) => {
+    if (current.table in prev) {
+      prev[current.table].push(current)
+    } else {
+      prev[current.table] = [current]
+    }
+
+    return prev
+  }, {} as { [key: string]: PostgresColumn[] })
+
+  return Object
+    .entries(tableGroupings)
+    .map(([table, columns]: [string, PostgresColumn[]]) => {
+      return `${table}: { ${columns.map(parseColumn).join(';')} };`
+    }).join('')
+}
+
 const parseColumn = (columnData: PostgresColumn) => {
   let dataType: string = ''
   switch (columnData.format) {
@@ -35,22 +52,7 @@ export default class TypeScriptTypes {
     // TODO: handle error
 
     if (data) {
-      const tableGroupings = data.reduce((prev, current) => {
-        if (current.table in prev) {
-          prev[current.table].push(current)
-        } else {
-          prev[current.table] = [current]
-        }
-
-        return prev
-      }, {} as { [key: string]: PostgresColumn[] })
-
-      const tableDefString = Object
-        .entries(tableGroupings)
-        .map(([table, columns]: [string, PostgresColumn[]]) => {
-          return `${table}: { ${columns.map(parseColumn).join(';')} };`
-        }).join('')
-
+      const tableDefString = parseColumns(data)
       let output = `export interface definitions { ${tableDefString} };`
 
       // Prettify output
