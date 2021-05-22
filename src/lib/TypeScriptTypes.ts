@@ -11,9 +11,12 @@ const parseColumn = (columnData: { name: string, format: string }) => {
     case 'int8':
       dataType = 'number'
       break
+    default:
+      dataType = 'any'
+      break
   }
 
-  return `${columnData.name}: ${dataType};`
+  return `${columnData.name}: ${dataType}`
 }
 
 export default class TypeScriptTypes {
@@ -38,7 +41,7 @@ export default class TypeScriptTypes {
       //   return prev
       // }, {} as { [key: string]: Array<any> })
 
-      let output = 'export interface definitions { todos: {' + parseColumn(data[0]) + '}; };'
+      let output = 'export interface definitions { todos: {' + data.map(parseColumn).join(';') + '}; };'
 
       // Prettify output
       let prettierOptions: prettier.Options = {
