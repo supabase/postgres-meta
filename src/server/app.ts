@@ -1,5 +1,5 @@
 import fastify from 'fastify'
-import { PG_META_PORT } from './constants'
+import { PG_META_EXPORT_DOCS, PG_META_PORT } from './constants'
 import routes from './routes'
 import pkg from '../../package.json'
 
@@ -15,8 +15,38 @@ app.setNotFoundHandler((request, reply) => {
   reply.code(404).send({ error: 'Not found' })
 })
 
+if (PG_META_EXPORT_DOCS) {
+  app.register(require('fastify-swagger'), {
+    openapi: {
+      servers: [],
+      info: {
+        title: 'postgres-meta',
+        description: 'A REST API to manage your Postgres database',
+        version: pkg.version,
+      },
+    },
+  })
+
+  app.ready(() => {
+    require('fs').writeFileSync(
+      'openapi.json',
+      JSON.stringify(
+        // @ts-ignore: app.swagger() is a Fastify decorator, so doesn't show up in the types
+        app.swagger(),
+        null,
+        2
+      ) + '\n'
+    )
+  })
+} else {
+  app.ready(() => {
+    app.listen(PG_META_PORT, () => {
+      app.log.info(`App started on port ${PG_META_PORT}`)
+    })
+  })
+}
+
 app.register(require('fastify-cors'))
-app.register(routes)
 
 app.get('/', async (_request, _reply) => {
   return {
@@ -31,6 +61,4 @@ app.get('/health', async (_request, _reply) => {
   return { date: new Date() }
 })
 
-app.listen(PG_META_PORT, () => {
-  app.log.info(`App started on port ${PG_META_PORT}`)
-})
+app.register(routes)
