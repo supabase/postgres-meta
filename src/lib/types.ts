@@ -104,9 +104,8 @@ export type PostgresGrant = Static<typeof postgresGrantSchema>
 export const postgresPolicySchema = Type.Object({
   id: Type.Integer(),
   schema: Type.String(),
-  // TODO: ???
   table: Type.String(),
-  table_id: Type.String(),
+  table_id: Type.Integer(),
   name: Type.String(),
   action: Type.Union([Type.Literal('PERMISSIVE'), Type.Literal('RESTRICTIVE')]),
   roles: Type.Array(Type.String()),
