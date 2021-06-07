@@ -1,7 +1,12 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
 import { schemasSql } from './sql'
-import { PostgresMetaResult, PostgresSchema } from './types'
+import {
+  PostgresMetaResult,
+  PostgresSchema,
+  PostgresSchemaCreate,
+  PostgresSchemaUpdate,
+} from './types'
 
 export default class PostgresMetaSchemas {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -54,10 +59,7 @@ export default class PostgresMetaSchemas {
   async create({
     name,
     owner = 'postgres',
-  }: {
-    name: string
-    owner?: string
-  }): Promise<PostgresMetaResult<PostgresSchema>> {
+  }: PostgresSchemaCreate): Promise<PostgresMetaResult<PostgresSchema>> {
     const sql = `CREATE SCHEMA ${ident(name)} AUTHORIZATION ${ident(owner)};`
     const { error } = await this.query(sql)
     if (error) {
@@ -68,7 +70,7 @@ export default class PostgresMetaSchemas {
 
   async update(
     id: number,
-    { name, owner }: { name?: string; owner?: string }
+    { name, owner }: PostgresSchemaUpdate
   ): Promise<PostgresMetaResult<PostgresSchema>> {
     const { data: old, error } = await this.retrieve({ id })
     if (error) {

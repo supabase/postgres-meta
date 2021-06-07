@@ -19,12 +19,14 @@
     "build:main": "tsc -p tsconfig.json && cpy 'src/lib/sql/*.sql' dist/main/sql",
     "build:module": "tsc -p tsconfig.module.json && cpy 'src/lib/sql/*.sql' dist/module/sql",
     "build:server": "tsc -p tsconfig.server.json && cpy 'src/lib/sql/*.sql' bin/src/lib/sql",
+    "docs:export": "PG_META_EXPORT_DOCS=true ts-node-dev src/server/app.ts",
     "start": "ts-node-dev src/server/app.ts | pino-pretty --colorize",
     "dev": "run-s clean format start",
     "pkg": "run-s clean format build:server && pkg --out-path bin .pkg.config.json",
     "test": "run-s build:server && node -r esm ./node_modules/.bin/mocha 'test/**/*.js' --recursive"
   },
   "dependencies": {
+    "@sinclair/typebox": "^0.16.7",
     "pg": "^7.0.0",
     "pg-format": "^1.0.4"
   },
@@ -39,6 +41,7 @@
     "esm": "^3.2.25",
     "fastify": "^3.14.0",
     "fastify-cors": "^5.2.0",
+    "fastify-swagger": "^4.7.0",
     "mocha": "^7.1.2",
     "npm-run-all": "^4.1.5",
     "pino-pretty": "^4.7.1",
@@ -46,6 +49,6 @@
     "prettier": "^2.0.5",
     "rimraf": "^3.0.2",
     "ts-node-dev": "^1.1.6",
-    "typescript": "^3.9.3"
+    "typescript": "^4.3.2"
   }
 }

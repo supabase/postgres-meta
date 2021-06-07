@@ -88,7 +88,7 @@ describe('/config/version', () => {
     const res = await axios.get(`${URL}/config/version`)
     // console.log('res.data', res.data)
     assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(res.data.version_number, '120005')
+    assert.equal(res.data.version_number, '130001')
   })
 })
 describe('/schemas', () => {
