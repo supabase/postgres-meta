@@ -13,5 +13,6 @@ export const relationshipsSql = readFileSync(resolve(__dirname, 'relationships.s
 export const rolesSql = readFileSync(resolve(__dirname, 'roles.sql'), 'utf-8')
 export const schemasSql = readFileSync(resolve(__dirname, 'schemas.sql'), 'utf-8')
 export const tablesSql = readFileSync(resolve(__dirname, 'tables.sql'), 'utf-8')
+export const triggersSql = readFileSync(resolve(__dirname, 'triggers.sql'), 'utf-8')
 export const typesSql = readFileSync(resolve(__dirname, 'types.sql'), 'utf-8')
 export const versionSql = readFileSync(resolve(__dirname, 'version.sql'), 'utf-8')
