@@ -22,21 +22,13 @@ export default class PostgresMetaFunctions {
   }
 
   async retrieve({ id }: { id: number }): Promise<PostgresMetaResult<PostgresFunction>>
-  async retrieve({
-    name,
-    schema,
-  }: {
-    name: string
-    schema: string
-  }): Promise<PostgresMetaResult<PostgresFunction>>
+  async retrieve({ name }: { name: string }): Promise<PostgresMetaResult<PostgresFunction>>
   async retrieve({
     id,
     name,
-    schema = 'public',
   }: {
     id?: number
     name?: string
-    schema?: string
   }): Promise<PostgresMetaResult<PostgresFunction>> {
     if (id) {
       const sql = `${functionsSql} WHERE p.oid = ${literal(id)};`
@@ -49,16 +41,14 @@ export default class PostgresMetaFunctions {
         return { data: data[0], error }
       }
     } else if (name) {
-      const sql = `${functionsSql} WHERE p.name = ${literal(name)} AND n.nspname = ${literal(
-        schema
-      )};`
+      const sql = `${functionsSql} WHERE p.name = ${literal(name)};`
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
       } else if (data.length === 0) {
         return {
           data: null,
-          error: { message: `Cannot find a function named ${name} in schema ${schema}` },
+          error: { message: `Cannot find a function named ${name}` },
         }
       } else {
         return { data: data[0], error }
