@@ -829,3 +829,12 @@ describe('/publications FOR ALL TABLES', () => {
     assert.equal(stillExists, false)
   })
 })
+
+describe('/triggers', () => {
+  it('GET /triggers', async () => {
+    const res = await axios.get(`${URL}/triggers`)
+    const included = res.data.find((x) => `${x.schema}.${x.name}` === 'public.check_update')
+    assert.strictEqual(res.status, STATUS.SUCCESS)
+    assert.strictEqual(true, !!included)
+  })
+})
