@@ -22,4 +22,25 @@ export default async (fastify: FastifyInstance) => {
 
     return data
   })
+
+  fastify.get<{
+    Headers: { pg: string }
+    Params: {
+      id: string
+    }
+  }>('/:id(\\d+)', async (request, reply) => {
+    const connectionString = request.headers.pg
+    const id = Number(request.params.id)
+
+    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const { data, error } = await pgMeta.functions.retrieve({ id })
+    await pgMeta.end()
+    if (error) {
+      request.log.error(JSON.stringify({ error, req: request.body }))
+      reply.code(404)
+      return { error: error.message }
+    }
+
+    return data
+  })
 }
