@@ -88,7 +88,7 @@ describe('/config/version', () => {
     const res = await axios.get(`${URL}/config/version`)
     // console.log('res.data', res.data)
     assert.equal(res.status, STATUS.SUCCESS)
-    assert.match(res.data.version_number, /^\d{6}$/)
+    assert.match(`${res.data.version_number}`, /^\d{6}$/)
   })
 })
 describe('/schemas', () => {
