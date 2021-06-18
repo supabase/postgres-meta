@@ -20,4 +20,41 @@ export default class PostgresMetaFunctions {
         )}));`
     return await this.query(sql)
   }
+
+  async retrieve({ id }: { id: number }): Promise<PostgresMetaResult<PostgresFunction>>
+  async retrieve({ name }: { name: string }): Promise<PostgresMetaResult<PostgresFunction>>
+  async retrieve({
+    id,
+    name,
+  }: {
+    id?: number
+    name?: string
+  }): Promise<PostgresMetaResult<PostgresFunction>> {
+    if (id) {
+      const sql = `${functionsSql} WHERE p.oid = ${literal(id)};`
+      const { data, error } = await this.query(sql)
+      if (error) {
+        return { data, error }
+      } else if (data.length === 0) {
+        return { data: null, error: { message: `Cannot find a function with ID ${id}` } }
+      } else {
+        return { data: data[0], error }
+      }
+    } else if (name) {
+      const sql = `${functionsSql} WHERE p.proname = ${literal(name)};`
+      const { data, error } = await this.query(sql)
+      if (error) {
+        return { data, error }
+      } else if (data.length === 0) {
+        return {
+          data: null,
+          error: { message: `Cannot find a function named ${name}` },
+        }
+      } else {
+        return { data: data[0], error }
+      }
+    } else {
+      return { data: null, error: { message: 'Invalid parameters on function retrieve' } }
+    }
+  }
 }

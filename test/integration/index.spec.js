@@ -175,6 +175,15 @@ describe('/functions', () => {
     assert.equal(true, !!datum)
     assert.equal(true, !!included)
   })
+  it('GET single by ID', async () => {
+    const functions = await axios.get(`${URL}/functions`)
+    const functionFiltered = functions.data.find(
+      (func) => `${func.schema}.${func.name}` === 'public.add'
+    )
+    const { data: functionById } = await axios.get(`${URL}/functions/${functionFiltered.id}`)
+
+    assert.deepStrictEqual(functionById, functionFiltered)
+  })
 })
 describe('/tables', async () => {
   it('GET', async () => {
@@ -312,7 +321,7 @@ describe('/tables', async () => {
       type: 'int2',
       default_value: 42,
       is_nullable: false,
-      comment: 'foo'
+      comment: 'foo',
     })
 
     const { data: columns } = await axios.get(`${URL}/columns`)
@@ -337,17 +346,16 @@ describe('/tables', async () => {
     })
 
     // https://wiki.postgresql.org/wiki/Retrieve_primary_key_columns
-    const { data: primaryKeys } = await axios.post(
-      `${URL}/query`,
-      { query: `
+    const { data: primaryKeys } = await axios.post(`${URL}/query`, {
+      query: `
         SELECT a.attname
         FROM   pg_index i
         JOIN   pg_attribute a ON a.attrelid = i.indrelid
                             AND a.attnum = ANY(i.indkey)
         WHERE  i.indrelid = '${newTable.name}'::regclass
         AND    i.indisprimary;
-      ` }
-    )
+      `,
+    })
     assert.equal(primaryKeys.length, 1)
     assert.equal(primaryKeys[0].attname, 'bar')
 
@@ -363,9 +371,8 @@ describe('/tables', async () => {
       is_unique: true,
     })
 
-    const { data: uniqueColumns } = await axios.post(
-      `${URL}/query`,
-      { query: `
+    const { data: uniqueColumns } = await axios.post(`${URL}/query`, {
+      query: `
         SELECT a.attname
         FROM   pg_index i
         JOIN   pg_constraint c ON c.conindid = i.indexrelid
@@ -373,8 +380,8 @@ describe('/tables', async () => {
                             AND a.attnum = ANY(i.indkey)
         WHERE  i.indrelid = '${newTable.name}'::regclass
         AND    i.indisunique;
-      ` }
-    )
+      `,
+    })
     assert.equal(uniqueColumns.length, 1)
     assert.equal(uniqueColumns[0].attname, 'bar')
 
@@ -423,16 +430,15 @@ describe('/tables', async () => {
       check: "description <> ''",
     })
 
-    const { data: constraints } = await axios.post(
-      `${URL}/query`,
-      { query: `
+    const { data: constraints } = await axios.post(`${URL}/query`, {
+      query: `
         SELECT pg_get_constraintdef((
           SELECT c.oid
           FROM   pg_constraint c
           WHERE  c.conrelid = '${newTable.name}'::regclass
         ));
-      ` }
-    )
+      `,
+    })
     assert.equal(constraints.length, 1)
     assert.equal(constraints[0].pg_get_constraintdef, "CHECK ((description <> ''::text))")
 
@@ -499,7 +505,7 @@ describe('/tables', async () => {
 
     const { data: updatedColumn } = await axios.patch(`${URL}/columns/${newTable.id}.1`, {
       type: 'int4',
-      default_value: 0
+      default_value: 0,
     })
 
     assert.strictEqual(updatedColumn.format, 'int4')
@@ -737,7 +743,10 @@ describe('/publications with tables', () => {
     assert.equal(newPublication.publish_update, publication.publish_update)
     assert.equal(newPublication.publish_delete, publication.publish_delete)
     assert.equal(newPublication.publish_truncate, publication.publish_truncate)
-    assert.equal(newPublication.tables.some(table => `${table.schema}.${table.name}` === 'public.users'), true)
+    assert.equal(
+      newPublication.tables.some((table) => `${table.schema}.${table.name}` === 'public.users'),
+      true
+    )
   })
   it('GET', async () => {
     const res = await axios.get(`${URL}/publications`)
@@ -755,7 +764,10 @@ describe('/publications with tables', () => {
     })
     assert.equal(updated.name, 'b')
     assert.equal(updated.publish_insert, false)
-    assert.equal(updated.tables.some(table => `${table.schema}.${table.name}` === 'public.users'), false)
+    assert.equal(
+      updated.tables.some((table) => `${table.schema}.${table.name}` === 'public.users'),
+      false
+    )
   })
   it('DELETE', async () => {
     const res = await axios.get(`${URL}/publications`)
@@ -768,9 +780,15 @@ describe('/publications with tables', () => {
   })
   it('/publications for tables with uppercase', async () => {
     const { data: table } = await axios.post(`${URL}/tables`, { name: 'T' })
-    const { data: publication } = await axios.post(`${URL}/publications`, { name: 'pub', tables: ['T'] })
+    const { data: publication } = await axios.post(`${URL}/publications`, {
+      name: 'pub',
+      tables: ['T'],
+    })
     assert.equal(publication.name, 'pub')
-    const { data: alteredPublication } = await axios.patch(`${URL}/publications/${publication.id}`, { tables: ['T'] })
+    const { data: alteredPublication } = await axios.patch(
+      `${URL}/publications/${publication.id}`,
+      { tables: ['T'] }
+    )
     assert.equal(alteredPublication.name, 'pub')
 
     await axios.delete(`${URL}/publications/${publication.id}`)
@@ -784,7 +802,7 @@ describe('/publications FOR ALL TABLES', () => {
     publish_insert: true,
     publish_update: true,
     publish_delete: true,
-    publish_truncate: false
+    publish_truncate: false,
   }
   it('POST', async () => {
     const { data: newPublication } = await axios.post(`${URL}/publications`, publication)
