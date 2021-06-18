@@ -41,7 +41,7 @@ export default class PostgresMetaFunctions {
         return { data: data[0], error }
       }
     } else if (name) {
-      const sql = `${functionsSql} WHERE p.name = ${literal(name)};`
+      const sql = `${functionsSql} WHERE p.proname = ${literal(name)};`
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
