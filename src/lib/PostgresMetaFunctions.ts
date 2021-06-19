@@ -1,4 +1,4 @@
-import { literal } from 'pg-format'
+import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
 import { functionsSql } from './sql'
 import { PostgresMetaResult, PostgresFunction } from './types'
@@ -22,7 +22,13 @@ export default class PostgresMetaFunctions {
   }
 
   async retrieve({ id }: { id: number }): Promise<PostgresMetaResult<PostgresFunction>>
-  async retrieve({ name }: { name: string }): Promise<PostgresMetaResult<PostgresFunction>>
+  async retrieve({
+    name,
+    schema,
+  }: {
+    name: string
+    schema: string
+  }): Promise<PostgresMetaResult<PostgresFunction>>
   async retrieve({
     id,
     name,
@@ -56,5 +62,55 @@ export default class PostgresMetaFunctions {
     } else {
       return { data: null, error: { message: 'Invalid parameters on function retrieve' } }
     }
+  }
+
+  async create({
+    name,
+    schema = 'public',
+    params,
+    definition,
+    rettype = 'void',
+    language = 'sql',
+  }: {
+    name: string
+    schema?: string
+    params?: string[]
+    definition: string
+    rettype?: string
+    language?: string
+  }): Promise<PostgresMetaResult<PostgresFunction>> {
+    const sql = `
+      CREATE FUNCTION ${ident(schema)}.${ident(name)}
+      ${params && params.length ? `(${params.join(',')})` : '()'}
+      RETURNS ${rettype || 'void'}
+      AS '${definition}'
+      LANGUAGE ${language}
+      RETURNS NULL ON NULL INPUT;
+      `
+    const { error } = await this.query(sql)
+    if (error) {
+      return { data: null, error }
+    }
+    return await this.retrieve({ name, schema })
+  }
+
+  async remove(
+    id: number,
+    { cascade = false } = {}
+  ): Promise<PostgresMetaResult<PostgresFunction>> {
+    const { data: func, error } = await this.retrieve({ id })
+    if (error) {
+      return { data: null, error }
+    }
+    const sql = `DROP FUNCTION ${ident(func!.schema)}.${ident(func!.name)} ${
+      cascade ? 'CASCADE' : 'RESTRICT'
+    };`
+    {
+      const { error } = await this.query(sql)
+      if (error) {
+        return { data: null, error }
+      }
+    }
+    return { data: func!, error: null }
   }
 }

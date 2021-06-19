@@ -157,6 +157,20 @@ describe('/types', () => {
   })
 })
 describe('/functions', () => {
+  var func = {
+    id: null,
+    name: 'test_func',
+    schema: 'public',
+    params: ['integer', 'integer'],
+    definition: 'select $1 + $2',
+    rettype: 'integer',
+    language: 'sql',
+  }
+  before(async () => {
+    await axios.post(`${URL}/query`, {
+      query: `DROP FUNCTION IF EXISTS "${func.name}";`,
+    })
+  })
   it('GET', async () => {
     const res = await axios.get(`${URL}/functions`)
     // console.log('res.data', res.data)
@@ -184,7 +198,22 @@ describe('/functions', () => {
 
     assert.deepStrictEqual(functionById, functionFiltered)
   })
+  it('POST', async () => {
+    const { data: newFunc } = await axios.post(`${URL}/functions`, func)
+    assert.equal(newFunc.name, 'test_func')
+    assert.equal(newFunc.schema, 'public')
+    assert.equal(newFunc.language, 'sql')
+    assert.equal(newFunc.return_type, 'int4')
+    func.id = newFunc.id
+  })
+  it('DELETE', async () => {
+    await axios.delete(`${URL}/functions/${func.id}`)
+    const { data: functions } = await axios.get(`${URL}/functions`)
+    const stillExists = functions.some((x) => func.id === x.id)
+    assert.equal(stillExists, false, 'Function is deleted')
+  })
 })
+
 describe('/tables', async () => {
   it('GET', async () => {
     const tables = await axios.get(`${URL}/tables`)
