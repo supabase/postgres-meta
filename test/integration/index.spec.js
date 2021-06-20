@@ -206,6 +206,19 @@ describe('/functions', () => {
     assert.equal(newFunc.return_type, 'int4')
     func.id = newFunc.id
   })
+  it('PATCH', async () => {
+    const updates = {
+      name: 'test_func_renamed',
+      params: ['integer', 'integer'],
+      // schema: 'test_schema' // TODO: test patching function schema
+      // extension: 'mathlib', // TODO: test patching function extension
+    }
+
+    let { data: updated } = await axios.patch(`${URL}/functions/${func.id}`, updates)
+    assert.equal(updated.id, func.id)
+    assert.equal(updated.name, 'test_func_renamed')
+    //assert.equal(updated.schema, 'test_schema')
+  })
   it('DELETE', async () => {
     await axios.delete(`${URL}/functions/${func.id}`)
     const { data: functions } = await axios.get(`${URL}/functions`)

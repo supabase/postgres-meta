@@ -61,6 +61,28 @@ export default async (fastify: FastifyInstance) => {
     return data
   })
 
+  fastify.patch<{
+    Headers: { pg: string }
+    Params: {
+      id: string
+    }
+    Body: any
+  }>('/:id(\\d+)', async (request, reply) => {
+    const connectionString = request.headers.pg
+    const id = Number(request.params.id)
+
+    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const { data, error } = await pgMeta.functions.update(id, request.body)
+    await pgMeta.end()
+    if (error) {
+      request.log.error(JSON.stringify({ error, req: request.body }))
+      reply.code(400)
+      if (error.message.startsWith('Cannot find')) reply.code(404)
+      return { error: error.message }
+    }
+    return data
+  })
+
   fastify.delete<{
     Headers: { pg: string }
     Params: {

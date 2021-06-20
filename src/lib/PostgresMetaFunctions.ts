@@ -94,6 +94,45 @@ export default class PostgresMetaFunctions {
     return await this.retrieve({ name, schema })
   }
 
+  async update(
+    id: number,
+    {
+      name,
+      schema,
+      params,
+      extension,
+    }: {
+      name: string
+      schema?: string
+      params?: string[] //optional params for overloaded functions
+      extension?: string //e.g. sqrt DEPENDS ON EXTENSION mathlib
+    }
+  ): Promise<PostgresMetaResult<PostgresFunction>> {
+    const { data: old, error: retrieveError } = await this.retrieve({ id })
+    if (retrieveError) {
+      return { data: null, error: retrieveError }
+    }
+
+    const alter = `ALTER FUNCTION ${ident(old!.schema)}.${ident(old!.name)}${
+      params && params.length ? `(${params.join(',')})` : ''
+    }`
+
+    const schemaSql =
+      schema === undefined || name == old!.schema ? '' : `${alter} SET SCHEMA ${ident(schema)};`
+    const extSql = extension === undefined ? '' : `${alter} DEPENDS ON EXTENSION ${extension};`
+    const nameSql =
+      name === undefined || name == old!.name ? '' : `${alter} RENAME TO ${ident(name)};`
+    //Note: leaving out search_path and owner - should these be alterable from this api?
+
+    const sql = `BEGIN; ${schemaSql} ${extSql} ${nameSql} COMMIT;`
+
+    const { error } = await this.query(sql)
+    if (error) {
+      return { data: null, error }
+    }
+    return await this.retrieve({ id })
+  }
+
   async remove(
     id: number,
     { cascade = false } = {}
