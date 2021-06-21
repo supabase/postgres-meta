@@ -266,6 +266,13 @@ describe('/tables', async () => {
     assert.equal(true, !!datum)
     assert.equal(true, !!included)
   })
+  it('GET enum /columns with quoted name', async () => {
+    await axios.post(`${URL}/query`, { query: 'CREATE TYPE "T" AS ENUM (\'v\'); CREATE TABLE t ( c "T" );' })
+    const { data: columns } = await axios.get(`${URL}/columns`)
+    const column = columns.find((x) => x.table == 't')
+    await axios.post(`${URL}/query`, { query: 'DROP TABLE t; DROP TYPE "T";' })
+    assert.deepStrictEqual(column.enums.includes('v'), true)
+  })
   it('POST /tables should create a table', async () => {
     const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'test', comment: 'foo' })
     assert.equal(`${newTable.schema}.${newTable.name}`, 'public.test')
