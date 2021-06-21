@@ -19,6 +19,6 @@ export default async (fastify: FastifyInstance) => {
       return { error: error.message }
     }
 
-    return data
+    return data || []
   })
 }
