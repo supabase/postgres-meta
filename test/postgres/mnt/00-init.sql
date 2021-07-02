@@ -49,9 +49,3 @@ begin
     return new;
 end;
 $$ language plpgsql;
-
-
-CREATE TRIGGER check_update
-BEFORE UPDATE ON users
-FOR EACH ROW
-EXECUTE FUNCTION public.audit_action();

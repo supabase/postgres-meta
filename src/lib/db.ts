@@ -3,7 +3,9 @@ import { PostgresMetaResult } from './types'
 
 types.setTypeParser(20, parseInt)
 
-export const init: (config: PoolConfig) => {
+export const init: (
+  config: PoolConfig
+) => {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
   end: () => Promise<void>
 } = (config) => {
