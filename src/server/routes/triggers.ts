@@ -4,16 +4,11 @@ import { PostgresMeta } from '../../lib'
 export default async (fastify: FastifyInstance) => {
   fastify.get<{
     Headers: { pg: string }
-    Querystring: {
-      include_system_schemas?: string
-    }
   }>('/', async (request, reply) => {
     const connectionString = request.headers.pg
-    const includeSystemSchemas = request.query.include_system_schemas === 'true'
 
-    
     const pgMeta = new PostgresMeta({ connectionString, max: 1 })
-    const { data, error } = await pgMeta.triggers.list({ includeSystemSchemas })
+    const { data, error } = await pgMeta.triggers.list()
     await pgMeta.end()
     if (error) {
       request.log.error(JSON.stringify({ error, req: request.body }))
@@ -30,19 +25,19 @@ export default async (fastify: FastifyInstance) => {
       id: string
     }
   }>('/:id(\\d+)', async (request, reply) => {
-    // const connectionString = request.headers.pg
-    // const id = Number(request.params.id)
+    const connectionString = request.headers.pg
+    const id = Number(request.params.id)
 
-    // const pgMeta = new PostgresMeta({ connectionString, max: 1 })
-    // const { data, error } = await pgMeta.tables.retrieve({ id })
-    // await pgMeta.end()
-    // if (error) {
-    //   request.log.error({ error, req: request.body })
-    //   reply.code(404)
-    //   return { error: error.message }
-    // }
+    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const { data, error } = await pgMeta.triggers.retrieve({ id })
+    await pgMeta.end()
+    if (error) {
+      request.log.error({ error, req: request.body })
+      reply.code(404)
+      return { error: error.message }
+    }
 
-    return { hello: 'world' }
+    return data
   })
 
   fastify.post<{
@@ -52,7 +47,7 @@ export default async (fastify: FastifyInstance) => {
     const connectionString = request.headers.pg
 
     const pgMeta = new PostgresMeta({ connectionString, max: 1 })
-    const { data, error } = await pgMeta.tables.create(request.body)
+    const { data, error } = await pgMeta.triggers.create(request.body)
     await pgMeta.end()
     if (error) {
       request.log.error(JSON.stringify({ error, req: request.body }))
@@ -74,7 +69,7 @@ export default async (fastify: FastifyInstance) => {
     const id = Number(request.params.id)
 
     const pgMeta = new PostgresMeta({ connectionString, max: 1 })
-    const { data, error } = await pgMeta.tables.update(id, request.body)
+    const { data, error } = await pgMeta.triggers.update(id, request.body)
     await pgMeta.end()
     if (error) {
       request.log.error(JSON.stringify({ error, req: request.body }))
@@ -100,7 +95,7 @@ export default async (fastify: FastifyInstance) => {
     const cascade = request.query.cascade === 'true'
 
     const pgMeta = new PostgresMeta({ connectionString, max: 1 })
-    const { data, error } = await pgMeta.tables.remove(id, { cascade })
+    const { data, error } = await pgMeta.triggers.remove(id, { cascade })
     await pgMeta.end()
     if (error) {
       request.log.error(JSON.stringify({ error, req: request.body }))
