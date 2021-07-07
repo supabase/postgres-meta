@@ -1,4 +1,4 @@
--- Adapted from infromation_schema.schemata
+-- Adapted from information_schema.schemata
 
 SELECT
   n.oid :: int8 AS id,

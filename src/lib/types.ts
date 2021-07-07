@@ -150,6 +150,31 @@ export const postgresPublicationSchema = Type.Object({
 })
 export type PostgresPublication = Static<typeof postgresPublicationSchema>
 
+export const postgresTriggerSchema = Type.Object({
+  id: Type.Integer(),
+  enabled_mode: Type.Union([
+    Type.Literal('ORIGIN'),
+    Type.Literal('REPLICA'),
+    Type.Literal('ALWAYS'),
+    Type.Literal('DISABLED'),
+  ]),
+  name: Type.String(),
+  table: Type.String(),
+  schema: Type.String(),
+  condition: Type.Union([Type.String(), Type.Null()]),
+  orientation: Type.Union([Type.Literal('ROW'), Type.Literal('STATEMENT')]),
+  activation: Type.Union([
+    Type.Literal('BEFORE'),
+    Type.Literal('AFTER'),
+    Type.Literal('INSTEAD OF'),
+  ]),
+  events: Type.Array(Type.String()),
+  function_schema: Type.String(),
+  function_name: Type.String(),
+  function_args: Type.Array(Type.String()),
+})
+export type PostgresTrigger = Static<typeof postgresTriggerSchema>
+
 export const postgresRelationshipSchema = Type.Object({
   id: Type.Integer(),
   constraint_name: Type.String(),
