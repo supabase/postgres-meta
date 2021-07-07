@@ -170,6 +170,9 @@ describe('/functions', () => {
     await axios.post(`${URL}/query`, {
       query: `DROP FUNCTION IF EXISTS "${func.name}";`,
     })
+    await axios.post(`${URL}/query`, {
+      query: `CREATE SCHEMA IF NOT EXISTS test_schema;`,
+    })
   })
   it('GET', async () => {
     const res = await axios.get(`${URL}/functions`)
@@ -210,14 +213,14 @@ describe('/functions', () => {
     const updates = {
       name: 'test_func_renamed',
       params: ['integer', 'integer'],
-      // schema: 'test_schema' // TODO: test patching function schema
+      schema: 'test_schema',
       // extension: 'mathlib', // TODO: test patching function extension
     }
 
     let { data: updated } = await axios.patch(`${URL}/functions/${func.id}`, updates)
     assert.equal(updated.id, func.id)
     assert.equal(updated.name, 'test_func_renamed')
-    //assert.equal(updated.schema, 'test_schema')
+    assert.equal(updated.schema, 'test_schema')
   })
   it('DELETE', async () => {
     await axios.delete(`${URL}/functions/${func.id}`)
@@ -309,7 +312,9 @@ describe('/tables', async () => {
     assert.equal(true, !!included)
   })
   it('GET enum /columns with quoted name', async () => {
-    await axios.post(`${URL}/query`, { query: 'CREATE TYPE "T" AS ENUM (\'v\'); CREATE TABLE t ( c "T" );' })
+    await axios.post(`${URL}/query`, {
+      query: 'CREATE TYPE "T" AS ENUM (\'v\'); CREATE TABLE t ( c "T" );',
+    })
     const { data: columns } = await axios.get(`${URL}/columns`)
     const column = columns.find((x) => x.table == 't')
     await axios.post(`${URL}/query`, { query: 'DROP TABLE t; DROP TYPE "T";' })
@@ -875,18 +880,21 @@ describe('/publications FOR ALL TABLES', () => {
 describe('/triggers', () => {
   const renamedTriggerName = 'test_trigger_renamed'
   const trigger = {
-      name: 'test_trigger',
-      schema: 'public',
-      table: 'users_audit',
-      function_schema: 'public',
-      function_name: 'audit_action',
-      function_args: ['test1', 'test2'],
-      activation: 'AFTER',
-      events: ['UPDATE'],
-      orientation: 'ROW',
-      condition: '(old.* IS DISTINCT FROM new.*)',
+    name: 'test_trigger',
+    schema: 'public',
+    table: 'users_audit',
+    function_schema: 'public',
+    function_name: 'audit_action',
+    function_args: ['test1', 'test2'],
+    activation: 'AFTER',
+    events: ['UPDATE'],
+    orientation: 'ROW',
+    condition: '(old.* IS DISTINCT FROM new.*)',
   }
-  const multiEventTrigger = { ...trigger, ...{ name: 'test_multi_event_trigger', events: ['insert', 'update', 'delete'], condition: '' } }
+  const multiEventTrigger = {
+    ...trigger,
+    ...{ name: 'test_multi_event_trigger', events: ['insert', 'update', 'delete'], condition: '' },
+  }
 
   before(async () => {
     await axios.post(`${URL}/query`, {
@@ -946,10 +954,14 @@ describe('/triggers', () => {
 
     const sortedTriggerData = triggerData.sort((a, b) => a.name.length - b.name.length)
 
-    const { data: singleEventTriggerRecord } = await axios.get(`${URL}/triggers/${sortedTriggerData[0].id}`)
+    const { data: singleEventTriggerRecord } = await axios.get(
+      `${URL}/triggers/${sortedTriggerData[0].id}`
+    )
     assert.strictEqual(singleEventTriggerRecord.name, 'test_trigger')
 
-    const { data: multiEventTriggerRecord } = await axios.get(`${URL}/triggers/${sortedTriggerData[1].id}`)
+    const { data: multiEventTriggerRecord } = await axios.get(
+      `${URL}/triggers/${sortedTriggerData[1].id}`
+    )
     assert.strictEqual(multiEventTriggerRecord.name, 'test_multi_event_trigger')
   })
 
@@ -962,14 +974,14 @@ describe('/triggers', () => {
 
     const { data: updatedTriggerRecord } = await axios.patch(`${URL}/triggers/${id}`, {
       name: 'test_trigger_renamed',
-      enabled_mode: 'DISABLED'
+      enabled_mode: 'DISABLED',
     })
 
     assert.strictEqual(updatedTriggerRecord.name, 'test_trigger_renamed')
     assert.strictEqual(updatedTriggerRecord.enabled_mode, 'DISABLED')
 
     const { data: reEnabledTriggerRecord } = await axios.patch(`${URL}/triggers/${id}`, {
-      enabled_mode: 'REPLICA'
+      enabled_mode: 'REPLICA',
     })
 
     assert.strictEqual(reEnabledTriggerRecord.enabled_mode, 'REPLICA')
