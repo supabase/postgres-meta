@@ -96,7 +96,7 @@ export default class PostgresMetaTriggers {
    * @param {('ROW'|'STATEMENT')} obj.orientation - Trigger function for every row affected by event or
    * once per statement. Defaults to 'STATEMENT'.
    * @param {string} obj.condition - Boolean expression that will trigger function.
-   * For example: '(old.* IS DISTINCT FROM new.*)'
+   * For example: 'old.* IS DISTINCT FROM new.*'
    * @param {Array<string>} obj.function_args - array of arguments to be passed to function when trigger is fired.
    * For example: ['arg1', 'arg2']
    */
