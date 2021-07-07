@@ -26,6 +26,7 @@ export default async (fastify: FastifyInstance) => {
   fastify.register(require('./query'), { prefix: '/query' })
   fastify.register(require('./schemas'), { prefix: '/schemas' })
   fastify.register(require('./tables'), { prefix: '/tables' })
+  fastify.register(require('./triggers'), { prefix: '/triggers' })
   fastify.register(require('./types'), { prefix: '/types' })
   fastify.register(require('./roles'), { prefix: '/roles' })
 }
