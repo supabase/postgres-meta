@@ -40,7 +40,7 @@ if (PG_META_EXPORT_DOCS) {
   })
 } else {
   app.ready(() => {
-    app.listen(PG_META_PORT, () => {
+    app.listen(PG_META_PORT, '0.0.0.0', () => {
       app.log.info(`App started on port ${PG_META_PORT}`)
     })
   })
