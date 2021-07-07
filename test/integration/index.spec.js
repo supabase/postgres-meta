@@ -295,6 +295,13 @@ describe('/tables', async () => {
     assert.equal(true, !!datum)
     assert.equal(true, !!included)
   })
+  it('GET enum /columns with quoted name', async () => {
+    await axios.post(`${URL}/query`, { query: 'CREATE TYPE "T" AS ENUM (\'v\'); CREATE TABLE t ( c "T" );' })
+    const { data: columns } = await axios.get(`${URL}/columns`)
+    const column = columns.find((x) => x.table == 't')
+    await axios.post(`${URL}/query`, { query: 'DROP TABLE t; DROP TYPE "T";' })
+    assert.deepStrictEqual(column.enums.includes('v'), true)
+  })
   it('POST /tables should create a table', async () => {
     const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'test', comment: 'foo' })
     assert.equal(`${newTable.schema}.${newTable.name}`, 'public.test')
@@ -849,5 +856,125 @@ describe('/publications FOR ALL TABLES', () => {
     const { data: publications } = await axios.get(`${URL}/publications`)
     const stillExists = publications.some((x) => x.id === id)
     assert.equal(stillExists, false)
+  })
+})
+
+describe('/triggers', () => {
+  const renamedTriggerName = 'test_trigger_renamed'
+  const trigger = {
+      name: 'test_trigger',
+      schema: 'public',
+      table: 'users_audit',
+      function_schema: 'public',
+      function_name: 'audit_action',
+      function_args: ['test1', 'test2'],
+      activation: 'AFTER',
+      events: ['UPDATE'],
+      orientation: 'ROW',
+      condition: '(old.* IS DISTINCT FROM new.*)',
+  }
+  const multiEventTrigger = { ...trigger, ...{ name: 'test_multi_event_trigger', events: ['insert', 'update', 'delete'], condition: '' } }
+
+  before(async () => {
+    await axios.post(`${URL}/query`, {
+      query: `DROP TRIGGER IF EXISTS ${trigger.name} on ${trigger.schema}.${trigger.table} CASCADE;`,
+    })
+    await axios.post(`${URL}/query`, {
+      query: `DROP TRIGGER IF EXISTS ${renamedTriggerName} on ${trigger.schema}.${trigger.table} CASCADE;`,
+    })
+    await axios.post(`${URL}/query`, {
+      query: `DROP TRIGGER IF EXISTS ${multiEventTrigger.name} on ${multiEventTrigger.schema}.${multiEventTrigger.table} CASCADE;`,
+    })
+  })
+
+  after(async () => {
+    await axios.post(`${URL}/query`, {
+      query: `DROP TRIGGER IF EXISTS ${trigger.name} on ${trigger.schema}.${trigger.table} CASCADE;`,
+    })
+    await axios.post(`${URL}/query`, {
+      query: `DROP TRIGGER IF EXISTS ${renamedTriggerName} on ${trigger.schema}.${trigger.table} CASCADE;`,
+    })
+    await axios.post(`${URL}/query`, {
+      query: `DROP TRIGGER IF EXISTS ${multiEventTrigger.name} on ${multiEventTrigger.schema}.${multiEventTrigger.table} CASCADE;`,
+    })
+  })
+
+  it('POST trigger', async () => {
+    const { data: triggerRecord } = await axios.post(`${URL}/triggers`, trigger)
+
+    assert.strictEqual(typeof triggerRecord.id, 'number')
+    assert.strictEqual(triggerRecord.enabled_mode, 'ORIGIN')
+    assert.strictEqual(triggerRecord.name, 'test_trigger')
+    assert.strictEqual(triggerRecord.table, 'users_audit')
+    assert.strictEqual(triggerRecord.schema, 'public')
+    assert.strictEqual(triggerRecord.condition, '(old.* IS DISTINCT FROM new.*)')
+    assert.strictEqual(triggerRecord.orientation, 'ROW')
+    assert.strictEqual(triggerRecord.activation, 'AFTER')
+    assert.strictEqual(triggerRecord.function_schema, 'public')
+    assert.strictEqual(triggerRecord.function_name, 'audit_action')
+    assert.deepStrictEqual(triggerRecord.events, ['UPDATE'])
+    assert.deepStrictEqual(triggerRecord.function_args, ['test1', 'test2'])
+  })
+
+  it('POST multi-event trigger', async () => {
+    const { data: triggerRecord } = await axios.post(`${URL}/triggers`, multiEventTrigger)
+
+    assert.deepStrictEqual(new Set(triggerRecord.events), new Set(['INSERT', 'UPDATE', 'DELETE']))
+  })
+
+  it('GET', async () => {
+    const { data: triggerData } = await axios.get(`${URL}/triggers`)
+    const triggerIds = triggerData.reduce((acc, { id }) => acc.add(id), new Set())
+
+    assert.strictEqual(triggerData.length, 2)
+    assert.strictEqual(triggerIds.size, 2)
+    assert.ok(triggerData.find(({ name }) => name === 'test_trigger'))
+    assert.ok(triggerData.find(({ name }) => name === 'test_multi_event_trigger'))
+
+    const sortedTriggerData = triggerData.sort((a, b) => a.name.length - b.name.length)
+
+    const { data: singleEventTriggerRecord } = await axios.get(`${URL}/triggers/${sortedTriggerData[0].id}`)
+    assert.strictEqual(singleEventTriggerRecord.name, 'test_trigger')
+
+    const { data: multiEventTriggerRecord } = await axios.get(`${URL}/triggers/${sortedTriggerData[1].id}`)
+    assert.strictEqual(multiEventTriggerRecord.name, 'test_multi_event_trigger')
+  })
+
+  it('PATCH', async () => {
+    const { data: triggerData } = await axios.get(`${URL}/triggers`)
+    const { id, name, enabled_mode } = triggerData.sort((a, b) => a.name.length - b.name.length)[0]
+
+    assert.strictEqual(name, 'test_trigger')
+    assert.strictEqual(enabled_mode, 'ORIGIN')
+
+    const { data: updatedTriggerRecord } = await axios.patch(`${URL}/triggers/${id}`, {
+      name: 'test_trigger_renamed',
+      enabled_mode: 'DISABLED'
+    })
+
+    assert.strictEqual(updatedTriggerRecord.name, 'test_trigger_renamed')
+    assert.strictEqual(updatedTriggerRecord.enabled_mode, 'DISABLED')
+
+    const { data: reEnabledTriggerRecord } = await axios.patch(`${URL}/triggers/${id}`, {
+      enabled_mode: 'REPLICA'
+    })
+
+    assert.strictEqual(reEnabledTriggerRecord.enabled_mode, 'REPLICA')
+  })
+
+  it('DELETE', async () => {
+    const { data: triggerData } = await axios.get(`${URL}/triggers`)
+
+    assert.strictEqual(triggerData.length, 2)
+
+    const triggerIds = triggerData.reduce((acc, { id }) => acc.add(id), new Set())
+
+    for (const id of triggerIds) {
+      await axios.delete(`${URL}/triggers/${id}`)
+    }
+
+    const { data: emptyTriggerData } = await axios.get(`${URL}/triggers`)
+
+    assert.strictEqual(emptyTriggerData.length, 0)
   })
 })
