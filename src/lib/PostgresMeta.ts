@@ -8,6 +8,7 @@ import PostgresMetaPublications from './PostgresMetaPublications'
 import PostgresMetaRoles from './PostgresMetaRoles'
 import PostgresMetaSchemas from './PostgresMetaSchemas'
 import PostgresMetaTables from './PostgresMetaTables'
+import PostgresMetaTriggers from './PostgresMetaTriggers'
 import PostgresMetaTypes from './PostgresMetaTypes'
 import PostgresMetaVersion from './PostgresMetaVersion'
 import { init } from './db'
@@ -25,6 +26,7 @@ export default class PostgresMeta {
   roles: PostgresMetaRoles
   schemas: PostgresMetaSchemas
   tables: PostgresMetaTables
+  triggers: PostgresMetaTriggers
   types: PostgresMetaTypes
   version: PostgresMetaVersion
 
@@ -41,6 +43,7 @@ export default class PostgresMeta {
     this.roles = new PostgresMetaRoles(this.query)
     this.schemas = new PostgresMetaSchemas(this.query)
     this.tables = new PostgresMetaTables(this.query)
+    this.triggers = new PostgresMetaTriggers(this.query)
     this.types = new PostgresMetaTypes(this.query)
     this.version = new PostgresMetaVersion(this.query)
   }
