@@ -98,7 +98,7 @@ export default class PostgresMetaFunctions {
     id: number,
     {
       name,
-      schema,
+      schema = 'public',
       params,
       extension,
     }: {
@@ -113,18 +113,26 @@ export default class PostgresMetaFunctions {
       return { data: null, error: retrieveError }
     }
 
-    const alter = `ALTER FUNCTION ${ident(old!.schema)}.${ident(old!.name)}${
+    let alter = `ALTER FUNCTION ${ident(old!.schema)}.${ident(old!.name)}${
       params && params.length ? `(${params.join(',')})` : ''
     }`
 
-    const schemaSql =
-      schema === undefined || name == old!.schema ? '' : `${alter} SET SCHEMA ${ident(schema)};`
-    const extSql = extension === undefined ? '' : `${alter} DEPENDS ON EXTENSION ${extension};`
+    let schemaSql = ''
+    if (schema !== undefined && schema !== old!.schema) {
+      schemaSql = `${alter} SET SCHEMA ${ident(schema)};`
+      alter = `ALTER FUNCTION ${ident(schema)}.${ident(old!.name)}${
+        params && params.length ? `(${params.join(',')})` : ''
+      }`
+    }
+
     const nameSql =
       name === undefined || name == old!.name ? '' : `${alter} RENAME TO ${ident(name)};`
-    //Note: leaving out search_path and owner - should these be alterable from this api?
 
-    const sql = `BEGIN; ${schemaSql} ${extSql} ${nameSql} COMMIT;`
+    //Note: leaving out search_path and owner - should these be alterable from this api?
+    //Note: also leaving out extensions - to enable extensions, they would have to already be
+    //installed. Current Postgres docker image has no extensions installed
+
+    const sql = `BEGIN;${schemaSql} ${nameSql} COMMIT;`
 
     const { error } = await this.query(sql)
     if (error) {
