@@ -85,7 +85,8 @@ export default class PostgresMetaColumns {
     default_value_format = 'literal',
     is_identity = false,
     identity_generation = 'BY DEFAULT',
-    is_nullable = true,
+    // Can't pick a value as default since regular columns are nullable by default but PK columns aren't
+    is_nullable,
     is_primary_key = false,
     is_unique = false,
     comment,
@@ -119,7 +120,10 @@ export default class PostgresMetaColumns {
       defaultValueClause = `DEFAULT ${literal(default_value)}`
     }
     const isIdentityClause = is_identity ? `GENERATED ${identity_generation} AS IDENTITY` : ''
-    const isNullableClause = is_nullable ? 'NULL' : 'NOT NULL'
+    let isNullableClause = ''
+    if (is_nullable !== undefined) {
+      isNullableClause = is_nullable ? 'NULL' : 'NOT NULL'
+    }
     const isPrimaryKeyClause = is_primary_key ? 'PRIMARY KEY' : ''
     const isUniqueClause = is_unique ? 'UNIQUE' : ''
     const checkSql = check === undefined ? '' : `CHECK (${check})`
