@@ -227,6 +227,9 @@ describe('/functions', () => {
     const { data: functions } = await axios.get(`${URL}/functions`)
     const stillExists = functions.some((x) => func.id === x.id)
     assert.equal(stillExists, false, 'Function is deleted')
+    await axios.post(`${URL}/query`, {
+      query: `DROP SCHEMA test_schema;`,
+    })
   })
 })
 

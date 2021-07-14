@@ -32,9 +32,11 @@ export default class PostgresMetaFunctions {
   async retrieve({
     id,
     name,
+    schema = 'public',
   }: {
     id?: number
     name?: string
+    schema?: string
   }): Promise<PostgresMetaResult<PostgresFunction>> {
     if (id) {
       const sql = `${functionsSql} WHERE p.oid = ${literal(id)};`
@@ -47,14 +49,16 @@ export default class PostgresMetaFunctions {
         return { data: data[0], error }
       }
     } else if (name) {
-      const sql = `${functionsSql} WHERE p.proname = ${literal(name)};`
+      const sql = `${functionsSql} WHERE p.proname = ${literal(name)} AND n.nspname = ${literal(
+        schema
+      )};`
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
       } else if (data.length === 0) {
         return {
           data: null,
-          error: { message: `Cannot find a function named ${name}` },
+          error: { message: `Cannot find a function named ${name} in schema ${schema}` },
         }
       } else {
         return { data: data[0], error }
@@ -80,10 +84,10 @@ export default class PostgresMetaFunctions {
     language?: string
   }): Promise<PostgresMetaResult<PostgresFunction>> {
     const sql = `
-      CREATE FUNCTION ${ident(schema)}.${ident(name)}
+      CREATE OR REPLACE FUNCTION ${ident(schema)}.${ident(name)}
       ${params && params.length ? `(${params.join(',')})` : '()'}
-      RETURNS ${rettype || 'void'}
-      AS '${definition}'
+      RETURNS ${rettype}
+      AS ${literal(definition)}
       LANGUAGE ${language}
       RETURNS NULL ON NULL INPUT;
       `
@@ -99,13 +103,9 @@ export default class PostgresMetaFunctions {
     {
       name,
       schema = 'public',
-      params,
-      extension,
     }: {
       name: string
       schema?: string
-      params?: string[] //optional params for overloaded functions
-      extension?: string //e.g. sqrt DEPENDS ON EXTENSION mathlib
     }
   ): Promise<PostgresMetaResult<PostgresFunction>> {
     const { data: old, error: retrieveError } = await this.retrieve({ id })
@@ -113,26 +113,15 @@ export default class PostgresMetaFunctions {
       return { data: null, error: retrieveError }
     }
 
-    let alter = `ALTER FUNCTION ${ident(old!.schema)}.${ident(old!.name)}${
-      params && params.length ? `(${params.join(',')})` : ''
-    }`
-
-    let schemaSql = ''
-    if (schema !== undefined && schema !== old!.schema) {
-      schemaSql = `${alter} SET SCHEMA ${ident(schema)};`
-      alter = `ALTER FUNCTION ${ident(schema)}.${ident(old!.name)}${
-        params && params.length ? `(${params.join(',')})` : ''
-      }`
-    }
-
+    let alter = `ALTER FUNCTION ${ident(old!.name)}`
     const nameSql =
       name === undefined || name == old!.name ? '' : `${alter} RENAME TO ${ident(name)};`
 
-    //Note: leaving out search_path and owner - should these be alterable from this api?
-    //Note: also leaving out extensions - to enable extensions, they would have to already be
-    //installed. Current Postgres docker image has no extensions installed
+    alter = `ALTER FUNCTION ${ident(name)}`
+    const schemaSql =
+      schema === undefined || schema == old!.schema ? '' : `${alter} SET SCHEMA ${ident(schema)};`
 
-    const sql = `BEGIN;${schemaSql} ${nameSql} COMMIT;`
+    const sql = `BEGIN;${nameSql} ${schemaSql} COMMIT;`
 
     const { error } = await this.query(sql)
     if (error) {
@@ -149,9 +138,9 @@ export default class PostgresMetaFunctions {
     if (error) {
       return { data: null, error }
     }
-    const sql = `DROP FUNCTION ${ident(func!.schema)}.${ident(func!.name)} ${
-      cascade ? 'CASCADE' : 'RESTRICT'
-    };`
+    const sql = `DROP FUNCTION ${ident(func!.schema)}.${ident(func!.name)}
+    ${func!.argument_types ? `(${func!.argument_types})` : '()'}
+    ${cascade ? 'CASCADE' : 'RESTRICT'};`
     {
       const { error } = await this.query(sql)
       if (error) {
