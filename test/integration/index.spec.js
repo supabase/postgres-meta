@@ -14,15 +14,15 @@ console.log('Running tests on ', URL)
 describe('/', () => {
   it('GET', async () => {
     const res = await axios.get(`${URL}/`)
-    assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(!!res.data.version, true)
+    assert.strictEqual(res.status, STATUS.SUCCESS)
+    assert.strictEqual(!!res.data.version, true)
   })
 })
 describe('/health', () => {
   it('GET', async () => {
     const res = await axios.get(`${URL}/health`)
-    assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(!!res.data.date, true)
+    assert.strictEqual(res.status, STATUS.SUCCESS)
+    assert.strictEqual(!!res.data.date, true)
   })
 })
 describe('When passing an encrypted connection header', () => {
@@ -35,8 +35,8 @@ describe('When passing an encrypted connection header', () => {
     })
     // console.log('res.data', res.data)
     const datum = res.data.find((x) => x.name == 'trace_recovery_messages')
-    assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(true, !!datum)
+    assert.strictEqual(res.status, STATUS.SUCCESS)
+    assert.strictEqual(true, !!datum)
   })
   it('should fail with a bad connection', async () => {
     const encrypted = CryptoJS.AES.encrypt('bad connection', CRYPTO_KEY).toString()
@@ -46,10 +46,10 @@ describe('When passing an encrypted connection header', () => {
           'X-Connection-Encrypted': encrypted,
         },
       })
-      assert.equal(res.status, STATUS.ERROR)
+      assert.strictEqual(res.status, STATUS.ERROR)
     } catch (error) {
       // console.log('error', error)
-      assert.equal(error.response.status, STATUS.ERROR)
+      assert.strictEqual(error.response.status, STATUS.ERROR)
     }
   })
 })
@@ -57,11 +57,11 @@ describe('should give meaningful errors', () => {
   it('POST', async () => {
     try {
       const res = await axios.post(`${URL}/query`, { query: 'drop table fake_table' })
-      assert.equal(res.data.body, 'Code block should not be reached') // Error should be thrown before executing
+      assert.strictEqual(res.data.body, 'Code block should not be reached') // Error should be thrown before executing
     } catch (error) {
       let { status, data } = error.response
-      assert.equal(status, 400)
-      assert.equal(data.error, 'table "fake_table" does not exist')
+      assert.strictEqual(status, 400)
+      assert.strictEqual(data.error, 'table "fake_table" does not exist')
     }
   })
 })
@@ -70,8 +70,8 @@ describe('/query', () => {
     const res = await axios.post(`${URL}/query`, { query: 'SELECT * FROM USERS' })
     // console.log('res.data', res.data)
     const datum = res.data.find((x) => x.id == 1)
-    assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(datum.name, 'Joe Bloggs')
+    assert.strictEqual(res.status, STATUS.SUCCESS)
+    assert.strictEqual(datum.name, 'Joe Bloggs')
   })
 })
 describe('/config', () => {
@@ -79,15 +79,15 @@ describe('/config', () => {
     const res = await axios.get(`${URL}/config`)
     // console.log('res.data', res.data)
     const datum = res.data.find((x) => x.name == 'trace_recovery_messages')
-    assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(true, !!datum)
+    assert.strictEqual(res.status, STATUS.SUCCESS)
+    assert.strictEqual(true, !!datum)
   })
 })
 describe('/config/version', () => {
   it('GET', async () => {
     const res = await axios.get(`${URL}/config/version`)
     // console.log('res.data', res.data)
-    assert.equal(res.status, STATUS.SUCCESS)
+    assert.strictEqual(res.status, STATUS.SUCCESS)
     assert.match(`${res.data.version_number}`, /^\d{6}$/)
   })
 })
@@ -97,43 +97,43 @@ describe('/schemas', () => {
     // console.log('res.data', res.data)
     const datum = res.data.find((x) => x.name == 'public')
     const notIncluded = res.data.find((x) => x.name == 'pg_toast')
-    assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(true, !!datum)
-    assert.equal(true, !notIncluded)
+    assert.strictEqual(res.status, STATUS.SUCCESS)
+    assert.strictEqual(true, !!datum)
+    assert.strictEqual(true, !notIncluded)
   })
   it('GET with system schemas', async () => {
     const res = await axios.get(`${URL}/schemas?include_system_schemas=true`)
     // console.log('res.data', res.data)
     const datum = res.data.find((x) => x.name == 'public')
     const included = res.data.find((x) => x.name == 'pg_toast')
-    assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(true, !!datum)
-    assert.equal(true, !!included)
+    assert.strictEqual(res.status, STATUS.SUCCESS)
+    assert.strictEqual(true, !!datum)
+    assert.strictEqual(true, !!included)
   })
   it('GET without system schemas (explicit)', async () => {
     const res = await axios.get(`${URL}/schemas?include_system_schemas=false`)
     const isIncluded = res.data.some((x) => x.name === 'pg_catalog')
-    assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(isIncluded, false)
+    assert.strictEqual(res.status, STATUS.SUCCESS)
+    assert.strictEqual(isIncluded, false)
   })
   it('POST & PATCH & DELETE', async () => {
     const res = await axios.post(`${URL}/schemas`, { name: 'api' })
-    assert.equal('api', res.data.name)
+    assert.strictEqual('api', res.data.name)
     const newSchemaId = res.data.id
     const res2 = await axios.patch(`${URL}/schemas/${newSchemaId}`, { name: 'api_updated' })
-    assert.equal('api_updated', res2.data.name)
+    assert.strictEqual('api_updated', res2.data.name)
     const res3 = await axios.patch(`${URL}/schemas/${newSchemaId}`, {
       name: 'api',
       owner: 'postgres',
     })
-    assert.equal('api', res3.data.name)
+    assert.strictEqual('api', res3.data.name)
 
     const res4 = await axios.delete(`${URL}/schemas/${newSchemaId}`)
-    assert.equal(res4.data.name, 'api')
+    assert.strictEqual(res4.data.name, 'api')
 
     const res5 = await axios.get(`${URL}/schemas`)
     const newSchemaExists = res5.data.some((x) => x.id === newSchemaId)
-    assert.equal(newSchemaExists, false)
+    assert.strictEqual(newSchemaExists, false)
   })
 })
 describe('/types', () => {
@@ -142,18 +142,18 @@ describe('/types', () => {
     // console.log('res.data', res.data)
     const datum = res.data.find((x) => x.schema == 'public')
     const notIncluded = res.data.find((x) => x.schema == 'pg_toast')
-    assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(true, !!datum)
-    assert.equal(true, !notIncluded)
+    assert.strictEqual(res.status, STATUS.SUCCESS)
+    assert.strictEqual(true, !!datum)
+    assert.strictEqual(true, !notIncluded)
   })
   it('GET with system types', async () => {
     const res = await axios.get(`${URL}/types?include_system_schemas=true`)
     // console.log('res.data', res.data)
     const datum = res.data.find((x) => x.schema == 'public')
     const included = res.data.find((x) => x.schema == 'pg_catalog')
-    assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(true, !!datum)
-    assert.equal(true, !!included)
+    assert.strictEqual(res.status, STATUS.SUCCESS)
+    assert.strictEqual(true, !!datum)
+    assert.strictEqual(true, !!included)
   })
 })
 describe('/functions', () => {
@@ -184,18 +184,18 @@ describe('/functions', () => {
     // console.log('res.data', res.data)
     const datum = res.data.find((x) => x.schema == 'public')
     const notIncluded = res.data.find((x) => x.schema == 'pg_toast')
-    assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(true, !!datum)
-    assert.equal(true, !notIncluded)
+    assert.strictEqual(res.status, STATUS.SUCCESS)
+    assert.strictEqual(true, !!datum)
+    assert.strictEqual(true, !notIncluded)
   })
   it('GET with system functions', async () => {
     const res = await axios.get(`${URL}/functions?include_system_schemas=true`)
     // console.log('res.data', res.data)
     const datum = res.data.find((x) => x.schema == 'public')
     const included = res.data.find((x) => x.schema == 'pg_catalog')
-    assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(true, !!datum)
-    assert.equal(true, !!included)
+    assert.strictEqual(res.status, STATUS.SUCCESS)
+    assert.strictEqual(true, !!datum)
+    assert.strictEqual(true, !!included)
   })
   it('GET single by ID', async () => {
     const functions = await axios.get(`${URL}/functions`)
@@ -208,10 +208,10 @@ describe('/functions', () => {
   })
   it('POST', async () => {
     const { data: newFunc } = await axios.post(`${URL}/functions`, func)
-    assert.equal(newFunc.name, 'test_func')
-    assert.equal(newFunc.schema, 'public')
-    assert.equal(newFunc.language, 'sql')
-    assert.equal(newFunc.return_type, 'int4')
+    assert.strictEqual(newFunc.name, 'test_func')
+    assert.strictEqual(newFunc.schema, 'public')
+    assert.strictEqual(newFunc.language, 'sql')
+    assert.strictEqual(newFunc.return_type, 'int4')
     func.id = newFunc.id
   })
   it('PATCH', async () => {
@@ -221,15 +221,15 @@ describe('/functions', () => {
     }
 
     let { data: updated } = await axios.patch(`${URL}/functions/${func.id}`, updates)
-    assert.equal(updated.id, func.id)
-    assert.equal(updated.name, 'test_func_renamed')
-    assert.equal(updated.schema, 'test_schema')
+    assert.strictEqual(updated.id, func.id)
+    assert.strictEqual(updated.name, 'test_func_renamed')
+    assert.strictEqual(updated.schema, 'test_schema')
   })
   it('DELETE', async () => {
     await axios.delete(`${URL}/functions/${func.id}`)
     const { data: functions } = await axios.get(`${URL}/functions`)
     const stillExists = functions.some((x) => func.id === x.id)
-    assert.equal(stillExists, false, 'Function is deleted')
+    assert.strictEqual(stillExists, false, 'Function is deleted')
   })
 })
 
@@ -242,19 +242,19 @@ describe('/tables', async () => {
     const idColumn = datum.columns.find((x) => x.name === 'id')
     const nameColumn = datum.columns.find((x) => x.name === 'name')
     const statusColumn = memes.columns.find((x) => x.name === 'status')
-    assert.equal(tables.status, STATUS.SUCCESS)
-    assert.equal(true, !!datum, 'Table included')
-    assert.equal(true, !notIncluded, 'System table not included')
-    assert.equal(datum['rls_enabled'], false, 'RLS false')
-    assert.equal(datum['rls_forced'], false, 'RLS Forced')
-    assert.equal(datum.columns.length > 0, true, 'Has columns')
-    assert.equal(datum.primary_keys.length > 0, true, 'Has PK')
-    assert.equal(idColumn.is_updatable, true, 'Is updatable')
-    assert.equal(idColumn.is_identity, true, 'ID is Identity')
-    assert.equal(nameColumn.is_identity, false, 'Name is not identity')
-    assert.equal(datum.grants.length > 0, true, 'Has grants')
-    assert.equal(datum.policies.length == 0, true, 'Has no policies')
-    assert.equal(statusColumn.enums[0], 'new', 'Has enums')
+    assert.strictEqual(tables.status, STATUS.SUCCESS)
+    assert.strictEqual(true, !!datum, 'Table included')
+    assert.strictEqual(true, !notIncluded, 'System table not included')
+    assert.strictEqual(datum['rls_enabled'], false, 'RLS false')
+    assert.strictEqual(datum['rls_forced'], false, 'RLS Forced')
+    assert.strictEqual(datum.columns.length > 0, true, 'Has columns')
+    assert.strictEqual(datum.primary_keys.length > 0, true, 'Has PK')
+    assert.strictEqual(idColumn.is_updatable, true, 'Is updatable')
+    assert.strictEqual(idColumn.is_identity, true, 'ID is Identity')
+    assert.strictEqual(nameColumn.is_identity, false, 'Name is not identity')
+    assert.strictEqual(datum.grants.length > 0, true, 'Has grants')
+    assert.strictEqual(datum.policies.length == 0, true, 'Has no policies')
+    assert.strictEqual(statusColumn.enums[0], 'new', 'Has enums')
   })
   it('GET single by ID', async () => {
     const tables = await axios.get(`${URL}/tables`)
@@ -272,9 +272,9 @@ describe('/tables', async () => {
     const relationship = relationships.find(
       (x) => x.source_schema === 'public' && x.source_table_name === 'todos'
     )
-    assert.equal(relationships.length > 0, true)
-    assert.equal(true, relationship.target_table_schema === 'public')
-    assert.equal(true, relationship.target_table_name === 'users')
+    assert.strictEqual(relationships.length > 0, true)
+    assert.strictEqual(true, relationship.target_table_schema === 'public')
+    assert.strictEqual(true, relationship.target_table_name === 'users')
   })
   it('/tables should return relationships for quoted names', async () => {
     const tables = await axios.get(`${URL}/tables`)
@@ -282,37 +282,37 @@ describe('/tables', async () => {
     const relationship = todos.relationships.find(
       (x) => x.source_schema === 'public' && x.source_table_name === 'todos'
     )
-    assert.equal(true, relationship.source_column_name === 'user-id')
+    assert.strictEqual(true, relationship.source_column_name === 'user-id')
   })
   it('GET /tables with system tables', async () => {
     const res = await axios.get(`${URL}/tables?include_system_schemas=true`)
     const included = res.data.find((x) => `${x.schema}.${x.name}` === 'pg_catalog.pg_type')
-    assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(true, !!included)
+    assert.strictEqual(res.status, STATUS.SUCCESS)
+    assert.strictEqual(true, !!included)
   })
   it('GET /tables without system tables (explicit)', async () => {
     const res = await axios.get(`${URL}/tables?include_system_schemas=false`)
     const isIncluded = res.data.some((x) => `${x.schema}.${x.name}` === 'pg_catalog.pg_type')
-    assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(isIncluded, false)
+    assert.strictEqual(res.status, STATUS.SUCCESS)
+    assert.strictEqual(isIncluded, false)
   })
   it('GET /columns', async () => {
     const res = await axios.get(`${URL}/columns`)
     // console.log('res.data', res.data)
     const datum = res.data.find((x) => x.schema == 'public')
     const notIncluded = res.data.find((x) => x.schema == 'pg_catalog')
-    assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(true, !!datum)
-    assert.equal(true, !notIncluded)
+    assert.strictEqual(res.status, STATUS.SUCCESS)
+    assert.strictEqual(true, !!datum)
+    assert.strictEqual(true, !notIncluded)
   })
   it('GET /columns with system types', async () => {
     const res = await axios.get(`${URL}/columns?include_system_schemas=true`)
     // console.log('res.data', res.data)
     const datum = res.data.find((x) => x.schema == 'public')
     const included = res.data.find((x) => x.schema == 'pg_catalog')
-    assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(true, !!datum)
-    assert.equal(true, !!included)
+    assert.strictEqual(res.status, STATUS.SUCCESS)
+    assert.strictEqual(true, !!datum)
+    assert.strictEqual(true, !!included)
   })
   it('GET enum /columns with quoted name', async () => {
     await axios.post(`${URL}/query`, {
@@ -325,12 +325,12 @@ describe('/tables', async () => {
   })
   it('POST /tables should create a table', async () => {
     const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'test', comment: 'foo' })
-    assert.equal(`${newTable.schema}.${newTable.name}`, 'public.test')
-    assert.equal(newTable.comment, 'foo')
+    assert.strictEqual(`${newTable.schema}.${newTable.name}`, 'public.test')
+    assert.strictEqual(newTable.comment, 'foo')
 
     const { data: tables } = await axios.get(`${URL}/tables`)
     const newTableExists = tables.some((table) => table.id === newTable.id)
-    assert.equal(newTableExists, true)
+    assert.strictEqual(newTableExists, true)
 
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })
@@ -345,11 +345,11 @@ describe('/tables', async () => {
       replica_identity: 'NOTHING',
       comment: 'foo',
     })
-    assert.equal(updatedTable.name, `test a`)
-    assert.equal(updatedTable.rls_enabled, true)
-    assert.equal(updatedTable.rls_forced, true)
-    assert.equal(updatedTable.replica_identity, 'NOTHING')
-    assert.equal(updatedTable.comment, 'foo')
+    assert.strictEqual(updatedTable.name, `test a`)
+    assert.strictEqual(updatedTable.rls_enabled, true)
+    assert.strictEqual(updatedTable.rls_forced, true)
+    assert.strictEqual(updatedTable.replica_identity, 'NOTHING')
+    assert.strictEqual(updatedTable.comment, 'foo')
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })
   it('PATCH /tables same name', async () => {
@@ -359,7 +359,7 @@ describe('/tables', async () => {
     let { data: updatedTable } = await axios.patch(`${URL}/tables/${newTable.id}`, {
       name: 'test',
     })
-    assert.equal(updatedTable.name, `test`)
+    assert.strictEqual(updatedTable.name, `test`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })
   it('DELETE /tables', async () => {
@@ -368,7 +368,7 @@ describe('/tables', async () => {
     await axios.delete(`${URL}/tables/${newTable.id}`)
     const { data: tables } = await axios.get(`${URL}/tables`)
     const newTableExists = tables.some((table) => table.id === newTable.id)
-    assert.equal(newTableExists, false)
+    assert.strictEqual(newTableExists, false)
   })
   it('POST /columns', async () => {
     const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'foo bar' })
@@ -386,9 +386,9 @@ describe('/tables', async () => {
       (column) =>
         column.id === `${newTable.id}.1` && column.name === 'foo bar' && column.format === 'int2'
     )
-    assert.equal(newColumn.default_value, "'42'::smallint")
-    assert.equal(newColumn.is_nullable, false)
-    assert.equal(newColumn.comment, 'foo')
+    assert.strictEqual(newColumn.default_value, "'42'::smallint")
+    assert.strictEqual(newColumn.is_nullable, false)
+    assert.strictEqual(newColumn.comment, 'foo')
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
@@ -413,8 +413,8 @@ describe('/tables', async () => {
         AND    i.indisprimary;
       `,
     })
-    assert.equal(primaryKeys.length, 1)
-    assert.equal(primaryKeys[0].attname, 'bar')
+    assert.strictEqual(primaryKeys.length, 1)
+    assert.strictEqual(primaryKeys[0].attname, 'bar')
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
@@ -439,8 +439,8 @@ describe('/tables', async () => {
         AND    i.indisunique;
       `,
     })
-    assert.equal(uniqueColumns.length, 1)
-    assert.equal(uniqueColumns[0].attname, 'bar')
+    assert.strictEqual(uniqueColumns.length, 1)
+    assert.strictEqual(uniqueColumns[0].attname, 'bar')
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
@@ -458,7 +458,7 @@ describe('/tables', async () => {
       (column) =>
         column.id === `${newTable.id}.1` && column.name === 'b' && column.format === '_int2'
     )
-    assert.equal(newColumn.name, 'b')
+    assert.strictEqual(newColumn.name, 'b')
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
@@ -473,7 +473,7 @@ describe('/tables', async () => {
       default_value_format: 'expression',
     })
 
-    assert.equal(newColumn.default_value, 'now()')
+    assert.strictEqual(newColumn.default_value, 'now()')
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
@@ -496,8 +496,8 @@ describe('/tables', async () => {
         ));
       `,
     })
-    assert.equal(constraints.length, 1)
-    assert.equal(constraints[0].pg_get_constraintdef, "CHECK ((description <> ''::text))")
+    assert.strictEqual(constraints.length, 1)
+    assert.strictEqual(constraints[0].pg_get_constraintdef, "CHECK ((description <> ''::text))")
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
@@ -527,10 +527,10 @@ describe('/tables', async () => {
       (column) =>
         column.id === `${newTable.id}.1` && column.name === 'foo bar' && column.format === 'int4'
     )
-    assert.equal(updatedColumn.default_value, null)
-    assert.equal(updatedColumn.identity_generation, 'ALWAYS')
-    assert.equal(updatedColumn.is_nullable, false)
-    assert.equal(updatedColumn.comment, 'bar')
+    assert.strictEqual(updatedColumn.default_value, null)
+    assert.strictEqual(updatedColumn.identity_generation, 'ALWAYS')
+    assert.strictEqual(updatedColumn.is_nullable, false)
+    assert.strictEqual(updatedColumn.comment, 'bar')
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
@@ -547,7 +547,7 @@ describe('/tables', async () => {
       name: 'bar',
     })
 
-    assert.equal(updatedColumn.name, 'bar')
+    assert.strictEqual(updatedColumn.name, 'bar')
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
@@ -577,14 +577,14 @@ describe('/tables', async () => {
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     const { data: columns } = await axios.get(`${URL}/columns`)
     const newColumnExists = columns.some((column) => column.id === `${newTable.id}.1`)
-    assert.equal(newColumnExists, false)
+    assert.strictEqual(newColumnExists, false)
 
     await axios.delete(`${URL}/tables/${newTable.id}`)
   })
 
   it("allows ' in COMMENTs", async () => {
     const { data: newTable } = await axios.post(`${URL}/tables`, { name: 'foo', comment: "'" })
-    assert.equal(newTable.comment, "'")
+    assert.strictEqual(newTable.comment, "'")
 
     await axios.post(`${URL}/columns`, {
       table_id: newTable.id,
@@ -598,7 +598,7 @@ describe('/tables', async () => {
       (column) =>
         column.id === `${newTable.id}.1` && column.name === 'bar' && column.format === 'int2'
     )
-    assert.equal(newColumn.comment, "'")
+    assert.strictEqual(newColumn.comment, "'")
 
     await axios.delete(`${URL}/columns/${newTable.id}.1`)
     await axios.delete(`${URL}/tables/${newTable.id}`)
@@ -610,8 +610,8 @@ describe('/extensions', () => {
     const res = await axios.get(`${URL}/extensions`)
     // console.log('res.data', res.data)
     const datum = res.data.find((x) => x.name == 'uuid-ossp')
-    assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(true, !!datum)
+    assert.strictEqual(res.status, STATUS.SUCCESS)
+    assert.strictEqual(true, !!datum)
   })
   it('POST', async () => {
     const { data: extSchema } = await axios.post(`${URL}/schemas`, { name: 'extensions' })
@@ -619,7 +619,7 @@ describe('/extensions', () => {
 
     const { data: extensions } = await axios.get(`${URL}/extensions`)
     const newExtension = extensions.find((ext) => ext.name === 'hstore')
-    assert.equal(newExtension.installed_version, '1.4')
+    assert.strictEqual(newExtension.installed_version, '1.4')
 
     await axios.delete(`${URL}/extensions/hstore`)
     await axios.delete(`${URL}/schemas/${extSchema.id}`)
@@ -632,7 +632,7 @@ describe('/extensions', () => {
 
     const { data: extensions } = await axios.get(`${URL}/extensions`)
     const updatedExtension = extensions.find((ext) => ext.name === 'hstore')
-    assert.equal(updatedExtension.installed_version, updatedExtension.default_version)
+    assert.strictEqual(updatedExtension.installed_version, updatedExtension.default_version)
 
     await axios.delete(`${URL}/extensions/hstore`)
     await axios.delete(`${URL}/schemas/${extSchema.id}`)
@@ -643,7 +643,7 @@ describe('/extensions', () => {
     await axios.delete(`${URL}/extensions/hstore`)
     const { data: extensions } = await axios.get(`${URL}/extensions`)
     const deletedExtension = extensions.find((ext) => ext.name === 'hstore')
-    assert.equal(deletedExtension.installed_version, null)
+    assert.strictEqual(deletedExtension.installed_version, null)
   })
 })
 describe('/roles', () => {
@@ -653,10 +653,10 @@ describe('/roles', () => {
     const datum = res.data.find((x) => x.name == 'postgres')
     const hasSystemSchema = datum.grants.some((x) => x.schema == 'information_schema')
     const hasPublicSchema = datum.grants.some((x) => x.schema == 'public')
-    assert.equal(res.status, STATUS.SUCCESS)
-    assert.equal(true, !!datum)
-    assert.equal(hasSystemSchema, false)
-    assert.equal(hasPublicSchema, true)
+    assert.strictEqual(res.status, STATUS.SUCCESS)
+    assert.strictEqual(true, !!datum)
+    assert.strictEqual(hasSystemSchema, false)
+    assert.strictEqual(hasPublicSchema, true)
   })
   it('POST', async () => {
     await axios.post(`${URL}/roles`, {
@@ -673,15 +673,15 @@ describe('/roles', () => {
     })
     const { data: roles } = await axios.get(`${URL}/roles`)
     const test = roles.find((role) => role.name === 'test')
-    assert.equal(test.is_superuser, true)
-    assert.equal(test.can_create_db, true)
-    assert.equal(test.can_create_role, true)
-    assert.equal(test.inherit_role, false)
-    assert.equal(test.can_login, true)
-    assert.equal(test.is_replication_role, true)
-    assert.equal(test.can_bypass_rls, true)
-    assert.equal(test.connection_limit, 100)
-    assert.equal(test.valid_until, '2020-01-01T00:00:00.000Z')
+    assert.strictEqual(test.is_superuser, true)
+    assert.strictEqual(test.can_create_db, true)
+    assert.strictEqual(test.can_create_role, true)
+    assert.strictEqual(test.inherit_role, false)
+    assert.strictEqual(test.can_login, true)
+    assert.strictEqual(test.is_replication_role, true)
+    assert.strictEqual(test.can_bypass_rls, true)
+    assert.strictEqual(test.connection_limit, 100)
+    assert.strictEqual(test.valid_until, '2020-01-01T00:00:00.000Z')
     await axios.post(`${URL}/query`, { query: 'DROP ROLE test;' })
   })
   it('PATCH', async () => {
@@ -702,16 +702,16 @@ describe('/roles', () => {
 
     const { data: roles } = await axios.get(`${URL}/roles`)
     const updatedRole = roles.find((role) => role.id === newRole.id)
-    assert.equal(updatedRole.name, 'bar')
-    assert.equal(updatedRole.is_superuser, true)
-    assert.equal(updatedRole.can_create_db, true)
-    assert.equal(updatedRole.can_create_role, true)
-    assert.equal(updatedRole.inherit_role, false)
-    assert.equal(updatedRole.can_login, true)
-    assert.equal(updatedRole.is_replication_role, true)
-    assert.equal(updatedRole.can_bypass_rls, true)
-    assert.equal(updatedRole.connection_limit, 100)
-    assert.equal(updatedRole.valid_until, '2020-01-01T00:00:00.000Z')
+    assert.strictEqual(updatedRole.name, 'bar')
+    assert.strictEqual(updatedRole.is_superuser, true)
+    assert.strictEqual(updatedRole.can_create_db, true)
+    assert.strictEqual(updatedRole.can_create_role, true)
+    assert.strictEqual(updatedRole.inherit_role, false)
+    assert.strictEqual(updatedRole.can_login, true)
+    assert.strictEqual(updatedRole.is_replication_role, true)
+    assert.strictEqual(updatedRole.can_bypass_rls, true)
+    assert.strictEqual(updatedRole.connection_limit, 100)
+    assert.strictEqual(updatedRole.valid_until, '2020-01-01T00:00:00.000Z')
 
     await axios.delete(`${URL}/roles/${newRole.id}`)
   })
@@ -721,7 +721,7 @@ describe('/roles', () => {
     await axios.delete(`${URL}/roles/${newRole.id}`)
     const { data: roles } = await axios.get(`${URL}/roles`)
     const newRoleExists = roles.some((role) => role.id === newRole.id)
-    assert.equal(newRoleExists, false)
+    assert.strictEqual(newRoleExists, false)
   })
 })
 describe('/policies', () => {
@@ -741,26 +741,26 @@ describe('/policies', () => {
     const res = await axios.get(`${URL}/policies`)
     // console.log('res', res)
     const policy = res.data[0]
-    assert.equal('id' in policy, true, 'Has ID')
-    assert.equal('name' in policy, true, 'Has name')
-    assert.equal('action' in policy, true, 'Has action')
-    assert.equal('table' in policy, true, 'Has table')
-    assert.equal('table_id' in policy, true, 'Has table_id')
-    assert.equal('roles' in policy, true, 'Has roles')
-    assert.equal('command' in policy, true, 'Has command')
-    assert.equal('definition' in policy, true, 'Has definition')
-    assert.equal('check' in policy, true, 'Has check')
+    assert.strictEqual('id' in policy, true, 'Has ID')
+    assert.strictEqual('name' in policy, true, 'Has name')
+    assert.strictEqual('action' in policy, true, 'Has action')
+    assert.strictEqual('table' in policy, true, 'Has table')
+    assert.strictEqual('table_id' in policy, true, 'Has table_id')
+    assert.strictEqual('roles' in policy, true, 'Has roles')
+    assert.strictEqual('command' in policy, true, 'Has command')
+    assert.strictEqual('definition' in policy, true, 'Has definition')
+    assert.strictEqual('check' in policy, true, 'Has check')
   })
   it('POST', async () => {
     const { data: newPolicy } = await axios.post(`${URL}/policies`, policy)
-    assert.equal(newPolicy.name, 'test policy')
-    assert.equal(newPolicy.schema, 'public')
-    assert.equal(newPolicy.table, 'memes')
-    assert.equal(newPolicy.action, 'RESTRICTIVE')
-    assert.equal(newPolicy.roles[0], 'public')
-    assert.equal(newPolicy.command, 'ALL')
-    assert.equal(newPolicy.definition, null)
-    assert.equal(newPolicy.check, null)
+    assert.strictEqual(newPolicy.name, 'test policy')
+    assert.strictEqual(newPolicy.schema, 'public')
+    assert.strictEqual(newPolicy.table, 'memes')
+    assert.strictEqual(newPolicy.action, 'RESTRICTIVE')
+    assert.strictEqual(newPolicy.roles[0], 'public')
+    assert.strictEqual(newPolicy.command, 'ALL')
+    assert.strictEqual(newPolicy.definition, null)
+    assert.strictEqual(newPolicy.check, null)
     policy.id = newPolicy.id
   })
   it('PATCH', async () => {
@@ -771,8 +771,8 @@ describe('/policies', () => {
     }
     let { data: updated } = await axios.patch(`${URL}/policies/${policy.id}`, updates)
     // console.log('updated', updated)
-    assert.equal(updated.id, policy.id)
-    assert.equal(updated.name, 'policy updated', 'name updated')
+    assert.strictEqual(updated.id, policy.id)
+    assert.strictEqual(updated.name, 'policy updated', 'name updated')
     assert.notEqual(updated.definition, null, 'definition updated')
     assert.notEqual(updated.check, null, 'check updated')
   })
@@ -780,7 +780,7 @@ describe('/policies', () => {
     await axios.delete(`${URL}/policies/${policy.id}`)
     const { data: policies } = await axios.get(`${URL}/policies`)
     const stillExists = policies.some((x) => policy.id === x.id)
-    assert.equal(stillExists, false, 'Policy is deleted')
+    assert.strictEqual(stillExists, false, 'Policy is deleted')
   })
 })
 
@@ -795,12 +795,12 @@ describe('/publications with tables', () => {
   }
   it('POST', async () => {
     const { data: newPublication } = await axios.post(`${URL}/publications`, publication)
-    assert.equal(newPublication.name, publication.name)
-    assert.equal(newPublication.publish_insert, publication.publish_insert)
-    assert.equal(newPublication.publish_update, publication.publish_update)
-    assert.equal(newPublication.publish_delete, publication.publish_delete)
-    assert.equal(newPublication.publish_truncate, publication.publish_truncate)
-    assert.equal(
+    assert.strictEqual(newPublication.name, publication.name)
+    assert.strictEqual(newPublication.publish_insert, publication.publish_insert)
+    assert.strictEqual(newPublication.publish_update, publication.publish_update)
+    assert.strictEqual(newPublication.publish_delete, publication.publish_delete)
+    assert.strictEqual(newPublication.publish_truncate, publication.publish_truncate)
+    assert.strictEqual(
       newPublication.tables.some((table) => `${table.schema}.${table.name}` === 'public.users'),
       true
     )
@@ -808,7 +808,7 @@ describe('/publications with tables', () => {
   it('GET', async () => {
     const res = await axios.get(`${URL}/publications`)
     const newPublication = res.data[0]
-    assert.equal(newPublication.name, publication.name)
+    assert.strictEqual(newPublication.name, publication.name)
   })
   it('PATCH', async () => {
     const res = await axios.get(`${URL}/publications`)
@@ -819,9 +819,9 @@ describe('/publications with tables', () => {
       publish_insert: false,
       tables: [],
     })
-    assert.equal(updated.name, 'b')
-    assert.equal(updated.publish_insert, false)
-    assert.equal(
+    assert.strictEqual(updated.name, 'b')
+    assert.strictEqual(updated.publish_insert, false)
+    assert.strictEqual(
       updated.tables.some((table) => `${table.schema}.${table.name}` === 'public.users'),
       false
     )
@@ -833,7 +833,7 @@ describe('/publications with tables', () => {
     await axios.delete(`${URL}/publications/${id}`)
     const { data: publications } = await axios.get(`${URL}/publications`)
     const stillExists = publications.some((x) => x.id === id)
-    assert.equal(stillExists, false)
+    assert.strictEqual(stillExists, false)
   })
   it('/publications for tables with uppercase', async () => {
     const { data: table } = await axios.post(`${URL}/tables`, { name: 'T' })
@@ -841,12 +841,12 @@ describe('/publications with tables', () => {
       name: 'pub',
       tables: ['T'],
     })
-    assert.equal(publication.name, 'pub')
+    assert.strictEqual(publication.name, 'pub')
     const { data: alteredPublication } = await axios.patch(
       `${URL}/publications/${publication.id}`,
       { tables: ['T'] }
     )
-    assert.equal(alteredPublication.name, 'pub')
+    assert.strictEqual(alteredPublication.name, 'pub')
 
     await axios.delete(`${URL}/publications/${publication.id}`)
     await axios.delete(`${URL}/tables/${table.id}`)
@@ -876,7 +876,7 @@ describe('/publications FOR ALL TABLES', () => {
     await axios.delete(`${URL}/publications/${id}`)
     const { data: publications } = await axios.get(`${URL}/publications`)
     const stillExists = publications.some((x) => x.id === id)
-    assert.equal(stillExists, false)
+    assert.strictEqual(stillExists, false)
   })
 })
 
