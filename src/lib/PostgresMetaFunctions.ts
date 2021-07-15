@@ -84,7 +84,7 @@ export default class PostgresMetaFunctions {
     language?: string
   }): Promise<PostgresMetaResult<PostgresFunction>> {
     const sql = `
-      CREATE OR REPLACE FUNCTION ${ident(schema)}.${ident(name)}
+      CREATE FUNCTION ${ident(schema)}.${ident(name)}
       ${params && params.length ? `(${params.join(',')})` : '()'}
       RETURNS ${rettype}
       AS ${literal(definition)}
@@ -102,9 +102,9 @@ export default class PostgresMetaFunctions {
     id: number,
     {
       name,
-      schema = 'public',
+      schema,
     }: {
-      name: string
+      name?: string
       schema?: string
     }
   ): Promise<PostgresMetaResult<PostgresFunction>> {
@@ -113,15 +113,21 @@ export default class PostgresMetaFunctions {
       return { data: null, error: retrieveError }
     }
 
-    let alter = `ALTER FUNCTION ${ident(old!.name)}`
-    const nameSql =
-      name === undefined || name == old!.name ? '' : `${alter} RENAME TO ${ident(name)};`
+    const updateNameSql =
+      name && name !== old!.name
+        ? `ALTER FUNCTION ${ident(old!.schema)}.${ident(old!.name)}(${
+            old!.argument_types
+          }) RENAME TO ${ident(name)};`
+        : ''
 
-    alter = `ALTER FUNCTION ${ident(name)}`
-    const schemaSql =
-      schema === undefined || schema == old!.schema ? '' : `${alter} SET SCHEMA ${ident(schema)};`
+    const updateSchemaSql =
+      schema && schema !== old!.schema
+        ? `ALTER FUNCTION ${ident(old!.schema)}.${ident(name || old!.name)}(${
+            old!.argument_types
+          })  SET SCHEMA ${ident(schema)};`
+        : ''
 
-    const sql = `BEGIN;${nameSql} ${schemaSql} COMMIT;`
+    const sql = `BEGIN;${updateNameSql} ${updateSchemaSql} COMMIT;`
 
     const { error } = await this.query(sql)
     if (error) {
