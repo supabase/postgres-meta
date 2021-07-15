@@ -174,6 +174,11 @@ describe('/functions', () => {
       query: `CREATE SCHEMA IF NOT EXISTS test_schema;`,
     })
   })
+  after(async () => {
+    await axios.post(`${URL}/query`, {
+      query: `DROP SCHEMA test_schema;`,
+    })
+  })
   it('GET', async () => {
     const res = await axios.get(`${URL}/functions`)
     // console.log('res.data', res.data)
@@ -212,9 +217,7 @@ describe('/functions', () => {
   it('PATCH', async () => {
     const updates = {
       name: 'test_func_renamed',
-      params: ['integer', 'integer'],
       schema: 'test_schema',
-      // extension: 'mathlib', // TODO: test patching function extension
     }
 
     let { data: updated } = await axios.patch(`${URL}/functions/${func.id}`, updates)
@@ -227,9 +230,6 @@ describe('/functions', () => {
     const { data: functions } = await axios.get(`${URL}/functions`)
     const stillExists = functions.some((x) => func.id === x.id)
     assert.equal(stillExists, false, 'Function is deleted')
-    await axios.post(`${URL}/query`, {
-      query: `DROP SCHEMA test_schema;`,
-    })
   })
 })
 
