@@ -42,7 +42,6 @@ GROUP BY
   is_t.event_object_schema,
   is_t.action_condition,
   is_t.action_orientation,
-  is_t.action_statement,
   is_t.action_timing,
   pg_p.proname,
   pg_n.nspname

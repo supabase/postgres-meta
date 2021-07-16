@@ -1,4 +1,4 @@
-import format, { ident, literal } from 'pg-format'
+import { ident, literal } from 'pg-format'
 import { triggersSql } from './sql'
 import { PostgresMetaResult, PostgresTrigger } from './types'
 
@@ -35,7 +35,7 @@ export default class PostgresMetaTriggers {
     table?: string
   }): Promise<PostgresMetaResult<PostgresTrigger>> {
     if (id) {
-      const sql = `${enrichedTriggersSql} WHERE triggers.id = ${literal(id)};`
+      const sql = `${enrichedTriggersSql} WHERE id = ${literal(id)};`
 
       const { data, error } = await this.query(sql)
 
@@ -53,9 +53,9 @@ export default class PostgresMetaTriggers {
     }
 
     if (name && schema && table) {
-      const sql = `${enrichedTriggersSql} WHERE triggers.name = ${literal(
-        name
-      )} AND triggers.schema = ${literal(schema)} AND triggers.table = ${literal(table)};`
+      const sql = `${enrichedTriggersSql} WHERE name = ${literal(name)} AND schema = ${literal(
+        schema
+      )} AND triggers.table = ${literal(table)};`
 
       const { data, error } = await this.query(sql)
 
@@ -125,17 +125,12 @@ export default class PostgresMetaTriggers {
   }): Promise<PostgresMetaResult<PostgresTrigger>> {
     const qualifiedTableName = `${ident(schema)}.${ident(table)}`
     const qualifiedFunctionName = `${ident(function_schema)}.${ident(function_name)}`
+    const triggerEvents = events.join(' OR ')
+    const triggerOrientation = orientation ? `FOR EACH ${orientation}` : ''
+    const triggerCondition = condition ? `WHEN (${condition})` : ''
+    const functionArgs = `${function_args?.map(literal).join(',') ?? ''}`
 
-    const triggerOrientation = orientation ? `FOR EACH ${format.string(orientation)}` : ''
-    const triggerCondition = condition ? `WHEN ( ${format.string(condition)} )` : ''
-    const triggerEvents = Array.isArray(events) ? `${format.string(events.join(' OR '))}` : ''
-    const functionArgs = Array.isArray(function_args)
-      ? `${function_args.map((arg) => literal(arg)).join(',')}`
-      : ''
-
-    const sql = `CREATE TRIGGER ${ident(name)} ${format.string(
-      activation
-    )} ${triggerEvents} ON ${qualifiedTableName} ${triggerOrientation} ${triggerCondition} EXECUTE FUNCTION ${qualifiedFunctionName} ( ${functionArgs} );`
+    const sql = `CREATE TRIGGER ${ident(name)} ${activation} ${triggerEvents} ON ${qualifiedTableName} ${triggerOrientation} ${triggerCondition} EXECUTE FUNCTION ${qualifiedFunctionName}(${functionArgs});`
 
     const { error } = await this.query(sql)
 
@@ -206,8 +201,9 @@ export default class PostgresMetaTriggers {
     }
 
     const { name, schema, table } = triggerRecord!
-    const qualifiedTableName = `${ident(schema)}.${ident(table)}`
-    const sql = `DROP TRIGGER ${ident(name)} ON ${qualifiedTableName} ${cascade ? 'CASCADE' : ''};`
+    const sql = `DROP TRIGGER ${ident(name)} ON ${ident(schema)}.${ident(table)} ${
+      cascade ? 'CASCADE' : ''
+    };`
 
     {
       const { error } = await this.query(sql)
@@ -222,7 +218,10 @@ export default class PostgresMetaTriggers {
 }
 
 const enrichedTriggersSql = `
-WITH triggers AS (${triggersSql})
-SELECT
-  *
-FROM triggers`
+  WITH triggers AS (
+    ${triggersSql}
+  )
+  SELECT
+    *
+  FROM triggers
+`
