@@ -10,49 +10,49 @@ https://supabase.github.io/postgres-meta/
 
 Schema:
 
-- [x] `POST /query` (Execute SQL query)
-- [x] `/columns`
+- [X] `POST /query` (Execute SQL query)
+- [X] `/columns`
   - [X] GET (List)
   - [X] POST (`alter table add column`)
   - [X] PATCH (`alter table alter/rename column`)
   - [X] DELETE (`alter table drop column`)
-- [x] `/extensions`
+- [X] `/extensions`
   - [X] GET (List)
   - [X] POST (`create extension`)
   - [X] PATCH (`alter extension`)
   - [X] DELETE (`drop extension`)
-- [ ] `/functions`
-  - [x] GET (List)
-  - [ ] POST (`create function`)
-  - [ ] PATCH (`alter function`)
-  - [ ] DELETE (`drop function`)
-- [x] `/publications`
+- [X] `/functions`
+  - [X] GET (List)
+  - [X] POST (`create function`)
+  - [X] PATCH (`alter function`)
+  - [X] DELETE (`drop function`)
+- [X] `/publications`
   - [X] GET (List)
   - [X] POST (`create publication`)
   - [X] PATCH (`alter publication`)
   - [X] DELETE (`drop publication`)
-- [x] `/roles`
-  - [x] GET (List)
-  - [x] POST (`create role`)
-  - [x] PATCH (`alter role`)
-  - [x] DELETE (`drop role`)
-- [x] `/schemas`
+- [X] `/roles`
+  - [X] GET (List)
+  - [X] POST (`create role`)
+  - [X] PATCH (`alter role`)
+  - [X] DELETE (`drop role`)
+- [X] `/schemas`
   - [X] GET (List)
   - [X] POST (`create schema`)
   - [X] PATCH (`alter schema`)
   - [X] DELETE (`drop schema`)
-- [x] `/tables`
+- [X] `/tables`
   - [X] GET (List)
   - [X] POST (`create table`)
   - [X] PATCH (`alter table`)
   - [X] DELETE (`drop table`)
-- [x] `/triggers`
+- [X] `/triggers`
   - [X] GET (List)
   - [X] POST (`create trigger`)
   - [X] PATCH (`alter trigger`)
   - [X] DELETE (`drop trigger`)
 - [ ] `/types`
-  - [x] GET (List)
+  - [X] GET (List)
   - [ ] POST (`create type`)
   - [ ] PATCH (`alter type`)
   - [ ] DELETE (`drop type`)
