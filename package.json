@@ -25,9 +25,13 @@
     "pkg": "run-s clean format build:server && pkg --out-path bin .pkg.config.json",
     "test": "run-s build:server && node -r esm ./node_modules/.bin/mocha 'test/**/*.js' --recursive"
   },
+  "engines": {
+    "node": ">=14 <15",
+    "npm": ">=7"
+  },
   "dependencies": {
     "@sinclair/typebox": "^0.19.2",
-    "pg": "^7.0.0",
+    "pg": "^8.6.0",
     "pg-format": "^1.0.4"
   },
   "devDependencies": {
