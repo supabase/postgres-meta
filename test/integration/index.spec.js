@@ -161,7 +161,7 @@ describe('/functions', () => {
     id: null,
     name: 'test_func',
     schema: 'public',
-    params: ['integer', 'integer'],
+    args: ['integer', 'integer'],
     definition: 'select $1 + $2',
     rettype: 'integer',
     language: 'sql',
@@ -176,7 +176,7 @@ describe('/functions', () => {
   })
   after(async () => {
     await axios.post(`${URL}/query`, {
-      query: `DROP SCHEMA test_schema;`,
+      query: `DROP SCHEMA IF EXISTS test_schema;`,
     })
   })
   it('GET', async () => {
