@@ -14,8 +14,8 @@ export default class PostgresMetaFunctions {
     PostgresMetaResult<PostgresFunction[]>
   > {
     const sql = includeSystemSchemas
-      ? functionsSql
-      : `${functionsSql} WHERE NOT (n.nspname IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(
+      ? enrichedFunctionsSql
+      : `${enrichedFunctionsSql} WHERE NOT (schema IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(
           ','
         )}));`
     return await this.query(sql)
@@ -25,21 +25,25 @@ export default class PostgresMetaFunctions {
   async retrieve({
     name,
     schema,
+    args,
   }: {
     name: string
     schema: string
+    args: string[]
   }): Promise<PostgresMetaResult<PostgresFunction>>
   async retrieve({
     id,
     name,
     schema = 'public',
+    args = [],
   }: {
     id?: number
     name?: string
     schema?: string
+    args?: string[]
   }): Promise<PostgresMetaResult<PostgresFunction>> {
     if (id) {
-      const sql = `${functionsSql} WHERE p.oid = ${literal(id)};`
+      const sql = `${enrichedFunctionsSql} WHERE id = ${literal(id)};`
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -48,17 +52,20 @@ export default class PostgresMetaFunctions {
       } else {
         return { data: data[0], error }
       }
-    } else if (name) {
-      const sql = `${functionsSql} WHERE p.proname = ${literal(name)} AND n.nspname = ${literal(
-        schema
-      )};`
+    } else if (name && schema && args) {
+      const argTypes = args.join(', ')
+      const sql = `${enrichedFunctionsSql} WHERE schema = ${literal(schema)} AND name = ${literal(
+        name
+      )} AND argument_types = ${literal(argTypes)};`
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
       } else if (data.length === 0) {
         return {
           data: null,
-          error: { message: `Cannot find a function named ${name} in schema ${schema}` },
+          error: {
+            message: `Cannot find function "${schema}"."${name}"(${argTypes})`,
+          },
         }
       } else {
         return { data: data[0], error }
@@ -71,21 +78,20 @@ export default class PostgresMetaFunctions {
   async create({
     name,
     schema = 'public',
-    params,
+    args = [],
     definition,
     rettype = 'void',
     language = 'sql',
   }: {
     name: string
     schema?: string
-    params?: string[]
+    args?: string[]
     definition: string
     rettype?: string
     language?: string
   }): Promise<PostgresMetaResult<PostgresFunction>> {
     const sql = `
-      CREATE FUNCTION ${ident(schema)}.${ident(name)}
-      ${params && params.length ? `(${params.join(',')})` : '()'}
+      CREATE FUNCTION ${ident(schema)}.${ident(name)}(${args.join(', ')})
       RETURNS ${rettype}
       AS ${literal(definition)}
       LANGUAGE ${language}
@@ -95,7 +101,7 @@ export default class PostgresMetaFunctions {
     if (error) {
       return { data: null, error }
     }
-    return await this.retrieve({ name, schema })
+    return await this.retrieve({ name, schema, args })
   }
 
   async update(
@@ -127,7 +133,7 @@ export default class PostgresMetaFunctions {
           })  SET SCHEMA ${ident(schema)};`
         : ''
 
-    const sql = `BEGIN;${updateNameSql} ${updateSchemaSql} COMMIT;`
+    const sql = `BEGIN; ${updateNameSql} ${updateSchemaSql} COMMIT;`
 
     const { error } = await this.query(sql)
     if (error) {
@@ -145,7 +151,7 @@ export default class PostgresMetaFunctions {
       return { data: null, error }
     }
     const sql = `DROP FUNCTION ${ident(func!.schema)}.${ident(func!.name)}
-    ${func!.argument_types ? `(${func!.argument_types})` : '()'}
+    (${func!.argument_types})
     ${cascade ? 'CASCADE' : 'RESTRICT'};`
     {
       const { error } = await this.query(sql)
@@ -156,3 +162,12 @@ export default class PostgresMetaFunctions {
     return { data: func!, error: null }
   }
 }
+
+const enrichedFunctionsSql = `
+  WITH functions AS (
+    ${functionsSql}
+  )
+  SELECT
+    *
+  FROM functions
+`
