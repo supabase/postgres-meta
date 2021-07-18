@@ -1,6 +1,8 @@
 import PostgresMeta from './PostgresMeta'
 export { PostgresMeta }
 export {
+  PostgresMetaOk,
+  PostgresMetaErr,
   PostgresMetaResult,
   PostgresColumn,
   PostgresConfig,
@@ -13,8 +15,8 @@ export {
   PostgresRelationship,
   PostgresRole,
   PostgresSchema,
-  PostgresSchemaCreate,
-  PostgresSchemaUpdate,
   PostgresTable,
-  PostgresType
+  PostgresTrigger,
+  PostgresType,
+  PostgresVersion,
 } from './types'
