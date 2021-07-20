@@ -78,6 +78,13 @@ const postgresFunctionSchema = Type.Object({
   definition: Type.String(),
   argument_types: Type.String(),
   return_type: Type.String(),
+  behavior: Type.Union([
+    Type.Literal('IMMUTABLE'),
+    Type.Literal('STABLE'),
+    Type.Literal('VOLATILE'),
+  ]),
+  security_definer: Type.Boolean(),
+  config_params: Type.Union([Type.Dict(Type.Array(Type.String())), Type.Null()]),
 })
 export type PostgresFunction = Static<typeof postgresFunctionSchema>
 

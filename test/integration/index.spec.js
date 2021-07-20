@@ -165,6 +165,9 @@ describe('/functions', () => {
     definition: 'select $1 + $2',
     rettype: 'integer',
     language: 'sql',
+    behavior: 'STABLE',
+    security_definer: true,
+    config_params: { search_path: ['hooks', 'auth'], role: ['postgres'] },
   }
   before(async () => {
     await axios.post(`${URL}/query`, {
@@ -212,6 +215,9 @@ describe('/functions', () => {
     assert.strictEqual(newFunc.schema, 'public')
     assert.strictEqual(newFunc.language, 'sql')
     assert.strictEqual(newFunc.return_type, 'int4')
+    assert.strictEqual(newFunc.behavior, 'STABLE')
+    assert.strictEqual(newFunc.security_definer, true)
+    assert.deepStrictEqual(newFunc.config_params, { search_path: ['hooks', 'auth'], role: ['postgres'] })
     func.id = newFunc.id
   })
   it('PATCH', async () => {
