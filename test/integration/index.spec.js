@@ -163,7 +163,7 @@ describe('/functions', () => {
     schema: 'public',
     args: ['integer', 'integer'],
     definition: 'select $1 + $2',
-    rettype: 'integer',
+    return_type: 'integer',
     language: 'sql',
     behavior: 'STABLE',
     security_definer: true,
