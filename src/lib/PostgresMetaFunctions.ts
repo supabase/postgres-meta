@@ -82,6 +82,9 @@ export default class PostgresMetaFunctions {
     definition,
     rettype = 'void',
     language = 'sql',
+    behavior = 'VOLATILE',
+    security_definer = false,
+    config_params,
   }: {
     name: string
     schema?: string
@@ -89,14 +92,27 @@ export default class PostgresMetaFunctions {
     definition: string
     rettype?: string
     language?: string
+    behavior?: 'IMMUTABLE' | 'STABLE' | 'VOLATILE'
+    security_definer?: boolean
+    config_params: { [key: string]: string[] }
   }): Promise<PostgresMetaResult<PostgresFunction>> {
     const sql = `
       CREATE FUNCTION ${ident(schema)}.${ident(name)}(${args.join(', ')})
       RETURNS ${rettype}
       AS ${literal(definition)}
       LANGUAGE ${language}
+      ${behavior}
+      ${security_definer ? 'SECURITY DEFINER' : 'SECURITY INVOKER'}
+      ${Object.entries(config_params)
+        .map(
+          ([param, values]) =>
+            `SET ${param} ${
+              values[0] === 'FROM CURRENT' ? 'FROM CURRENT' : 'TO ' + values.map(ident).join(',')
+            }`
+        )
+        .join('\n')}
       RETURNS NULL ON NULL INPUT;
-      `
+    `
     const { error } = await this.query(sql)
     if (error) {
       return { data: null, error }
