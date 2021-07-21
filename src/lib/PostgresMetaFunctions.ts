@@ -80,7 +80,7 @@ export default class PostgresMetaFunctions {
     schema = 'public',
     args = [],
     definition,
-    rettype = 'void',
+    return_type = 'void',
     language = 'sql',
     behavior = 'VOLATILE',
     security_definer = false,
@@ -90,7 +90,7 @@ export default class PostgresMetaFunctions {
     schema?: string
     args?: string[]
     definition: string
-    rettype?: string
+    return_type?: string
     language?: string
     behavior?: 'IMMUTABLE' | 'STABLE' | 'VOLATILE'
     security_definer?: boolean
@@ -98,7 +98,7 @@ export default class PostgresMetaFunctions {
   }): Promise<PostgresMetaResult<PostgresFunction>> {
     const sql = `
       CREATE FUNCTION ${ident(schema)}.${ident(name)}(${args.join(', ')})
-      RETURNS ${rettype}
+      RETURNS ${return_type}
       AS ${literal(definition)}
       LANGUAGE ${language}
       ${behavior}
