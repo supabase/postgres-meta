@@ -234,6 +234,7 @@ export type PostgresTable = Static<typeof postgresTableSchema>
 
 export const postgresTriggerSchema = Type.Object({
   id: Type.Integer(),
+  table_id: Type.Integer(),
   enabled_mode: Type.Union([
     Type.Literal('ORIGIN'),
     Type.Literal('REPLICA'),

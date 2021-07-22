@@ -130,7 +130,9 @@ export default class PostgresMetaTriggers {
     const triggerCondition = condition ? `WHEN (${condition})` : ''
     const functionArgs = `${function_args?.map(literal).join(',') ?? ''}`
 
-    const sql = `CREATE TRIGGER ${ident(name)} ${activation} ${triggerEvents} ON ${qualifiedTableName} ${triggerOrientation} ${triggerCondition} EXECUTE FUNCTION ${qualifiedFunctionName}(${functionArgs});`
+    const sql = `CREATE TRIGGER ${ident(
+      name
+    )} ${activation} ${triggerEvents} ON ${qualifiedTableName} ${triggerOrientation} ${triggerCondition} EXECUTE FUNCTION ${qualifiedFunctionName}(${functionArgs});`
 
     const { error } = await this.query(sql)
 
