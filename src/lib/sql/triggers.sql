@@ -1,5 +1,6 @@
 SELECT
   pg_t.oid AS id,
+  pg_t.tgrelid AS table_id,
   CASE
     WHEN pg_t.tgenabled = 'D' THEN 'DISABLED'
     WHEN pg_t.tgenabled = 'O' THEN 'ORIGIN'
@@ -34,6 +35,7 @@ JOIN pg_namespace AS pg_n
 ON pg_p.pronamespace = pg_n.oid
 GROUP BY
   pg_t.oid,
+  pg_t.tgrelid,
   pg_t.tgenabled,
   pg_t.tgargs,
   pg_t.tgnargs,
