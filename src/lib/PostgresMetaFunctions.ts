@@ -94,7 +94,7 @@ export default class PostgresMetaFunctions {
     language?: string
     behavior?: 'IMMUTABLE' | 'STABLE' | 'VOLATILE'
     security_definer?: boolean
-    config_params: { [key: string]: string[] }
+    config_params: { [key: string]: string }
   }): Promise<PostgresMetaResult<PostgresFunction>> {
     const sql = `
       CREATE FUNCTION ${ident(schema)}.${ident(name)}(${args.join(', ')})
@@ -105,10 +105,8 @@ export default class PostgresMetaFunctions {
       ${security_definer ? 'SECURITY DEFINER' : 'SECURITY INVOKER'}
       ${Object.entries(config_params)
         .map(
-          ([param, values]) =>
-            `SET ${param} ${
-              values[0] === 'FROM CURRENT' ? 'FROM CURRENT' : 'TO ' + values.map(ident).join(',')
-            }`
+          ([param, value]) =>
+            `SET ${param} ${value[0] === 'FROM CURRENT' ? 'FROM CURRENT' : 'TO ' + value}`
         )
         .join('\n')}
       RETURNS NULL ON NULL INPUT;
