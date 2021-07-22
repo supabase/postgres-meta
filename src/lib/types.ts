@@ -84,7 +84,7 @@ const postgresFunctionSchema = Type.Object({
     Type.Literal('VOLATILE'),
   ]),
   security_definer: Type.Boolean(),
-  config_params: Type.Union([Type.Dict(Type.Array(Type.String())), Type.Null()]),
+  config_params: Type.Union([Type.Dict(Type.String()), Type.Null()]),
 })
 export type PostgresFunction = Static<typeof postgresFunctionSchema>
 

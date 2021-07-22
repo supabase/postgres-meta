@@ -15,7 +15,7 @@ SELECT
     WHEN p.provolatile = 'v' THEN 'VOLATILE'
   END AS behavior,
   p.prosecdef AS security_definer,
-  JSON_OBJECT_AGG(p_config.param, p_config.values)
+  JSON_OBJECT_AGG(p_config.param, p_config.value)
     FILTER (WHERE p_config.param IS NOT NULL) AS config_params
 FROM
   pg_proc p
@@ -26,7 +26,7 @@ FROM
     SELECT
 	    oid as id,
 	    (string_to_array(unnest(proconfig), '='))[1] AS param,
-   	  string_to_array((string_to_array(unnest(proconfig), '='))[2], ', ') AS values
+   	  (string_to_array(unnest(proconfig), '='))[2] AS value
 	  FROM
 	    pg_proc
 	) p_config ON p_config.id = p.oid
