@@ -933,6 +933,7 @@ describe('/triggers', () => {
     const { data: triggerRecord } = await axios.post(`${URL}/triggers`, trigger)
 
     assert.strictEqual(typeof triggerRecord.id, 'number')
+    assert.strictEqual(typeof triggerRecord.table_id, 'number')
     assert.strictEqual(triggerRecord.enabled_mode, 'ORIGIN')
     assert.strictEqual(triggerRecord.name, 'test_trigger')
     assert.strictEqual(triggerRecord.table, 'users_audit')
