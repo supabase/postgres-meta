@@ -161,8 +161,8 @@ describe('/functions', () => {
     id: null,
     name: 'test_func',
     schema: 'public',
-    args: ['integer', 'integer'],
-    definition: 'select $1 + $2',
+    args: ['a int2', 'b int2'],
+    definition: 'select a + b',
     return_type: 'integer',
     language: 'sql',
     behavior: 'STABLE',
@@ -213,6 +213,7 @@ describe('/functions', () => {
     const { data: newFunc } = await axios.post(`${URL}/functions`, func)
     assert.strictEqual(newFunc.name, 'test_func')
     assert.strictEqual(newFunc.schema, 'public')
+    assert.strictEqual(newFunc.argument_types, 'a smallint, b smallint')
     assert.strictEqual(newFunc.language, 'sql')
     assert.strictEqual(newFunc.return_type, 'int4')
     assert.strictEqual(newFunc.behavior, 'STABLE')

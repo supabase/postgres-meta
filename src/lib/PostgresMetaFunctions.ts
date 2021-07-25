@@ -53,10 +53,31 @@ export default class PostgresMetaFunctions {
         return { data: data[0], error }
       }
     } else if (name && schema && args) {
-      const argTypes = args.join(', ')
-      const sql = `${enrichedFunctionsSql} WHERE schema = ${literal(schema)} AND name = ${literal(
-        name
-      )} AND argument_types = ${literal(argTypes)};`
+      const sql = `${enrichedFunctionsSql} JOIN pg_proc AS p ON id = p.oid WHERE schema = ${literal(
+        schema
+      )} AND name = ${literal(name)} AND p.proargtypes::text = ${
+        args.length
+          ? `(
+            SELECT STRING_AGG(type_oid::text, ' ') FROM (
+              SELECT (
+                split_args.arr[
+                  array_length(
+                    split_args.arr,
+                    1
+                  )
+                ]::regtype::oid
+              ) AS type_oid FROM (
+                SELECT STRING_TO_ARRAY(
+                  UNNEST(
+                    ARRAY[${args.map(literal)}]
+                  ),
+                  ' '
+                ) AS arr
+              ) AS split_args
+            ) args
+      );`
+          : literal('')
+      }`
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -64,7 +85,7 @@ export default class PostgresMetaFunctions {
         return {
           data: null,
           error: {
-            message: `Cannot find function "${schema}"."${name}"(${argTypes})`,
+            message: `Cannot find function "${schema}"."${name}"(${args.join(', ')})`,
           },
         }
       } else {
@@ -84,7 +105,7 @@ export default class PostgresMetaFunctions {
     language = 'sql',
     behavior = 'VOLATILE',
     security_definer = false,
-    config_params,
+    config_params = {},
   }: {
     name: string
     schema?: string
@@ -94,7 +115,7 @@ export default class PostgresMetaFunctions {
     language?: string
     behavior?: 'IMMUTABLE' | 'STABLE' | 'VOLATILE'
     security_definer?: boolean
-    config_params: { [key: string]: string }
+    config_params?: { [key: string]: string }
   }): Promise<PostgresMetaResult<PostgresFunction>> {
     const sql = `
       CREATE FUNCTION ${ident(schema)}.${ident(name)}(${args.join(', ')})
@@ -178,10 +199,10 @@ export default class PostgresMetaFunctions {
 }
 
 const enrichedFunctionsSql = `
-  WITH functions AS (
+  WITH f AS (
     ${functionsSql}
   )
   SELECT
-    *
-  FROM functions
+    f.*
+  FROM f
 `
