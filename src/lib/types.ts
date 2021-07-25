@@ -76,6 +76,7 @@ const postgresFunctionSchema = Type.Object({
   name: Type.String(),
   language: Type.String(),
   definition: Type.String(),
+  complete_statement: Type.String(),
   argument_types: Type.String(),
   return_type: Type.String(),
   behavior: Type.Union([
