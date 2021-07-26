@@ -4,9 +4,13 @@ SELECT
   p.proname AS name,
   l.lanname AS language,
   CASE
+    WHEN l.lanname = 'internal' THEN ''
+    ELSE p.prosrc
+  END AS definition,
+  CASE
     WHEN l.lanname = 'internal' THEN p.prosrc
     ELSE pg_get_functiondef(p.oid)
-  END AS definition,
+  END AS complete_statement,
   pg_get_function_arguments(p.oid) AS argument_types,
   t.typname AS return_type,
   CASE
