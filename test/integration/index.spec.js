@@ -215,6 +215,17 @@ describe('/functions', () => {
     assert.strictEqual(newFunc.schema, 'public')
     assert.strictEqual(newFunc.argument_types, 'a smallint, b smallint')
     assert.strictEqual(newFunc.language, 'sql')
+    assert.strictEqual(newFunc.definition, 'select a + b')
+    assert.strictEqual(
+      newFunc.complete_statement,
+      'CREATE OR REPLACE FUNCTION public.test_func(a smallint, b smallint)\n' +
+      ' RETURNS integer\n' +
+      ' LANGUAGE sql\n' +
+      ' STABLE SECURITY DEFINER\n' +
+      " SET search_path TO 'hooks', 'auth'\n" +
+      " SET role TO 'postgres'\n" +
+      'AS $function$select a + b$function$\n'
+    )
     assert.strictEqual(newFunc.return_type, 'int4')
     assert.strictEqual(newFunc.behavior, 'STABLE')
     assert.strictEqual(newFunc.security_definer, true)
@@ -225,12 +236,24 @@ describe('/functions', () => {
     const updates = {
       name: 'test_func_renamed',
       schema: 'test_schema',
+      definition: 'select b - a'
     }
 
     let { data: updated } = await axios.patch(`${URL}/functions/${func.id}`, updates)
     assert.strictEqual(updated.id, func.id)
     assert.strictEqual(updated.name, 'test_func_renamed')
     assert.strictEqual(updated.schema, 'test_schema')
+    assert.strictEqual(updated.definition, 'select b - a')
+    assert.strictEqual(
+      updated.complete_statement,
+      'CREATE OR REPLACE FUNCTION test_schema.test_func_renamed(a smallint, b smallint)\n' +
+      ' RETURNS integer\n' +
+      ' LANGUAGE sql\n' +
+      ' STABLE SECURITY DEFINER\n' +
+      " SET search_path TO 'hooks', 'auth'\n" +
+      " SET role TO 'postgres'\n" +
+      'AS $function$select b - a$function$\n'
+    )
   })
   it('DELETE', async () => {
     await axios.delete(`${URL}/functions/${func.id}`)
