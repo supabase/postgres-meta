@@ -26,7 +26,7 @@
     "test": "run-s build:server && node -r esm ./node_modules/.bin/mocha 'test/**/*.js' --recursive"
   },
   "dependencies": {
-    "@sinclair/typebox": "^0.16.7",
+    "@sinclair/typebox": "^0.19.2",
     "pg": "^7.0.0",
     "pg-format": "^1.0.4"
   },

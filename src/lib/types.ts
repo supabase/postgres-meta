@@ -85,9 +85,24 @@ const postgresFunctionSchema = Type.Object({
     Type.Literal('VOLATILE'),
   ]),
   security_definer: Type.Boolean(),
-  config_params: Type.Union([Type.Dict(Type.String()), Type.Null()]),
+  config_params: Type.Union([Type.Record(Type.String(), Type.String()), Type.Null()]),
 })
 export type PostgresFunction = Static<typeof postgresFunctionSchema>
+
+export const postgresFunctionCreateFunction = Type.Object({
+  name: Type.String(),
+  definition: Type.String(),
+  args: Type.Optional(Type.Array(Type.String())),
+  behavior: Type.Optional(
+    Type.Union([Type.Literal('IMMUTABLE'), Type.Literal('STABLE'), Type.Literal('VOLATILE')])
+  ),
+  config_params: Type.Optional(Type.Record(Type.String(), Type.String())),
+  schema: Type.Optional(Type.String()),
+  language: Type.Optional(Type.String()),
+  return_type: Type.Optional(Type.String()),
+  security_definer: Type.Optional(Type.Boolean()),
+})
+export type PostgresFunctionCreate = Static<typeof postgresFunctionCreateFunction>
 
 export const postgresGrantSchema = Type.Object({
   table_id: Type.Integer(),
