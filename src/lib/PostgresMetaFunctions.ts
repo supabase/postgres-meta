@@ -1,19 +1,7 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
 import { functionsSql } from './sql'
-import { PostgresMetaResult, PostgresFunction } from './types'
-
-type FunctionInputs = {
-  name: string
-  definition: string
-  args?: string[]
-  behavior?: 'IMMUTABLE' | 'STABLE' | 'VOLATILE'
-  config_params?: { [key: string]: string }
-  schema?: string
-  language?: string
-  return_type?: string
-  security_definer?: boolean
-}
+import { PostgresMetaResult, PostgresFunction, PostgresFunctionCreate } from './types'
 
 export default class PostgresMetaFunctions {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -94,7 +82,7 @@ export default class PostgresMetaFunctions {
     behavior = 'VOLATILE',
     security_definer = false,
     config_params = {},
-  }: FunctionInputs): Promise<PostgresMetaResult<PostgresFunction>> {
+  }: PostgresFunctionCreate): Promise<PostgresMetaResult<PostgresFunction>> {
     const sql = this.generateCreateFunctionSql({
       name,
       schema,
@@ -130,19 +118,26 @@ export default class PostgresMetaFunctions {
       return { data: null, error }
     }
 
-    const updateDefinitionSql = typeof definition === 'string' ? this.generateCreateFunctionSql(
-      { ...currentFunc!, definition },
-      { replace: true }
-    ) : ''
+    const args = currentFunc!.argument_types.split(', ')
 
-    const retrieveFunctionSql = this.generateRetrieveFunctionSql(
-      {
-        schema: currentFunc!.schema,
-        name: currentFunc!.name,
-        args: currentFunc!.argument_types.split(', '),
-      },
-      { terminateCommand: false }
-    )
+    const updateDefinitionSql =
+      typeof definition === 'string'
+        ? this.generateCreateFunctionSql(
+            {
+              ...currentFunc!,
+              definition,
+              args,
+              config_params: currentFunc!.config_params ?? {},
+            },
+            { replace: true }
+          )
+        : ''
+
+    const retrieveFunctionSql = this.generateRetrieveFunctionSql({
+      schema: currentFunc!.schema,
+      name: currentFunc!.name,
+      args,
+    })
 
     const updateNameSql =
       name && name !== currentFunc!.name
@@ -218,19 +213,18 @@ export default class PostgresMetaFunctions {
       name,
       schema,
       args,
-      argument_types,
       definition,
       return_type,
       language,
       behavior,
       security_definer,
       config_params,
-    }: Partial<Omit<FunctionInputs, 'config_params'> & PostgresFunction>,
-    { replace = false, terminateCommand = true } = {}
+    }: PostgresFunctionCreate,
+    { replace = false } = {}
   ): string {
     return `
       CREATE ${replace ? 'OR REPLACE' : ''} FUNCTION ${ident(schema!)}.${ident(name!)}(${
-      argument_types || args?.join(', ') || ''
+      args?.join(', ') || ''
     })
       RETURNS ${return_type}
       AS ${literal(definition)}
@@ -247,23 +241,19 @@ export default class PostgresMetaFunctions {
               )
               .join('\n')
           : ''
-      }
-      ${terminateCommand ? ';' : ''}
+      };
     `
   }
 
-  private generateRetrieveFunctionSql(
-    {
-      schema,
-      name,
-      args,
-    }: {
-      schema: string
-      name: string
-      args: string[]
-    },
-    { terminateCommand = true } = {}
-  ): string {
+  private generateRetrieveFunctionSql({
+    schema,
+    name,
+    args,
+  }: {
+    schema: string
+    name: string
+    args: string[]
+  }): string {
     return `${enrichedFunctionsSql} JOIN pg_proc AS p ON id = p.oid WHERE schema = ${literal(
       schema
     )} AND name = ${literal(name)} AND p.proargtypes::text = ${
@@ -286,7 +276,7 @@ export default class PostgresMetaFunctions {
               ) AS arr
             ) AS split_args
           ) args
-    ) ${terminateCommand ? ';' : ''}`
+    )`
         : literal('')
     }`
   }
