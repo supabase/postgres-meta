@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { PostgresMeta } from '../../lib'
+import { DEFAULT_POOL_CONFIG } from '../constants'
 
 export default async (fastify: FastifyInstance) => {
   fastify.get<{
@@ -7,7 +8,7 @@ export default async (fastify: FastifyInstance) => {
   }>('/', async (request, reply) => {
     const connectionString = request.headers.pg
 
-    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.config.list()
     await pgMeta.end()
     if (error) {
@@ -24,7 +25,7 @@ export default async (fastify: FastifyInstance) => {
   }>('/version', async (request, reply) => {
     const connectionString = request.headers.pg
 
-    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.version.retrieve()
     await pgMeta.end()
     if (error) {
