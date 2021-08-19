@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { PostgresMeta } from '../../lib'
+import { DEFAULT_POOL_CONFIG } from '../constants'
 
 export default async (fastify: FastifyInstance) => {
   fastify.get<{
@@ -13,7 +14,7 @@ export default async (fastify: FastifyInstance) => {
     const includeDefaultRoles = request.query.include_default_roles === 'true'
     const includeSystemSchemas = request.query.include_system_schemas === 'true'
 
-    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.roles.list({ includeDefaultRoles, includeSystemSchemas })
     await pgMeta.end()
     if (error) {
@@ -34,7 +35,7 @@ export default async (fastify: FastifyInstance) => {
     const connectionString = request.headers.pg
     const id = Number(request.params.id)
 
-    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.roles.retrieve({ id })
     await pgMeta.end()
     if (error) {
@@ -52,7 +53,7 @@ export default async (fastify: FastifyInstance) => {
   }>('/', async (request, reply) => {
     const connectionString = request.headers.pg
 
-    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.roles.create(request.body)
     await pgMeta.end()
     if (error) {
@@ -74,7 +75,7 @@ export default async (fastify: FastifyInstance) => {
     const connectionString = request.headers.pg
     const id = Number(request.params.id)
 
-    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.roles.update(id, request.body)
     await pgMeta.end()
     if (error) {
@@ -96,7 +97,7 @@ export default async (fastify: FastifyInstance) => {
     const connectionString = request.headers.pg
     const id = Number(request.params.id)
 
-    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.roles.remove(id)
     await pgMeta.end()
     if (error) {

@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { PostgresMeta } from '../../lib'
+import { DEFAULT_POOL_CONFIG } from '../constants'
 
 export default async (fastify: FastifyInstance) => {
   fastify.get<{
@@ -7,7 +8,7 @@ export default async (fastify: FastifyInstance) => {
   }>('/', async (request, reply) => {
     const connectionString = request.headers.pg
 
-    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.extensions.list()
     await pgMeta.end()
     if (error) {
@@ -27,7 +28,7 @@ export default async (fastify: FastifyInstance) => {
   }>('/:name', async (request, reply) => {
     const connectionString = request.headers.pg
 
-    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.extensions.retrieve({ name: request.params.name })
     await pgMeta.end()
     if (error) {
@@ -45,7 +46,7 @@ export default async (fastify: FastifyInstance) => {
   }>('/', async (request, reply) => {
     const connectionString = request.headers.pg
 
-    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.extensions.create(request.body)
     await pgMeta.end()
     if (error) {
@@ -66,7 +67,7 @@ export default async (fastify: FastifyInstance) => {
   }>('/:name', async (request, reply) => {
     const connectionString = request.headers.pg
 
-    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.extensions.update(request.params.name, request.body)
     await pgMeta.end()
     if (error) {
@@ -91,7 +92,7 @@ export default async (fastify: FastifyInstance) => {
     const connectionString = request.headers.pg
     const cascade = request.query.cascade === 'true'
 
-    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.extensions.remove(request.params.name, { cascade })
     await pgMeta.end()
     if (error) {
