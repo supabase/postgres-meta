@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { PostgresMeta } from '../../lib'
+import { DEFAULT_POOL_CONFIG } from '../constants'
 
 export default async (fastify: FastifyInstance) => {
   fastify.get<{
@@ -11,7 +12,7 @@ export default async (fastify: FastifyInstance) => {
     const connectionString = request.headers.pg
     const includeSystemSchemas = request.query.include_system_schemas === 'true'
 
-    const pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.types.list({ includeSystemSchemas })
     await pgMeta.end()
     if (error) {
