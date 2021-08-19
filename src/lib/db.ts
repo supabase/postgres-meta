@@ -3,18 +3,16 @@ import { PostgresMetaResult } from './types'
 
 types.setTypeParser(20, parseInt)
 
-export const init: (
-  config: PoolConfig
-) => {
+export const init: (config: PoolConfig) => {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
   end: () => Promise<void>
 } = (config) => {
-  // XXX: Race condition could happen here: one async task may be doing
+  // NOTE: Race condition could happen here: one async task may be doing
   // `pool.end()` which invalidates the pool and subsequently all existing
   // handles to `query`. Normally you might only deal with one DB so you don't
   // need to call `pool.end()`, but since the server needs this, we make a
   // compromise: if we run `query` after `pool.end()` is called (i.e. pool is
-  // `null`), we temporarily create a pool and close is right after.
+  // `null`), we temporarily create a pool and close it right after.
   let pool: Pool | null = new Pool(config)
   return {
     async query(sql) {

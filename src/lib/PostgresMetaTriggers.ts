@@ -167,9 +167,12 @@ export default class PostgresMetaTriggers {
     const enabledMode = enabled_mode.toUpperCase()
     const { name: currentName, schema: schema, table: table } = triggerRecord!
     const qualifiedTableName = `${ident(schema)}.${ident(table)}`
-    const updateNameSql = newName && newName !== currentName
-      ? `ALTER TRIGGER ${ident(currentName)} ON ${qualifiedTableName} RENAME TO ${ident(newName)};`
-      : ''
+    const updateNameSql =
+      newName && newName !== currentName
+        ? `ALTER TRIGGER ${ident(currentName)} ON ${qualifiedTableName} RENAME TO ${ident(
+            newName
+          )};`
+        : ''
 
     if (['ORIGIN', 'REPLICA', 'ALWAYS', 'DISABLED'].includes(enabledMode)) {
       if (enabledMode === 'DISABLED') {
