@@ -214,6 +214,7 @@ describe('/functions', () => {
     assert.strictEqual(newFunc.name, 'test_func')
     assert.strictEqual(newFunc.schema, 'public')
     assert.strictEqual(newFunc.argument_types, 'a smallint, b smallint')
+    assert.strictEqual(newFunc.identity_argument_types, 'a smallint, b smallint')
     assert.strictEqual(newFunc.language, 'sql')
     assert.strictEqual(newFunc.definition, 'select a + b')
     assert.strictEqual(

@@ -78,6 +78,7 @@ const postgresFunctionSchema = Type.Object({
   definition: Type.String(),
   complete_statement: Type.String(),
   argument_types: Type.String(),
+  identity_argument_types: Type.String(),
   return_type: Type.String(),
   behavior: Type.Union([
     Type.Literal('IMMUTABLE'),
