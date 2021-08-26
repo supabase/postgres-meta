@@ -119,6 +119,7 @@ export default class PostgresMetaFunctions {
     }
 
     const args = currentFunc!.argument_types.split(', ')
+    const identityArgs = currentFunc!.identity_argument_types
 
     const updateDefinitionSql =
       typeof definition === 'string'
@@ -133,40 +134,34 @@ export default class PostgresMetaFunctions {
           )
         : ''
 
-    const retrieveFunctionSql = this.generateRetrieveFunctionSql({
-      schema: currentFunc!.schema,
-      name: currentFunc!.name,
-      args,
-    })
-
     const updateNameSql =
       name && name !== currentFunc!.name
-        ? `ALTER FUNCTION ${ident(currentFunc!.schema)}.${ident(currentFunc!.name)}(${
-            currentFunc!.argument_types
-          }) RENAME TO ${ident(name)};`
+        ? `ALTER FUNCTION ${ident(currentFunc!.schema)}.${ident(
+            currentFunc!.name
+          )}(${identityArgs}) RENAME TO ${ident(name)};`
         : ''
 
     const updateSchemaSql =
       schema && schema !== currentFunc!.schema
-        ? `ALTER FUNCTION ${ident(currentFunc!.schema)}.${ident(name || currentFunc!.name)}(${
-            currentFunc!.argument_types
-          })  SET SCHEMA ${ident(schema)};`
+        ? `ALTER FUNCTION ${ident(currentFunc!.schema)}.${ident(
+            name || currentFunc!.name
+          )}(${identityArgs})  SET SCHEMA ${ident(schema)};`
         : ''
 
     const sql = `
       DO LANGUAGE plpgsql $$
-      DECLARE
-        function record;
       BEGIN
         IF ${typeof definition === 'string' ? 'TRUE' : 'FALSE'} THEN
           ${updateDefinitionSql}
 
-          ${retrieveFunctionSql} INTO function;
-
-          IF function.id != ${id} THEN
-            RAISE EXCEPTION 'Cannot find function "${currentFunc!.schema}"."${currentFunc!.name}"(${
-      currentFunc!.argument_types
-    })';
+          IF (
+            SELECT id
+            FROM (${functionsSql}) AS f
+            WHERE f.identity_argument_types = ${literal(identityArgs)}
+          ) != ${id} THEN
+            RAISE EXCEPTION 'Cannot find function "${currentFunc!.schema}"."${
+      currentFunc!.name
+    }"(${identityArgs})';
           END IF;
         END IF;
 
@@ -197,7 +192,7 @@ export default class PostgresMetaFunctions {
       return { data: null, error }
     }
     const sql = `DROP FUNCTION ${ident(func!.schema)}.${ident(func!.name)}
-    (${func!.argument_types})
+    (${func!.identity_argument_types})
     ${cascade ? 'CASCADE' : 'RESTRICT'};`
     {
       const { error } = await this.query(sql)
