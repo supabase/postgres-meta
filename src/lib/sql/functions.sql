@@ -12,6 +12,7 @@ SELECT
     ELSE pg_get_functiondef(p.oid)
   END AS complete_statement,
   pg_get_function_arguments(p.oid) AS argument_types,
+  pg_get_function_identity_arguments(p.oid) AS identity_argument_types,
   t.typname AS return_type,
   CASE
     WHEN p.provolatile = 'i' THEN 'IMMUTABLE'
