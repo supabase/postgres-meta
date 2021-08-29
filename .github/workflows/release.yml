@@ -7,142 +7,76 @@ on:
   workflow_dispatch:
 
 jobs:
-  release:
-    name: Release / Node ${{ matrix.node }}
-    strategy:
-      matrix:
-        node: ['14']
-
-    runs-on: ubuntu-latest
-
+  semantic-release:
+    name: Release
+    runs-on: ubuntu-20.04
+    outputs:
+      new-release-published: ${{ steps.semantic-release.outputs.new_release_published }}
+      new-release-version: ${{ steps.semantic-release.outputs.new_release_version }}
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up Node
-        uses: actions/setup-node@v2
+      - uses: actions/setup-node@v2
         with:
-          node-version: ${{ matrix.node }}
+          node-version: "14"
 
       - run: |
-          npm ci
+          npm clean-install
           npm run build
 
-      - name: Get version before
-        run: echo "VERSION_BEFORE=$(curl -s https://api.github.com/repos/supabase/postgres-meta/releases/latest | jq .name -r)" >> $GITHUB_ENV
-
-      - name: Release on GitHub
-        run: npx semantic-release
+      - id: semantic-release
+        uses: cycjimmy/semantic-release-action@v2
+        with:
+          semantic_version: 17
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Get version after
-        run: echo "VERSION_AFTER=$(curl -s https://api.github.com/repos/supabase/postgres-meta/releases/latest | jq .name -r)" >> $GITHUB_ENV
-
-      - name: Check version difference
-        run: |
-          if [ ${{ env.VERSION_BEFORE }} = ${{ env.VERSION_AFTER }} ]; then
-            echo 0 > has-new-release
-          else
-            echo 1 > has-new-release
-          fi
-
-      - uses: actions/upload-artifact@v1
-        with:
-          name: has-new-release
-          path: has-new-release
-
   upload:
-    name: Upload / Node ${{ matrix.node }}
-
+    name: Upload assets to GitHub Releases
     needs:
-      - release
-
-    strategy:
-      matrix:
-        node: ['14']
-
-    runs-on: ubuntu-latest
-
+      - semantic-release
+    if: needs.semantic-release.outputs.new-release-published == 'true'
+    runs-on: ubuntu-20.04
     steps:
-      - uses: actions/download-artifact@v1
-        with:
-          name: has-new-release
-
-      - name: Check for new release
-        run: echo "HAS_NEW_RELEASE=$(cat has-new-release/has-new-release)" >> $GITHUB_ENV
-
       - uses: actions/checkout@v2
-        if: env.HAS_NEW_RELEASE == 1
 
-      - uses: actions/cache@v1
-        if: env.HAS_NEW_RELEASE == 1
+      - uses: actions/setup-node@v2
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Set up Node
-        if: env.HAS_NEW_RELEASE == 1
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node }}
+          node-version: "14"
 
       - name: Prepare release
-        if: env.HAS_NEW_RELEASE == 1
         run: |
-          npm ci
+          npm clean-install
           npm run pkg
-          tar -czvf postgres-meta-linux.tar.gz -C ./bin postgres-meta-linux
-          tar -czvf postgres-meta-macos.tar.gz -C ./bin postgres-meta-macos
-          tar -czvf postgres-meta-windows.tar.gz -C ./bin postgres-meta-win.exe
+          tar -czvf postgres-meta-${{ needs.semantic-release.outputs.new-release-version }}-x86_64-linux-gnu.tar.gz -C ./bin postgres-meta-linux
+          tar -czvf postgres-meta-${{ needs.semantic-release.outputs.new-release-version }}-x86_64-apple-darwin.tar.gz -C ./bin postgres-meta-macos
+          tar -czvf postgres-meta-${{ needs.semantic-release.outputs.new-release-version }}-x86_64-pc-windows.tar.gz -C ./bin postgres-meta-win.exe
 
-      - name: Get upload url
-        if: env.HAS_NEW_RELEASE == 1
-        run: echo "UPLOAD_URL=$(curl -s https://api.github.com/repos/supabase/postgres-meta/releases/latest | jq .upload_url -r)" >> $GITHUB_ENV
-
-      - name: Upload linux release asset
-        if: env.HAS_NEW_RELEASE == 1
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: softprops/action-gh-release@v1
         with:
-          upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ./postgres-meta-linux.tar.gz
-          asset_name: postgres-meta-linux.tar.gz
-          asset_content_type: application/gzip
+          files: postgres-meta-*.tar.gz
 
-      - name: Upload macos release asset
-        if: env.HAS_NEW_RELEASE == 1
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  docker:
+    name: Release on Docker Hub
+    needs:
+      - semantic-release
+    if: needs.semantic-release.outputs.new-release-published == 'true'
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: docker/setup-qemu-action@v1
         with:
-          upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ./postgres-meta-macos.tar.gz
-          asset_name: postgres-meta-macos.tar.gz
-          asset_content_type: application/gzip
+          platforms: amd64,arm64
 
-      - name: Upload windows release asset
-        if: env.HAS_NEW_RELEASE == 1
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ./postgres-meta-windows.tar.gz
-          asset_name: postgres-meta-windows.tar.gz
-          asset_content_type: application/gzip
+      - uses: docker/setup-buildx-action@v1
 
-      - name: Get version
-        run: echo "VERSION=$(curl -s https://api.github.com/repos/supabase/postgres-meta/releases/latest | jq .name -r)" >> $GITHUB_ENV
-
-      - name: Upload image to Docker Hub
-        if: env.HAS_NEW_RELEASE == 1
-        uses: docker/build-push-action@v1
+      - uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: supabase/postgres-meta
-          tags: latest,${{ env.VERSION }}
+
+      - uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: supabase/postgres-meta:latest,supabase/postgres-meta:v${{ needs.semantic-release.outputs.new-release-version }}
+          platforms: linux/amd64,linux/arm64
