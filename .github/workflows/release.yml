@@ -55,6 +55,7 @@ jobs:
 
       - uses: softprops/action-gh-release@v1
         with:
+          tag_name: v${{ needs.semantic-release.outputs.new-release-version }}
           files: postgres-meta-*.tar.gz
 
   docker:
@@ -64,6 +65,17 @@ jobs:
     if: needs.semantic-release.outputs.new-release-published == 'true'
     runs-on: ubuntu-20.04
     steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
+      - name: Prepare build
+        run: |
+          npm clean-install
+          npm run pkg
+
       - uses: docker/setup-qemu-action@v1
         with:
           platforms: amd64,arm64
