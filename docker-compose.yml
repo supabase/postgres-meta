@@ -1,11 +1,9 @@
-# docker-compose.yml
-version: "3"
 services:
   db:
     image: postgres:13
     ports:
-      - "5432:5432"
+      - 5432:5432
     volumes:
-    - ./test/postgres/mnt:/docker-entrypoint-initdb.d/
+    - ./test/postgres/mnt:/docker-entrypoint-initdb.d
     environment: 
       POSTGRES_PASSWORD: postgres
