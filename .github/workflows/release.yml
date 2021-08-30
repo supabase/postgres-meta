@@ -49,9 +49,12 @@ jobs:
         run: |
           npm clean-install
           npm run pkg
-          tar -czvf postgres-meta-${{ needs.semantic-release.outputs.new-release-version }}-x86_64-linux-gnu.tar.gz -C ./bin postgres-meta-linux
-          tar -czvf postgres-meta-${{ needs.semantic-release.outputs.new-release-version }}-x86_64-apple-darwin.tar.gz -C ./bin postgres-meta-macos
-          tar -czvf postgres-meta-${{ needs.semantic-release.outputs.new-release-version }}-x86_64-pc-windows.tar.gz -C ./bin postgres-meta-win.exe
+          mv bin/postgres-meta-linux postgres-meta
+          tar -czvf postgres-meta-${{ needs.semantic-release.outputs.new-release-version }}-x86_64-linux-gnu.tar.gz postgres-meta
+          mv bin/postgres-meta-macos postgres-meta
+          tar -czvf postgres-meta-${{ needs.semantic-release.outputs.new-release-version }}-x86_64-apple-darwin.tar.gz postgres-meta
+          mv bin/postgres-meta-win.exe postgres-meta.exe
+          tar -czvf postgres-meta-${{ needs.semantic-release.outputs.new-release-version }}-x86_64-pc-windows.tar.gz postgres-meta.exe
 
       - uses: softprops/action-gh-release@v1
         with:
@@ -89,6 +92,7 @@ jobs:
 
       - uses: docker/build-push-action@v2
         with:
+          context: .
           push: true
           tags: supabase/postgres-meta:latest,supabase/postgres-meta:v${{ needs.semantic-release.outputs.new-release-version }}
           platforms: linux/amd64,linux/arm64
