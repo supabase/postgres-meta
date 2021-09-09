@@ -23,10 +23,10 @@
     "start": "NODE_ENV=production node bin/src/server/app.js",
     "dev": "run-s clean && NODE_ENV=development ts-node-dev src/server/app.ts | pino-pretty --colorize",
     "pkg": "run-s clean build:server && pkg --out-path bin .pkg.config.json",
-    "test": "run-s clean test:db build:server test:run; run-s test:clean",
+    "test": "run-s test:db test:run test:clean",
     "test:clean": "cd test/db && docker-compose down",
     "test:db": "cd test/db && docker-compose up --detach",
-    "test:run": "export PG_META_PORT=54321 && (run-s start & wait-for-localhost --use-get $PG_META_PORT && jest --runInBand)"
+    "test:run": "jest --runInBand"
   },
   "engines": {
     "node": ">=14 <15",
