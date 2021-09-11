@@ -14,15 +14,20 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up Node
-        uses: actions/setup-node@v2
+      - uses: actions/setup-node@v2
         with:
           node-version: "14"
 
       - run: |
-          docker-compose up --detach
-          export PG_META_PORT=8000
           npm clean-install
-          npm run dev &
-          npx wait-for-localhost-cli --use-get $PG_META_PORT
-          npm test
+          npm run test
+
+  prettier-check:
+    name: Prettier check
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actionsx/prettier@v2
+        with:
+          args: --check "{src,test}/**/*.ts"

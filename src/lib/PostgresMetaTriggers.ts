@@ -150,43 +150,48 @@ export default class PostgresMetaTriggers {
   async update(
     id: number,
     {
-      name: newName,
+      name,
       enabled_mode,
     }: {
-      name: string
-      enabled_mode: 'ORIGIN' | 'REPLICA' | 'ALWAYS' | 'DISABLED'
+      name?: string
+      enabled_mode?: 'ORIGIN' | 'REPLICA' | 'ALWAYS' | 'DISABLED'
     }
   ): Promise<PostgresMetaResult<PostgresTrigger>> {
-    const { data: triggerRecord, error } = await this.retrieve({ id })
-
+    const { data: old, error } = await this.retrieve({ id })
     if (error) {
       return { data: null, error }
     }
 
-    let enabledModeSql
-    const enabledMode = enabled_mode.toUpperCase()
-    const { name: currentName, schema: schema, table: table } = triggerRecord!
-    const qualifiedTableName = `${ident(schema)}.${ident(table)}`
-    const updateNameSql =
-      newName && newName !== currentName
-        ? `ALTER TRIGGER ${ident(currentName)} ON ${qualifiedTableName} RENAME TO ${ident(
-            newName
-          )};`
+    let enabledModeSql = ''
+    switch (enabled_mode) {
+      case 'ORIGIN':
+        enabledModeSql = `ALTER TABLE ${ident(old!.schema)}.${ident(
+          old!.table
+        )} ENABLE TRIGGER ${ident(old!.name)};`
+        break
+      case 'DISABLED':
+        enabledModeSql = `ALTER TABLE ${ident(old!.schema)}.${ident(
+          old!.table
+        )} DISABLE TRIGGER ${ident(old!.name)};`
+        break
+      case 'REPLICA':
+      case 'ALWAYS':
+        enabledModeSql = `ALTER TABLE ${ident(old!.schema)}.${ident(
+          old!.table
+        )} ENABLE ${enabled_mode} TRIGGER ${ident(old!.name)};`
+        break
+      default:
+        break
+    }
+    const nameSql =
+      name && name !== old!.name
+        ? `ALTER TRIGGER ${ident(old!.name)} ON ${ident(old!.schema)}.${ident(
+            old!.table
+          )} RENAME TO ${ident(name)};`
         : ''
 
-    if (['ORIGIN', 'REPLICA', 'ALWAYS', 'DISABLED'].includes(enabledMode)) {
-      if (enabledMode === 'DISABLED') {
-        enabledModeSql = `ALTER TABLE ${qualifiedTableName} DISABLE TRIGGER ${ident(currentName)};`
-      } else {
-        enabledModeSql = `ALTER TABLE ${qualifiedTableName} ENABLE ${
-          ['REPLICA', 'ALWAYS'].includes(enabledMode) ? enabledMode : ''
-        } TRIGGER ${ident(currentName)};`
-      }
-    }
-
     // updateNameSql must be last
-    const sql = `BEGIN; ${enabledModeSql} ${updateNameSql} COMMIT;`
-
+    const sql = `BEGIN; ${enabledModeSql}; ${nameSql}; COMMIT;`
     {
       const { error } = await this.query(sql)
 
@@ -194,11 +199,10 @@ export default class PostgresMetaTriggers {
         return { data: null, error }
       }
     }
-
     return await this.retrieve({ id })
   }
 
-  async remove(id: number, { cascade = false }): Promise<PostgresMetaResult<PostgresTrigger>> {
+  async remove(id: number, { cascade = false } = {}): Promise<PostgresMetaResult<PostgresTrigger>> {
     const { data: triggerRecord, error } = await this.retrieve({ id })
 
     if (error) {
