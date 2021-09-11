@@ -1,6 +1,5 @@
 {
   "include": ["src/lib"],
-  "exclude": ["src/lib/connection*.ts"],
   "compilerOptions": {
     "declaration": true,
     "declarationMap": true,
