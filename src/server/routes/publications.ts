@@ -5,11 +5,17 @@ import { DEFAULT_POOL_CONFIG } from '../constants'
 export default async (fastify: FastifyInstance) => {
   fastify.get<{
     Headers: { pg: string }
+    Querystring: {
+      limit?: number
+      offset?: number
+    }
   }>('/', async (request, reply) => {
     const connectionString = request.headers.pg
+    const limit = request.query.limit
+    const offset = request.query.offset
 
     const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
-    const { data, error } = await pgMeta.publications.list()
+    const { data, error } = await pgMeta.publications.list({ limit, offset })
     await pgMeta.end()
     if (error) {
       request.log.error(JSON.stringify({ error, req: request.body }))

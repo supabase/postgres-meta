@@ -7,14 +7,20 @@ export default async (fastify: FastifyInstance) => {
     Headers: { pg: string }
     Querystring: {
       include_system_schemas?: string
+      limit?: number
+      offset?: number
     }
   }>('/', async (request, reply) => {
     const connectionString = request.headers.pg
     const includeSystemSchemas = request.query.include_system_schemas === 'true'
+    const limit = request.query.limit
+    const offset = request.query.offset
 
     const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.columns.list({
       includeSystemSchemas,
+      limit,
+      offset,
     })
     await pgMeta.end()
     if (error) {
