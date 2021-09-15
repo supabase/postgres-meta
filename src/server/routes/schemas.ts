@@ -162,7 +162,7 @@ export default async (fastify: FastifyInstance) => {
       const { data, error } = await pgMeta.schemas.update(id, request.body)
       await pgMeta.end()
       if (error) {
-        request.log.error({ error, req: request.body })
+        request.log.error(JSON.stringify({ error, req: request.body }))
         reply.code(400)
         if (error.message.startsWith('Cannot find')) reply.code(404)
         return { error: error.message }
@@ -213,7 +213,7 @@ export default async (fastify: FastifyInstance) => {
       const { data, error } = await pgMeta.schemas.remove(id, { cascade })
       await pgMeta.end()
       if (error) {
-        request.log.error({ error, req: request.body })
+        request.log.error(JSON.stringify({ error, req: request.body }))
         reply.code(400)
         if (error.message.startsWith('Cannot find')) reply.code(404)
         return { error: error.message }
