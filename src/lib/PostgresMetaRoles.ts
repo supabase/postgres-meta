@@ -11,10 +11,18 @@ export default class PostgresMetaRoles {
     this.query = query
   }
 
-  async list({ includeDefaultRoles = false, includeSystemSchemas = false } = {}): Promise<
-    PostgresMetaResult<PostgresRole[]>
-  > {
-    const sql = `
+  async list({
+    includeDefaultRoles = false,
+    includeSystemSchemas = false,
+    limit,
+    offset,
+  }: {
+    includeDefaultRoles?: boolean
+    includeSystemSchemas?: boolean
+    limit?: number
+    offset?: number
+  } = {}): Promise<PostgresMetaResult<PostgresRole[]>> {
+    let sql = `
 WITH roles AS (${
       includeDefaultRoles
         ? rolesSql
@@ -29,7 +37,13 @@ SELECT
   *,
   ${coalesceRowsToArray('grants', 'SELECT * FROM grants WHERE grants.grantee = roles.name')}
 FROM
-  roles;`
+  roles`
+    if (limit) {
+      sql = `${sql} LIMIT ${limit}`
+    }
+    if (offset) {
+      sql = `${sql} OFFSET ${offset}`
+    }
     return await this.query(sql)
   }
 

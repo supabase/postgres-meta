@@ -18,12 +18,25 @@ export default class PostgresMetaTables {
     this.query = query
   }
 
-  async list({ includeSystemSchemas = false } = {}): Promise<PostgresMetaResult<PostgresTable[]>> {
-    const sql = includeSystemSchemas
-      ? enrichedTablesSql
-      : `${enrichedTablesSql} WHERE NOT (schema IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(
-          ','
-        )}));`
+  async list({
+    includeSystemSchemas = false,
+    limit,
+    offset,
+  }: {
+    includeSystemSchemas?: boolean
+    limit?: number
+    offset?: number
+  } = {}): Promise<PostgresMetaResult<PostgresTable[]>> {
+    let sql = enrichedTablesSql
+    if (!includeSystemSchemas) {
+      sql = `${sql} WHERE NOT (schema IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
+    }
+    if (limit) {
+      sql = `${sql} LIMIT ${limit}`
+    }
+    if (offset) {
+      sql = `${sql} OFFSET ${offset}`
+    }
     return await this.query(sql)
   }
 
