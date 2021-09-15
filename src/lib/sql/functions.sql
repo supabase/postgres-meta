@@ -29,12 +29,12 @@ FROM
   LEFT JOIN pg_type t ON t.oid = p.prorettype
   LEFT JOIN (
     SELECT
-	    oid as id,
-	    (string_to_array(unnest(proconfig), '='))[1] AS param,
-   	  (string_to_array(unnest(proconfig), '='))[2] AS value
-	  FROM
-	    pg_proc
-	) p_config ON p_config.id = p.oid
+      oid as id,
+      (string_to_array(unnest(proconfig), '='))[1] AS param,
+      (string_to_array(unnest(proconfig), '='))[2] AS value
+    FROM
+      pg_proc
+  ) p_config ON p_config.id = p.oid
 GROUP BY
   p.oid,
   n.nspname,
