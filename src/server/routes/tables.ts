@@ -37,7 +37,7 @@ export default async (fastify: FastifyInstance) => {
     const { data, error } = await pgMeta.tables.retrieve({ id })
     await pgMeta.end()
     if (error) {
-      request.log.error({ error, req: request.body })
+      request.log.error(JSON.stringify({ error, req: request.body }))
       reply.code(404)
       return { error: error.message }
     }
