@@ -15,6 +15,8 @@ export default async (fastify: FastifyInstance) => {
     Headers: { pg: string }
     Querystring: {
       include_system_schemas?: string
+      limit?: number
+      offset?: number
     }
   }>(
     '/',
@@ -25,6 +27,8 @@ export default async (fastify: FastifyInstance) => {
         }),
         querystring: Type.Object({
           include_system_schemas: Type.Optional(Type.String()),
+          limit: Type.Optional(Type.String()),
+          offset: Type.Optional(Type.String()),
         }),
         response: {
           200: Type.Array(postgresSchemaSchema),
@@ -37,9 +41,11 @@ export default async (fastify: FastifyInstance) => {
     async (request, reply) => {
       const connectionString = request.headers.pg
       const includeSystemSchemas = request.query.include_system_schemas === 'true'
+      const limit = request.query.limit
+      const offset = request.query.offset
 
       const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
-      const { data, error } = await pgMeta.schemas.list({ includeSystemSchemas })
+      const { data, error } = await pgMeta.schemas.list({ includeSystemSchemas, limit, offset })
       await pgMeta.end()
       if (error) {
         request.log.error(JSON.stringify({ error, req: request.body }))
