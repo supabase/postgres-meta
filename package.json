@@ -21,11 +21,11 @@
     "build:server": "tsc -p tsconfig.server.json && cpy 'src/lib/sql/*.sql' bin/src/lib/sql",
     "docs:export": "PG_META_EXPORT_DOCS=true ts-node-dev src/server/app.ts",
     "start": "NODE_ENV=production node bin/src/server/app.js",
-    "dev": "run-s clean && NODE_ENV=development ts-node-dev src/server/app.ts | pino-pretty --colorize",
+    "dev": "run-s db:clean db:run && NODE_ENV=development ts-node-dev src/server/app.ts | pino-pretty --colorize",
     "pkg": "run-s clean build:server && pkg --out-path bin .pkg.config.json",
-    "test": "run-s test:db test:run test:clean",
-    "test:clean": "cd test/db && docker-compose down",
-    "test:db": "cd test/db && docker-compose up --detach",
+    "test": "run-s db:clean db:run test:run db:clean",
+    "db:clean": "cd test/db && docker-compose down",
+    "db:run": "cd test/db && docker-compose up --detach",
     "test:run": "jest --runInBand"
   },
   "engines": {
