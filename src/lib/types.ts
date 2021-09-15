@@ -32,6 +32,7 @@ export const postgresColumnSchema = Type.Object({
   ]),
   is_nullable: Type.Boolean(),
   is_updatable: Type.Boolean(),
+  is_unique: Type.Boolean(),
   enums: Type.Array(Type.Unknown()),
   comment: Type.Union([Type.String(), Type.Null()]),
 })

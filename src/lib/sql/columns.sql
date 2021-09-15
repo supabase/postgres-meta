@@ -26,32 +26,22 @@ SELECT
     END
   END AS data_type,
   COALESCE(bt.typname, t.typname) AS format,
-  CASE
-    WHEN a.attidentity IN ('a', 'd') THEN TRUE
-    ELSE FALSE
-  END AS is_identity,
+  a.attidentity IN ('a', 'd') AS is_identity,
   CASE
     a.attidentity
     WHEN 'a' THEN 'ALWAYS'
     WHEN 'd' THEN 'BY DEFAULT'
     ELSE NULL
   END AS identity_generation,
-  CASE
-    WHEN a.attnotnull
-    OR t.typtype = 'd'
-    AND t.typnotnull THEN FALSE
-    ELSE TRUE
-  END AS is_nullable,
-  CASE
-    WHEN (
-      c.relkind IN ('r', 'p')
-    )
-    OR (
-      c.relkind IN ('v', 'f')
-    )
-    AND pg_column_is_updatable(c.oid, a.attnum, FALSE) THEN TRUE
-    ELSE FALSE
-  END AS is_updatable,
+  NOT (
+    a.attnotnull
+    OR t.typtype = 'd' AND t.typnotnull
+  ) AS is_nullable,
+  (
+    c.relkind IN ('r', 'p')
+    OR c.relkind IN ('v', 'f') AND pg_column_is_updatable(c.oid, a.attnum, FALSE)
+  ) AS is_updatable,
+  uniques.table_id IS NOT NULL AS is_unique,
   array_to_json(
     array(
       SELECT
@@ -82,6 +72,13 @@ FROM
     JOIN pg_namespace nbt ON bt.typnamespace = nbt.oid
   ) ON t.typtype = 'd'
   AND t.typbasetype = bt.oid
+  LEFT JOIN (
+    SELECT
+      conrelid AS table_id,
+      conkey[1] AS ordinal_position
+    FROM pg_catalog.pg_constraint
+    WHERE contype = 'u' AND cardinality(conkey) = 1
+  ) AS uniques ON uniques.table_id = c.oid AND uniques.ordinal_position = a.attnum
 WHERE
   NOT pg_is_other_temp_schema(nc.oid)
   AND a.attnum > 0

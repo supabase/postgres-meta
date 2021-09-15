@@ -163,6 +163,7 @@ COMMIT;`
       is_identity,
       identity_generation,
       is_nullable,
+      is_unique,
       comment,
     }: {
       name?: string
@@ -173,6 +174,7 @@ COMMIT;`
       is_identity?: boolean
       identity_generation?: 'BY DEFAULT' | 'ALWAYS'
       is_nullable?: boolean
+      is_unique?: boolean
       comment?: string
     }
   ): Promise<PostgresMetaResult<PostgresColumn>> {
@@ -245,6 +247,32 @@ COMMIT;`
             old!.name
           )} SET NOT NULL;`
     }
+    let isUniqueSql = ''
+    if (old!.is_unique === true && is_unique === false) {
+      isUniqueSql = `
+DO $$
+DECLARE
+  r record;
+BEGIN
+  FOR r IN
+    SELECT conname FROM pg_constraint WHERE
+      contype = 'u'
+      AND cardinality(conkey) = 1
+      AND conrelid = ${literal(old!.table_id)}
+      AND conkey[1] = ${literal(old!.ordinal_position)}
+  LOOP
+    EXECUTE ${literal(
+      `ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} DROP CONSTRAINT `
+    )} || quote_ident(r.conname);
+  END LOOP;
+END
+$$;
+`
+    } else if (old!.is_unique === false && is_unique === true) {
+      isUniqueSql = `ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} ADD UNIQUE (${ident(
+        old!.name
+      )});`
+    }
     const commentSql =
       comment === undefined
         ? ''
@@ -262,6 +290,7 @@ BEGIN;
   ${typeSql}
   ${defaultValueSql}
   ${identitySql}
+  ${isUniqueSql}
   ${commentSql}
   ${nameSql}
 COMMIT;`
