@@ -408,3 +408,64 @@ Object {
 
   await pgMeta.tables.remove(testTable!.id)
 })
+
+test('update is_unique', async () => {
+  const { data: testTable } = await pgMeta.tables.create({ name: 't' })
+
+  let res = await pgMeta.columns.create({
+    table_id: testTable!.id,
+    name: 'c',
+    type: 'text',
+    is_unique: false,
+  })
+  res = await pgMeta.columns.update(res.data!.id, { is_unique: true })
+  expect(res).toMatchInlineSnapshot(`
+Object {
+  "data": Object {
+    "comment": null,
+    "data_type": "text",
+    "default_value": null,
+    "enums": Array [],
+    "format": "text",
+    "id": "16525.1",
+    "identity_generation": null,
+    "is_identity": false,
+    "is_nullable": true,
+    "is_unique": true,
+    "is_updatable": true,
+    "name": "c",
+    "ordinal_position": 1,
+    "schema": "public",
+    "table": "t",
+    "table_id": 16525,
+  },
+  "error": null,
+}
+`)
+  res = await pgMeta.columns.update(res.data!.id, { is_unique: false })
+  expect(res).toMatchInlineSnapshot(`
+Object {
+  "data": Object {
+    "comment": null,
+    "data_type": "text",
+    "default_value": null,
+    "enums": Array [],
+    "format": "text",
+    "id": "16525.1",
+    "identity_generation": null,
+    "is_identity": false,
+    "is_nullable": true,
+    "is_unique": false,
+    "is_updatable": true,
+    "name": "c",
+    "ordinal_position": 1,
+    "schema": "public",
+    "table": "t",
+    "table_id": 16525,
+  },
+  "error": null,
+}
+`)
+
+  await pgMeta.tables.remove(testTable!.id)
+})
