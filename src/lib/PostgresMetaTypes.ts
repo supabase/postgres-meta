@@ -10,10 +10,25 @@ export default class PostgresMetaTypes {
     this.query = query
   }
 
-  async list({ includeSystemSchemas = false } = {}): Promise<PostgresMetaResult<PostgresType[]>> {
-    const sql = includeSystemSchemas
-      ? typesSql
-      : `${typesSql} AND NOT (n.nspname IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}));`
+  async list({
+    includeSystemSchemas = false,
+    limit,
+    offset,
+  }: {
+    includeSystemSchemas?: boolean
+    limit?: number
+    offset?: number
+  } = {}): Promise<PostgresMetaResult<PostgresType[]>> {
+    let sql = typesSql
+    if (!includeSystemSchemas) {
+      sql = `${sql} AND NOT (n.nspname IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
+    }
+    if (limit) {
+      sql = `${sql} LIMIT ${limit}`
+    }
+    if (offset) {
+      sql = `${sql} OFFSET ${offset}`
+    }
     return await this.query(sql)
   }
 }

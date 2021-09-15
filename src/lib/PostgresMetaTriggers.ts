@@ -9,8 +9,21 @@ export default class PostgresMetaTriggers {
     this.query = query
   }
 
-  async list(): Promise<PostgresMetaResult<PostgresTrigger[]>> {
-    return await this.query(enrichedTriggersSql)
+  async list({
+    limit,
+    offset,
+  }: {
+    limit?: number
+    offset?: number
+  } = {}): Promise<PostgresMetaResult<PostgresTrigger[]>> {
+    let sql = enrichedTriggersSql
+    if (limit) {
+      sql = `${sql} LIMIT ${limit}`
+    }
+    if (offset) {
+      sql = `${sql} OFFSET ${offset}`
+    }
+    return await this.query(sql)
   }
 
   async retrieve({ id }: { id: number }): Promise<PostgresMetaResult<PostgresTrigger>>

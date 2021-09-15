@@ -8,7 +8,20 @@ export default class PostgresMetaConfig {
     this.query = query
   }
 
-  async list(): Promise<PostgresMetaResult<PostgresConfig[]>> {
-    return await this.query(configSql)
+  async list({
+    limit,
+    offset,
+  }: {
+    limit?: number
+    offset?: number
+  } = {}): Promise<PostgresMetaResult<PostgresConfig[]>> {
+    let sql = configSql
+    if (limit) {
+      sql = `${sql} LIMIT ${limit}`
+    }
+    if (offset) {
+      sql = `${sql} OFFSET ${offset}`
+    }
+    return await this.query(sql)
   }
 }
