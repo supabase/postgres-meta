@@ -39,7 +39,7 @@ Object {
     "check": null,
     "command": "ALL",
     "definition": null,
-    "id": 16655,
+    "id": 16663,
     "name": "test policy",
     "roles": Array [
       "public",
@@ -59,7 +59,7 @@ Object {
     "check": null,
     "command": "ALL",
     "definition": null,
-    "id": 16655,
+    "id": 16663,
     "name": "test policy",
     "roles": Array [
       "public",
@@ -83,7 +83,7 @@ Object {
     "check": "(current_setting('my.username'::text) = name)",
     "command": "ALL",
     "definition": "(current_setting('my.username'::text) = name)",
-    "id": 16655,
+    "id": 16663,
     "name": "policy updated",
     "roles": Array [
       "public",
@@ -103,7 +103,7 @@ Object {
     "check": "(current_setting('my.username'::text) = name)",
     "command": "ALL",
     "definition": "(current_setting('my.username'::text) = name)",
-    "id": 16655,
+    "id": 16663,
     "name": "policy updated",
     "roles": Array [
       "public",
