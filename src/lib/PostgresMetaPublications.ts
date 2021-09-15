@@ -9,8 +9,21 @@ export default class PostgresMetaPublications {
     this.query = query
   }
 
-  async list(): Promise<PostgresMetaResult<PostgresPublication[]>> {
-    return await this.query(publicationsSql)
+  async list({
+    limit,
+    offset,
+  }: {
+    limit?: number
+    offset?: number
+  }): Promise<PostgresMetaResult<PostgresPublication[]>> {
+    let sql = publicationsSql
+    if (limit) {
+      sql = `${sql} LIMIT ${limit}`
+    }
+    if (offset) {
+      sql = `${sql} OFFSET ${offset}`
+    }
+    return await this.query(sql)
   }
 
   async retrieve({ id }: { id: number }): Promise<PostgresMetaResult<PostgresPublication>>

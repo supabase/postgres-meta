@@ -9,8 +9,21 @@ export default class PostgresMetaExtensions {
     this.query = query
   }
 
-  async list(): Promise<PostgresMetaResult<PostgresExtension[]>> {
-    return await this.query(extensionsSql)
+  async list({
+    limit,
+    offset,
+  }: {
+    limit?: number
+    offset?: number
+  } = {}): Promise<PostgresMetaResult<PostgresExtension[]>> {
+    let sql = extensionsSql
+    if (limit) {
+      sql = `${sql} LIMIT ${limit}`
+    }
+    if (offset) {
+      sql = `${sql} OFFSET ${offset}`
+    }
+    return await this.query(sql)
   }
 
   async retrieve({ name }: { name: string }): Promise<PostgresMetaResult<PostgresExtension>> {

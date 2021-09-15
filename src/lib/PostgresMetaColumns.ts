@@ -13,10 +13,25 @@ export default class PostgresMetaColumns {
     this.metaTables = new PostgresMetaTables(query)
   }
 
-  async list({ includeSystemSchemas = false } = {}): Promise<PostgresMetaResult<PostgresColumn[]>> {
-    const sql = includeSystemSchemas
-      ? columnsSql
-      : `${columnsSql} AND NOT (nc.nspname IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}));`
+  async list({
+    includeSystemSchemas = false,
+    limit,
+    offset,
+  }: {
+    includeSystemSchemas?: boolean
+    limit?: number
+    offset?: number
+  } = {}): Promise<PostgresMetaResult<PostgresColumn[]>> {
+    let sql = columnsSql
+    if (!includeSystemSchemas) {
+      sql = `${sql} AND NOT (nc.nspname IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
+    }
+    if (limit) {
+      sql = `${sql} LIMIT ${limit}`
+    }
+    if (offset) {
+      sql = `${sql} OFFSET ${offset}`
+    }
     return await this.query(sql)
   }
 

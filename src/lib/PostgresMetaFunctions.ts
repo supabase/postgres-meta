@@ -10,14 +10,25 @@ export default class PostgresMetaFunctions {
     this.query = query
   }
 
-  async list({ includeSystemSchemas = false } = {}): Promise<
-    PostgresMetaResult<PostgresFunction[]>
-  > {
-    const sql = includeSystemSchemas
-      ? enrichedFunctionsSql
-      : `${enrichedFunctionsSql} WHERE NOT (schema IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(
-          ','
-        )}));`
+  async list({
+    includeSystemSchemas = false,
+    limit,
+    offset,
+  }: {
+    includeSystemSchemas?: boolean
+    limit?: number
+    offset?: number
+  } = {}): Promise<PostgresMetaResult<PostgresFunction[]>> {
+    let sql = enrichedFunctionsSql
+    if (!includeSystemSchemas) {
+      sql = `${sql} WHERE NOT (schema IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
+    }
+    if (limit) {
+      sql = `${sql} LIMIT ${limit}`
+    }
+    if (offset) {
+      sql = `${sql} OFFSET ${offset}`
+    }
     return await this.query(sql)
   }
 
