@@ -12,7 +12,7 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(`
 Object {
   "data": Object {
-    "id": 16656,
+    "id": 16664,
     "name": "a",
     "owner": "postgres",
     "publish_delete": true,
@@ -34,7 +34,7 @@ Object {
   expect(res).toMatchInlineSnapshot(`
 Object {
   "data": Object {
-    "id": 16656,
+    "id": 16664,
     "name": "a",
     "owner": "postgres",
     "publish_delete": true,
@@ -60,7 +60,7 @@ Object {
   expect(res).toMatchInlineSnapshot(`
 Object {
   "data": Object {
-    "id": 16656,
+    "id": 16664,
     "name": "b",
     "owner": "postgres",
     "publish_delete": true,
@@ -76,7 +76,7 @@ Object {
   expect(res).toMatchInlineSnapshot(`
 Object {
   "data": Object {
-    "id": 16656,
+    "id": 16664,
     "name": "b",
     "owner": "postgres",
     "publish_delete": true,
@@ -109,7 +109,7 @@ test('tables with uppercase', async () => {
   expect(res).toMatchInlineSnapshot(`
 Object {
   "data": Object {
-    "id": 16661,
+    "id": 16669,
     "name": "pub",
     "owner": "postgres",
     "publish_delete": false,
@@ -118,7 +118,7 @@ Object {
     "publish_update": false,
     "tables": Array [
       Object {
-        "id": 16658,
+        "id": 16666,
         "name": "T",
         "schema": "public",
       },
@@ -133,7 +133,7 @@ Object {
   expect(res).toMatchInlineSnapshot(`
 Object {
   "data": Object {
-    "id": 16661,
+    "id": 16669,
     "name": "pub",
     "owner": "postgres",
     "publish_delete": false,
@@ -142,7 +142,7 @@ Object {
     "publish_update": false,
     "tables": Array [
       Object {
-        "id": 16658,
+        "id": 16666,
         "name": "T",
         "schema": "public",
       },
@@ -167,7 +167,7 @@ test('FOR ALL TABLES', async () => {
   expect(res).toMatchInlineSnapshot(`
 Object {
   "data": Object {
-    "id": 16663,
+    "id": 16671,
     "name": "for_all",
     "owner": "postgres",
     "publish_delete": true,
