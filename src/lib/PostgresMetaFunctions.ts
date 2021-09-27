@@ -168,7 +168,9 @@ export default class PostgresMetaFunctions {
           IF (
             SELECT id
             FROM (${functionsSql}) AS f
-            WHERE f.identity_argument_types = ${literal(identityArgs)}
+            WHERE f.schema = ${literal(currentFunc!.schema)}
+            AND f.name = ${literal(currentFunc!.name)}
+            AND f.identity_argument_types = ${literal(identityArgs)}
           ) != ${id} THEN
             RAISE EXCEPTION 'Cannot find function "${currentFunc!.schema}"."${
       currentFunc!.name

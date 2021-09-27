@@ -92,7 +92,7 @@ None. Please don't use this as a standalone server. This should be used behind a
 
 ## Developers
 
-1. Start the database using `docker-compose up`
+1. Start the database using `docker-compose -f test/db/docker-compose.yml up`
 2. Run `npm run dev`
 3. Run `npm test` while you work
 
