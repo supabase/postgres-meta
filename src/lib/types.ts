@@ -1,4 +1,11 @@
 import { Static, Type } from '@sinclair/typebox'
+import { Options as PrettierOptions } from 'prettier'
+import { Option as SqlParserOptions, TableColumnAst } from 'node-sql-parser/build/postgresql'
+
+
+export interface ParserOptions extends PrettierOptions {}
+export interface ParsedAst extends TableColumnAst {}
+export interface FormatterOptions extends SqlParserOptions {}
 
 export interface PostgresMetaOk<T> {
   data: T

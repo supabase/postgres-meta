@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { PostgresMeta } from '../../lib'
+import * as Parser from '../../lib/Parser'
 import { DEFAULT_POOL_CONFIG } from '../constants'
 
 export default async (fastify: FastifyInstance) => {
@@ -21,5 +22,39 @@ export default async (fastify: FastifyInstance) => {
     }
 
     return data || []
+  })
+
+  fastify.post<{
+    Headers: { pg: string }
+    Body: {
+      query: string
+    }
+  }>('/format', async (request, reply) => {
+    const { data, error } = await Parser.Format(request.body.query)
+
+    if (error) {
+      request.log.error(JSON.stringify({ error, req: request.body }))
+      reply.code(400)
+      return { error: error.message }
+    }
+
+    return data
+  })
+
+  fastify.post<{
+    Headers: { pg: string }
+    Body: {
+      query: string
+    }
+  }>('/parse', async (request, reply) => {
+    const { data, error } = await Parser.Parse(request.body.query)
+
+    if (error) {
+      request.log.error(JSON.stringify({ error, req: request.body }))
+      reply.code(400)
+      return { error: error.message }
+    }
+
+    return data
   })
 }
