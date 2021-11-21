@@ -11,8 +11,8 @@ https://supabase.github.io/postgres-meta/
 Schema:
 
 - [X] `POST /query` (Execute SQL query)
-  - [ ] `POST /format` (Format SQL query)
-  - [ ] `POST /parse` (Parse SQL query into AST)
+  - [x] `POST /format` (Format SQL query)
+  - [x] `POST /parse` (Parse SQL query into AST)
   - [ ] `POST /explain` (Explain SQL query)
 - [X] `/columns`
   - [X] GET (List)
