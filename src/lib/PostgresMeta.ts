@@ -1,4 +1,5 @@
 import { PoolConfig } from 'pg'
+import * as Parser from './Parser'
 import PostgresMetaColumns from './PostgresMetaColumns'
 import PostgresMetaConfig from './PostgresMetaConfig'
 import PostgresMetaExtensions from './PostgresMetaExtensions'
@@ -13,7 +14,6 @@ import PostgresMetaTypes from './PostgresMetaTypes'
 import PostgresMetaVersion from './PostgresMetaVersion'
 import { init } from './db'
 import { PostgresMetaResult } from './types'
-
 export default class PostgresMeta {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
   end: () => Promise<void>
@@ -29,6 +29,9 @@ export default class PostgresMeta {
   triggers: PostgresMetaTriggers
   types: PostgresMetaTypes
   version: PostgresMetaVersion
+
+  parse = Parser.Parse
+  format = Parser.Format
 
   constructor(config: PoolConfig) {
     const { query, end } = init(config)
