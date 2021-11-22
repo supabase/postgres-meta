@@ -176,7 +176,7 @@ COMMIT;`
       default_value,
       default_value_format = 'literal',
       is_identity,
-      identity_generation,
+      identity_generation = 'BY DEFAULT',
       is_nullable,
       is_unique,
       comment,
@@ -295,10 +295,11 @@ $$;
             old!.name
           )} IS ${literal(comment)};`
 
-    // nameSql must be last.
-    // defaultValueSql must be after typeSql.
-    // TODO: Can't set default if column is previously identity even if is_identity: false.
-    // Must do two separate PATCHes (once to drop identity and another to set default).
+    // TODO: Can't set default if column is previously identity even if
+    // is_identity: false. Must do two separate PATCHes (once to drop identity
+    // and another to set default).
+    // NOTE: nameSql must be last. defaultValueSql must be after typeSql.
+    // identitySql must be after isNullableSql.
     const sql = `
 BEGIN;
   ${isNullableSql}
