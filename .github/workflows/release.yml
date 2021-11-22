@@ -61,7 +61,7 @@ jobs:
           tag_name: v${{ needs.semantic-release.outputs.new-release-version }}
           files: postgres-meta-*.tar.gz
 
-  docker:
+  docker-hub:
     name: Release on Docker Hub
     needs:
       - semantic-release
