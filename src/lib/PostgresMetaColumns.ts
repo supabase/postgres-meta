@@ -210,7 +210,7 @@ COMMIT;`
         ? ''
         : `ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} ALTER COLUMN ${ident(
             old!.name
-          )} SET DATA TYPE ${type} USING ${ident(old!.name)}::${type};`
+          )} SET DATA TYPE ${ident(type)} USING ${ident(old!.name)}::${ident(type)};`
 
     let defaultValueSql: string
     if (drop_default) {

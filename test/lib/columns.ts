@@ -479,3 +479,51 @@ Object {
 
   await pgMeta.tables.remove(testTable!.id)
 })
+
+// https://github.com/supabase/supabase/issues/3553
+test('alter column to type with uppercase', async () => {
+  const { data: testTable } = await pgMeta.tables.create({ name: 't' })
+  await pgMeta.query('CREATE TYPE "T" AS ENUM ()')
+
+  let res = await pgMeta.columns.create({
+    table_id: testTable!.id,
+    name: 'c',
+    type: 'text',
+    is_unique: false,
+  })
+  res = await pgMeta.columns.update(res.data!.id, { type: 'T' })
+  expect(res).toMatchInlineSnapshot(
+    {
+      data: {
+        id: expect.stringMatching(/^\d+\.\d+$/),
+        table_id: expect.any(Number),
+      },
+    },
+    `
+    Object {
+      "data": Object {
+        "comment": null,
+        "data_type": "USER-DEFINED",
+        "default_value": null,
+        "enums": Array [],
+        "format": "T",
+        "id": StringMatching /\\^\\\\d\\+\\\\\\.\\\\d\\+\\$/,
+        "identity_generation": null,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_updatable": true,
+        "name": "c",
+        "ordinal_position": 1,
+        "schema": "public",
+        "table": "t",
+        "table_id": Any<Number>,
+      },
+      "error": null,
+    }
+  `
+  )
+
+  await pgMeta.tables.remove(testTable!.id)
+  await pgMeta.query('DROP TYPE "T"')
+})
