@@ -1,12 +1,7 @@
-import { ParserOptions, ParsedAst, FormatterOptions } from './types'
-import { Parser } from 'node-sql-parser/build/postgresql'
+import { FormatterOptions } from './types'
+const { parse, deparse } = require('pgsql-parser')
 import prettier from 'prettier/standalone'
 import SqlFormatter from 'prettier-plugin-sql'
-
-const DEFAULT_PARSER_OPTIONS = {
-  database: 'PostgreSQL',
-  type: 'table',
-}
 
 const DEFAULT_FORMATTER_OPTIONS = {
   plugins: [SqlFormatter],
@@ -20,21 +15,34 @@ const DEFAULT_FORMATTER_OPTIONS = {
 /**
  * Parses a SQL string into an AST.
  */
-export function Parse(sql: string, options: ParserOptions = {}): ParseReturnValues {
+export function Parse(sql: string): ParseReturnValues {
   try {
-    const parser = new Parser()
-    const ast = parser.parse(sql, {
-      ...DEFAULT_PARSER_OPTIONS,
-      ...options,
-    })
+    const data = parse(sql)
 
-    return { data: ast, error: null }
+    return { data, error: null }
   } catch (error) {
     return { data: null, error: error as Error }
   }
 }
 interface ParseReturnValues {
-  data: ParsedAst | null
+  data: object | null
+  error: null | Error
+}
+
+/**
+ * Deparses an AST into SQL string.
+ */
+export function Deparse(parsedSql: object): DeparseReturnValues {
+  try {
+    const data = deparse(parsedSql)
+
+    return { data, error: null }
+  } catch (error) {
+    return { data: null, error: error as Error }
+  }
+}
+interface DeparseReturnValues {
+  data: string | null
   error: null | Error
 }
 
