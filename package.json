@@ -34,9 +34,9 @@
   },
   "dependencies": {
     "@sinclair/typebox": "^0.19.2",
-    "node-sql-parser": "^3.9.4",
     "pg": "^8.7.1",
     "pg-format": "^1.0.4",
+    "pgsql-parser": "^13.1.11",
     "prettier": "^2.4.1",
     "prettier-plugin-sql": "^0.4.0",
     "sql-formatter": "^4.0.2"

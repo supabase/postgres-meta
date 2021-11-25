@@ -57,4 +57,21 @@ export default async (fastify: FastifyInstance) => {
 
     return data
   })
+
+  fastify.post<{
+    Headers: { pg: string }
+    Body: {
+      ast: object
+    }
+  }>('/deparse', async (request, reply) => {
+    const { data, error } = await Parser.Deparse(request.body.ast)
+
+    if (error) {
+      request.log.error(JSON.stringify({ error, req: request.body }))
+      reply.code(400)
+      return { error: error.message }
+    }
+
+    return data
+  })
 }

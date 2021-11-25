@@ -31,6 +31,7 @@ export default class PostgresMeta {
   version: PostgresMetaVersion
 
   parse = Parser.Parse
+  deparse = Parser.Deparse
   format = Parser.Format
 
   constructor(config: PoolConfig) {
