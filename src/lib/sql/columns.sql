@@ -33,6 +33,7 @@ SELECT
     WHEN 'd' THEN 'BY DEFAULT'
     ELSE NULL
   END AS identity_generation,
+  a.attgenerated IN ('s') AS is_generated,
   NOT (
     a.attnotnull
     OR t.typtype = 'd' AND t.typnotnull
