@@ -4,6 +4,9 @@ import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
 import { columnsSql } from './sql'
 import { PostgresMetaResult, PostgresColumn } from './types'
 
+// TODO: Fix handling of `type` in `create()` and `update()`.
+// `type` on its own is not enough, e.g. `1::my type` should be `1::"my type"`.
+// `ident(type)` is not enough, e.g. `"int2[]"` should be `"int2"[]`.
 export default class PostgresMetaColumns {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
   metaTables: PostgresMetaTables
@@ -126,15 +129,26 @@ export default class PostgresMetaColumns {
     }
     const { name: table, schema } = data!
 
-    let defaultValueClause: string
-    if (default_value === undefined) {
-      defaultValueClause = ''
-    } else if (default_value_format === 'expression') {
-      defaultValueClause = `DEFAULT ${default_value}`
+    let defaultValueClause = ''
+    if (is_identity) {
+      if (default_value !== undefined) {
+        return {
+          data: null,
+          error: { message: 'Columns cannot both be identity and have a default value' },
+        }
+      }
+
+      defaultValueClause = `GENERATED ${identity_generation} AS IDENTITY`
     } else {
-      defaultValueClause = `DEFAULT ${literal(default_value)}`
+      if (default_value === undefined) {
+        // skip
+      } else if (default_value_format === 'expression') {
+        defaultValueClause = `DEFAULT ${default_value}`
+      } else {
+        defaultValueClause = `DEFAULT ${literal(default_value)}`
+      }
     }
-    const isIdentityClause = is_identity ? `GENERATED ${identity_generation} AS IDENTITY` : ''
+
     let isNullableClause = ''
     if (is_nullable !== undefined) {
       isNullableClause = is_nullable ? 'NULL' : 'NOT NULL'
@@ -151,7 +165,6 @@ export default class PostgresMetaColumns {
 BEGIN;
   ALTER TABLE ${ident(schema)}.${ident(table)} ADD COLUMN ${ident(name)} ${type}
     ${defaultValueClause}
-    ${isIdentityClause}
     ${isNullableClause}
     ${isPrimaryKeyClause}
     ${isUniqueClause}
