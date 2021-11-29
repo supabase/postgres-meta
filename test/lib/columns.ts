@@ -3,25 +3,26 @@ import { pgMeta } from './utils'
 test('list', async () => {
   const res = await pgMeta.columns.list()
   expect(res.data?.find(({ name }) => name === 'user-id')).toMatchInlineSnapshot(`
-Object {
-  "comment": null,
-  "data_type": "bigint",
-  "default_value": null,
-  "enums": Array [],
-  "format": "int8",
-  "id": "16402.3",
-  "identity_generation": null,
-  "is_identity": false,
-  "is_nullable": false,
-  "is_unique": false,
-  "is_updatable": true,
-  "name": "user-id",
-  "ordinal_position": 3,
-  "schema": "public",
-  "table": "todos",
-  "table_id": 16402,
-}
-`)
+    Object {
+      "comment": null,
+      "data_type": "bigint",
+      "default_value": null,
+      "enums": Array [],
+      "format": "int8",
+      "id": "16402.3",
+      "identity_generation": null,
+      "is_generated": false,
+      "is_identity": false,
+      "is_nullable": false,
+      "is_unique": false,
+      "is_updatable": true,
+      "name": "user-id",
+      "ordinal_position": 3,
+      "schema": "public",
+      "table": "todos",
+      "table_id": 16402,
+    }
+  `)
 })
 
 test('retrieve, create, update, delete', async () => {
@@ -35,52 +36,54 @@ test('retrieve, create, update, delete', async () => {
     comment: 'foo',
   })
   expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "comment": "foo",
-    "data_type": "smallint",
-    "default_value": "'42'::smallint",
-    "enums": Array [],
-    "format": "int2",
-    "id": "16474.1",
-    "identity_generation": null,
-    "is_identity": false,
-    "is_nullable": true,
-    "is_unique": false,
-    "is_updatable": true,
-    "name": "c",
-    "ordinal_position": 1,
-    "schema": "public",
-    "table": "t",
-    "table_id": 16474,
-  },
-  "error": null,
-}
-`)
+    Object {
+      "data": Object {
+        "comment": "foo",
+        "data_type": "smallint",
+        "default_value": "'42'::smallint",
+        "enums": Array [],
+        "format": "int2",
+        "id": "16474.1",
+        "identity_generation": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_updatable": true,
+        "name": "c",
+        "ordinal_position": 1,
+        "schema": "public",
+        "table": "t",
+        "table_id": 16474,
+      },
+      "error": null,
+    }
+  `)
   res = await pgMeta.columns.retrieve({ id: res.data!.id })
   expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "comment": "foo",
-    "data_type": "smallint",
-    "default_value": "'42'::smallint",
-    "enums": Array [],
-    "format": "int2",
-    "id": "16474.1",
-    "identity_generation": null,
-    "is_identity": false,
-    "is_nullable": true,
-    "is_unique": false,
-    "is_updatable": true,
-    "name": "c",
-    "ordinal_position": 1,
-    "schema": "public",
-    "table": "t",
-    "table_id": 16474,
-  },
-  "error": null,
-}
-`)
+    Object {
+      "data": Object {
+        "comment": "foo",
+        "data_type": "smallint",
+        "default_value": "'42'::smallint",
+        "enums": Array [],
+        "format": "int2",
+        "id": "16474.1",
+        "identity_generation": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_updatable": true,
+        "name": "c",
+        "ordinal_position": 1,
+        "schema": "public",
+        "table": "t",
+        "table_id": 16474,
+      },
+      "error": null,
+    }
+  `)
   res = await pgMeta.columns.update(res.data!.id, {
     name: 'c1',
     type: 'int4',
@@ -91,52 +94,54 @@ Object {
     comment: 'bar',
   })
   expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "comment": "bar",
-    "data_type": "integer",
-    "default_value": null,
-    "enums": Array [],
-    "format": "int4",
-    "id": "16474.1",
-    "identity_generation": "ALWAYS",
-    "is_identity": true,
-    "is_nullable": false,
-    "is_unique": false,
-    "is_updatable": true,
-    "name": "c1",
-    "ordinal_position": 1,
-    "schema": "public",
-    "table": "t",
-    "table_id": 16474,
-  },
-  "error": null,
-}
-`)
+    Object {
+      "data": Object {
+        "comment": "bar",
+        "data_type": "integer",
+        "default_value": null,
+        "enums": Array [],
+        "format": "int4",
+        "id": "16474.1",
+        "identity_generation": "ALWAYS",
+        "is_generated": false,
+        "is_identity": true,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_updatable": true,
+        "name": "c1",
+        "ordinal_position": 1,
+        "schema": "public",
+        "table": "t",
+        "table_id": 16474,
+      },
+      "error": null,
+    }
+  `)
   res = await pgMeta.columns.remove(res.data!.id)
   expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "comment": "bar",
-    "data_type": "integer",
-    "default_value": null,
-    "enums": Array [],
-    "format": "int4",
-    "id": "16474.1",
-    "identity_generation": "ALWAYS",
-    "is_identity": true,
-    "is_nullable": false,
-    "is_unique": false,
-    "is_updatable": true,
-    "name": "c1",
-    "ordinal_position": 1,
-    "schema": "public",
-    "table": "t",
-    "table_id": 16474,
-  },
-  "error": null,
-}
-`)
+    Object {
+      "data": Object {
+        "comment": "bar",
+        "data_type": "integer",
+        "default_value": null,
+        "enums": Array [],
+        "format": "int4",
+        "id": "16474.1",
+        "identity_generation": "ALWAYS",
+        "is_generated": false,
+        "is_identity": true,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_updatable": true,
+        "name": "c1",
+        "ordinal_position": 1,
+        "schema": "public",
+        "table": "t",
+        "table_id": 16474,
+      },
+      "error": null,
+    }
+  `)
   res = await pgMeta.columns.retrieve({ id: res.data!.id })
   expect(res).toMatchObject({
     data: null,
@@ -153,27 +158,28 @@ test('enum column with quoted name', async () => {
 
   const res = await pgMeta.columns.list()
   expect(res.data!.find(({ table }) => table === 't')).toMatchInlineSnapshot(`
-Object {
-  "comment": null,
-  "data_type": "USER-DEFINED",
-  "default_value": null,
-  "enums": Array [
-    "v",
-  ],
-  "format": "T",
-  "id": "16487.1",
-  "identity_generation": null,
-  "is_identity": false,
-  "is_nullable": true,
-  "is_unique": false,
-  "is_updatable": true,
-  "name": "c",
-  "ordinal_position": 1,
-  "schema": "public",
-  "table": "t",
-  "table_id": 16487,
-}
-`)
+    Object {
+      "comment": null,
+      "data_type": "USER-DEFINED",
+      "default_value": null,
+      "enums": Array [
+        "v",
+      ],
+      "format": "T",
+      "id": "16487.1",
+      "identity_generation": null,
+      "is_generated": false,
+      "is_identity": false,
+      "is_nullable": true,
+      "is_unique": false,
+      "is_updatable": true,
+      "name": "c",
+      "ordinal_position": 1,
+      "schema": "public",
+      "table": "t",
+      "table_id": 16487,
+    }
+  `)
 
   await pgMeta.query('DROP TABLE t; DROP TYPE "T";')
 })
@@ -196,15 +202,15 @@ WHERE  i.indrelid = '${testTable!.name}'::regclass
 AND    i.indisprimary;
 `)
   expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Array [
     Object {
-      "attname": "c",
-    },
-  ],
-  "error": null,
-}
-`)
+      "data": Array [
+        Object {
+          "attname": "c",
+        },
+      ],
+      "error": null,
+    }
+  `)
 
   await pgMeta.tables.remove(testTable!.id)
 })
@@ -228,15 +234,15 @@ WHERE  i.indrelid = '${testTable!.name}'::regclass
 AND    i.indisunique;
 `)
   expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Array [
     Object {
-      "attname": "c",
-    },
-  ],
-  "error": null,
-}
-`)
+      "data": Array [
+        Object {
+          "attname": "c",
+        },
+      ],
+      "error": null,
+    }
+  `)
 
   await pgMeta.tables.remove(testTable!.id)
 })
@@ -250,28 +256,29 @@ test('array column', async () => {
     type: 'int2[]',
   })
   expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "comment": null,
-    "data_type": "ARRAY",
-    "default_value": null,
-    "enums": Array [],
-    "format": "_int2",
-    "id": "16500.1",
-    "identity_generation": null,
-    "is_identity": false,
-    "is_nullable": true,
-    "is_unique": false,
-    "is_updatable": true,
-    "name": "c",
-    "ordinal_position": 1,
-    "schema": "public",
-    "table": "t",
-    "table_id": 16500,
-  },
-  "error": null,
-}
-`)
+    Object {
+      "data": Object {
+        "comment": null,
+        "data_type": "ARRAY",
+        "default_value": null,
+        "enums": Array [],
+        "format": "_int2",
+        "id": "16500.1",
+        "identity_generation": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_updatable": true,
+        "name": "c",
+        "ordinal_position": 1,
+        "schema": "public",
+        "table": "t",
+        "table_id": 16500,
+      },
+      "error": null,
+    }
+  `)
 
   await pgMeta.tables.remove(testTable!.id)
 })
@@ -287,28 +294,29 @@ test('column with default value', async () => {
     default_value_format: 'expression',
   })
   expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "comment": null,
-    "data_type": "timestamp with time zone",
-    "default_value": "now()",
-    "enums": Array [],
-    "format": "timestamptz",
-    "id": "16506.1",
-    "identity_generation": null,
-    "is_identity": false,
-    "is_nullable": true,
-    "is_unique": false,
-    "is_updatable": true,
-    "name": "c",
-    "ordinal_position": 1,
-    "schema": "public",
-    "table": "t",
-    "table_id": 16506,
-  },
-  "error": null,
-}
-`)
+    Object {
+      "data": Object {
+        "comment": null,
+        "data_type": "timestamp with time zone",
+        "default_value": "now()",
+        "enums": Array [],
+        "format": "timestamptz",
+        "id": "16506.1",
+        "identity_generation": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_updatable": true,
+        "name": "c",
+        "ordinal_position": 1,
+        "schema": "public",
+        "table": "t",
+        "table_id": 16506,
+      },
+      "error": null,
+    }
+  `)
 
   await pgMeta.tables.remove(testTable!.id)
 })
@@ -330,15 +338,15 @@ SELECT pg_get_constraintdef((
 ));
 `)
   expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Array [
     Object {
-      "pg_get_constraintdef": null,
-    },
-  ],
-  "error": null,
-}
-`)
+      "data": Array [
+        Object {
+          "pg_get_constraintdef": null,
+        },
+      ],
+      "error": null,
+    }
+  `)
 
   await pgMeta.tables.remove(testTable!.id)
 })
@@ -355,28 +363,29 @@ test('update with name unchanged', async () => {
     name: 'c',
   })
   expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "comment": null,
-    "data_type": "smallint",
-    "default_value": null,
-    "enums": Array [],
-    "format": "int2",
-    "id": "16513.1",
-    "identity_generation": null,
-    "is_identity": false,
-    "is_nullable": true,
-    "is_unique": false,
-    "is_updatable": true,
-    "name": "c",
-    "ordinal_position": 1,
-    "schema": "public",
-    "table": "t",
-    "table_id": 16513,
-  },
-  "error": null,
-}
-`)
+    Object {
+      "data": Object {
+        "comment": null,
+        "data_type": "smallint",
+        "default_value": null,
+        "enums": Array [],
+        "format": "int2",
+        "id": "16513.1",
+        "identity_generation": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_updatable": true,
+        "name": "c",
+        "ordinal_position": 1,
+        "schema": "public",
+        "table": "t",
+        "table_id": 16513,
+      },
+      "error": null,
+    }
+  `)
 
   await pgMeta.tables.remove(testTable!.id)
 })
@@ -393,28 +402,29 @@ test('update with incompatible types', async () => {
     type: 'int4',
   })
   expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "comment": null,
-    "data_type": "integer",
-    "default_value": null,
-    "enums": Array [],
-    "format": "int4",
-    "id": "16516.1",
-    "identity_generation": null,
-    "is_identity": false,
-    "is_nullable": true,
-    "is_unique": false,
-    "is_updatable": true,
-    "name": "c",
-    "ordinal_position": 1,
-    "schema": "public",
-    "table": "t",
-    "table_id": 16516,
-  },
-  "error": null,
-}
-`)
+    Object {
+      "data": Object {
+        "comment": null,
+        "data_type": "integer",
+        "default_value": null,
+        "enums": Array [],
+        "format": "int4",
+        "id": "16516.1",
+        "identity_generation": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_updatable": true,
+        "name": "c",
+        "ordinal_position": 1,
+        "schema": "public",
+        "table": "t",
+        "table_id": 16516,
+      },
+      "error": null,
+    }
+  `)
 
   await pgMeta.tables.remove(testTable!.id)
 })
@@ -430,52 +440,54 @@ test('update is_unique', async () => {
   })
   res = await pgMeta.columns.update(res.data!.id, { is_unique: true })
   expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "comment": null,
-    "data_type": "text",
-    "default_value": null,
-    "enums": Array [],
-    "format": "text",
-    "id": "16525.1",
-    "identity_generation": null,
-    "is_identity": false,
-    "is_nullable": true,
-    "is_unique": true,
-    "is_updatable": true,
-    "name": "c",
-    "ordinal_position": 1,
-    "schema": "public",
-    "table": "t",
-    "table_id": 16525,
-  },
-  "error": null,
-}
-`)
+    Object {
+      "data": Object {
+        "comment": null,
+        "data_type": "text",
+        "default_value": null,
+        "enums": Array [],
+        "format": "text",
+        "id": "16525.1",
+        "identity_generation": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_unique": true,
+        "is_updatable": true,
+        "name": "c",
+        "ordinal_position": 1,
+        "schema": "public",
+        "table": "t",
+        "table_id": 16525,
+      },
+      "error": null,
+    }
+  `)
   res = await pgMeta.columns.update(res.data!.id, { is_unique: false })
   expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "comment": null,
-    "data_type": "text",
-    "default_value": null,
-    "enums": Array [],
-    "format": "text",
-    "id": "16525.1",
-    "identity_generation": null,
-    "is_identity": false,
-    "is_nullable": true,
-    "is_unique": false,
-    "is_updatable": true,
-    "name": "c",
-    "ordinal_position": 1,
-    "schema": "public",
-    "table": "t",
-    "table_id": 16525,
-  },
-  "error": null,
-}
-`)
+    Object {
+      "data": Object {
+        "comment": null,
+        "data_type": "text",
+        "default_value": null,
+        "enums": Array [],
+        "format": "text",
+        "id": "16525.1",
+        "identity_generation": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_updatable": true,
+        "name": "c",
+        "ordinal_position": 1,
+        "schema": "public",
+        "table": "t",
+        "table_id": 16525,
+      },
+      "error": null,
+    }
+  `)
 
   await pgMeta.tables.remove(testTable!.id)
 })
@@ -509,6 +521,7 @@ test('alter column to type with uppercase', async () => {
         "format": "T",
         "id": StringMatching /\\^\\\\d\\+\\\\\\.\\\\d\\+\\$/,
         "identity_generation": null,
+        "is_generated": false,
         "is_identity": false,
         "is_nullable": true,
         "is_unique": false,

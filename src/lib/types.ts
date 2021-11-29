@@ -33,6 +33,7 @@ export const postgresColumnSchema = Type.Object({
     Type.Literal('BY DEFAULT'),
     Type.Null(),
   ]),
+  is_generated: Type.Boolean(),
   is_nullable: Type.Boolean(),
   is_updatable: Type.Boolean(),
   is_unique: Type.Boolean(),
