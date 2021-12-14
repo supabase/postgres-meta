@@ -1,5 +1,20 @@
 import { pgMeta } from './utils'
 
+const cleanNondet = (x: any) => {
+  const {
+    data: { tables, ...rest2 },
+    ...rest1
+  } = x
+
+  return {
+    data: {
+      tables: tables?.map(({ id, ...rest }: any) => rest) ?? tables,
+      ...rest2,
+    },
+    ...rest1,
+  }
+}
+
 test('retrieve, create, update, delete', async () => {
   let res = await pgMeta.publications.create({
     name: 'a',
@@ -9,85 +24,95 @@ test('retrieve, create, update, delete', async () => {
     publish_truncate: false,
     tables: ['users'],
   })
-  expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "id": 16675,
-    "name": "a",
-    "owner": "postgres",
-    "publish_delete": true,
-    "publish_insert": true,
-    "publish_truncate": false,
-    "publish_update": true,
-    "tables": Array [
-      Object {
-        "id": 16391,
-        "name": "users",
-        "schema": "public",
+  expect(cleanNondet(res)).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    Object {
+      "data": Object {
+        "id": Any<Number>,
+        "name": "a",
+        "owner": "postgres",
+        "publish_delete": true,
+        "publish_insert": true,
+        "publish_truncate": false,
+        "publish_update": true,
+        "tables": Array [
+          Object {
+            "name": "users",
+            "schema": "public",
+          },
+        ],
       },
-    ],
-  },
-  "error": null,
-}
-`)
+      "error": null,
+    }
+  `
+  )
   res = await pgMeta.publications.retrieve({ id: res.data!.id })
-  expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "id": 16675,
-    "name": "a",
-    "owner": "postgres",
-    "publish_delete": true,
-    "publish_insert": true,
-    "publish_truncate": false,
-    "publish_update": true,
-    "tables": Array [
-      Object {
-        "id": 16391,
-        "name": "users",
-        "schema": "public",
+  expect(cleanNondet(res)).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    Object {
+      "data": Object {
+        "id": Any<Number>,
+        "name": "a",
+        "owner": "postgres",
+        "publish_delete": true,
+        "publish_insert": true,
+        "publish_truncate": false,
+        "publish_update": true,
+        "tables": Array [
+          Object {
+            "name": "users",
+            "schema": "public",
+          },
+        ],
       },
-    ],
-  },
-  "error": null,
-}
-`)
+      "error": null,
+    }
+  `
+  )
   res = await pgMeta.publications.update(res.data!.id, {
     name: 'b',
     publish_insert: false,
     tables: [],
   })
-  expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "id": 16675,
-    "name": "b",
-    "owner": "postgres",
-    "publish_delete": true,
-    "publish_insert": false,
-    "publish_truncate": false,
-    "publish_update": true,
-    "tables": Array [],
-  },
-  "error": null,
-}
-`)
+  expect(cleanNondet(res)).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    Object {
+      "data": Object {
+        "id": Any<Number>,
+        "name": "b",
+        "owner": "postgres",
+        "publish_delete": true,
+        "publish_insert": false,
+        "publish_truncate": false,
+        "publish_update": true,
+        "tables": Array [],
+      },
+      "error": null,
+    }
+  `
+  )
   res = await pgMeta.publications.remove(res.data!.id)
-  expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "id": 16675,
-    "name": "b",
-    "owner": "postgres",
-    "publish_delete": true,
-    "publish_insert": false,
-    "publish_truncate": false,
-    "publish_update": true,
-    "tables": Array [],
-  },
-  "error": null,
-}
-`)
+  expect(cleanNondet(res)).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    Object {
+      "data": Object {
+        "id": Any<Number>,
+        "name": "b",
+        "owner": "postgres",
+        "publish_delete": true,
+        "publish_insert": false,
+        "publish_truncate": false,
+        "publish_update": true,
+        "tables": Array [],
+      },
+      "error": null,
+    }
+  `
+  )
   res = await pgMeta.publications.retrieve({ id: res.data!.id })
   expect(res).toMatchObject({
     data: null,
@@ -106,51 +131,55 @@ test('tables with uppercase', async () => {
     name: 'pub',
     tables: ['T'],
   })
-  expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "id": 16680,
-    "name": "pub",
-    "owner": "postgres",
-    "publish_delete": false,
-    "publish_insert": false,
-    "publish_truncate": false,
-    "publish_update": false,
-    "tables": Array [
-      Object {
-        "id": 16677,
-        "name": "T",
-        "schema": "public",
+  expect(cleanNondet(res)).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    Object {
+      "data": Object {
+        "id": Any<Number>,
+        "name": "pub",
+        "owner": "postgres",
+        "publish_delete": false,
+        "publish_insert": false,
+        "publish_truncate": false,
+        "publish_update": false,
+        "tables": Array [
+          Object {
+            "name": "T",
+            "schema": "public",
+          },
+        ],
       },
-    ],
-  },
-  "error": null,
-}
-`)
+      "error": null,
+    }
+  `
+  )
   res = await pgMeta.publications.update(res.data!.id, {
     tables: ['T'],
   })
-  expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "id": 16680,
-    "name": "pub",
-    "owner": "postgres",
-    "publish_delete": false,
-    "publish_insert": false,
-    "publish_truncate": false,
-    "publish_update": false,
-    "tables": Array [
-      Object {
-        "id": 16677,
-        "name": "T",
-        "schema": "public",
+  expect(cleanNondet(res)).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    Object {
+      "data": Object {
+        "id": Any<Number>,
+        "name": "pub",
+        "owner": "postgres",
+        "publish_delete": false,
+        "publish_insert": false,
+        "publish_truncate": false,
+        "publish_update": false,
+        "tables": Array [
+          Object {
+            "name": "T",
+            "schema": "public",
+          },
+        ],
       },
-    ],
-  },
-  "error": null,
-}
-`)
+      "error": null,
+    }
+  `
+  )
   await pgMeta.publications.remove(res.data!.id)
 
   await pgMeta.tables.remove(testTableId)
@@ -164,20 +193,23 @@ test('FOR ALL TABLES', async () => {
     publish_delete: true,
     publish_truncate: false,
   })
-  expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "id": 16682,
-    "name": "for_all",
-    "owner": "postgres",
-    "publish_delete": true,
-    "publish_insert": true,
-    "publish_truncate": false,
-    "publish_update": true,
-    "tables": null,
-  },
-  "error": null,
-}
-`)
+  expect(cleanNondet(res)).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    Object {
+      "data": Object {
+        "id": Any<Number>,
+        "name": "for_all",
+        "owner": "postgres",
+        "publish_delete": true,
+        "publish_insert": true,
+        "publish_truncate": false,
+        "publish_update": true,
+        "tables": null,
+      },
+      "error": null,
+    }
+  `
+  )
   await pgMeta.publications.remove(res.data!.id)
 })

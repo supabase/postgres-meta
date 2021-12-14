@@ -2,11 +2,17 @@ import { pgMeta } from './utils'
 
 test('list', async () => {
   const res = await pgMeta.roles.list()
-  expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Array [
+
+  const { grants, ...rest }: any = res.data?.find(({ name }) => name === 'postgres')
+
+  expect({
+    grants: grants.map(({ table_id, ...rest }: any) => rest),
+    ...rest,
+  }).toMatchInlineSnapshot(
+    { active_connections: expect.any(Number), id: expect.any(Number) },
+    `
     Object {
-      "active_connections": 2,
+      "active_connections": Any<Number>,
       "can_bypass_rls": true,
       "can_create_db": true,
       "can_create_role": true,
@@ -20,7 +26,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "INSERT",
           "schema": "public",
-          "table_id": 16391,
           "table_name": "users",
           "with_hierarchy": false,
         },
@@ -30,7 +35,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "SELECT",
           "schema": "public",
-          "table_id": 16391,
           "table_name": "users",
           "with_hierarchy": true,
         },
@@ -40,7 +44,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "UPDATE",
           "schema": "public",
-          "table_id": 16391,
           "table_name": "users",
           "with_hierarchy": false,
         },
@@ -50,7 +53,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "DELETE",
           "schema": "public",
-          "table_id": 16391,
           "table_name": "users",
           "with_hierarchy": false,
         },
@@ -60,7 +62,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "TRUNCATE",
           "schema": "public",
-          "table_id": 16391,
           "table_name": "users",
           "with_hierarchy": false,
         },
@@ -70,7 +71,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "REFERENCES",
           "schema": "public",
-          "table_id": 16391,
           "table_name": "users",
           "with_hierarchy": false,
         },
@@ -80,7 +80,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "TRIGGER",
           "schema": "public",
-          "table_id": 16391,
           "table_name": "users",
           "with_hierarchy": false,
         },
@@ -90,7 +89,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "INSERT",
           "schema": "public",
-          "table_id": 16402,
           "table_name": "todos",
           "with_hierarchy": false,
         },
@@ -100,7 +98,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "SELECT",
           "schema": "public",
-          "table_id": 16402,
           "table_name": "todos",
           "with_hierarchy": true,
         },
@@ -110,7 +107,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "UPDATE",
           "schema": "public",
-          "table_id": 16402,
           "table_name": "todos",
           "with_hierarchy": false,
         },
@@ -120,7 +116,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "DELETE",
           "schema": "public",
-          "table_id": 16402,
           "table_name": "todos",
           "with_hierarchy": false,
         },
@@ -130,7 +125,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "TRUNCATE",
           "schema": "public",
-          "table_id": 16402,
           "table_name": "todos",
           "with_hierarchy": false,
         },
@@ -140,7 +134,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "REFERENCES",
           "schema": "public",
-          "table_id": 16402,
           "table_name": "todos",
           "with_hierarchy": false,
         },
@@ -150,7 +143,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "TRIGGER",
           "schema": "public",
-          "table_id": 16402,
           "table_name": "todos",
           "with_hierarchy": false,
         },
@@ -160,7 +152,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "INSERT",
           "schema": "public",
-          "table_id": 16418,
           "table_name": "users_audit",
           "with_hierarchy": false,
         },
@@ -170,7 +161,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "SELECT",
           "schema": "public",
-          "table_id": 16418,
           "table_name": "users_audit",
           "with_hierarchy": true,
         },
@@ -180,7 +170,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "UPDATE",
           "schema": "public",
-          "table_id": 16418,
           "table_name": "users_audit",
           "with_hierarchy": false,
         },
@@ -190,7 +179,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "DELETE",
           "schema": "public",
-          "table_id": 16418,
           "table_name": "users_audit",
           "with_hierarchy": false,
         },
@@ -200,7 +188,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "TRUNCATE",
           "schema": "public",
-          "table_id": 16418,
           "table_name": "users_audit",
           "with_hierarchy": false,
         },
@@ -210,7 +197,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "REFERENCES",
           "schema": "public",
-          "table_id": 16418,
           "table_name": "users_audit",
           "with_hierarchy": false,
         },
@@ -220,7 +206,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "TRIGGER",
           "schema": "public",
-          "table_id": 16418,
           "table_name": "users_audit",
           "with_hierarchy": false,
         },
@@ -230,7 +215,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "INSERT",
           "schema": "public",
-          "table_id": 16428,
           "table_name": "category",
           "with_hierarchy": false,
         },
@@ -240,7 +224,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "SELECT",
           "schema": "public",
-          "table_id": 16428,
           "table_name": "category",
           "with_hierarchy": true,
         },
@@ -250,7 +233,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "UPDATE",
           "schema": "public",
-          "table_id": 16428,
           "table_name": "category",
           "with_hierarchy": false,
         },
@@ -260,7 +242,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "DELETE",
           "schema": "public",
-          "table_id": 16428,
           "table_name": "category",
           "with_hierarchy": false,
         },
@@ -270,7 +251,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "TRUNCATE",
           "schema": "public",
-          "table_id": 16428,
           "table_name": "category",
           "with_hierarchy": false,
         },
@@ -280,7 +260,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "REFERENCES",
           "schema": "public",
-          "table_id": 16428,
           "table_name": "category",
           "with_hierarchy": false,
         },
@@ -290,7 +269,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "TRIGGER",
           "schema": "public",
-          "table_id": 16428,
           "table_name": "category",
           "with_hierarchy": false,
         },
@@ -300,7 +278,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "INSERT",
           "schema": "public",
-          "table_id": 16447,
           "table_name": "memes",
           "with_hierarchy": false,
         },
@@ -310,7 +287,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "SELECT",
           "schema": "public",
-          "table_id": 16447,
           "table_name": "memes",
           "with_hierarchy": true,
         },
@@ -320,7 +296,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "UPDATE",
           "schema": "public",
-          "table_id": 16447,
           "table_name": "memes",
           "with_hierarchy": false,
         },
@@ -330,7 +305,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "DELETE",
           "schema": "public",
-          "table_id": 16447,
           "table_name": "memes",
           "with_hierarchy": false,
         },
@@ -340,7 +314,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "TRUNCATE",
           "schema": "public",
-          "table_id": 16447,
           "table_name": "memes",
           "with_hierarchy": false,
         },
@@ -350,7 +323,6 @@ Object {
           "is_grantable": true,
           "privilege_type": "REFERENCES",
           "schema": "public",
-          "table_id": 16447,
           "table_name": "memes",
           "with_hierarchy": false,
         },
@@ -360,23 +332,20 @@ Object {
           "is_grantable": true,
           "privilege_type": "TRIGGER",
           "schema": "public",
-          "table_id": 16447,
           "table_name": "memes",
           "with_hierarchy": false,
         },
       ],
-      "id": 10,
+      "id": Any<Number>,
       "inherit_role": true,
       "is_replication_role": true,
       "is_superuser": true,
       "name": "postgres",
       "password": "********",
       "valid_until": null,
-    },
-  ],
-  "error": null,
-}
-`)
+    }
+  `
+  )
 })
 
 test('retrieve, create, update, delete', async () => {
@@ -392,49 +361,55 @@ test('retrieve, create, update, delete', async () => {
     connection_limit: 100,
     valid_until: '2020-01-01T00:00:00.000Z',
   })
-  expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "active_connections": 0,
-    "can_bypass_rls": true,
-    "can_create_db": true,
-    "can_create_role": true,
-    "can_login": true,
-    "config": null,
-    "connection_limit": 100,
-    "id": 16672,
-    "inherit_role": false,
-    "is_replication_role": true,
-    "is_superuser": true,
-    "name": "r",
-    "password": "********",
-    "valid_until": 2020-01-01T00:00:00.000Z,
-  },
-  "error": null,
-}
-`)
+  expect(res).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    Object {
+      "data": Object {
+        "active_connections": 0,
+        "can_bypass_rls": true,
+        "can_create_db": true,
+        "can_create_role": true,
+        "can_login": true,
+        "config": null,
+        "connection_limit": 100,
+        "id": Any<Number>,
+        "inherit_role": false,
+        "is_replication_role": true,
+        "is_superuser": true,
+        "name": "r",
+        "password": "********",
+        "valid_until": 2020-01-01T00:00:00.000Z,
+      },
+      "error": null,
+    }
+  `
+  )
   res = await pgMeta.roles.retrieve({ id: res.data!.id })
-  expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "active_connections": 0,
-    "can_bypass_rls": true,
-    "can_create_db": true,
-    "can_create_role": true,
-    "can_login": true,
-    "config": null,
-    "connection_limit": 100,
-    "id": 16672,
-    "inherit_role": false,
-    "is_replication_role": true,
-    "is_superuser": true,
-    "name": "r",
-    "password": "********",
-    "valid_until": 2020-01-01T00:00:00.000Z,
-  },
-  "error": null,
-}
-`)
+  expect(res).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    Object {
+      "data": Object {
+        "active_connections": 0,
+        "can_bypass_rls": true,
+        "can_create_db": true,
+        "can_create_role": true,
+        "can_login": true,
+        "config": null,
+        "connection_limit": 100,
+        "id": Any<Number>,
+        "inherit_role": false,
+        "is_replication_role": true,
+        "is_superuser": true,
+        "name": "r",
+        "password": "********",
+        "valid_until": 2020-01-01T00:00:00.000Z,
+      },
+      "error": null,
+    }
+  `
+  )
   await pgMeta.roles.remove(res.data!.id)
   res = await pgMeta.roles.create({
     name: 'r',
@@ -451,49 +426,55 @@ Object {
     connection_limit: 100,
     valid_until: '2020-01-01T00:00:00.000Z',
   })
-  expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "active_connections": 0,
-    "can_bypass_rls": true,
-    "can_create_db": true,
-    "can_create_role": true,
-    "can_login": true,
-    "config": null,
-    "connection_limit": 100,
-    "id": 16673,
-    "inherit_role": false,
-    "is_replication_role": true,
-    "is_superuser": true,
-    "name": "rr",
-    "password": "********",
-    "valid_until": 2020-01-01T00:00:00.000Z,
-  },
-  "error": null,
-}
-`)
+  expect(res).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    Object {
+      "data": Object {
+        "active_connections": 0,
+        "can_bypass_rls": true,
+        "can_create_db": true,
+        "can_create_role": true,
+        "can_login": true,
+        "config": null,
+        "connection_limit": 100,
+        "id": Any<Number>,
+        "inherit_role": false,
+        "is_replication_role": true,
+        "is_superuser": true,
+        "name": "rr",
+        "password": "********",
+        "valid_until": 2020-01-01T00:00:00.000Z,
+      },
+      "error": null,
+    }
+  `
+  )
   res = await pgMeta.roles.remove(res.data!.id)
-  expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "active_connections": 0,
-    "can_bypass_rls": true,
-    "can_create_db": true,
-    "can_create_role": true,
-    "can_login": true,
-    "config": null,
-    "connection_limit": 100,
-    "id": 16673,
-    "inherit_role": false,
-    "is_replication_role": true,
-    "is_superuser": true,
-    "name": "rr",
-    "password": "********",
-    "valid_until": 2020-01-01T00:00:00.000Z,
-  },
-  "error": null,
-}
-`)
+  expect(res).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    Object {
+      "data": Object {
+        "active_connections": 0,
+        "can_bypass_rls": true,
+        "can_create_db": true,
+        "can_create_role": true,
+        "can_login": true,
+        "config": null,
+        "connection_limit": 100,
+        "id": Any<Number>,
+        "inherit_role": false,
+        "is_replication_role": true,
+        "is_superuser": true,
+        "name": "rr",
+        "password": "********",
+        "valid_until": 2020-01-01T00:00:00.000Z,
+      },
+      "error": null,
+    }
+  `
+  )
   res = await pgMeta.roles.retrieve({ id: res.data!.id })
   expect(res).toMatchObject({
     data: null,

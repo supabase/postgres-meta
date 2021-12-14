@@ -16,65 +16,76 @@ test('list with system schemas', async () => {
 
 test('list without system schemas', async () => {
   const res = await pgMeta.schemas.list({ includeSystemSchemas: false })
-  expect(res).toMatchInlineSnapshot(`
+  expect(res.data?.find(({ name }) => name === 'pg_catalog')).toMatchInlineSnapshot(`undefined`)
+  expect(res.data?.find(({ name }) => name === 'public')).toMatchInlineSnapshot(
+    { id: expect.any(Number) },
+    `
     Object {
-      "data": Array [
-        Object {
-          "id": 2200,
-          "name": "public",
-          "owner": "postgres",
-        },
-      ],
-      "error": null,
+      "id": Any<Number>,
+      "name": "public",
+      "owner": "postgres",
     }
-  `)
+  `
+  )
 })
 
 test('retrieve, create, update, delete', async () => {
   let res = await pgMeta.schemas.create({ name: 's' })
-  expect(res).toMatchInlineSnapshot(`
+  expect(res).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
     Object {
       "data": Object {
-        "id": 16462,
+        "id": Any<Number>,
         "name": "s",
         "owner": "postgres",
       },
       "error": null,
     }
-  `)
+  `
+  )
   res = await pgMeta.schemas.retrieve({ id: res.data!.id })
-  expect(res).toMatchInlineSnapshot(`
+  expect(res).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
     Object {
       "data": Object {
-        "id": 16462,
+        "id": Any<Number>,
         "name": "s",
         "owner": "postgres",
       },
       "error": null,
     }
-  `)
+  `
+  )
   res = await pgMeta.schemas.update(res.data!.id, { name: 'ss', owner: 'postgres' })
-  expect(res).toMatchInlineSnapshot(`
+  expect(res).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
     Object {
       "data": Object {
-        "id": 16462,
+        "id": Any<Number>,
         "name": "ss",
         "owner": "postgres",
       },
       "error": null,
     }
-  `)
+  `
+  )
   res = await pgMeta.schemas.remove(res.data!.id)
-  expect(res).toMatchInlineSnapshot(`
+  expect(res).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
     Object {
       "data": Object {
-        "id": 16462,
+        "id": Any<Number>,
         "name": "ss",
         "owner": "postgres",
       },
       "error": null,
     }
-  `)
+  `
+  )
   res = await pgMeta.schemas.retrieve({ id: res.data!.id })
   expect(res).toMatchObject({
     data: null,

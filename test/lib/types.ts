@@ -2,9 +2,9 @@ import { pgMeta } from './utils'
 
 test('list', async () => {
   const res = await pgMeta.types.list()
-  expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Array [
+  expect(res.data?.find(({ name }) => name === 'user_status')).toMatchInlineSnapshot(
+    { id: expect.any(Number) },
+    `
     Object {
       "comment": null,
       "enums": Array [
@@ -12,24 +12,10 @@ Object {
         "INACTIVE",
       ],
       "format": "user_status",
-      "id": 16385,
+      "id": Any<Number>,
       "name": "user_status",
       "schema": "public",
-    },
-    Object {
-      "comment": null,
-      "enums": Array [
-        "new",
-        "old",
-        "retired",
-      ],
-      "format": "meme_status",
-      "id": 16439,
-      "name": "meme_status",
-      "schema": "public",
-    },
-  ],
-  "error": null,
-}
-`)
+    }
+  `
+  )
 })
