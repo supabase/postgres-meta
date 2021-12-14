@@ -1,9 +1,10 @@
 services:
   db:
-    image: postgres:13
+    image: supabase/postgres:14.1.0
     ports:
       - 5432:5432
     volumes:
     - .:/docker-entrypoint-initdb.d
     environment: 
       POSTGRES_PASSWORD: postgres
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf

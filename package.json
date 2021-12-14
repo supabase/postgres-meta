@@ -25,7 +25,7 @@
     "pkg": "run-s clean build:server && pkg --out-path bin .pkg.config.json",
     "test": "run-s db:clean db:run test:run db:clean",
     "db:clean": "cd test/db && docker-compose down",
-    "db:run": "cd test/db && docker-compose up --detach && sleep 5",
+    "db:run": "cd test/db && docker-compose up --detach",
     "test:run": "jest --runInBand"
   },
   "engines": {
