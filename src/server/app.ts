@@ -1,17 +1,18 @@
 import fastify from 'fastify'
 import { PG_META_EXPORT_DOCS, PG_META_PORT } from './constants'
 import routes from './routes'
+import { extractRequestForLogging } from './utils'
 import pkg from '../../package.json'
 
 const app = fastify({ logger: true, disableRequestLogging: true })
 
 app.setErrorHandler((error, request, reply) => {
-  app.log.error(JSON.stringify({ error, req: request.body }))
+  app.log.error({ error, request: extractRequestForLogging(request) })
   reply.code(500).send({ error: error.message })
 })
 
 app.setNotFoundHandler((request, reply) => {
-  app.log.error(JSON.stringify({ error: 'Not found', req: request.body }))
+  app.log.error({ error: 'Not found', request: extractRequestForLogging(request) })
   reply.code(404).send({ error: 'Not found' })
 })
 
