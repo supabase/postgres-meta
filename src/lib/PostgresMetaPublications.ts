@@ -175,6 +175,7 @@ CREATE PUBLICATION ${ident(name)} ${tableClause}
     } else if (old!.tables.length === 0) {
       tableSql = ''
     } else {
+      // @ts-ignore: Suppress TS2589
       tableSql = `ALTER PUBLICATION ${ident(old!.name)} DROP TABLE ${old!.tables
         .map((table) => `${ident(table.schema)}.${ident(table.name)}`)
         .join(',')};`

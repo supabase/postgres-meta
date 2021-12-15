@@ -2,6 +2,7 @@ import { pgMeta } from './utils'
 
 test('list', async () => {
   const res = await pgMeta.config.list()
+  // @ts-ignore: Suppress TS2589
   expect(res.data?.find(({ name }) => name === 'autovacuum')).toMatchInlineSnapshot(`
 Object {
   "boot_val": "on",
