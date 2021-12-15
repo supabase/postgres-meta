@@ -26,7 +26,7 @@ export const init: (config: PoolConfig) => {
 
         const { rows } = await pool.query(sql)
         return { data: rows, error: null }
-      } catch (e) {
+      } catch (e: any) {
         return { data: null, error: { message: e.message } }
       }
     },
