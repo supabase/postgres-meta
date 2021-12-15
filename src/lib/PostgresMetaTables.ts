@@ -118,6 +118,7 @@ export default class PostgresMetaTables {
       rls_forced,
       replica_identity,
       replica_identity_index,
+      primary_keys,
       comment,
     }: {
       name?: string
@@ -126,6 +127,7 @@ export default class PostgresMetaTables {
       rls_forced?: boolean
       replica_identity?: 'DEFAULT' | 'INDEX' | 'FULL' | 'NOTHING'
       replica_identity_index?: string
+      primary_keys?: { name: string }[]
       comment?: string
     }
   ): Promise<PostgresMetaResult<PostgresTable>> {
@@ -153,13 +155,41 @@ export default class PostgresMetaTables {
       const disable = `${alter} NO FORCE ROW LEVEL SECURITY;`
       forceRls = rls_forced ? enable : disable
     }
-    let replicaSql: string
+    let replicaSql = ''
     if (replica_identity === undefined) {
-      replicaSql = ''
+      // skip
     } else if (replica_identity === 'INDEX') {
       replicaSql = `${alter} REPLICA IDENTITY USING INDEX ${replica_identity_index};`
     } else {
       replicaSql = `${alter} REPLICA IDENTITY ${replica_identity};`
+    }
+    let primaryKeysSql = ''
+    if (primary_keys === undefined) {
+      // skip
+    } else {
+      if (old!.primary_keys.length !== 0) {
+        primaryKeysSql += `
+DO $$
+DECLARE
+  r record;
+BEGIN
+  SELECT conname
+    INTO r
+    FROM pg_constraint
+    WHERE contype = 'p' AND conrelid = ${literal(id)};
+  EXECUTE ${literal(`${alter} DROP CONSTRAINT `)} || quote_ident(r.conname);
+END
+$$;
+`
+      }
+
+      if (primary_keys.length === 0) {
+        // skip
+      } else {
+        primaryKeysSql += `${alter} ADD PRIMARY KEY (${primary_keys
+          .map((x) => ident(x.name))
+          .join(',')});`
+      }
     }
     const commentSql =
       comment === undefined
@@ -171,6 +201,7 @@ BEGIN;
   ${enableRls}
   ${forceRls}
   ${replicaSql}
+  ${primaryKeysSql}
   ${commentSql}
   ${schemaSql}
   ${nameSql}
