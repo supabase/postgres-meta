@@ -30,7 +30,7 @@ export default async (fastify: FastifyInstance) => {
       query: string
     }
   }>('/format', async (request, reply) => {
-    const { data, error } = await Parser.Format(request.body.query)
+    const { data, error } = Parser.Format(request.body.query)
 
     if (error) {
       request.log.error(JSON.stringify({ error, req: request.body }))
@@ -47,7 +47,7 @@ export default async (fastify: FastifyInstance) => {
       query: string
     }
   }>('/parse', async (request, reply) => {
-    const { data, error } = await Parser.Parse(request.body.query)
+    const { data, error } = Parser.Parse(request.body.query)
 
     if (error) {
       request.log.error(JSON.stringify({ error, req: request.body }))
@@ -64,7 +64,7 @@ export default async (fastify: FastifyInstance) => {
       ast: object
     }
   }>('/deparse', async (request, reply) => {
-    const { data, error } = await Parser.Deparse(request.body.ast)
+    const { data, error } = Parser.Deparse(request.body.ast)
 
     if (error) {
       request.log.error(JSON.stringify({ error, req: request.body }))
