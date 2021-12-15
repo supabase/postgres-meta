@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify'
 import { PostgresMeta } from '../../lib'
 import { DEFAULT_POOL_CONFIG } from '../constants'
+import { extractRequestForLogging } from '../utils'
 
 export default async (fastify: FastifyInstance) => {
   fastify.get<{
@@ -20,7 +21,7 @@ export default async (fastify: FastifyInstance) => {
     const { data, error } = await pgMeta.types.list({ includeSystemSchemas, limit, offset })
     await pgMeta.end()
     if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
+      request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(500)
       return { error: error.message }
     }

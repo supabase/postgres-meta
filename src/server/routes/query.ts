@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify'
 import { PostgresMeta } from '../../lib'
 import * as Parser from '../../lib/Parser'
 import { DEFAULT_POOL_CONFIG } from '../constants'
+import { extractRequestForLogging } from '../utils'
 
 export default async (fastify: FastifyInstance) => {
   fastify.post<{
@@ -16,7 +17,7 @@ export default async (fastify: FastifyInstance) => {
     const { data, error } = await pgMeta.query(request.body.query)
     await pgMeta.end()
     if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
+      request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(400)
       return { error: error.message }
     }
@@ -33,7 +34,7 @@ export default async (fastify: FastifyInstance) => {
     const { data, error } = Parser.Format(request.body.query)
 
     if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
+      request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(400)
       return { error: error.message }
     }
@@ -50,7 +51,7 @@ export default async (fastify: FastifyInstance) => {
     const { data, error } = Parser.Parse(request.body.query)
 
     if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
+      request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(400)
       return { error: error.message }
     }
@@ -67,7 +68,7 @@ export default async (fastify: FastifyInstance) => {
     const { data, error } = Parser.Deparse(request.body.ast)
 
     if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
+      request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(400)
       return { error: error.message }
     }

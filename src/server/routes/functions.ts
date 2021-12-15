@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify'
 import { PostgresMeta } from '../../lib'
 import { DEFAULT_POOL_CONFIG } from '../constants'
+import { extractRequestForLogging } from '../utils'
 
 export default async (fastify: FastifyInstance) => {
   fastify.get<{
@@ -20,7 +21,7 @@ export default async (fastify: FastifyInstance) => {
     const { data, error } = await pgMeta.functions.list({ includeSystemSchemas, limit, offset })
     await pgMeta.end()
     if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
+      request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(500)
       return { error: error.message }
     }
@@ -41,7 +42,7 @@ export default async (fastify: FastifyInstance) => {
     const { data, error } = await pgMeta.functions.retrieve({ id })
     await pgMeta.end()
     if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
+      request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(404)
       return { error: error.message }
     }
@@ -59,7 +60,7 @@ export default async (fastify: FastifyInstance) => {
     const { data, error } = await pgMeta.functions.create(request.body)
     await pgMeta.end()
     if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
+      request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(400)
       return { error: error.message }
     }
@@ -80,7 +81,7 @@ export default async (fastify: FastifyInstance) => {
     const { data, error } = await pgMeta.functions.update(id, request.body)
     await pgMeta.end()
     if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
+      request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(400)
       if (error.message.startsWith('Cannot find')) reply.code(404)
       return { error: error.message }
@@ -101,7 +102,7 @@ export default async (fastify: FastifyInstance) => {
     const { data, error } = await pgMeta.functions.remove(id)
     await pgMeta.end()
     if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
+      request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(400)
       if (error.message.startsWith('Cannot find')) reply.code(404)
       return { error: error.message }
