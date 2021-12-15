@@ -771,3 +771,157 @@ test("allow ' in comments", async () => {
   )
   await pgMeta.tables.remove(res.data!.id)
 })
+
+test('primary keys', async () => {
+  let res = await pgMeta.tables.create({ name: 't' })
+  await pgMeta.columns.create({ table_id: res.data!.id, name: 'c', type: 'int8' })
+  await pgMeta.columns.create({ table_id: res.data!.id, name: 'cc', type: 'text' })
+  res = await pgMeta.tables.update(res.data!.id, {
+    primary_keys: [{ name: 'c' }, { name: 'cc' }],
+  })
+  expect(cleanNondet(res)).toMatchInlineSnapshot(
+    {
+      data: {
+        bytes: expect.any(Number),
+        dead_rows_estimate: expect.any(Number),
+        id: expect.any(Number),
+        live_rows_estimate: expect.any(Number),
+        size: expect.any(String),
+      },
+    },
+    `
+    Object {
+      "data": Object {
+        "bytes": Any<Number>,
+        "columns": Array [
+          Object {
+            "comment": null,
+            "data_type": "bigint",
+            "default_value": null,
+            "enums": Array [],
+            "format": "int8",
+            "identity_generation": null,
+            "is_generated": false,
+            "is_identity": false,
+            "is_nullable": false,
+            "is_unique": false,
+            "is_updatable": true,
+            "name": "c",
+            "ordinal_position": 1,
+            "schema": "public",
+            "table": "t",
+          },
+          Object {
+            "comment": null,
+            "data_type": "text",
+            "default_value": null,
+            "enums": Array [],
+            "format": "text",
+            "identity_generation": null,
+            "is_generated": false,
+            "is_identity": false,
+            "is_nullable": false,
+            "is_unique": false,
+            "is_updatable": true,
+            "name": "cc",
+            "ordinal_position": 2,
+            "schema": "public",
+            "table": "t",
+          },
+        ],
+        "comment": null,
+        "dead_rows_estimate": Any<Number>,
+        "grants": Array [
+          Object {
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "is_grantable": true,
+            "privilege_type": "INSERT",
+            "schema": "public",
+            "table_name": "t",
+            "with_hierarchy": false,
+          },
+          Object {
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "is_grantable": true,
+            "privilege_type": "SELECT",
+            "schema": "public",
+            "table_name": "t",
+            "with_hierarchy": true,
+          },
+          Object {
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "is_grantable": true,
+            "privilege_type": "UPDATE",
+            "schema": "public",
+            "table_name": "t",
+            "with_hierarchy": false,
+          },
+          Object {
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "is_grantable": true,
+            "privilege_type": "DELETE",
+            "schema": "public",
+            "table_name": "t",
+            "with_hierarchy": false,
+          },
+          Object {
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "is_grantable": true,
+            "privilege_type": "TRUNCATE",
+            "schema": "public",
+            "table_name": "t",
+            "with_hierarchy": false,
+          },
+          Object {
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "is_grantable": true,
+            "privilege_type": "REFERENCES",
+            "schema": "public",
+            "table_name": "t",
+            "with_hierarchy": false,
+          },
+          Object {
+            "grantee": "postgres",
+            "grantor": "postgres",
+            "is_grantable": true,
+            "privilege_type": "TRIGGER",
+            "schema": "public",
+            "table_name": "t",
+            "with_hierarchy": false,
+          },
+        ],
+        "id": Any<Number>,
+        "live_rows_estimate": Any<Number>,
+        "name": "t",
+        "policies": Array [],
+        "primary_keys": Array [
+          Object {
+            "name": "c",
+            "schema": "public",
+            "table_name": "t",
+          },
+          Object {
+            "name": "cc",
+            "schema": "public",
+            "table_name": "t",
+          },
+        ],
+        "relationships": Array [],
+        "replica_identity": "DEFAULT",
+        "rls_enabled": false,
+        "rls_forced": false,
+        "schema": "public",
+        "size": Any<String>,
+      },
+      "error": null,
+    }
+  `
+  )
+  await pgMeta.tables.remove(res.data!.id)
+})
