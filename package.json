@@ -33,7 +33,7 @@
     "npm": ">=7"
   },
   "dependencies": {
-    "@sinclair/typebox": "^0.19.2",
+    "@sinclair/typebox": "^0.21.0",
     "pg": "^8.7.1",
     "pg-format": "^1.0.4",
     "pgsql-parser": "^13.1.11",
