@@ -1,6 +1,6 @@
 import { ident, literal } from 'pg-format'
 import { publicationsSql } from './sql'
-import { PostgresMetaResult, PostgresPublication } from './types'
+import { PostgresMetaResult, PostgresPublication, PostgresTable } from './types'
 
 export default class PostgresMetaPublications {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -175,9 +175,10 @@ CREATE PUBLICATION ${ident(name)} ${tableClause}
     } else if (old!.tables.length === 0) {
       tableSql = ''
     } else {
-      // @ts-ignore: Suppress TS2589
       tableSql = `ALTER PUBLICATION ${ident(old!.name)} DROP TABLE ${old!.tables
-        .map((table) => `${ident(table.schema)}.${ident(table.name)}`)
+        .map(
+          (table: { schema: string; name: string }) => `${ident(table.schema)}.${ident(table.name)}`
+        )
         .join(',')};`
     }
 

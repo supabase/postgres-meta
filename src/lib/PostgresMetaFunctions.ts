@@ -244,7 +244,7 @@ export default class PostgresMetaFunctions {
         config_params
           ? Object.entries(config_params)
               .map(
-                ([param, value]) =>
+                ([param, value]: string[]) =>
                   `SET ${param} ${value[0] === 'FROM CURRENT' ? 'FROM CURRENT' : 'TO ' + value}`
               )
               .join('\n')
