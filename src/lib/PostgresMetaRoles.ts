@@ -35,7 +35,7 @@ WITH roles AS (${
   })
 SELECT
   *,
-  ${coalesceRowsToArray('grants', 'SELECT * FROM grants WHERE grants.grantee = roles.name')}
+  ${coalesceRowsToArray('grants', 'grants.grantee = roles.name')}
 FROM
   roles`
     if (limit) {
