@@ -211,21 +211,13 @@ WITH tables AS (${tablesSql}),
   relationships AS (${relationshipsSql})
 SELECT
   *,
-  ${coalesceRowsToArray('columns', 'SELECT * FROM columns WHERE columns.table_id = tables.id')},
-  ${coalesceRowsToArray('grants', 'SELECT * FROM grants WHERE grants.table_id = tables.id')},
-  ${coalesceRowsToArray('policies', 'SELECT * FROM policies WHERE policies.table_id = tables.id')},
-  ${coalesceRowsToArray(
-    'primary_keys',
-    'SELECT * FROM primary_keys WHERE primary_keys.table_id = tables.id'
-  )},
+  ${coalesceRowsToArray('columns', 'columns.table_id = tables.id')},
+  ${coalesceRowsToArray('grants', 'grants.table_id = tables.id')},
+  ${coalesceRowsToArray('policies', 'policies.table_id = tables.id')},
+  ${coalesceRowsToArray('primary_keys', 'primary_keys.table_id = tables.id')},
   ${coalesceRowsToArray(
     'relationships',
-    `SELECT
-       *
-     FROM
-       relationships
-     WHERE
-       (relationships.source_schema = tables.schema AND relationships.source_table_name = tables.name)
+    `(relationships.source_schema = tables.schema AND relationships.source_table_name = tables.name)
        OR (relationships.target_table_schema = tables.schema AND relationships.target_table_name = tables.name)`
   )}
 FROM tables`
