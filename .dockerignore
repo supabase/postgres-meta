@@ -1,2 +1,4 @@
 *
-!bin
+!src
+!package*.json
+!tsconfig.server.json
