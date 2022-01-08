@@ -18,7 +18,7 @@ jobs:
 
       - uses: actions/setup-node@v2
         with:
-          node-version: "14"
+          node-version: "16"
 
       - run: |
           npm clean-install
@@ -27,7 +27,7 @@ jobs:
       - id: semantic-release
         uses: cycjimmy/semantic-release-action@v2
         with:
-          semantic_version: 17
+          semantic_version: 18
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -70,15 +70,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: actions/setup-node@v2
-        with:
-          node-version: "14"
-
-      - name: Prepare build
-        run: |
-          npm clean-install
-          npm run pkg
-
       - uses: docker/setup-qemu-action@v1
         with:
           platforms: amd64,arm64
@@ -93,6 +84,6 @@ jobs:
       - uses: docker/build-push-action@v2
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: supabase/postgres-meta:latest,supabase/postgres-meta:v${{ needs.semantic-release.outputs.new-release-version }}
-          platforms: linux/amd64,linux/arm64
