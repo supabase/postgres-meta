@@ -49,3 +49,5 @@ begin
     return new;
 end;
 $$ language plpgsql;
+
+CREATE VIEW todos_view AS SELECT * FROM public.todos;

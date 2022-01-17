@@ -12,6 +12,7 @@ import PostgresMetaTables from './PostgresMetaTables'
 import PostgresMetaTriggers from './PostgresMetaTriggers'
 import PostgresMetaTypes from './PostgresMetaTypes'
 import PostgresMetaVersion from './PostgresMetaVersion'
+import PostgresMetaViews from './PostgresMetaViews'
 import { init } from './db'
 import { PostgresMetaResult } from './types'
 export default class PostgresMeta {
@@ -29,6 +30,7 @@ export default class PostgresMeta {
   triggers: PostgresMetaTriggers
   types: PostgresMetaTypes
   version: PostgresMetaVersion
+  views: PostgresMetaViews
 
   parse = Parser.Parse
   deparse = Parser.Deparse
@@ -50,5 +52,6 @@ export default class PostgresMeta {
     this.triggers = new PostgresMetaTriggers(this.query)
     this.types = new PostgresMetaTypes(this.query)
     this.version = new PostgresMetaVersion(this.query)
+    this.views = new PostgresMetaViews(this.query)
   }
 }
