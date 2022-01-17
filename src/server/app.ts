@@ -2,9 +2,22 @@ import fastify from 'fastify'
 import { PG_META_EXPORT_DOCS, PG_META_PORT } from './constants'
 import routes from './routes'
 import { extractRequestForLogging } from './utils'
+import pino from 'pino'
 import pkg from '../../package.json'
 
-const app = fastify({ logger: true, disableRequestLogging: true })
+const logger = pino({
+  formatters: {
+    level(label) {
+      return { level: label }
+    },
+  },
+  timestamp: pino.stdTimeFunctions.isoTime,
+})
+
+const app = fastify({
+  logger,
+  disableRequestLogging: true,
+})
 
 app.setErrorHandler((error, request, reply) => {
   app.log.error({ error, request: extractRequestForLogging(request) })
