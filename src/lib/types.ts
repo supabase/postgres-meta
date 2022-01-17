@@ -297,3 +297,11 @@ export const postgresVersionSchema = Type.Object({
   max_connections: Type.Integer(),
 })
 export type PostgresVersion = Static<typeof postgresVersionSchema>
+
+export const postgresViewSchema = Type.Object({
+  id: Type.Integer(),
+  schema: Type.String(),
+  name: Type.String(),
+  comment: Type.Union([Type.String(), Type.Null()]),
+})
+export type PostgresView = Static<typeof postgresViewSchema>
