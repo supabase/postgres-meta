@@ -1,8 +1,14 @@
-import { FastifyInstance } from 'fastify'
+import { FastifyInstance, FastifyRequest } from 'fastify'
 import { PostgresMeta } from '../../lib'
 import * as Parser from '../../lib/Parser'
 import { DEFAULT_POOL_CONFIG } from '../constants'
 import { extractRequestForLogging } from '../utils'
+
+const errorOnEmptyQuery = (request: FastifyRequest) => {
+  if (!(request.body as any).query) {
+    throw new Error('query not found')
+  }
+}
 
 export default async (fastify: FastifyInstance) => {
   fastify.post<{
@@ -11,6 +17,7 @@ export default async (fastify: FastifyInstance) => {
       query: string
     }
   }>('/', async (request, reply) => {
+    errorOnEmptyQuery(request)
     const connectionString = request.headers.pg
 
     const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
@@ -31,6 +38,7 @@ export default async (fastify: FastifyInstance) => {
       query: string
     }
   }>('/format', async (request, reply) => {
+    errorOnEmptyQuery(request)
     const { data, error } = Parser.Format(request.body.query)
 
     if (error) {
@@ -48,6 +56,7 @@ export default async (fastify: FastifyInstance) => {
       query: string
     }
   }>('/parse', async (request, reply) => {
+    errorOnEmptyQuery(request)
     const { data, error } = Parser.Parse(request.body.query)
 
     if (error) {
