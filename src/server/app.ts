@@ -20,7 +20,7 @@ const app = fastify({
 })
 
 app.setErrorHandler((error, request, reply) => {
-  app.log.error({ error, request: extractRequestForLogging(request) })
+  app.log.error({ error: error.toString(), request: extractRequestForLogging(request) })
   reply.code(500).send({ error: error.message })
 })
 

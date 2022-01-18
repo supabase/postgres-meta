@@ -1,4 +1,4 @@
-import CryptoJS from 'crypto-js'
+import * as CryptoJS from 'crypto-js'
 import { FastifyInstance } from 'fastify'
 import { PG_CONNECTION, CRYPTO_KEY } from '../constants'
 
@@ -8,9 +8,17 @@ export default async (fastify: FastifyInstance) => {
     // Node converts headers to lowercase
     const encryptedHeader = request.headers['x-connection-encrypted']?.toString()
     if (encryptedHeader) {
-      request.headers.pg = CryptoJS.AES.decrypt(encryptedHeader, CRYPTO_KEY).toString(
-        CryptoJS.enc.Utf8
-      )
+      try {
+        request.headers.pg = CryptoJS.AES.decrypt(encryptedHeader, CRYPTO_KEY).toString(
+          CryptoJS.enc.Utf8
+        )
+      } catch (e: any) {
+        request.log.warn({
+          message: 'failed to parse encrypted connstring',
+          error: e.toString(),
+        })
+        throw new Error('failed to process upstream connection details')
+      }
     } else {
       request.headers.pg = PG_CONNECTION
     }
