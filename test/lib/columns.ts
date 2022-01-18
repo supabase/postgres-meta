@@ -31,6 +31,47 @@ test('list', async () => {
   )
 })
 
+test('createBatch', async () => {
+  const { data: testTable }: any = await pgMeta.tables.create({ name: 't' })
+
+  let res = await pgMeta.columns.createBatch({
+    table_id: testTable!.id,
+    columns: [
+      { name: 'c', type: 'int2', default_value: 42, comment: 'foo' },
+      { name: 'd', type: 'int2', default_value: 43, comment: 'bar' },
+    ],
+  })
+  expect(res).toMatchInlineSnapshot(
+    { data: { id: expect.stringMatching(/^\d+\.1$/), table_id: expect.any(Number) } },
+    `
+    Object {
+      "data": Object {
+        "comment": "foo",
+        "data_type": "smallint",
+        "default_value": "'42'::smallint",
+        "enums": Array [],
+        "format": "int2",
+        "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
+        "identity_generation": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_updatable": true,
+        "name": "c",
+        "ordinal_position": 1,
+        "schema": "public",
+        "table": "t",
+        "table_id": Any<Number>,
+      },
+      "error": null,
+    }
+  `
+  )
+
+  await pgMeta.tables.remove(testTable!.id)
+})
+
 test('retrieve, create, update, delete', async () => {
   const { data: testTable }: any = await pgMeta.tables.create({ name: 't' })
 

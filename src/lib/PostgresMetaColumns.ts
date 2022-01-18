@@ -4,6 +4,26 @@ import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
 import { columnsSql } from './sql'
 import { PostgresMetaResult, PostgresColumn } from './types'
 
+interface ColumnCreateRequest {
+  name: string
+  type: string
+  default_value?: any
+  default_value_format?: 'expression' | 'literal'
+  is_identity?: boolean
+  identity_generation?: 'BY DEFAULT' | 'ALWAYS'
+  is_nullable?: boolean
+  is_primary_key?: boolean
+  is_unique?: boolean
+  comment?: string
+  check?: string
+}
+
+interface ColumnInfoRequest {
+  id?: string
+  name?: string
+  table?: string
+  schema?: string
+}
 // TODO: Fix handling of `type` in `create()` and `update()`.
 // `type` on its own is not enough, e.g. `1::my type` should be `1::"my type"`.
 // `ident(type)` is not enough, e.g. `"int2[]"` should be `"int2"[]`.
@@ -38,6 +58,8 @@ export default class PostgresMetaColumns {
     return await this.query(sql)
   }
 
+  async retrieve(columns: ColumnInfoRequest[]): Promise<PostgresMetaResult<PostgresColumn>> { }
+
   async retrieve({ id }: { id: string }): Promise<PostgresMetaResult<PostgresColumn>>
   async retrieve({
     name,
@@ -53,12 +75,7 @@ export default class PostgresMetaColumns {
     name,
     table,
     schema = 'public',
-  }: {
-    id?: string
-    name?: string
-    table?: string
-    schema?: string
-  }): Promise<PostgresMetaResult<PostgresColumn>> {
+  }: ColumnInfoRequest): Promise<PostgresMetaResult<PostgresColumn>> {
     if (id) {
       const regexp = /^(\d+)\.(\d+)$/
       if (!regexp.test(id)) {
@@ -95,49 +112,29 @@ export default class PostgresMetaColumns {
     }
   }
 
-  async create({
-    table_id,
-    name,
-    type,
-    default_value,
-    default_value_format = 'literal',
-    is_identity = false,
-    identity_generation = 'BY DEFAULT',
-    // Can't pick a value as default since regular columns are nullable by default but PK columns aren't
-    is_nullable,
-    is_primary_key = false,
-    is_unique = false,
-    comment,
-    check,
-  }: {
-    table_id: number
-    name: string
-    type: string
-    default_value?: any
-    default_value_format?: 'expression' | 'literal'
-    is_identity?: boolean
-    identity_generation?: 'BY DEFAULT' | 'ALWAYS'
-    is_nullable?: boolean
-    is_primary_key?: boolean
-    is_unique?: boolean
-    comment?: string
-    check?: string
-  }): Promise<PostgresMetaResult<PostgresColumn>> {
-    const { data, error } = await this.metaTables.retrieve({ id: table_id })
-    if (error) {
-      return { data: null, error }
-    }
-    const { name: table, schema } = data!
-
+  generateColumnSql(
+    {
+      name,
+      type,
+      default_value,
+      default_value_format = 'literal',
+      is_identity = false,
+      identity_generation = 'BY DEFAULT',
+      // Can't pick a value as default since regular columns are nullable by default but PK columns aren't
+      is_nullable,
+      is_primary_key = false,
+      is_unique = false,
+      comment,
+      check,
+    }: ColumnCreateRequest,
+    schema: string,
+    table: string
+  ): string {
     let defaultValueClause = ''
     if (is_identity) {
       if (default_value !== undefined) {
-        return {
-          data: null,
-          error: { message: 'Columns cannot both be identity and have a default value' },
-        }
+        throw new Error(`Column ${name} cannot both be identity and have a default value`)
       }
-
       defaultValueClause = `GENERATED ${identity_generation} AS IDENTITY`
     } else {
       if (default_value === undefined) {
@@ -161,23 +158,63 @@ export default class PostgresMetaColumns {
         ? ''
         : `COMMENT ON COLUMN ${ident(schema)}.${ident(table)}.${ident(name)} IS ${literal(comment)}`
 
-    const sql = `
-BEGIN;
+    return `
   ALTER TABLE ${ident(schema)}.${ident(table)} ADD COLUMN ${ident(name)} ${type}
     ${defaultValueClause}
     ${isNullableClause}
     ${isPrimaryKeyClause}
     ${isUniqueClause}
     ${checkSql};
-  ${commentSql};
-COMMIT;`
+  ${commentSql};`
+  }
+
+  async createBatch({
+    table_id,
+    columns,
+  }: {
+    table_id: number
+    columns: ColumnCreateRequest[]
+  }): Promise<PostgresMetaResult<PostgresColumn>> {
+    const { data, error } = await this.metaTables.retrieve({ id: table_id })
+    if (error) {
+      return { data: null, error }
+    }
+    const { name: table, schema } = data!
+    let columnsSql: string
+    try {
+      columnsSql = columns.map((column) => this.generateColumnSql(column, schema, table)).join('\n')
+    } catch (e: any) {
+      return { data: null, error: { message: e.toString() } }
+    }
+
     {
-      const { error } = await this.query(sql)
+      const { error } = await this.query(`
+BEGIN;
+  ${columnsSql}
+COMMIT;
+`)
       if (error) {
         return { data: null, error }
       }
     }
     return await this.retrieve({ name, table, schema })
+  }
+
+  async create(body: {
+    table_id: number
+    name: string
+    type: string
+    default_value?: any
+    default_value_format?: 'expression' | 'literal'
+    is_identity?: boolean
+    identity_generation?: 'BY DEFAULT' | 'ALWAYS'
+    is_nullable?: boolean
+    is_primary_key?: boolean
+    is_unique?: boolean
+    comment?: string
+    check?: string
+  }): Promise<PostgresMetaResult<PostgresColumn>> {
+    return this.createBatch(body.table_id, [body])
   }
 
   async update(
@@ -215,21 +252,21 @@ COMMIT;`
       name === undefined || name === old!.name
         ? ''
         : `ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} RENAME COLUMN ${ident(
-            old!.name
-          )} TO ${ident(name)};`
+          old!.name
+        )} TO ${ident(name)}; `
     // We use USING to allow implicit conversion of incompatible types (e.g. int4 -> text).
     const typeSql =
       type === undefined
         ? ''
         : `ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} ALTER COLUMN ${ident(
-            old!.name
-          )} SET DATA TYPE ${ident(type)} USING ${ident(old!.name)}::${ident(type)};`
+          old!.name
+        )} SET DATA TYPE ${ident(type)} USING ${ident(old!.name)}:: ${ident(type)}; `
 
     let defaultValueSql: string
     if (drop_default) {
       defaultValueSql = `ALTER TABLE ${ident(old!.schema)}.${ident(
         old!.table
-      )} ALTER COLUMN ${ident(old!.name)} DROP DEFAULT;`
+      )} ALTER COLUMN ${ident(old!.name)} DROP DEFAULT; `
     } else if (default_value === undefined) {
       defaultValueSql = ''
     } else {
@@ -237,7 +274,7 @@ COMMIT;`
         default_value_format === 'expression' ? default_value : literal(default_value)
       defaultValueSql = `ALTER TABLE ${ident(old!.schema)}.${ident(
         old!.table
-      )} ALTER COLUMN ${ident(old!.name)} SET DEFAULT ${defaultValue};`
+      )} ALTER COLUMN ${ident(old!.name)} SET DEFAULT ${defaultValue}; `
     }
     // What identitySql does vary depending on the old and new values of
     // is_identity and identity_generation.
@@ -249,19 +286,19 @@ COMMIT;`
     // | false                  | -                  | add identity       | drop if exists |
     let identitySql = `ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} ALTER COLUMN ${ident(
       old!.name
-    )}`
+    )} `
     if (is_identity === false) {
       identitySql += ' DROP IDENTITY IF EXISTS;'
     } else if (old!.is_identity === true) {
       if (identity_generation === undefined) {
         identitySql = ''
       } else {
-        identitySql += ` SET GENERATED ${identity_generation};`
+        identitySql += ` SET GENERATED ${identity_generation}; `
       }
     } else if (is_identity === undefined) {
       identitySql = ''
     } else {
-      identitySql += ` ADD GENERATED ${identity_generation} AS IDENTITY;`
+      identitySql += ` ADD GENERATED ${identity_generation} AS IDENTITY; `
     }
     let isNullableSql: string
     if (is_nullable === undefined) {
@@ -269,35 +306,35 @@ COMMIT;`
     } else {
       isNullableSql = is_nullable
         ? `ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} ALTER COLUMN ${ident(
-            old!.name
-          )} DROP NOT NULL;`
+          old!.name
+        )} DROP NOT NULL; `
         : `ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} ALTER COLUMN ${ident(
-            old!.name
-          )} SET NOT NULL;`
+          old!.name
+        )} SET NOT NULL; `
     }
     let isUniqueSql = ''
     if (old!.is_unique === true && is_unique === false) {
       isUniqueSql = `
-DO $$
-DECLARE
-  r record;
-BEGIN
-  FOR r IN
+    DO $$
+    DECLARE
+    r record;
+    BEGIN
+    FOR r IN
     SELECT conname FROM pg_constraint WHERE
-      contype = 'u'
-      AND cardinality(conkey) = 1
-      AND conrelid = ${literal(old!.table_id)}
-      AND conkey[1] = ${literal(old!.ordinal_position)}
-  LOOP
+    contype = 'u'
+    AND cardinality(conkey) = 1
+    AND conrelid = ${literal(old!.table_id)}
+    AND conkey[1] = ${literal(old!.ordinal_position)}
+    LOOP
     EXECUTE ${literal(
-      `ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} DROP CONSTRAINT `
-    )} || quote_ident(r.conname);
-  END LOOP;
-END
-$$;
-`
+        `ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} DROP CONSTRAINT `
+      )} || quote_ident(r.conname);
+    END LOOP;
+    END
+    $$;
+    `
     } else if (old!.is_unique === false && is_unique === true) {
-      isUniqueSql = `ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} ADD UNIQUE (${ident(
+      isUniqueSql = `ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} ADD UNIQUE(${ident(
         old!.name
       )});`
     }
@@ -305,8 +342,8 @@ $$;
       comment === undefined
         ? ''
         : `COMMENT ON COLUMN ${ident(old!.schema)}.${ident(old!.table)}.${ident(
-            old!.name
-          )} IS ${literal(comment)};`
+          old!.name
+        )} IS ${literal(comment)}; `
 
     // TODO: Can't set default if column is previously identity even if
     // is_identity: false. Must do two separate PATCHes (once to drop identity
@@ -315,14 +352,14 @@ $$;
     // identitySql must be after isNullableSql.
     const sql = `
 BEGIN;
-  ${isNullableSql}
-  ${typeSql}
-  ${defaultValueSql}
-  ${identitySql}
-  ${isUniqueSql}
-  ${commentSql}
-  ${nameSql}
-COMMIT;`
+${isNullableSql}
+${typeSql}
+${defaultValueSql}
+${identitySql}
+${isUniqueSql}
+${commentSql}
+${nameSql}
+COMMIT; `
     {
       const { error } = await this.query(sql)
       if (error) {
@@ -339,7 +376,7 @@ COMMIT;`
     }
     const sql = `ALTER TABLE ${ident(column!.schema)}.${ident(column!.table)} DROP COLUMN ${ident(
       column!.name
-    )};`
+    )}; `
     {
       const { error } = await this.query(sql)
       if (error) {
