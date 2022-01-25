@@ -26,7 +26,8 @@
     "test": "run-s db:clean db:run test:run db:clean",
     "db:clean": "cd test/db && docker-compose down",
     "db:run": "cd test/db && docker-compose up --detach && sleep 5",
-    "test:run": "jest --runInBand"
+    "test:run": "jest --runInBand",
+    "test:update": "run-s db:clean db:run && jest --runInBand --updateSnapshot && run-s db:clean"
   },
   "engines": {
     "node": ">=14 <15",
@@ -38,6 +39,7 @@
     "pg-format": "^1.0.4",
     "pgsql-parser": "^13.1.11",
     "pino": "^7.6.3",
+    "postgres-array": "^3.0.1",
     "prettier": "^2.4.1",
     "prettier-plugin-sql": "^0.4.0",
     "sql-formatter": "^4.0.2"

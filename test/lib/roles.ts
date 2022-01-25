@@ -442,7 +442,7 @@ test('retrieve, create, update, delete', async () => {
         "is_superuser": true,
         "name": "r",
         "password": "********",
-        "valid_until": 2020-01-01T00:00:00.000Z,
+        "valid_until": "2020-01-01 00:00:00+00",
       },
       "error": null,
     }
@@ -467,7 +467,7 @@ test('retrieve, create, update, delete', async () => {
         "is_superuser": true,
         "name": "r",
         "password": "********",
-        "valid_until": 2020-01-01T00:00:00.000Z,
+        "valid_until": "2020-01-01 00:00:00+00",
       },
       "error": null,
     }
@@ -507,7 +507,7 @@ test('retrieve, create, update, delete', async () => {
         "is_superuser": true,
         "name": "rr",
         "password": "********",
-        "valid_until": 2020-01-01T00:00:00.000Z,
+        "valid_until": "2020-01-01 00:00:00+00",
       },
       "error": null,
     }
@@ -532,7 +532,7 @@ test('retrieve, create, update, delete', async () => {
         "is_superuser": true,
         "name": "rr",
         "password": "********",
-        "valid_until": 2020-01-01T00:00:00.000Z,
+        "valid_until": "2020-01-01 00:00:00+00",
       },
       "error": null,
     }
