@@ -1,7 +1,14 @@
 import { types, Pool, PoolConfig } from 'pg'
+import { parse as parseArray } from 'postgres-array'
 import { PostgresMetaResult } from './types'
 
-types.setTypeParser(20, parseInt)
+types.setTypeParser(types.builtins.INT8, parseInt)
+types.setTypeParser(types.builtins.DATE, (x) => x)
+types.setTypeParser(types.builtins.TIMESTAMP, (x) => x)
+types.setTypeParser(types.builtins.TIMESTAMPTZ, (x) => x)
+types.setTypeParser(1115, parseArray) // _timestamp
+types.setTypeParser(1182, parseArray) // _date
+types.setTypeParser(1185, parseArray) // _timestamptz
 
 export const init: (config: PoolConfig) => {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
