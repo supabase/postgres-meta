@@ -12,6 +12,7 @@ types.setTypeParser(1185, parseArray) // _timestamptz
 
 export const init: (config: PoolConfig) => {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
+  queryArrayMode: (sql: string) => Promise<any>
   end: () => Promise<void>
 } = (config) => {
   // NOTE: Race condition could happen here: one async task may be doing
@@ -33,6 +34,45 @@ export const init: (config: PoolConfig) => {
 
         const { rows } = await pool.query(sql)
         return { data: rows, error: null }
+      } catch (e: any) {
+        return { data: null, error: { message: e.message } }
+      }
+    },
+
+    async queryArrayMode(sql) {
+      try {
+        if (!pool) {
+          const pool = new Pool(config)
+          let res: any = await pool.query({
+            rowMode: 'array',
+            text: sql,
+          })
+          if (!Array.isArray(res)) {
+            res = [res]
+          }
+          return {
+            data: res.map(({ fields, rows }: any) => ({
+              columns: fields.map((x: any) => x.name),
+              rows,
+            })),
+            error: null,
+          }
+        }
+
+        let res: any = await pool.query({
+          rowMode: 'array',
+          text: sql,
+        })
+        if (!Array.isArray(res)) {
+          res = [res]
+        }
+        return {
+          data: res.map(({ fields, rows }: any) => ({
+            columns: fields.map((x: any) => x.name),
+            rows,
+          })),
+          error: null,
+        }
       } catch (e: any) {
         return { data: null, error: { message: e.message } }
       }

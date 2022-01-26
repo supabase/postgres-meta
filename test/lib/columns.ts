@@ -235,7 +235,14 @@ AND    i.indisprimary;
     Object {
       "data": Array [
         Object {
-          "attname": "c",
+          "columns": Array [
+            "attname",
+          ],
+          "rows": Array [
+            Array [
+              "c",
+            ],
+          ],
         },
       ],
       "error": null,
@@ -267,7 +274,14 @@ AND    i.indisunique;
     Object {
       "data": Array [
         Object {
-          "attname": "c",
+          "columns": Array [
+            "attname",
+          ],
+          "rows": Array [
+            Array [
+              "c",
+            ],
+          ],
         },
       ],
       "error": null,
@@ -387,7 +401,14 @@ SELECT pg_get_constraintdef((
     Object {
       "data": Array [
         Object {
-          "pg_get_constraintdef": null,
+          "columns": Array [
+            "pg_get_constraintdef",
+          ],
+          "rows": Array [
+            Array [
+              null,
+            ],
+          ],
         },
       ],
       "error": null,

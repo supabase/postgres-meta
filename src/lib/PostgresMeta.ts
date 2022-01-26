@@ -14,9 +14,8 @@ import PostgresMetaTypes from './PostgresMetaTypes'
 import PostgresMetaVersion from './PostgresMetaVersion'
 import PostgresMetaViews from './PostgresMetaViews'
 import { init } from './db'
-import { PostgresMetaResult } from './types'
 export default class PostgresMeta {
-  query: (sql: string) => Promise<PostgresMetaResult<any>>
+  query: (sql: string) => Promise<any>
   end: () => Promise<void>
   columns: PostgresMetaColumns
   config: PostgresMetaConfig
@@ -37,21 +36,21 @@ export default class PostgresMeta {
   format = Parser.Format
 
   constructor(config: PoolConfig) {
-    const { query, end } = init(config)
-    this.query = query
+    const { query, queryArrayMode, end } = init(config)
+    this.query = queryArrayMode
     this.end = end
-    this.columns = new PostgresMetaColumns(this.query)
-    this.config = new PostgresMetaConfig(this.query)
-    this.extensions = new PostgresMetaExtensions(this.query)
-    this.functions = new PostgresMetaFunctions(this.query)
-    this.policies = new PostgresMetaPolicies(this.query)
-    this.publications = new PostgresMetaPublications(this.query)
-    this.roles = new PostgresMetaRoles(this.query)
-    this.schemas = new PostgresMetaSchemas(this.query)
-    this.tables = new PostgresMetaTables(this.query)
-    this.triggers = new PostgresMetaTriggers(this.query)
-    this.types = new PostgresMetaTypes(this.query)
-    this.version = new PostgresMetaVersion(this.query)
-    this.views = new PostgresMetaViews(this.query)
+    this.columns = new PostgresMetaColumns(query)
+    this.config = new PostgresMetaConfig(query)
+    this.extensions = new PostgresMetaExtensions(query)
+    this.functions = new PostgresMetaFunctions(query)
+    this.policies = new PostgresMetaPolicies(query)
+    this.publications = new PostgresMetaPublications(query)
+    this.roles = new PostgresMetaRoles(query)
+    this.schemas = new PostgresMetaSchemas(query)
+    this.tables = new PostgresMetaTables(query)
+    this.triggers = new PostgresMetaTriggers(query)
+    this.types = new PostgresMetaTypes(query)
+    this.version = new PostgresMetaVersion(query)
+    this.views = new PostgresMetaViews(query)
   }
 }
