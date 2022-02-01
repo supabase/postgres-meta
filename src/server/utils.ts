@@ -16,3 +16,13 @@ export const extractRequestForLogging = (request: FastifyRequest) => {
     pg,
   }
 }
+
+export function translateErrorToResponseCode(
+  error: { message: string },
+  defaultResponseCode = 400
+): number {
+  if (error.message === 'Connection terminated due to connection timeout') {
+    return 504
+  }
+  return defaultResponseCode
+}

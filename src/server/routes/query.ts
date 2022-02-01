@@ -2,7 +2,7 @@ import { FastifyInstance, FastifyRequest } from 'fastify'
 import { PostgresMeta } from '../../lib'
 import * as Parser from '../../lib/Parser'
 import { DEFAULT_POOL_CONFIG } from '../constants'
-import { extractRequestForLogging } from '../utils'
+import { extractRequestForLogging, translateErrorToResponseCode } from '../utils'
 
 const errorOnEmptyQuery = (request: FastifyRequest) => {
   if (!(request.body as any).query) {
@@ -25,7 +25,7 @@ export default async (fastify: FastifyInstance) => {
     await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
-      reply.code(400)
+      reply.code(translateErrorToResponseCode(error))
       return { error: error.message }
     }
 
@@ -43,7 +43,7 @@ export default async (fastify: FastifyInstance) => {
 
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
-      reply.code(400)
+      reply.code(translateErrorToResponseCode(error))
       return { error: error.message }
     }
 
@@ -61,7 +61,7 @@ export default async (fastify: FastifyInstance) => {
 
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
-      reply.code(400)
+      reply.code(translateErrorToResponseCode(error))
       return { error: error.message }
     }
 
@@ -78,7 +78,7 @@ export default async (fastify: FastifyInstance) => {
 
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
-      reply.code(400)
+      reply.code(translateErrorToResponseCode(error))
       return { error: error.message }
     }
 
