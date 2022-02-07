@@ -10,10 +10,14 @@ export const extractRequestForLogging = (request: FastifyRequest) => {
   } catch (e: any) {
     console.warn('failed to parse PG connstring for ' + request.url)
   }
+
+  const additional = request.headers['x-supabase-info']?.toString() || ''
+
   return {
     method: request.method,
     url: request.url,
     pg,
+    opt: additional,
   }
 }
 
