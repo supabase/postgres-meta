@@ -444,6 +444,53 @@ test('update with name unchanged', async () => {
   await pgMeta.tables.remove(testTable!.id)
 })
 
+test('update with array types', async () => {
+  const { data: testTable } = await pgMeta.tables.create({ name: 't' })
+
+  let res = await pgMeta.columns.create({
+    table_id: testTable!.id,
+    name: 'c',
+    type: 'text',
+  })
+  res = await pgMeta.columns.update(res.data!.id, {
+    type: 'text[]',
+  })
+  expect(res).toMatchInlineSnapshot(
+    {
+      data: {
+        id: expect.stringMatching(/^\d+\.1$/),
+        table_id: expect.any(Number),
+      },
+    },
+    `
+    Object {
+      "data": Object {
+        "comment": null,
+        "data_type": "ARRAY",
+        "default_value": null,
+        "enums": Array [],
+        "format": "_text",
+        "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
+        "identity_generation": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_updatable": true,
+        "name": "c",
+        "ordinal_position": 1,
+        "schema": "public",
+        "table": "t",
+        "table_id": Any<Number>,
+      },
+      "error": null,
+    }
+  `
+  )
+
+  await pgMeta.tables.remove(testTable!.id)
+})
+
 test('update with incompatible types', async () => {
   const { data: testTable } = await pgMeta.tables.create({ name: 't' })
 

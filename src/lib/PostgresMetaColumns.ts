@@ -4,9 +4,6 @@ import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
 import { columnsSql } from './sql'
 import { PostgresMetaResult, PostgresColumn } from './types'
 
-// TODO: Fix handling of `type` in `create()` and `update()`.
-// `type` on its own is not enough, e.g. `1::my type` should be `1::"my type"`.
-// `ident(type)` is not enough, e.g. `"int2[]"` should be `"int2"[]`.
 export default class PostgresMetaColumns {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
   metaTables: PostgresMetaTables
@@ -163,7 +160,7 @@ export default class PostgresMetaColumns {
 
     const sql = `
 BEGIN;
-  ALTER TABLE ${ident(schema)}.${ident(table)} ADD COLUMN ${ident(name)} ${type}
+  ALTER TABLE ${ident(schema)}.${ident(table)} ADD COLUMN ${ident(name)} ${typeIdent(type)}
     ${defaultValueClause}
     ${isNullableClause}
     ${isPrimaryKeyClause}
@@ -223,7 +220,7 @@ COMMIT;`
         ? ''
         : `ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} ALTER COLUMN ${ident(
             old!.name
-          )} SET DATA TYPE ${ident(type)} USING ${ident(old!.name)}::${ident(type)};`
+          )} SET DATA TYPE ${typeIdent(type)} USING ${ident(old!.name)}::${typeIdent(type)};`
 
     let defaultValueSql: string
     if (drop_default) {
@@ -348,4 +345,8 @@ COMMIT;`
     }
     return { data: column!, error: null }
   }
+}
+
+const typeIdent = (type: string) => {
+  return type.endsWith('[]') ? `${ident(type.slice(0, -2))}[]` : ident(type)
 }
