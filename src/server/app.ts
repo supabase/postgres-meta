@@ -1,5 +1,5 @@
 import fastify from 'fastify'
-import { PG_META_EXPORT_DOCS, PG_META_PORT } from './constants'
+import { PG_META_EXPORT_DOCS, PG_META_PORT, PG_META_REQ_HEADER } from './constants'
 import routes from './routes'
 import { extractRequestForLogging } from './utils'
 import pino from 'pino'
@@ -17,6 +17,7 @@ const logger = pino({
 const app = fastify({
   logger,
   disableRequestLogging: true,
+  requestIdHeader: PG_META_REQ_HEADER,
 })
 
 app.setErrorHandler((error, request, reply) => {

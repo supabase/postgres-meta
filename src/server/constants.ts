@@ -14,3 +14,4 @@ export const PG_CONNECTION = `postgres://${PG_META_DB_USER}:${PG_META_DB_PASSWOR
 export const PG_META_EXPORT_DOCS = process.env.PG_META_EXPORT_DOCS === 'true' || false
 
 export const DEFAULT_POOL_CONFIG = { max: 1, connectionTimeoutMillis: PG_CONN_TIMEOUT_SECS * 1000 }
+export const PG_META_REQ_HEADER = process.env.PG_META_REQ_HEADER || 'request-id'
