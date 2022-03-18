@@ -51,7 +51,7 @@
     "@types/pg": "^7.14.3",
     "@types/pg-format": "^1.0.1",
     "@types/pino": "^7.0.5",
-    "cpy-cli": "^3.1.1",
+    "cpy-cli": "^4.1.0",
     "crypto-js": "^4.0.0",
     "fastify": "^3.14.0",
     "fastify-cors": "^5.2.0",
