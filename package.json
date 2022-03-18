@@ -45,7 +45,7 @@
     "sql-formatter": "^4.0.2"
   },
   "devDependencies": {
-    "@types/crypto-js": "^3.1.47",
+    "@types/crypto-js": "^4.1.1",
     "@types/jest": "^27.0.1",
     "@types/node": "^14.0.13",
     "@types/pg": "^7.14.3",
