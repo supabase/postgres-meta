@@ -1,0 +1,20 @@
+version = 1
+
+[update]
+autoupdate_label = "dependencies"
+
+[approve]
+auto_approve_usernames = ["dependabot"]
+
+[merge.automerge_dependencies]
+versions = ["minor", "patch"]
+
+[merge]
+automerge_label = "pr/automerge"
+delete_branch_on_merge = true
+# prefer rebase over merge commits
+method = "rebase"
+# this should make sure that the automerge label doesn't get removed
+# hopefully, when dependabot resolves conflicts and pushes an update,
+# kodiak will get triggered again and merge the PR
+notify_on_conflict = false
