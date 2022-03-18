@@ -1,0 +1,20 @@
+version: 2
+updates:
+
+  # github actions
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels: ["github-actions", "dependencies", "pr/automerge"]
+
+  # npm
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 15
+    labels: ["npm", "dependencies", "pr/automerge"]
