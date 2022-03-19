@@ -170,9 +170,139 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchObject({
     data: null,
     error: {
-      message: expect.stringMatching(/^Cannot find a column with ID \d+.1$/),
+      message: expect.stringMatching(/^Cannot find some of the requested columns.$/),
     },
   })
+
+  await pgMeta.tables.remove(testTable!.id)
+})
+
+test('batch endpoints for create and retrieve', async () => {
+  const { data: testTable }: any = await pgMeta.tables.create({ name: 't' })
+
+  let res = await pgMeta.columns.batchCreate([
+    {
+      table_id: testTable!.id,
+      name: 'c1',
+      type: 'int2',
+      default_value: 42,
+      comment: 'foo',
+    },
+    {
+      table_id: testTable!.id,
+      name: 'c2',
+      type: 'int2',
+      default_value: 41,
+      comment: 'bar',
+    },
+  ])
+  expect(res).toMatchInlineSnapshot(
+    {
+      data: [
+        { id: expect.stringMatching(/^\d+\.1$/), table_id: expect.any(Number) },
+        { id: expect.stringMatching(/^\d+\.2$/), table_id: expect.any(Number) },
+      ],
+    },
+    `
+    Object {
+      "data": Array [
+        Object {
+          "comment": "foo",
+          "data_type": "smallint",
+          "default_value": "'42'::smallint",
+          "enums": Array [],
+          "format": "int2",
+          "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
+          "identity_generation": null,
+          "is_generated": false,
+          "is_identity": false,
+          "is_nullable": true,
+          "is_unique": false,
+          "is_updatable": true,
+          "name": "c1",
+          "ordinal_position": 1,
+          "schema": "public",
+          "table": "t",
+          "table_id": Any<Number>,
+        },
+        Object {
+          "comment": "bar",
+          "data_type": "smallint",
+          "default_value": "'41'::smallint",
+          "enums": Array [],
+          "format": "int2",
+          "id": StringMatching /\\^\\\\d\\+\\\\\\.2\\$/,
+          "identity_generation": null,
+          "is_generated": false,
+          "is_identity": false,
+          "is_nullable": true,
+          "is_unique": false,
+          "is_updatable": true,
+          "name": "c2",
+          "ordinal_position": 2,
+          "schema": "public",
+          "table": "t",
+          "table_id": Any<Number>,
+        },
+      ],
+      "error": null,
+    }
+  `
+  )
+  res = await pgMeta.columns.batchRetrieve({ ids: [res.data![0].id, res.data![1].id] })
+  expect(res).toMatchInlineSnapshot(
+    {
+      data: [
+        { id: expect.stringMatching(/^\d+\.1$/), table_id: expect.any(Number) },
+        { id: expect.stringMatching(/^\d+\.2$/), table_id: expect.any(Number) },
+      ],
+    },
+    `
+    Object {
+      "data": Array [
+        Object {
+          "comment": "foo",
+          "data_type": "smallint",
+          "default_value": "'42'::smallint",
+          "enums": Array [],
+          "format": "int2",
+          "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
+          "identity_generation": null,
+          "is_generated": false,
+          "is_identity": false,
+          "is_nullable": true,
+          "is_unique": false,
+          "is_updatable": true,
+          "name": "c1",
+          "ordinal_position": 1,
+          "schema": "public",
+          "table": "t",
+          "table_id": Any<Number>,
+        },
+        Object {
+          "comment": "bar",
+          "data_type": "smallint",
+          "default_value": "'41'::smallint",
+          "enums": Array [],
+          "format": "int2",
+          "id": StringMatching /\\^\\\\d\\+\\\\\\.2\\$/,
+          "identity_generation": null,
+          "is_generated": false,
+          "is_identity": false,
+          "is_nullable": true,
+          "is_unique": false,
+          "is_updatable": true,
+          "name": "c2",
+          "ordinal_position": 2,
+          "schema": "public",
+          "table": "t",
+          "table_id": Any<Number>,
+        },
+      ],
+      "error": null,
+    }
+  `
+  )
 
   await pgMeta.tables.remove(testTable!.id)
 })

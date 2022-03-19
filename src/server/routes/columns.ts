@@ -33,6 +33,7 @@ export default async (fastify: FastifyInstance) => {
     return data
   })
 
+  // deprecated: use GET /batch instead
   fastify.get<{
     Headers: { pg: string }
     Params: {
@@ -54,6 +55,26 @@ export default async (fastify: FastifyInstance) => {
     return data
   })
 
+  fastify.get<{
+    Headers: { pg: string }
+    Body: any
+  }>('/batch', async (request, reply) => {
+    const connectionString = request.headers.pg
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+    const { data, error } = await pgMeta.columns.batchRetrieve({ ids: request.body })
+    await pgMeta.end()
+    if (error) {
+      request.log.error({ error, request: extractRequestForLogging(request) })
+      reply.code(400)
+      if (error.message.startsWith('Cannot find')) reply.code(404)
+      return { error: error.message }
+    }
+
+    return data
+  })
+
+  // deprecated: use POST /batch instead
+  // TODO (darora): specifying a schema on the routes would both allow for validation, and enable us to mark methods as deprecated
   fastify.post<{
     Headers: { pg: string }
     Body: any
@@ -69,7 +90,24 @@ export default async (fastify: FastifyInstance) => {
       if (error.message.startsWith('Cannot find')) reply.code(404)
       return { error: error.message }
     }
+    return data
+  })
 
+  fastify.post<{
+    Headers: { pg: string }
+    Body: any
+  }>('/batch', async (request, reply) => {
+    const connectionString = request.headers.pg
+
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+    const { data, error } = await pgMeta.columns.batchCreate(request.body)
+    await pgMeta.end()
+    if (error) {
+      request.log.error({ error, request: extractRequestForLogging(request) })
+      reply.code(400)
+      if (error.message.startsWith('Cannot find')) reply.code(404)
+      return { error: error.message }
+    }
     return data
   })
 

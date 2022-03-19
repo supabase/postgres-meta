@@ -4,6 +4,28 @@ import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
 import { columnsSql } from './sql'
 import { PostgresMetaResult, PostgresColumn } from './types'
 
+interface ColumnCreationRequest {
+  table_id: number
+  name: string
+  type: string
+  default_value?: any
+  default_value_format?: 'expression' | 'literal'
+  is_identity?: boolean
+  identity_generation?: 'BY DEFAULT' | 'ALWAYS'
+  is_nullable?: boolean
+  is_primary_key?: boolean
+  is_unique?: boolean
+  comment?: string
+  check?: string
+}
+
+interface ColumnBatchInfoRequest {
+  ids?: string[]
+  names?: string[]
+  table?: string
+  schema?: string
+}
+
 export default class PostgresMetaColumns {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
   metaTables: PostgresMetaTables
@@ -57,75 +79,130 @@ export default class PostgresMetaColumns {
     schema?: string
   }): Promise<PostgresMetaResult<PostgresColumn>> {
     if (id) {
-      const regexp = /^(\d+)\.(\d+)$/
-      if (!regexp.test(id)) {
-        return { data: null, error: { message: 'Invalid format for column ID' } }
+      const { data, error } = await this.batchRetrieve({ ids: [id] })
+      if (data) {
+        return { data: data[0], error: null }
+      } else if (error) {
+        return { data: null, error: error }
       }
-      const matches = id.match(regexp) as RegExpMatchArray
-      const [tableId, ordinalPos] = matches.slice(1).map(Number)
-      const sql = `${columnsSql} AND c.oid = ${tableId} AND a.attnum = ${ordinalPos};`
+    }
+    if (name && table) {
+      const { data, error } = await this.batchRetrieve({ names: [name], table, schema })
+      if (data) {
+        return { data: data[0], error: null }
+      } else if (error) {
+        return { data: null, error: error }
+      }
+    }
+    return { data: null, error: { message: 'Invalid parameters on column retrieve' } }
+  }
+
+  async batchRetrieve({
+    ids,
+    names,
+    table,
+    schema = 'public',
+  }: ColumnBatchInfoRequest): Promise<PostgresMetaResult<PostgresColumn[]>> {
+    if (ids && ids.length > 0) {
+      const regexp = /^(\d+)\.(\d+)$/
+      const filteringClauses = ids
+        .map((id) => {
+          if (!regexp.test(id)) {
+            return { data: null, error: { message: 'Invalid format for column ID' } }
+          }
+          const matches = id.match(regexp) as RegExpMatchArray
+          const [tableId, ordinalPos] = matches.slice(1).map(Number)
+          return `(c.oid = ${tableId} AND a.attnum = ${ordinalPos})`
+        })
+        .join(' OR ')
+      const sql = `${columnsSql} AND (${filteringClauses});`
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
-      } else if (data.length === 0) {
-        return { data: null, error: { message: `Cannot find a column with ID ${id}` } }
+      } else if (data.length < ids.length) {
+        return { data: null, error: { message: `Cannot find some of the requested columns.` } }
       } else {
-        return { data: data[0], error }
+        return { data, error }
       }
-    } else if (name && table) {
-      const sql = `${columnsSql} AND a.attname = ${literal(name)} AND c.relname = ${literal(
+    } else if (names && names.length > 0 && table) {
+      const filteringClauses = names.map((name) => `a.attname = ${literal(name)}`).join(' OR ')
+      const sql = `${columnsSql} AND (${filteringClauses}) AND c.relname = ${literal(
         table
       )} AND nc.nspname = ${literal(schema)};`
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
-      } else if (data.length === 0) {
+      } else if (data.length < names.length) {
         return {
           data: null,
-          error: { message: `Cannot find a column named ${name} in table ${schema}.${table}` },
+          error: { message: `Cannot find some of the requested columns.` },
         }
       } else {
-        return { data: data[0], error }
+        return { data, error }
       }
     } else {
       return { data: null, error: { message: 'Invalid parameters on column retrieve' } }
     }
   }
 
-  async create({
-    table_id,
-    name,
-    type,
-    default_value,
-    default_value_format = 'literal',
-    is_identity = false,
-    identity_generation = 'BY DEFAULT',
-    // Can't pick a value as default since regular columns are nullable by default but PK columns aren't
-    is_nullable,
-    is_primary_key = false,
-    is_unique = false,
-    comment,
-    check,
-  }: {
-    table_id: number
-    name: string
-    type: string
-    default_value?: any
-    default_value_format?: 'expression' | 'literal'
-    is_identity?: boolean
-    identity_generation?: 'BY DEFAULT' | 'ALWAYS'
-    is_nullable?: boolean
-    is_primary_key?: boolean
-    is_unique?: boolean
-    comment?: string
-    check?: string
-  }): Promise<PostgresMetaResult<PostgresColumn>> {
+  async create(col: ColumnCreationRequest): Promise<PostgresMetaResult<PostgresColumn>> {
+    const { data, error } = await this.batchCreate([col])
+    if (data) {
+      return { data: data[0], error: null }
+    } else if (error) {
+      return { data: null, error: error }
+    }
+    return { data: null, error: { message: 'Invalid params' } }
+  }
+
+  async batchCreate(cols: ColumnCreationRequest[]): Promise<PostgresMetaResult<PostgresColumn[]>> {
+    if (cols.length < 1) {
+      throw new Error('no columns provided for creation')
+    }
+    if ([...new Set(cols.map((col) => col.table_id))].length > 1) {
+      throw new Error('all columns in a single request must share the same table')
+    }
+    const { table_id } = cols[0]
     const { data, error } = await this.metaTables.retrieve({ id: table_id })
     if (error) {
       return { data: null, error }
     }
     const { name: table, schema } = data!
 
+    const sqlStrings = cols.map((col) => this.generateColumnCreationSql(col, schema, table))
+
+    const sql = `BEGIN;
+${sqlStrings.join('\n')}
+COMMIT;
+`
+    {
+      const { error } = await this.query(sql)
+      if (error) {
+        return { data: null, error }
+      }
+    }
+    const names = cols.map((col) => col.name)
+    return await this.batchRetrieve({ names, table, schema })
+  }
+
+  generateColumnCreationSql(
+    {
+      name,
+      type,
+      default_value,
+      default_value_format = 'literal',
+      is_identity = false,
+      identity_generation = 'BY DEFAULT',
+      // Can't pick a value as default since regular columns are nullable by default but PK columns aren't
+      is_nullable,
+      is_primary_key = false,
+      is_unique = false,
+      comment,
+      check,
+    }: ColumnCreationRequest,
+    schema: string,
+    table: string
+  ) {
     let defaultValueClause = ''
     if (is_identity) {
       if (default_value !== undefined) {
@@ -159,22 +236,14 @@ export default class PostgresMetaColumns {
         : `COMMENT ON COLUMN ${ident(schema)}.${ident(table)}.${ident(name)} IS ${literal(comment)}`
 
     const sql = `
-BEGIN;
   ALTER TABLE ${ident(schema)}.${ident(table)} ADD COLUMN ${ident(name)} ${typeIdent(type)}
     ${defaultValueClause}
     ${isNullableClause}
     ${isPrimaryKeyClause}
     ${isUniqueClause}
     ${checkSql};
-  ${commentSql};
-COMMIT;`
-    {
-      const { error } = await this.query(sql)
-      if (error) {
-        return { data: null, error }
-      }
-    }
-    return await this.retrieve({ name, table, schema })
+  ${commentSql};`
+    return sql
   }
 
   async update(
