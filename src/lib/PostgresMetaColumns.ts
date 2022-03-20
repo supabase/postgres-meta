@@ -98,11 +98,14 @@ export default class PostgresMetaColumns {
   }): Promise<PostgresMetaResult<PostgresColumn[]>> {
     if (ids && ids.length > 0) {
       const regexp = /^(\d+)\.(\d+)$/
+
+      const invalidId = ids.find((id) => !regexp.test(id))
+      if (invalidId) {
+        return { data: null, error: { message: `Invalid format for column ID: ${invalidId}` } }
+      }
+
       const filteringClauses = ids
         .map((id) => {
-          if (!regexp.test(id)) {
-            return { data: null, error: { message: 'Invalid format for column ID' } }
-          }
           const matches = id.match(regexp) as RegExpMatchArray
           const [tableId, ordinalPos] = matches.slice(1).map(Number)
           return `(c.oid = ${tableId} AND a.attnum = ${ordinalPos})`
