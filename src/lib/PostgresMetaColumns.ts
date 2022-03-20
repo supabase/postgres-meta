@@ -2,29 +2,7 @@ import { ident, literal } from 'pg-format'
 import PostgresMetaTables from './PostgresMetaTables'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
 import { columnsSql } from './sql'
-import { PostgresMetaResult, PostgresColumn } from './types'
-
-interface ColumnCreationRequest {
-  table_id: number
-  name: string
-  type: string
-  default_value?: any
-  default_value_format?: 'expression' | 'literal'
-  is_identity?: boolean
-  identity_generation?: 'BY DEFAULT' | 'ALWAYS'
-  is_nullable?: boolean
-  is_primary_key?: boolean
-  is_unique?: boolean
-  comment?: string
-  check?: string
-}
-
-interface ColumnBatchInfoRequest {
-  ids?: string[]
-  names?: string[]
-  table?: string
-  schema?: string
-}
+import { PostgresMetaResult, PostgresColumn, PostgresColumnCreate } from './types'
 
 export default class PostgresMetaColumns {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -97,12 +75,27 @@ export default class PostgresMetaColumns {
     return { data: null, error: { message: 'Invalid parameters on column retrieve' } }
   }
 
+  async batchRetrieve({ ids }: { ids: string[] }): Promise<PostgresMetaResult<PostgresColumn[]>>
+  async batchRetrieve({
+    names,
+    table,
+    schema,
+  }: {
+    names: string[]
+    table: string
+    schema: string
+  }): Promise<PostgresMetaResult<PostgresColumn[]>>
   async batchRetrieve({
     ids,
     names,
     table,
     schema = 'public',
-  }: ColumnBatchInfoRequest): Promise<PostgresMetaResult<PostgresColumn[]>> {
+  }: {
+    ids?: string[]
+    names?: string[]
+    table?: string
+    schema?: string
+  }): Promise<PostgresMetaResult<PostgresColumn[]>> {
     if (ids && ids.length > 0) {
       const regexp = /^(\d+)\.(\d+)$/
       const filteringClauses = ids
@@ -145,7 +138,7 @@ export default class PostgresMetaColumns {
     }
   }
 
-  async create(col: ColumnCreationRequest): Promise<PostgresMetaResult<PostgresColumn>> {
+  async create(col: PostgresColumnCreate): Promise<PostgresMetaResult<PostgresColumn>> {
     const { data, error } = await this.batchCreate([col])
     if (data) {
       return { data: data[0], error: null }
@@ -155,7 +148,7 @@ export default class PostgresMetaColumns {
     return { data: null, error: { message: 'Invalid params' } }
   }
 
-  async batchCreate(cols: ColumnCreationRequest[]): Promise<PostgresMetaResult<PostgresColumn[]>> {
+  async batchCreate(cols: PostgresColumnCreate[]): Promise<PostgresMetaResult<PostgresColumn[]>> {
     if (cols.length < 1) {
       throw new Error('no columns provided for creation')
     }
@@ -199,7 +192,7 @@ COMMIT;
       is_unique = false,
       comment,
       check,
-    }: ColumnCreationRequest,
+    }: PostgresColumnCreate,
     schema: string,
     table: string
   ) {
