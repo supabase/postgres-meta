@@ -55,24 +55,6 @@ export default async (fastify: FastifyInstance) => {
     return data
   })
 
-  fastify.get<{
-    Headers: { pg: string }
-    Body: any
-  }>('/batch', async (request, reply) => {
-    const connectionString = request.headers.pg
-    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
-    const { data, error } = await pgMeta.columns.batchRetrieve({ ids: request.body })
-    await pgMeta.end()
-    if (error) {
-      request.log.error({ error, request: extractRequestForLogging(request) })
-      reply.code(400)
-      if (error.message.startsWith('Cannot find')) reply.code(404)
-      return { error: error.message }
-    }
-
-    return data
-  })
-
   // deprecated: use POST /batch instead
   // TODO (darora): specifying a schema on the routes would both allow for validation, and enable us to mark methods as deprecated
   fastify.post<{
@@ -80,26 +62,11 @@ export default async (fastify: FastifyInstance) => {
     Body: any
   }>('/', async (request, reply) => {
     const connectionString = request.headers.pg
-
     const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
-    const { data, error } = await pgMeta.columns.create(request.body)
-    await pgMeta.end()
-    if (error) {
-      request.log.error({ error, request: extractRequestForLogging(request) })
-      reply.code(400)
-      if (error.message.startsWith('Cannot find')) reply.code(404)
-      return { error: error.message }
+    if (!Array.isArray(request.body)) {
+      request.body = [request.body]
     }
-    return data
-  })
 
-  fastify.post<{
-    Headers: { pg: string }
-    Body: any
-  }>('/batch', async (request, reply) => {
-    const connectionString = request.headers.pg
-
-    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.columns.batchCreate(request.body)
     await pgMeta.end()
     if (error) {
@@ -108,7 +75,11 @@ export default async (fastify: FastifyInstance) => {
       if (error.message.startsWith('Cannot find')) reply.code(404)
       return { error: error.message }
     }
-    return data
+
+    if (Array.isArray(request.body)) {
+      return data
+    }
+    return data[0]
   })
 
   fastify.patch<{
