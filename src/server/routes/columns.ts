@@ -84,13 +84,15 @@ export default async (fastify: FastifyInstance) => {
     },
     async (request, reply) => {
       const connectionString = request.headers.pg
-
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
-      if (!Array.isArray(request.body)) {
-        request.body = [request.body]
+      let batchCreateArg: PostgresColumnCreate[]
+      if (Array.isArray(request.body)) {
+        batchCreateArg = request.body
+      } else {
+        batchCreateArg = [request.body]
       }
 
-      const { data, error } = await pgMeta.columns.batchCreate(request.body)
+      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const { data, error } = await pgMeta.columns.batchCreate(batchCreateArg)
       await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
