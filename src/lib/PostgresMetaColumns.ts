@@ -99,9 +99,12 @@ export default class PostgresMetaColumns {
     if (ids && ids.length > 0) {
       const regexp = /^(\d+)\.(\d+)$/
 
-      const invalidId = ids.find((id) => !regexp.test(id))
-      if (invalidId) {
-        return { data: null, error: { message: `Invalid format for column ID: ${invalidId}` } }
+      const invalidIds = ids.filter((id) => !regexp.test(id))
+      if (invalidIds.length > 0) {
+        return {
+          data: null,
+          error: { message: `Invalid format for column IDs: ${invalidIds.join(', ')}` },
+        }
       }
 
       const filteringClauses = ids
