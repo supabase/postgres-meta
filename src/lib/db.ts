@@ -9,6 +9,8 @@ types.setTypeParser(types.builtins.TIMESTAMPTZ, (x) => x)
 types.setTypeParser(1115, parseArray) // _timestamp
 types.setTypeParser(1182, parseArray) // _date
 types.setTypeParser(1185, parseArray) // _timestamptz
+types.setTypeParser(600, (x) => x) // point
+types.setTypeParser(1017, (x) => x) // _point
 
 export const init: (config: PoolConfig) => {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
