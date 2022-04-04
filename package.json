@@ -41,7 +41,7 @@
     "pino": "^7.6.3",
     "postgres-array": "^3.0.1",
     "prettier": "^2.6.0",
-    "prettier-plugin-sql": "^0.4.0",
+    "prettier-plugin-sql": "^0.6.0",
     "sql-formatter": "^4.0.2"
   },
   "devDependencies": {
