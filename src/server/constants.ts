@@ -6,7 +6,7 @@ const PG_META_DB_NAME = process.env.PG_META_DB_NAME || 'postgres'
 const PG_META_DB_USER = process.env.PG_META_DB_USER || 'postgres'
 const PG_META_DB_PORT = Number(process.env.PG_META_DB_PORT) || 5432
 const PG_META_DB_PASSWORD = process.env.PG_META_DB_PASSWORD || 'postgres'
-const PG_META_DB_SSL_MODE = process.env.PG_META_DB_SSL_MODE|| 'disable'
+const PG_META_DB_SSL_MODE = process.env.PG_META_DB_SSL_MODE || 'disable'
 
 const PG_CONN_TIMEOUT_SECS = Number(process.env.PG_CONN_TIMEOUT_SECS || 15)
 
