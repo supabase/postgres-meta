@@ -91,7 +91,7 @@ export default class PostgresMetaPolicies {
     check,
     action = 'PERMISSIVE',
     command = 'ALL',
-    roles = ['PUBLIC'],
+    roles = ['public'],
   }: {
     name: string
     table: string
@@ -108,7 +108,7 @@ export default class PostgresMetaPolicies {
 CREATE POLICY ${ident(name)} ON ${ident(schema)}.${ident(table)}
   AS ${action}
   FOR ${command}
-  TO ${roles.join(',')}
+  TO ${roles.map(ident).join(',')}
   ${definitionClause} ${checkClause};`
     const { error } = await this.query(sql)
     if (error) {
@@ -140,7 +140,7 @@ CREATE POLICY ${ident(name)} ON ${ident(schema)}.${ident(table)}
     const nameSql = name === undefined ? '' : `${alter} RENAME TO ${ident(name)};`
     const definitionSql = definition === undefined ? '' : `${alter} USING (${definition});`
     const checkSql = check === undefined ? '' : `${alter} WITH CHECK (${check});`
-    const rolesSql = roles === undefined ? '' : `${alter} TO (${roles.join(',')});`
+    const rolesSql = roles === undefined ? '' : `${alter} TO ${roles.map(ident).join(',')};`
 
     // nameSql must be last
     const sql = `BEGIN; ${definitionSql} ${checkSql} ${rolesSql} ${nameSql} COMMIT;`
