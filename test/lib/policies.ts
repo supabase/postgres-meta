@@ -89,6 +89,7 @@ test('retrieve, create, update, delete', async () => {
     name: 'policy updated',
     definition: "current_setting('my.username') IN (name)",
     check: "current_setting('my.username') IN (name)",
+    roles: ['postgres'],
   })
   expect(res).toMatchInlineSnapshot(
     {
@@ -107,7 +108,7 @@ test('retrieve, create, update, delete', async () => {
         "id": Any<Number>,
         "name": "policy updated",
         "roles": Array [
-          "public",
+          "postgres",
         ],
         "schema": "public",
         "table": "memes",
@@ -135,7 +136,7 @@ test('retrieve, create, update, delete', async () => {
         "id": Any<Number>,
         "name": "policy updated",
         "roles": Array [
-          "public",
+          "postgres",
         ],
         "schema": "public",
         "table": "memes",
