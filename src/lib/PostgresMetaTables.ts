@@ -1,13 +1,7 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
 import { coalesceRowsToArray } from './helpers'
-import {
-  columnsSql,
-  policiesSql,
-  primaryKeysSql,
-  relationshipsSql,
-  tablesSql,
-} from './sql'
+import { columnsSql, policiesSql, primaryKeysSql, relationshipsSql, tablesSql } from './sql'
 import { PostgresMetaResult, PostgresTable } from './types'
 
 export default class PostgresMetaTables {
