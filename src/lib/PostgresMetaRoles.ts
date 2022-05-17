@@ -1,7 +1,6 @@
 import { ident, literal } from 'pg-format'
-import { DEFAULT_ROLES, DEFAULT_SYSTEM_SCHEMAS } from './constants'
-import { coalesceRowsToArray } from './helpers'
-import { grantsSql, rolesSql } from './sql'
+import { DEFAULT_ROLES } from './constants'
+import { rolesSql } from './sql'
 import { PostgresMetaResult, PostgresRole } from './types'
 
 export default class PostgresMetaRoles {
@@ -13,31 +12,21 @@ export default class PostgresMetaRoles {
 
   async list({
     includeDefaultRoles = false,
-    includeSystemSchemas = false,
     limit,
     offset,
   }: {
     includeDefaultRoles?: boolean
-    includeSystemSchemas?: boolean
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresRole[]>> {
     let sql = `
-WITH roles AS (${
-      includeDefaultRoles
-        ? rolesSql
-        : `${rolesSql} WHERE NOT (rolname IN (${DEFAULT_ROLES.map(literal).join(',')}))`
-    }),
-  grants AS (${
-    includeSystemSchemas
-      ? grantsSql
-      : `${grantsSql} AND NOT (nc.nspname IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
-  })
+WITH
+  roles AS (${rolesSql})
 SELECT
-  *,
-  ${coalesceRowsToArray('grants', 'grants.grantee = roles.name')}
+  *
 FROM
-  roles`
+  roles
+${includeDefaultRoles ? '' : `WHERE name NOT IN (${DEFAULT_ROLES.map(literal).join(',')})`}`
     if (limit) {
       sql = `${sql} LIMIT ${limit}`
     }
