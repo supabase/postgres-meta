@@ -110,26 +110,6 @@ export const postgresFunctionCreateFunction = Type.Object({
 })
 export type PostgresFunctionCreate = Static<typeof postgresFunctionCreateFunction>
 
-export const postgresGrantSchema = Type.Object({
-  table_id: Type.Integer(),
-  grantor: Type.String(),
-  grantee: Type.String(),
-  schema: Type.String(),
-  table_name: Type.String(),
-  privilege_type: Type.Union([
-    Type.Literal('INSERT'),
-    Type.Literal('SELECT'),
-    Type.Literal('UPDATE'),
-    Type.Literal('DELETE'),
-    Type.Literal('TRUNCATE'),
-    Type.Literal('REFERENCES'),
-    Type.Literal('TRIGGER'),
-  ]),
-  is_grantable: Type.Boolean(),
-  with_hierarchy: Type.Boolean(),
-})
-export type PostgresGrant = Static<typeof postgresGrantSchema>
-
 export const postgresPolicySchema = Type.Object({
   id: Type.Integer(),
   schema: Type.String(),
@@ -206,7 +186,6 @@ export const postgresRoleSchema = Type.Object({
   password: Type.String(),
   valid_until: Type.Union([Type.String(), Type.Null()]),
   config: Type.Union([Type.String(), Type.Null()]),
-  grants: Type.Array(postgresGrantSchema),
 })
 export type PostgresRole = Static<typeof postgresRoleSchema>
 
@@ -247,7 +226,6 @@ export const postgresTableSchema = Type.Object({
   dead_rows_estimate: Type.Integer(),
   comment: Type.Union([Type.String(), Type.Null()]),
   columns: Type.Array(postgresColumnSchema),
-  grants: Type.Array(postgresGrantSchema),
   policies: Type.Array(postgresPolicySchema),
   primary_keys: Type.Array(postgresPrimaryKeySchema),
   relationships: Type.Array(postgresRelationshipSchema),

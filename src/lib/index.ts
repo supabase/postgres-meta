@@ -8,7 +8,6 @@ export {
   PostgresConfig,
   PostgresExtension,
   PostgresFunction,
-  PostgresGrant,
   PostgresPolicy,
   PostgresPrimaryKey,
   PostgresPublication,
