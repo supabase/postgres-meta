@@ -5,7 +5,6 @@ export const columnsSql = readFileSync(resolve(__dirname, 'columns.sql'), 'utf-8
 export const configSql = readFileSync(resolve(__dirname, 'config.sql'), 'utf-8')
 export const extensionsSql = readFileSync(resolve(__dirname, 'extensions.sql'), 'utf-8')
 export const functionsSql = readFileSync(resolve(__dirname, 'functions.sql'), 'utf-8')
-export const grantsSql = readFileSync(resolve(__dirname, 'grants.sql'), 'utf-8')
 export const policiesSql = readFileSync(resolve(__dirname, 'policies.sql'), 'utf-8')
 export const primaryKeysSql = readFileSync(resolve(__dirname, 'primary_keys.sql'), 'utf-8')
 export const publicationsSql = readFileSync(resolve(__dirname, 'publications.sql'), 'utf-8')
