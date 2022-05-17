@@ -3,7 +3,6 @@ import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
 import { coalesceRowsToArray } from './helpers'
 import {
   columnsSql,
-  grantsSql,
   policiesSql,
   primaryKeysSql,
   relationshipsSql,
@@ -236,14 +235,12 @@ COMMIT;`
 const enrichedTablesSql = `
 WITH tables AS (${tablesSql}),
   columns AS (${columnsSql}),
-  grants AS (${grantsSql}),
   policies AS (${policiesSql}),
   primary_keys AS (${primaryKeysSql}),
   relationships AS (${relationshipsSql})
 SELECT
   *,
   ${coalesceRowsToArray('columns', 'columns.table_id = tables.id')},
-  ${coalesceRowsToArray('grants', 'grants.table_id = tables.id')},
   ${coalesceRowsToArray('policies', 'policies.table_id = tables.id')},
   ${coalesceRowsToArray('primary_keys', 'primary_keys.table_id = tables.id')},
   ${coalesceRowsToArray(
