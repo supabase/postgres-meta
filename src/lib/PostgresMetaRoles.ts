@@ -26,12 +26,16 @@ SELECT
   *
 FROM
   roles
-${includeDefaultRoles ? '' : `WHERE name NOT IN (${DEFAULT_ROLES.map(literal).join(',')})`}`
+WHERE
+  true`
+    if (includeDefaultRoles) {
+      sql += ` AND name NOT IN (${DEFAULT_ROLES.map(literal).join(',')})`
+    }
     if (limit) {
-      sql = `${sql} LIMIT ${limit}`
+      sql += ` LIMIT ${limit}`
     }
     if (offset) {
-      sql = `${sql} OFFSET ${offset}`
+      sql += ` OFFSET ${offset}`
     }
     return await this.query(sql)
   }
