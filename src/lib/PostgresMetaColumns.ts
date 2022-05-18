@@ -14,23 +14,36 @@ export default class PostgresMetaColumns {
   }
 
   async list({
+    tableId,
     includeSystemSchemas = false,
     limit,
     offset,
   }: {
+    tableId?: number
     includeSystemSchemas?: boolean
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresColumn[]>> {
-    let sql = columnsSql
+    let sql = `
+WITH
+  columns AS (${columnsSql})
+SELECT
+  *
+FROM
+  columns
+WHERE
+  true`
     if (!includeSystemSchemas) {
-      sql = `${sql} AND NOT (nc.nspname IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
+      sql += ` AND schema NOT IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')})`
+    }
+    if (tableId !== undefined) {
+      sql += ` AND table_id = ${literal(tableId)}`
     }
     if (limit) {
-      sql = `${sql} LIMIT ${limit}`
+      sql += ` LIMIT ${limit}`
     }
     if (offset) {
-      sql = `${sql} OFFSET ${offset}`
+      sql += ` OFFSET ${offset}`
     }
     return await this.query(sql)
   }
