@@ -2,14 +2,13 @@ import { pgMeta } from './utils'
 
 const cleanNondet = (x: any) => {
   const {
-    data: { columns, policies, primary_keys, relationships, ...rest2 },
+    data: { columns, primary_keys, relationships, ...rest2 },
     ...rest1
   } = x
 
   return {
     data: {
       columns: columns.map(({ id, table_id, ...rest }: any) => rest),
-      policies: policies.map(({ id, table_id, ...rest }: any) => rest),
       primary_keys: primary_keys.map(({ table_id, ...rest }: any) => rest),
       relationships: relationships.map(({ id, ...rest }: any) => rest),
       ...rest2,
@@ -21,13 +20,12 @@ const cleanNondet = (x: any) => {
 test('list', async () => {
   const res = await pgMeta.tables.list()
 
-  const { columns, policies, primary_keys, relationships, ...rest }: any = res.data?.find(
+  const { columns, primary_keys, relationships, ...rest }: any = res.data?.find(
     ({ name }) => name === 'users'
   )
 
   expect({
     columns: columns.map(({ id, table_id, ...rest }: any) => rest),
-    policies: policies.map(({ id, table_id, ...rest }: any) => rest),
     primary_keys: primary_keys.map(({ table_id, ...rest }: any) => rest),
     relationships: relationships.map(({ id, ...rest }: any) => rest),
     ...rest,
@@ -103,7 +101,6 @@ test('list', async () => {
       "id": Any<Number>,
       "live_rows_estimate": Any<Number>,
       "name": "users",
-      "policies": Array [],
       "primary_keys": Array [
         Object {
           "name": "id",
@@ -146,7 +143,6 @@ test('retrieve, create, update, delete', async () => {
         "id": Any<Number>,
         "live_rows_estimate": 0,
         "name": "test",
-        "policies": Array [],
         "primary_keys": Array [],
         "relationships": Array [],
         "replica_identity": "DEFAULT",
@@ -172,7 +168,6 @@ test('retrieve, create, update, delete', async () => {
         "id": Any<Number>,
         "live_rows_estimate": 0,
         "name": "test",
-        "policies": Array [],
         "primary_keys": Array [],
         "relationships": Array [],
         "replica_identity": "DEFAULT",
@@ -204,7 +199,6 @@ test('retrieve, create, update, delete', async () => {
         "id": Any<Number>,
         "live_rows_estimate": 0,
         "name": "test a",
-        "policies": Array [],
         "primary_keys": Array [],
         "relationships": Array [],
         "replica_identity": "NOTHING",
@@ -230,7 +224,6 @@ test('retrieve, create, update, delete', async () => {
         "id": Any<Number>,
         "live_rows_estimate": 0,
         "name": "test a",
-        "policies": Array [],
         "primary_keys": Array [],
         "relationships": Array [],
         "replica_identity": "NOTHING",
@@ -269,7 +262,6 @@ test('update with name unchanged', async () => {
         "id": Any<Number>,
         "live_rows_estimate": 0,
         "name": "t",
-        "policies": Array [],
         "primary_keys": Array [],
         "relationships": Array [],
         "replica_identity": "DEFAULT",
@@ -299,7 +291,6 @@ test("allow ' in comments", async () => {
         "id": Any<Number>,
         "live_rows_estimate": 0,
         "name": "t",
-        "policies": Array [],
         "primary_keys": Array [],
         "relationships": Array [],
         "replica_identity": "DEFAULT",
@@ -377,7 +368,6 @@ test('primary keys', async () => {
         "id": Any<Number>,
         "live_rows_estimate": Any<Number>,
         "name": "t",
-        "policies": Array [],
         "primary_keys": Array [
           Object {
             "name": "c",
