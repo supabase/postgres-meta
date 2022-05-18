@@ -35,6 +35,39 @@ export default async (fastify: FastifyInstance) => {
 
   fastify.get<{
     Headers: { pg: string }
+    Params: { tableId: number }
+    Querystring: {
+      include_system_schemas?: string
+      limit?: number
+      offset?: number
+    }
+  }>('/:tableId(^\\d+$)', async (request, reply) => {
+    const {
+      headers: { pg: connectionString },
+      query: { limit, offset },
+      params: { tableId },
+    } = request
+    const includeSystemSchemas = request.query.include_system_schemas === 'true'
+
+    const pgMeta: PostgresMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+    const { data, error } = await pgMeta.columns.list({
+      tableId,
+      includeSystemSchemas,
+      limit,
+      offset,
+    })
+    await pgMeta.end()
+    if (error) {
+      request.log.error({ error, request: extractRequestForLogging(request) })
+      reply.code(500)
+      return { error: error.message }
+    }
+
+    return data
+  })
+
+  fastify.get<{
+    Headers: { pg: string }
     Params: {
       id: string
     }

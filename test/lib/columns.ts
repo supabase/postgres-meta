@@ -31,6 +31,74 @@ test('list', async () => {
   )
 })
 
+test('list from a single table', async () => {
+  const { data: testTable }: any = await pgMeta.tables.create({ name: 't' })
+  await pgMeta.query('alter table t add c1 text, add c2 text')
+
+  const res = await pgMeta.columns.list({ tableId: testTable!.id })
+  expect(res).toMatchInlineSnapshot(
+    {
+      data: [
+        {
+          id: expect.stringMatching(/^\d+\.\d+$/),
+          table_id: expect.any(Number),
+        },
+        {
+          id: expect.stringMatching(/^\d+\.\d+$/),
+          table_id: expect.any(Number),
+        },
+      ],
+    },
+    `
+    Object {
+      "data": Array [
+        Object {
+          "comment": null,
+          "data_type": "text",
+          "default_value": null,
+          "enums": Array [],
+          "format": "text",
+          "id": StringMatching /\\^\\\\d\\+\\\\\\.\\\\d\\+\\$/,
+          "identity_generation": null,
+          "is_generated": false,
+          "is_identity": false,
+          "is_nullable": true,
+          "is_unique": false,
+          "is_updatable": true,
+          "name": "c1",
+          "ordinal_position": 1,
+          "schema": "public",
+          "table": "t",
+          "table_id": Any<Number>,
+        },
+        Object {
+          "comment": null,
+          "data_type": "text",
+          "default_value": null,
+          "enums": Array [],
+          "format": "text",
+          "id": StringMatching /\\^\\\\d\\+\\\\\\.\\\\d\\+\\$/,
+          "identity_generation": null,
+          "is_generated": false,
+          "is_identity": false,
+          "is_nullable": true,
+          "is_unique": false,
+          "is_updatable": true,
+          "name": "c2",
+          "ordinal_position": 2,
+          "schema": "public",
+          "table": "t",
+          "table_id": Any<Number>,
+        },
+      ],
+      "error": null,
+    }
+  `
+  )
+
+  await pgMeta.tables.remove(testTable!.id)
+})
+
 test('retrieve, create, update, delete', async () => {
   const { data: testTable }: any = await pgMeta.tables.create({ name: 't' })
 
