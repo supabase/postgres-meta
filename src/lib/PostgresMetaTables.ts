@@ -1,7 +1,7 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
 import { coalesceRowsToArray } from './helpers'
-import { columnsSql, policiesSql, primaryKeysSql, relationshipsSql, tablesSql } from './sql'
+import { columnsSql, primaryKeysSql, relationshipsSql, tablesSql } from './sql'
 import { PostgresMetaResult, PostgresTable } from './types'
 
 export default class PostgresMetaTables {
@@ -229,13 +229,11 @@ COMMIT;`
 const enrichedTablesSql = `
 WITH tables AS (${tablesSql}),
   columns AS (${columnsSql}),
-  policies AS (${policiesSql}),
   primary_keys AS (${primaryKeysSql}),
   relationships AS (${relationshipsSql})
 SELECT
   *,
   ${coalesceRowsToArray('columns', 'columns.table_id = tables.id')},
-  ${coalesceRowsToArray('policies', 'policies.table_id = tables.id')},
   ${coalesceRowsToArray('primary_keys', 'primary_keys.table_id = tables.id')},
   ${coalesceRowsToArray(
     'relationships',
