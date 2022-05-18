@@ -226,7 +226,6 @@ export const postgresTableSchema = Type.Object({
   dead_rows_estimate: Type.Integer(),
   comment: Type.Union([Type.String(), Type.Null()]),
   columns: Type.Array(postgresColumnSchema),
-  policies: Type.Array(postgresPolicySchema),
   primary_keys: Type.Array(postgresPrimaryKeySchema),
   relationships: Type.Array(postgresRelationshipSchema),
 })
