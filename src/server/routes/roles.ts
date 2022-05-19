@@ -8,21 +8,18 @@ export default async (fastify: FastifyInstance) => {
     Headers: { pg: string }
     Querystring: {
       include_default_roles?: string
-      include_system_schemas?: string
       limit?: number
       offset?: number
     }
   }>('/', async (request, reply) => {
     const connectionString = request.headers.pg
     const includeDefaultRoles = request.query.include_default_roles === 'true'
-    const includeSystemSchemas = request.query.include_system_schemas === 'true'
     const limit = request.query.limit
     const offset = request.query.offset
 
     const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.roles.list({
       includeDefaultRoles,
-      includeSystemSchemas,
       limit,
       offset,
     })
