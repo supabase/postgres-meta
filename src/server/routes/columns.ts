@@ -33,6 +33,37 @@ export default async (fastify: FastifyInstance) => {
     return data
   })
 
+  // HACK: Dark arts to get around https://github.com/delvedor/find-my-way/issues/285:
+  // - this route has to be before /:tableId(^\\d+$)
+  // - can't do :tableId(^\\d+$) instead of :tableId(^\\d+)
+  // - need to separate :ordinalPosition as a 2nd param
+  //
+  // Anyhow, this probably just happens to work.
+  fastify.get<{
+    Headers: { pg: string }
+    Params: {
+      tableId: string
+      ordinalPosition: string
+    }
+  }>('/:tableId(^\\d+).:ordinalPosition(^\\d+$)', async (request, reply) => {
+    const {
+      headers: { pg: connectionString },
+      params: { tableId, ordinalPosition },
+    } = request
+
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+    const { data, error } = await pgMeta.columns.retrieve({ id: `${tableId}.${ordinalPosition}` })
+    await pgMeta.end()
+    if (error) {
+      request.log.error({ error, request: extractRequestForLogging(request) })
+      reply.code(400)
+      if (error.message.startsWith('Cannot find')) reply.code(404)
+      return { error: error.message }
+    }
+
+    return data
+  })
+
   fastify.get<{
     Headers: { pg: string }
     Params: { tableId: number }
@@ -60,27 +91,6 @@ export default async (fastify: FastifyInstance) => {
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(500)
-      return { error: error.message }
-    }
-
-    return data
-  })
-
-  fastify.get<{
-    Headers: { pg: string }
-    Params: {
-      id: string
-    }
-  }>('/:id(\\d+\\.\\d+)', async (request, reply) => {
-    const connectionString = request.headers.pg
-
-    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
-    const { data, error } = await pgMeta.columns.retrieve({ id: request.params.id })
-    await pgMeta.end()
-    if (error) {
-      request.log.error({ error, request: extractRequestForLogging(request) })
-      reply.code(400)
-      if (error.message.startsWith('Cannot find')) reply.code(404)
       return { error: error.message }
     }
 
