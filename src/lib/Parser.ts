@@ -8,7 +8,6 @@ const DEFAULT_FORMATTER_OPTIONS = {
   formatter: 'sql-formatter',
   language: 'postgresql',
   database: 'postgresql',
-  uppercase: false, // I thought this would "lowercase" everything, but it doesn't. There is not option to convert everything to lowercase.
   parser: 'sql',
 }
 
