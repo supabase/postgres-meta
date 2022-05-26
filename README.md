@@ -87,7 +87,7 @@ Then run any of the binaries in the releases.
 
 **Why?**
 
-This serves as a light-weight connection pooler. It also normalises the Postgres system catalog into a more readable format. While it it a lot of reinventing right now, this server will eventually provide helpers (such as type generators). The server is multi-tenant, so it can support multiple Postgres databases from a single server.
+This serves as a light-weight connection pooler. It also normalises the Postgres system catalog into a more readable format. While there is a lot of re-inventing right now, this server will eventually provide helpers (such as type generators). The server is multi-tenant, so it can support multiple Postgres databases from a single server.
 
 **What security does this use?**
 
