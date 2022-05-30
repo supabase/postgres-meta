@@ -38,4 +38,5 @@ export default async (fastify: FastifyInstance) => {
   fastify.register(require('./triggers'), { prefix: '/triggers' })
   fastify.register(require('./types'), { prefix: '/types' })
   fastify.register(require('./views'), { prefix: '/views' })
+  fastify.register(require('./generators/typescript'), { prefix: 'generators/typescript' })
 }
