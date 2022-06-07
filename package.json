@@ -30,8 +30,8 @@
     "test:update": "run-s db:clean db:run && jest --runInBand --updateSnapshot && run-s db:clean"
   },
   "engines": {
-    "node": ">=14 <15",
-    "npm": ">=7"
+    "node": ">=16",
+    "npm": ">=8"
   },
   "dependencies": {
     "@sinclair/typebox": "^0.23.4",

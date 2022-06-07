@@ -1,4 +1,4 @@
-FROM node:14 as build
+FROM node:16 as build
 WORKDIR /usr/src/app
 # Do `npm ci` separately so we can cache `node_modules`
 # https://nodejs.org/en/docs/guides/nodejs-docker-webapp/
@@ -7,7 +7,7 @@ RUN npm clean-install
 COPY . .
 RUN npm run build:server
 
-FROM node:14-slim
+FROM node:16-slim
 WORKDIR /usr/src/app
 COPY --from=build /usr/src/app/node_modules node_modules
 COPY --from=build /usr/src/app/bin bin
