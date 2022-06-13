@@ -2,7 +2,14 @@ import { types, Pool, PoolConfig } from 'pg'
 import { parse as parseArray } from 'postgres-array'
 import { PostgresMetaResult } from './types'
 
-types.setTypeParser(types.builtins.INT8, parseInt)
+types.setTypeParser(types.builtins.INT8, (x) => {
+  const asNumber = Number(x)
+  if (Number.isSafeInteger(asNumber)) {
+    return asNumber
+  } else {
+    return x
+  }
+})
 types.setTypeParser(types.builtins.DATE, (x) => x)
 types.setTypeParser(types.builtins.TIMESTAMP, (x) => x)
 types.setTypeParser(types.builtins.TIMESTAMPTZ, (x) => x)

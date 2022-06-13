@@ -491,3 +491,22 @@ test('formatter', async () => {
     }
   `)
 })
+
+test('very big number', async () => {
+  const res = await pgMeta.query(
+    `SELECT ${Number.MAX_SAFE_INTEGER + 1}::int8, ARRAY[${Number.MIN_SAFE_INTEGER - 1}::int8]`
+  )
+  expect(res).toMatchInlineSnapshot(`
+    Object {
+      "data": Array [
+        Object {
+          "array": Array [
+            "-9007199254740992",
+          ],
+          "int8": "9007199254740992",
+        },
+      ],
+      "error": null,
+    }
+  `)
+})
