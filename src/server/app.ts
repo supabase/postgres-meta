@@ -4,6 +4,7 @@ import routes from './routes'
 import { extractRequestForLogging } from './utils'
 import pino from 'pino'
 import pkg from '../../package.json'
+import { build as buildAdminApp } from './admin-app'
 
 const logger = pino({
   formatters: {
@@ -57,6 +58,11 @@ if (PG_META_EXPORT_DOCS) {
   app.ready(() => {
     app.listen(PG_META_PORT, '0.0.0.0', () => {
       app.log.info(`App started on port ${PG_META_PORT}`)
+      const adminApp = buildAdminApp({ logger })
+      const adminPort = PG_META_PORT + 1
+      adminApp.listen(adminPort, '0.0.0.0', () => {
+        adminApp.log.info(`Admin App started on port ${adminPort}`)
+      })
     })
   })
 }
