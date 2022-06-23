@@ -1,6 +1,16 @@
 import fastify from 'fastify'
-import { PG_META_EXPORT_DOCS, PG_META_PORT, PG_META_REQ_HEADER } from './constants'
+import { PostgresMeta } from '../lib'
+import {
+  DEFAULT_POOL_CONFIG,
+  EXPORT_DOCS,
+  GENERATE_TYPES,
+  GENERATE_TYPES_EXCLUDED_SCHEMAS,
+  PG_CONNECTION,
+  PG_META_PORT,
+  PG_META_REQ_HEADER,
+} from './constants'
 import routes from './routes'
+import { apply as applyTypescriptTemplate } from './templates/typescript'
 import { extractRequestForLogging } from './utils'
 import pino from 'pino'
 import pkg from '../../package.json'
@@ -31,7 +41,7 @@ app.setNotFoundHandler((request, reply) => {
   reply.code(404).send({ error: 'Not found' })
 })
 
-if (PG_META_EXPORT_DOCS) {
+if (EXPORT_DOCS) {
   app.register(require('fastify-swagger'), {
     openapi: {
       servers: [],
@@ -44,16 +54,45 @@ if (PG_META_EXPORT_DOCS) {
   })
 
   app.ready(() => {
-    require('fs').writeFileSync(
-      'openapi.json',
-      JSON.stringify(
-        // @ts-ignore: app.swagger() is a Fastify decorator, so doesn't show up in the types
-        app.swagger(),
-        null,
-        2
-      ) + '\n'
-    )
+    // @ts-ignore: app.swagger() is a Fastify decorator, so doesn't show up in the types
+    console.log(JSON.stringify(app.swagger(), null, 2))
   })
+} else if (GENERATE_TYPES === 'typescript') {
+  ;(async () => {
+    const pgMeta: PostgresMeta = new PostgresMeta({
+      ...DEFAULT_POOL_CONFIG,
+      connectionString: PG_CONNECTION,
+    })
+    const { data: schemas, error: schemasError } = await pgMeta.schemas.list()
+    const { data: tables, error: tablesError } = await pgMeta.tables.list()
+    const { data: functions, error: functionsError } = await pgMeta.functions.list()
+    const { data: types, error: typesError } = await pgMeta.types.list({
+      includeSystemSchemas: true,
+    })
+    await pgMeta.end()
+
+    if (schemasError) {
+      throw schemasError
+    }
+    if (tablesError) {
+      throw schemasError
+    }
+    if (functionsError) {
+      throw schemasError
+    }
+    if (typesError) {
+      throw typesError
+    }
+
+    console.log(
+      applyTypescriptTemplate({
+        schemas: schemas.filter(({ name }) => !GENERATE_TYPES_EXCLUDED_SCHEMAS.includes(name)),
+        tables,
+        functions,
+        types,
+      })
+    )
+  })()
 } else {
   app.ready(() => {
     app.listen(PG_META_PORT, '0.0.0.0', () => {
