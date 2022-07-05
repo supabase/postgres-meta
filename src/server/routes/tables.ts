@@ -4,6 +4,27 @@ import { DEFAULT_POOL_CONFIG } from '../constants'
 import { extractRequestForLogging, translateErrorToResponseCode } from '../utils'
 
 export default async (fastify: FastifyInstance) => {
+  fastify.head<{
+    Headers: { pg: string }
+    Querystring: {
+      include_system_schemas?: string
+    }
+  }>('/', async (request, reply) => {
+    const connectionString = request.headers.pg
+    const includeSystemSchemas = request.query.include_system_schemas === 'true'
+
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+    const { data, error } = await pgMeta.tables.count({ includeSystemSchemas })
+    await pgMeta.end()
+    if (error) {
+      request.log.error({ error, request: extractRequestForLogging(request) })
+      reply.code(translateErrorToResponseCode(error, 500))
+      return { error: error.message }
+    }
+
+    return reply.header('content-range', `*/${data.count}`).send()
+  })
+
   fastify.get<{
     Headers: { pg: string }
     Querystring: {

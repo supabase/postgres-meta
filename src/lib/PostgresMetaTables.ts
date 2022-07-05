@@ -11,6 +11,22 @@ export default class PostgresMetaTables {
     this.query = query
   }
 
+  async count({ includeSystemSchemas = false } = {}): Promise<
+    PostgresMetaResult<{ count: number }>
+  > {
+    let sql = `WITH tables AS (${tablesSql}) SELECT count(1) FROM tables`
+    if (!includeSystemSchemas) {
+      sql = `${sql} WHERE NOT (schema IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
+    }
+
+    const { data, error } = await this.query(sql)
+    if (error) {
+      return { data, error }
+    } else {
+      return { data: data[0], error }
+    }
+  }
+
   async list({
     includeSystemSchemas = false,
     limit,

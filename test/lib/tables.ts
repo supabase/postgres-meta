@@ -17,6 +17,19 @@ const cleanNondet = (x: any) => {
   }
 }
 
+test('count', async () => {
+  const res = await pgMeta.tables.count()
+
+  expect(res).toMatchInlineSnapshot(`
+    Object {
+      "data": Object {
+        "count": 5,
+      },
+      "error": null,
+    }
+  `)
+})
+
 test('list', async () => {
   const res = await pgMeta.tables.list()
 
