@@ -43,7 +43,7 @@
     "pino": "^7.6.3",
     "postgres-array": "^3.0.1",
     "prettier": "^2.6.0",
-    "prettier-plugin-sql": "^0.7.0"
+    "prettier-plugin-sql": "^0.10.0"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.1.1",
