@@ -9,11 +9,14 @@ export default async (fastify: FastifyInstance) => {
     Headers: { pg: string }
     Querystring: {
       excluded_schemas?: string
+      included_schemas?: string
     }
   }>('/', async (request, reply) => {
     const connectionString = request.headers.pg
     const excludedSchemas =
       request.query.excluded_schemas?.split(',').map((schema) => schema.trim()) ?? []
+    const includedSchemas =
+      request.query.included_schemas?.split(',').map((schema) => schema.trim()) ?? []
 
     const pgMeta: PostgresMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data: schemas, error: schemasError } = await pgMeta.schemas.list()
@@ -46,7 +49,11 @@ export default async (fastify: FastifyInstance) => {
     }
 
     return applyTypescriptTemplate({
-      schemas: schemas.filter(({ name }) => !excludedSchemas.includes(name)),
+      schemas: schemas.filter(
+        ({ name }) =>
+          !excludedSchemas.includes(name) &&
+          (includedSchemas.length === 0 || includedSchemas.includes(name))
+      ),
       tables,
       functions,
       types,
