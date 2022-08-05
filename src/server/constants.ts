@@ -17,8 +17,8 @@ export const PG_CONNECTION =
 export const EXPORT_DOCS = process.argv[2] === 'docs' && process.argv[3] === 'export'
 export const GENERATE_TYPES =
   process.argv[2] === 'gen' && process.argv[3] === 'types' ? process.argv[4] : undefined
-export const GENERATE_TYPES_EXCLUDED_SCHEMAS =
-  GENERATE_TYPES && process.argv[5] === '--exclude-schemas' ? process.argv[6]?.split(',') ?? [] : []
+export const GENERATE_TYPES_INCLUDED_SCHEMAS =
+  GENERATE_TYPES && process.argv[5] === '--include-schemas' ? process.argv[6]?.split(',') ?? [] : []
 
 export const DEFAULT_POOL_CONFIG = { max: 1, connectionTimeoutMillis: PG_CONN_TIMEOUT_SECS * 1000 }
 export const PG_META_REQ_HEADER = process.env.PG_META_REQ_HEADER || 'request-id'
