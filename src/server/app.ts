@@ -4,7 +4,7 @@ import {
   DEFAULT_POOL_CONFIG,
   EXPORT_DOCS,
   GENERATE_TYPES,
-  GENERATE_TYPES_EXCLUDED_SCHEMAS,
+  GENERATE_TYPES_INCLUDED_SCHEMAS,
   PG_CONNECTION,
   PG_META_PORT,
   PG_META_REQ_HEADER,
@@ -86,7 +86,11 @@ if (EXPORT_DOCS) {
 
     console.log(
       applyTypescriptTemplate({
-        schemas: schemas.filter(({ name }) => !GENERATE_TYPES_EXCLUDED_SCHEMAS.includes(name)),
+        schemas: schemas.filter(
+          ({ name }) =>
+            GENERATE_TYPES_INCLUDED_SCHEMAS.length === 0 ||
+            GENERATE_TYPES_INCLUDED_SCHEMAS.includes(name)
+        ),
         tables,
         functions,
         types,
