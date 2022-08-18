@@ -66,24 +66,39 @@ jobs:
     needs:
       - semantic-release
     if: needs.semantic-release.outputs.new-release-published == 'true'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            supabase/postgres-meta
+            public.ecr.aws/t3w2s2c9/postgres-meta
+          tags: |
+            type=raw,value=v${{ needs.semantic-release.outputs.new-release-version }}
 
       - uses: docker/setup-qemu-action@v2
         with:
           platforms: amd64,arm64
-
       - uses: docker/setup-buildx-action@v2
 
-      - uses: docker/login-action@v2
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Login to ECR
+        uses: docker/login-action@v2
+        with:
+          registry: public.ecr.aws
+          username: ${{ secrets.PROD_ACCESS_KEY_ID }}
+          password: ${{ secrets.PROD_SECRET_ACCESS_KEY }}
+
       - uses: docker/build-push-action@v3
         with:
-          context: .
-          platforms: linux/amd64,linux/arm64
           push: true
-          tags: supabase/postgres-meta:latest,supabase/postgres-meta:v${{ needs.semantic-release.outputs.new-release-version }}
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
