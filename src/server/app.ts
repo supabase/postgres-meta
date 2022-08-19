@@ -72,16 +72,16 @@ if (EXPORT_DOCS) {
     await pgMeta.end()
 
     if (schemasError) {
-      throw schemasError
+      throw new Error(schemasError.message)
     }
     if (tablesError) {
-      throw schemasError
+      throw new Error(tablesError.message)
     }
     if (functionsError) {
-      throw schemasError
+      throw new Error(functionsError.message)
     }
     if (typesError) {
-      throw typesError
+      throw new Error(typesError.message)
     }
 
     console.log(
