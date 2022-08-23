@@ -12,7 +12,9 @@ const PG_CONN_TIMEOUT_SECS = Number(process.env.PG_CONN_TIMEOUT_SECS || 15)
 
 export const PG_CONNECTION =
   process.env.PG_META_DB_URL ||
-  `postgres://${PG_META_DB_USER}:${PG_META_DB_PASSWORD}@${PG_META_DB_HOST}:${PG_META_DB_PORT}/${PG_META_DB_NAME}?sslmode=${PG_META_DB_SSL_MODE}`
+  `postgres://${PG_META_DB_USER}:${encodeURIComponent(
+    PG_META_DB_PASSWORD
+  )}@${PG_META_DB_HOST}:${PG_META_DB_PORT}/${PG_META_DB_NAME}?sslmode=${PG_META_DB_SSL_MODE}`
 
 export const EXPORT_DOCS = process.argv[2] === 'docs' && process.argv[3] === 'export'
 export const GENERATE_TYPES =
