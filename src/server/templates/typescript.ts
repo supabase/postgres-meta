@@ -152,7 +152,7 @@ const pgTypeToTsType = (pgType: string, types: PostgresType[]): string => {
   } else if (pgType === 'record') {
     return 'Record<string, unknown>[]'
   } else if (pgType.startsWith('_')) {
-    return pgTypeToTsType(pgType.substring(1), types) + '[]'
+    return `(${pgTypeToTsType(pgType.substring(1), types)})[]`
   } else {
     const type = types.find((type) => type.name === pgType && type.enums.length > 0)
     if (type) {
