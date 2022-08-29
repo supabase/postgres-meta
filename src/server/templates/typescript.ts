@@ -81,18 +81,15 @@ export interface Database {
           }
           Functions: {
             ${functions
-              .filter(
-                (function_) =>
-                  function_.schema === schema.name && function_.return_type !== 'trigger'
-              )
+              .filter((func) => func.schema === schema.name)
               .map(
-                (function_) => `${JSON.stringify(function_.name)}: {
+                (func) => `${JSON.stringify(func.name)}: {
                   Args: ${(() => {
-                    if (function_.argument_types === '') {
+                    if (func.argument_types === '') {
                       return 'Record<PropertyKey, never>'
                     }
 
-                    const splitArgs = function_.argument_types.split(',').map((arg) => arg.trim())
+                    const splitArgs = func.argument_types.split(',').map((arg) => arg.trim())
                     if (splitArgs.some((arg) => arg.includes('"') || !arg.includes(' '))) {
                       return 'Record<string, unknown>'
                     }
@@ -110,7 +107,7 @@ export interface Database {
                       ({ name, type }) => `${JSON.stringify(name)}: ${type}`
                     )} }`
                   })()}
-                  Returns: ${pgTypeToTsType(function_.return_type, types)}
+                  Returns: ${pgTypeToTsType(func.return_type, types)}
                 }`
               )}
           }
