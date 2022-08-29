@@ -279,6 +279,8 @@ export const postgresViewSchema = Type.Object({
   id: Type.Integer(),
   schema: Type.String(),
   name: Type.String(),
+  is_updatable: Type.Boolean(),
   comment: Type.Union([Type.String(), Type.Null()]),
+  columns: Type.Array(postgresColumnSchema),
 })
 export type PostgresView = Static<typeof postgresViewSchema>
