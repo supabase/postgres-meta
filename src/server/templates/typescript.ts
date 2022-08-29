@@ -16,14 +16,16 @@ export const apply = ({
 export type Json = string | number | boolean | null | { [key: string]: Json } | Json[]
 
 export interface Database {
-  ${schemas.map(
-    (schema) =>
-      `${JSON.stringify(schema.name)}: {
+  ${schemas.map((schema) => {
+    const schemaTables = tables.filter((table) => table.schema === schema.name)
+    const schemaFunctions = functions.filter((func) => func.schema === schema.name)
+    return `${JSON.stringify(schema.name)}: {
           Tables: {
-            ${tables
-              .filter((table) => table.schema === schema.name)
-              .map(
-                (table) => `${JSON.stringify(table.name)}: {
+            ${
+              schemaTables.length === 0
+                ? '[_ in never]: never'
+                : schemaTables.map(
+                    (table) => `${JSON.stringify(table.name)}: {
                   Row: {
                     ${table.columns.map(
                       (column) =>
@@ -77,13 +79,15 @@ export interface Database {
                     })}
                   }
                 }`
-              )}
+                  )
+            }
           }
           Functions: {
-            ${functions
-              .filter((func) => func.schema === schema.name)
-              .map(
-                (func) => `${JSON.stringify(func.name)}: {
+            ${
+              schemaFunctions.length === 0
+                ? '[_ in never]: never'
+                : schemaFunctions.map(
+                    (func) => `${JSON.stringify(func.name)}: {
                   Args: ${(() => {
                     if (func.argument_types === '') {
                       return 'Record<PropertyKey, never>'
@@ -109,10 +113,11 @@ export interface Database {
                   })()}
                   Returns: ${pgTypeToTsType(func.return_type, types)}
                 }`
-              )}
+                  )
+            }
           }
         }`
-  )}
+  })}
 }`
 
   output = prettier.format(output, {
