@@ -55,7 +55,7 @@ export default async (fastify: FastifyInstance) => {
           (includedSchemas.length === 0 || includedSchemas.includes(name))
       ),
       tables,
-      functions,
+      functions: functions.filter((f) => !['trigger', 'event_trigger'].includes(f.return_type)),
       types,
     })
   })

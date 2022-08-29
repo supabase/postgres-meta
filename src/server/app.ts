@@ -92,7 +92,7 @@ if (EXPORT_DOCS) {
             GENERATE_TYPES_INCLUDED_SCHEMAS.includes(name)
         ),
         tables,
-        functions,
+        functions: functions.filter((f) => !['trigger', 'event_trigger'].includes(f.return_type)),
         types,
       })
     )
