@@ -16,14 +16,16 @@ export const apply = ({
 export type Json = string | number | boolean | null | { [key: string]: Json } | Json[]
 
 export interface Database {
-  ${schemas.map(
-    (schema) =>
-      `${JSON.stringify(schema.name)}: {
+  ${schemas.map((schema) => {
+    const schemaTables = tables.filter((table) => table.schema === schema.name)
+    const schemaFunctions = functions.filter((func) => func.schema === schema.name)
+    return `${JSON.stringify(schema.name)}: {
           Tables: {
-            ${tables
-              .filter((table) => table.schema === schema.name)
-              .map(
-                (table) => `${JSON.stringify(table.name)}: {
+            ${
+              schemaTables.length === 0
+                ? '[_ in never]: never'
+                : schemaTables.map(
+                    (table) => `${JSON.stringify(table.name)}: {
                   Row: {
                     ${table.columns.map(
                       (column) =>
@@ -77,22 +79,21 @@ export interface Database {
                     })}
                   }
                 }`
-              )}
+                  )
+            }
           }
           Functions: {
-            ${functions
-              .filter(
-                (function_) =>
-                  function_.schema === schema.name && function_.return_type !== 'trigger'
-              )
-              .map(
-                (function_) => `${JSON.stringify(function_.name)}: {
+            ${
+              schemaFunctions.length === 0
+                ? '[_ in never]: never'
+                : schemaFunctions.map(
+                    (func) => `${JSON.stringify(func.name)}: {
                   Args: ${(() => {
-                    if (function_.argument_types === '') {
+                    if (func.argument_types === '') {
                       return 'Record<PropertyKey, never>'
                     }
 
-                    const splitArgs = function_.argument_types.split(',').map((arg) => arg.trim())
+                    const splitArgs = func.argument_types.split(',').map((arg) => arg.trim())
                     if (splitArgs.some((arg) => arg.includes('"') || !arg.includes(' '))) {
                       return 'Record<string, unknown>'
                     }
@@ -110,12 +111,13 @@ export interface Database {
                       ({ name, type }) => `${JSON.stringify(name)}: ${type}`
                     )} }`
                   })()}
-                  Returns: ${pgTypeToTsType(function_.return_type, types)}
+                  Returns: ${pgTypeToTsType(func.return_type, types)}
                 }`
-              )}
+                  )
+            }
           }
         }`
-  )}
+  })}
 }`
 
   output = prettier.format(output, {
