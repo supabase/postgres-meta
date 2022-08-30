@@ -1,6 +1,7 @@
 import { literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
-import { viewsSql } from './sql'
+import { coalesceRowsToArray } from './helpers'
+import { columnsSql, viewsSql } from './sql'
 import { PostgresMetaResult, PostgresView } from './types'
 
 export default class PostgresMetaViews {
@@ -19,9 +20,9 @@ export default class PostgresMetaViews {
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresView[]>> {
-    let sql = viewsSql
+    let sql = enrichedViewsSql
     if (!includeSystemSchemas) {
-      sql = `${sql} AND n.nspname NOT IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')})`
+      sql = `${sql} WHERE schema NOT IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')})`
     }
     if (limit) {
       sql = `${sql} LIMIT ${limit}`
@@ -32,3 +33,11 @@ export default class PostgresMetaViews {
     return await this.query(sql)
   }
 }
+
+const enrichedViewsSql = `
+WITH views AS (${viewsSql}),
+  columns AS (${columnsSql})
+SELECT
+  *,
+  ${coalesceRowsToArray('columns', 'columns.table_id = views.id')}
+FROM views`
