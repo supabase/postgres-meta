@@ -1,14 +1,22 @@
 import prettier from 'prettier'
-import type { PostgresFunction, PostgresSchema, PostgresTable, PostgresType } from '../../lib'
+import type {
+  PostgresFunction,
+  PostgresSchema,
+  PostgresTable,
+  PostgresType,
+  PostgresView,
+} from '../../lib'
 
 export const apply = ({
   schemas,
   tables,
+  views,
   functions,
   types,
 }: {
   schemas: PostgresSchema[]
   tables: PostgresTable[]
+  views: PostgresView[]
   functions: PostgresFunction[]
   types: PostgresType[]
 }): string => {
@@ -18,6 +26,7 @@ export type Json = string | number | boolean | null | { [key: string]: Json } | 
 export interface Database {
   ${schemas.map((schema) => {
     const schemaTables = tables.filter((table) => table.schema === schema.name)
+    const schemaViews = views.filter((view) => view.schema === schema.name)
     const schemaFunctions = functions.filter((func) => func.schema === schema.name)
     return `${JSON.stringify(schema.name)}: {
           Tables: {
@@ -77,6 +86,59 @@ export interface Database {
 
                       return output
                     })}
+                  }
+                }`
+                  )
+            }
+          }
+          Views: {
+            ${
+              schemaViews.length === 0
+                ? '[_ in never]: never'
+                : schemaViews.map(
+                    (view) => `${JSON.stringify(view.name)}: {
+                  Row: {
+                    ${view.columns.map(
+                      (column) =>
+                        `${JSON.stringify(column.name)}: ${pgTypeToTsType(
+                          column.format,
+                          types
+                        )} | null`
+                    )}
+                  }
+                  ${
+                    view.is_updatable
+                      ? `Insert: {
+                    ${view.columns.map((column) => {
+                      let output = JSON.stringify(column.name)
+
+                      if (!column.is_updatable) {
+                        return `${output}?: never`
+                      }
+
+                      output += `?: ${pgTypeToTsType(column.format, types)} | null`
+
+                      return output
+                    })}
+                  }`
+                      : ''
+                  }
+                  ${
+                    view.is_updatable
+                      ? `Update: {
+                    ${view.columns.map((column) => {
+                      let output = JSON.stringify(column.name)
+
+                      if (!column.is_updatable) {
+                        return `${output}?: never`
+                      }
+
+                      output += `?: ${pgTypeToTsType(column.format, types)} | null`
+
+                      return output
+                    })}
+                  }`
+                      : ''
                   }
                 }`
                   )

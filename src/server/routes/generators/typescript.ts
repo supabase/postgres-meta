@@ -21,6 +21,7 @@ export default async (fastify: FastifyInstance) => {
     const pgMeta: PostgresMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data: schemas, error: schemasError } = await pgMeta.schemas.list()
     const { data: tables, error: tablesError } = await pgMeta.tables.list()
+    const { data: views, error: viewsError } = await pgMeta.views.list()
     const { data: functions, error: functionsError } = await pgMeta.functions.list()
     const { data: types, error: typesError } = await pgMeta.types.list({
       includeSystemSchemas: true,
@@ -36,6 +37,11 @@ export default async (fastify: FastifyInstance) => {
       request.log.error({ error: tablesError, request: extractRequestForLogging(request) })
       reply.code(500)
       return { error: tablesError.message }
+    }
+    if (viewsError) {
+      request.log.error({ error: viewsError, request: extractRequestForLogging(request) })
+      reply.code(500)
+      return { error: viewsError.message }
     }
     if (functionsError) {
       request.log.error({ error: functionsError, request: extractRequestForLogging(request) })
@@ -55,6 +61,7 @@ export default async (fastify: FastifyInstance) => {
           (includedSchemas.length === 0 || includedSchemas.includes(name))
       ),
       tables,
+      views,
       functions: functions.filter(
         ({ return_type }) => !['trigger', 'event_trigger'].includes(return_type)
       ),
