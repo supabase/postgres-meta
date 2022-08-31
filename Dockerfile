@@ -13,5 +13,6 @@ COPY --from=build /usr/src/app/node_modules node_modules
 COPY --from=build /usr/src/app/bin bin
 COPY package.json ./
 ENV PG_META_PORT=8080
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["npm", "run", "start"]
 EXPOSE 8080
