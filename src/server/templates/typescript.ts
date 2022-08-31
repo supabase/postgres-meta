@@ -28,6 +28,7 @@ export interface Database {
     const schemaTables = tables.filter((table) => table.schema === schema.name)
     const schemaViews = views.filter((view) => view.schema === schema.name)
     const schemaFunctions = functions.filter((func) => func.schema === schema.name)
+    const schemaEnums = types.filter((type) => type.schema === schema.name && type.enums.length > 0)
     return `${JSON.stringify(schema.name)}: {
           Tables: {
             ${
@@ -38,9 +39,11 @@ export interface Database {
                   Row: {
                     ${table.columns.map(
                       (column) =>
-                        `${JSON.stringify(column.name)}: ${pgTypeToTsType(column.format, types)} ${
-                          column.is_nullable ? '| null' : ''
-                        }`
+                        `${JSON.stringify(column.name)}: ${pgTypeToTsType(
+                          column.format,
+                          types,
+                          schemas
+                        )} ${column.is_nullable ? '| null' : ''}`
                     )}
                   }
                   Insert: {
@@ -61,7 +64,7 @@ export interface Database {
                         output += ':'
                       }
 
-                      output += pgTypeToTsType(column.format, types)
+                      output += pgTypeToTsType(column.format, types, schemas)
 
                       if (column.is_nullable) {
                         output += '| null'
@@ -78,7 +81,7 @@ export interface Database {
                         return `${output}?: never`
                       }
 
-                      output += `?: ${pgTypeToTsType(column.format, types)}`
+                      output += `?: ${pgTypeToTsType(column.format, types, schemas)}`
 
                       if (column.is_nullable) {
                         output += '| null'
@@ -102,7 +105,8 @@ export interface Database {
                       (column) =>
                         `${JSON.stringify(column.name)}: ${pgTypeToTsType(
                           column.format,
-                          types
+                          types,
+                          schemas
                         )} | null`
                     )}
                   }
@@ -116,7 +120,7 @@ export interface Database {
                         return `${output}?: never`
                       }
 
-                      output += `?: ${pgTypeToTsType(column.format, types)} | null`
+                      output += `?: ${pgTypeToTsType(column.format, types, schemas)} | null`
 
                       return output
                     })}
@@ -133,7 +137,7 @@ export interface Database {
                         return `${output}?: never`
                       }
 
-                      output += `?: ${pgTypeToTsType(column.format, types)} | null`
+                      output += `?: ${pgTypeToTsType(column.format, types, schemas)} | null`
 
                       return output
                     })}
@@ -177,19 +181,31 @@ export interface Database {
                       if (!type) {
                         return { name, type: 'unknown' }
                       }
-                      return { name, type: pgTypeToTsType(type.name, types) }
+                      return { name, type: pgTypeToTsType(type.name, types, schemas) }
                     })
 
                     return `{ ${argsNameAndType.map(
                       ({ name, type }) => `${JSON.stringify(name)}: ${type}`
                     )} }`
                   })()}
-                  Returns: ${pgTypeToTsType(fn.return_type, types)}
+                  Returns: ${pgTypeToTsType(fn.return_type, types, schemas)}
                 }`
                     )
                     .join('|')}`
               )
             })()}
+          }
+          Enums: {
+            ${
+              schemaEnums.length === 0
+                ? '[_ in never]: never'
+                : schemaEnums.map(
+                    (enum_) =>
+                      `${JSON.stringify(enum_.name)}: ${enum_.enums
+                        .map((variant) => JSON.stringify(variant))
+                        .join('|')}`
+                  )
+            }
           }
         }`
   })}
@@ -202,7 +218,11 @@ export interface Database {
 }
 
 // TODO: Make this more robust. Currently doesn't handle composite types - returns them as unknown.
-const pgTypeToTsType = (pgType: string, types: PostgresType[]): string => {
+const pgTypeToTsType = (
+  pgType: string,
+  types: PostgresType[],
+  schemas: PostgresSchema[]
+): string => {
   if (pgType === 'bool') {
     return 'boolean'
   } else if (['int2', 'int4', 'int8', 'float4', 'float8', 'numeric'].includes(pgType)) {
@@ -229,10 +249,13 @@ const pgTypeToTsType = (pgType: string, types: PostgresType[]): string => {
   } else if (pgType === 'record') {
     return 'Record<string, unknown>[]'
   } else if (pgType.startsWith('_')) {
-    return `(${pgTypeToTsType(pgType.substring(1), types)})[]`
+    return `(${pgTypeToTsType(pgType.substring(1), types, schemas)})[]`
   } else {
     const type = types.find((type) => type.name === pgType && type.enums.length > 0)
     if (type) {
+      if (schemas.some(({ name }) => name === type.schema)) {
+        return `Database[${JSON.stringify(type.schema)}]['Enums'][${JSON.stringify(type.name)}]`
+      }
       return type.enums.map((variant) => JSON.stringify(variant)).join('|')
     }
 
