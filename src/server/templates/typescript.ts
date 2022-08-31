@@ -145,17 +145,28 @@ export interface Database {
             }
           }
           Functions: {
-            ${
-              schemaFunctions.length === 0
-                ? '[_ in never]: never'
-                : schemaFunctions.map(
-                    (func) => `${JSON.stringify(func.name)}: {
+            ${(() => {
+              if (schemaFunctions.length === 0) {
+                return '[_ in never]: never'
+              }
+
+              const schemaFunctionsGroupedByName = schemaFunctions.reduce((acc, curr) => {
+                acc[curr.name] ??= []
+                acc[curr.name].push(curr)
+                return acc
+              }, {} as Record<string, PostgresFunction[]>)
+
+              return Object.entries(schemaFunctionsGroupedByName).map(
+                ([fnName, fns]) =>
+                  `${JSON.stringify(fnName)}: ${fns
+                    .map(
+                      (fn) => `{
                   Args: ${(() => {
-                    if (func.argument_types === '') {
+                    if (fn.argument_types === '') {
                       return 'Record<PropertyKey, never>'
                     }
 
-                    const splitArgs = func.argument_types.split(',').map((arg) => arg.trim())
+                    const splitArgs = fn.argument_types.split(',').map((arg) => arg.trim())
                     if (splitArgs.some((arg) => arg.includes('"') || !arg.includes(' '))) {
                       return 'Record<string, unknown>'
                     }
@@ -173,10 +184,12 @@ export interface Database {
                       ({ name, type }) => `${JSON.stringify(name)}: ${type}`
                     )} }`
                   })()}
-                  Returns: ${pgTypeToTsType(func.return_type, types)}
+                  Returns: ${pgTypeToTsType(fn.return_type, types)}
                 }`
-                  )
-            }
+                    )
+                    .join('|')}`
+              )
+            })()}
           }
         }`
   })}
