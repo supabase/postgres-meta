@@ -73,6 +73,7 @@ Helpers:
 Set the following ENV VARS:
 
 ```bash
+PG_META_HOST="0.0.0.0"
 PG_META_PORT=8080
 PG_META_DB_HOST="postgres"
 PG_META_DB_NAME="postgres"

@@ -6,6 +6,7 @@ import {
   GENERATE_TYPES,
   GENERATE_TYPES_INCLUDED_SCHEMAS,
   PG_CONNECTION,
+  PG_META_HOST,
   PG_META_PORT,
   PG_META_REQ_HEADER,
 } from './constants'
@@ -106,11 +107,11 @@ if (EXPORT_DOCS) {
   })()
 } else {
   app.ready(() => {
-    app.listen(PG_META_PORT, '0.0.0.0', () => {
+    app.listen(PG_META_PORT, PG_META_HOST, () => {
       app.log.info(`App started on port ${PG_META_PORT}`)
       const adminApp = buildAdminApp({ logger })
       const adminPort = PG_META_PORT + 1
-      adminApp.listen(adminPort, '0.0.0.0', () => {
+      adminApp.listen(adminPort, PG_META_HOST, () => {
         adminApp.log.info(`Admin App started on port ${adminPort}`)
       })
     })
