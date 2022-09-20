@@ -37,14 +37,26 @@ export interface Database {
                 : schemaTables.map(
                     (table) => `${JSON.stringify(table.name)}: {
                   Row: {
-                    ${table.columns.map(
-                      (column) =>
-                        `${JSON.stringify(column.name)}: ${pgTypeToTsType(
-                          column.format,
-                          types,
-                          schemas
-                        )} ${column.is_nullable ? '| null' : ''}`
-                    )}
+                    ${[
+                      ...table.columns.map(
+                        (column) =>
+                          `${JSON.stringify(column.name)}: ${pgTypeToTsType(
+                            column.format,
+                            types,
+                            schemas
+                          )} ${column.is_nullable ? '| null' : ''}`
+                      ),
+                      ...schemaFunctions
+                        .filter((fn) => fn.argument_types === table.name)
+                        .map(
+                          (fn) =>
+                            `${JSON.stringify(fn.name)}: ${pgTypeToTsType(
+                              fn.return_type,
+                              types,
+                              schemas
+                            )}`
+                        ),
+                    ]}
                   }
                   Insert: {
                     ${table.columns.map((column) => {

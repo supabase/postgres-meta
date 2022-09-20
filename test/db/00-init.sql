@@ -51,3 +51,8 @@ end;
 $$ language plpgsql;
 
 CREATE VIEW todos_view AS SELECT * FROM public.todos;
+
+create function public.blurb(public.todos) returns text as
+$$
+select substring($1.details, 1, 3);
+$$ language sql stable;
