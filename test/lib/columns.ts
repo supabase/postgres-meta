@@ -733,3 +733,51 @@ test('alter column to type with uppercase', async () => {
   await pgMeta.tables.remove(testTable!.id)
   await pgMeta.query('DROP TYPE "T"')
 })
+
+test('enums are populated in enum array columns', async () => {
+  await pgMeta.query(`create type test_enum as enum ('a')`)
+  const { data: testTable } = await pgMeta.tables.create({ name: 't' })
+
+  let res = await pgMeta.columns.create({
+    table_id: testTable!.id,
+    name: 'c',
+    type: '_test_enum',
+  })
+  expect(res).toMatchInlineSnapshot(
+    {
+      data: {
+        id: expect.stringMatching(/^\d+\.1$/),
+        table_id: expect.any(Number),
+      },
+    },
+    `
+    Object {
+      "data": Object {
+        "comment": null,
+        "data_type": "ARRAY",
+        "default_value": null,
+        "enums": Array [
+          "a",
+        ],
+        "format": "_test_enum",
+        "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
+        "identity_generation": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_updatable": true,
+        "name": "c",
+        "ordinal_position": 1,
+        "schema": "public",
+        "table": "t",
+        "table_id": Any<Number>,
+      },
+      "error": null,
+    }
+  `
+  )
+
+  await pgMeta.tables.remove(testTable!.id)
+  await pgMeta.query(`drop type test_enum`)
+})
