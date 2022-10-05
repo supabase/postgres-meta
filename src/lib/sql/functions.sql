@@ -34,7 +34,7 @@ select
     when l.lanname = 'internal' then f.prosrc
     else pg_get_functiondef(f.oid)
   end as complete_statement,
-  f_args.args as args,
+  coalesce(f_args.args, '[]') as args,
   pg_get_function_arguments(f.oid) as argument_types,
   pg_get_function_identity_arguments(f.oid) as identity_argument_types,
   t.typname as return_type,
