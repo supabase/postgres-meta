@@ -27,7 +27,26 @@ export interface Database {
   ${schemas.map((schema) => {
     const schemaTables = tables.filter((table) => table.schema === schema.name)
     const schemaViews = views.filter((view) => view.schema === schema.name)
-    const schemaFunctions = functions.filter((func) => func.schema === schema.name)
+    const schemaFunctions = functions.filter((func) => {
+      if (func.schema !== schema.name) {
+        return false
+      }
+
+      // Either:
+      // 1. All input args are be named, or
+      // 2. There is only one input arg which is unnamed
+      const inArgs = func.args.filter(({ mode }) => ['in', 'inout', 'variadic'].includes(mode))
+
+      if (!inArgs.some(({ name }) => name === '')) {
+        return true
+      }
+
+      if (inArgs.length === 1) {
+        return true
+      }
+
+      return false
+    })
     const schemaEnums = types.filter((type) => type.schema === schema.name && type.enums.length > 0)
     return `${JSON.stringify(schema.name)}: {
           Tables: {
@@ -176,20 +195,16 @@ export interface Database {
                 ([fnName, fns]) =>
                   `${JSON.stringify(fnName)}: ${fns
                     .map(
-                      (fn) => `{
+                      ({ args, return_type }) => `{
                   Args: ${(() => {
-                    if (fn.argument_types === '') {
+                    const inArgs = args.filter(({ mode }) => mode === 'in')
+
+                    if (inArgs.length === 0) {
                       return 'Record<PropertyKey, never>'
                     }
 
-                    const splitArgs = fn.argument_types.split(',').map((arg) => arg.trim())
-                    if (splitArgs.some((arg) => arg.includes('"') || !arg.includes(' '))) {
-                      return 'Record<string, unknown>'
-                    }
-
-                    const argsNameAndType = splitArgs.map((arg) => {
-                      const [name, ...rest] = arg.split(' ')
-                      const type = types.find((_type) => _type.format === rest.join(' '))
+                    const argsNameAndType = inArgs.map(({ name, type_id }) => {
+                      const type = types.find(({ id }) => id === type_id)
                       if (!type) {
                         return { name, type: 'unknown' }
                       }
@@ -200,7 +215,7 @@ export interface Database {
                       ({ name, type }) => `${JSON.stringify(name)}: ${type}`
                     )} }`
                   })()}
-                  Returns: ${pgTypeToTsType(fn.return_type, types, schemas)}
+                  Returns: ${pgTypeToTsType(return_type, types, schemas)}
                 }`
                     )
                     .join('|')}`
@@ -225,6 +240,7 @@ export interface Database {
 
   output = prettier.format(output, {
     parser: 'typescript',
+    semi: false,
   })
   return output
 }
