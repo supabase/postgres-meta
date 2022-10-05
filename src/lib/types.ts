@@ -82,6 +82,19 @@ const postgresFunctionSchema = Type.Object({
   language: Type.String(),
   definition: Type.String(),
   complete_statement: Type.String(),
+  args: Type.Array(
+    Type.Object({
+      mode: Type.Union([
+        Type.Literal('in'),
+        Type.Literal('out'),
+        Type.Literal('inout'),
+        Type.Literal('variadic'),
+        Type.Literal('table'),
+      ]),
+      name: Type.String(),
+      type_id: Type.Number(),
+    })
+  ),
   argument_types: Type.String(),
   identity_argument_types: Type.String(),
   return_type: Type.String(),
