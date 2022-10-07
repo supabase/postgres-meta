@@ -20,10 +20,9 @@ test('list', async () => {
   )
 })
 
-
 test('list types with included schemas', async () => {
   let res = await pgMeta.types.list({
-    includedSchemas: ['public']
+    includedSchemas: ['public'],
   })
 
   expect(res.data?.length).toBeGreaterThan(0)
@@ -31,17 +30,17 @@ test('list types with included schemas', async () => {
   res.data?.forEach((type) => {
     expect(type.schema).toBe('public')
   })
-}) 
+})
 
 test('list types with excluded schemas', async () => {
   let res = await pgMeta.types.list({
     excludedSchemas: ['public'],
   })
-  
+
   res.data?.forEach((type) => {
     expect(type.schema).not.toBe('public')
   })
-}) 
+})
 
 test('list types with excluded schemas and include System Schemas', async () => {
   let res = await pgMeta.types.list({
@@ -54,4 +53,4 @@ test('list types with excluded schemas and include System Schemas', async () => 
   res.data?.forEach((type) => {
     expect(type.schema).not.toBe('public')
   })
-}) 
+})
