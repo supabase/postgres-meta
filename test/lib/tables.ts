@@ -129,6 +129,41 @@ test('list', async () => {
   )
 })
 
+test('list tables with included schemas', async () => {
+  let res = await pgMeta.tables.list({
+    includedSchemas: ['public']
+  })
+
+  expect(res.data?.length).toBeGreaterThan(0)
+
+  res.data?.forEach((table) => {
+    expect(table.schema).toBe('public')
+  })
+}) 
+
+test('list tables with excluded schemas', async () => {
+  let res = await pgMeta.tables.list({
+    excludedSchemas: ['public'],
+  })
+  
+  res.data?.forEach((table) => {
+    expect(table.schema).not.toBe('public')
+  })
+}) 
+
+test('list tables with excluded schemas and include System Schemas', async () => {
+  let res = await pgMeta.tables.list({
+    excludedSchemas: ['public'],
+    includeSystemSchemas: true,
+  })
+
+  expect(res.data?.length).toBeGreaterThan(0)
+
+  res.data?.forEach((table) => {
+    expect(table.schema).not.toBe('public')
+  })
+}) 
+
 test('retrieve, create, update, delete', async () => {
   let res = await pgMeta.tables.create({ name: 'test', comment: 'foo' })
   expect(cleanNondet(res)).toMatchInlineSnapshot(
