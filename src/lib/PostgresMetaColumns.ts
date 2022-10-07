@@ -16,11 +16,15 @@ export default class PostgresMetaColumns {
   async list({
     tableId,
     includeSystemSchemas = false,
+    includedSchemas,
+    excludedSchemas,
     limit,
     offset,
   }: {
     tableId?: number
     includeSystemSchemas?: boolean
+    includedSchemas?: string[]
+    excludedSchemas?: string[]
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresColumn[]>> {
@@ -33,9 +37,17 @@ FROM
   columns
 WHERE
   true`
-    if (!includeSystemSchemas) {
-      sql += ` AND schema NOT IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')})`
+
+    if (includedSchemas?.length) {
+      sql = `${sql} AND (schema IN (${includedSchemas.map(literal).join(',')}))`
+    } else if (!includeSystemSchemas) {
+      sql = `${sql} AND NOT (schema IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
     }
+
+    if (excludedSchemas?.length) {
+      sql = `${sql} AND NOT (schema IN (${excludedSchemas.map(literal).join(',')}))`
+    }
+
     if (tableId !== undefined) {
       sql += ` AND table_id = ${literal(tableId)}`
     }
