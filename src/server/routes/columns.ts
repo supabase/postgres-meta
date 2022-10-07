@@ -1,5 +1,11 @@
+import { Type } from '@sinclair/typebox'
 import { FastifyInstance } from 'fastify'
 import { PostgresMeta } from '../../lib'
+import {
+  PostgresColumnCreate,
+  postgresColumnSchema,
+  postgresColumnCreateSchema,
+} from '../../lib/types'
 import { DEFAULT_POOL_CONFIG } from '../constants'
 import { extractRequestForLogging } from '../utils'
 
@@ -99,22 +105,51 @@ export default async (fastify: FastifyInstance) => {
 
   fastify.post<{
     Headers: { pg: string }
-    Body: any
-  }>('/', async (request, reply) => {
-    const connectionString = request.headers.pg
+    Body: PostgresColumnCreate | PostgresColumnCreate[]
+  }>(
+    '/',
+    {
+      schema: {
+        headers: Type.Object({
+          pg: Type.String(),
+        }),
+        body: Type.Union([postgresColumnCreateSchema, Type.Array(postgresColumnCreateSchema)]),
+        response: {
+          200: Type.Union([postgresColumnSchema, Type.Array(postgresColumnSchema)]),
+          400: Type.Object({
+            error: Type.String(),
+          }),
+          404: Type.Object({
+            error: Type.String(),
+          }),
+        },
+      },
+    },
+    async (request, reply) => {
+      const connectionString = request.headers.pg
+      let batchCreateArg: PostgresColumnCreate[]
+      if (Array.isArray(request.body)) {
+        batchCreateArg = request.body
+      } else {
+        batchCreateArg = [request.body]
+      }
 
-    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
-    const { data, error } = await pgMeta.columns.create(request.body)
-    await pgMeta.end()
-    if (error) {
-      request.log.error({ error, request: extractRequestForLogging(request) })
-      reply.code(400)
-      if (error.message.startsWith('Cannot find')) reply.code(404)
-      return { error: error.message }
+      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const { data, error } = await pgMeta.columns.batchCreate(batchCreateArg)
+      await pgMeta.end()
+      if (error) {
+        request.log.error({ error, request: extractRequestForLogging(request) })
+        reply.code(400)
+        if (error.message.startsWith('Cannot find')) reply.code(404)
+        return { error: error.message }
+      }
+
+      if (Array.isArray(request.body)) {
+        return data
+      }
+      return data[0]
     }
-
-    return data
-  })
+  )
 
   fastify.patch<{
     Headers: { pg: string }
