@@ -23,6 +23,39 @@ test('list', async () => {
   )
 })
 
+test('list policies with included schemas', async () => {
+  let res = await pgMeta.policies.list({
+    includedSchemas: ['public'],
+  })
+
+  expect(res.data?.length).toBeGreaterThan(0)
+
+  res.data?.forEach((policy) => {
+    expect(policy.schema).toBe('public')
+  })
+})
+
+test('list policies with excluded schemas', async () => {
+  let res = await pgMeta.policies.list({
+    excludedSchemas: ['public'],
+  })
+
+  res.data?.forEach((policy) => {
+    expect(policy.schema).not.toBe('public')
+  })
+})
+
+test('list policies with excluded schemas and include System Schemas', async () => {
+  let res = await pgMeta.policies.list({
+    excludedSchemas: ['public'],
+    includeSystemSchemas: true,
+  })
+
+  res.data?.forEach((policy) => {
+    expect(policy.schema).not.toBe('public')
+  })
+})
+
 test('retrieve, create, update, delete', async () => {
   let res = await pgMeta.policies.create({
     name: 'test policy',
