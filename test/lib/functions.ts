@@ -40,6 +40,41 @@ test('list', async () => {
   )
 })
 
+test('list functions with included schemas', async () => {
+  let res = await pgMeta.functions.list({
+    includedSchemas: ['public']
+  })
+
+  expect(res.data?.length).toBeGreaterThan(0)
+
+  res.data?.forEach((func) => {
+    expect(func.schema).toBe('public')
+  })
+}) 
+
+test('list functions with excluded schemas', async () => {
+  let res = await pgMeta.functions.list({
+    excludedSchemas: ['public'],
+  })
+  
+  res.data?.forEach((func) => {
+    expect(func.schema).not.toBe('public')
+  })
+}) 
+
+test('list functions with excluded schemas and include System Schemas', async () => {
+  let res = await pgMeta.functions.list({
+    excludedSchemas: ['public'],
+    includeSystemSchemas: true,
+  })
+
+  expect(res.data?.length).toBeGreaterThan(0)
+
+  res.data?.forEach((func) => {
+    expect(func.schema).not.toBe('public')
+  })
+}) 
+
 test('retrieve, create, update, delete', async () => {
   const {
     data: { id: testSchemaId },
