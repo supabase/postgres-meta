@@ -12,17 +12,33 @@ export default class PostgresMetaPolicies {
 
   async list({
     includeSystemSchemas = false,
+    includedSchemas,
+    excludedSchemas,
     limit,
     offset,
   }: {
     includeSystemSchemas?: boolean
+    includedSchemas?: string[]
+    excludedSchemas?: string[]
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresPolicy[]>> {
     let sql = policiesSql
-    if (!includeSystemSchemas) {
+
+    if (includedSchemas?.length) {
+      sql = `${sql} WHERE (n.nspname IN (${includedSchemas.map(literal).join(',')}))`
+    } else if (!includeSystemSchemas) {
       sql = `${sql} WHERE NOT (n.nspname IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
     }
+
+    if (excludedSchemas?.length) {
+      if (includedSchemas?.length || !includeSystemSchemas) {
+        sql = `${sql} AND NOT (n.nspname IN (${excludedSchemas.map(literal).join(',')}))`
+      } else {
+        sql = `${sql} WHERE NOT (n.nspname IN (${excludedSchemas.map(literal).join(',')}))`
+      }
+    }
+
     if (limit) {
       sql = `${sql} LIMIT ${limit}`
     }
