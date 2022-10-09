@@ -198,7 +198,11 @@ export const postgresRoleSchema = Type.Object({
   connection_limit: Type.Integer(),
   password: Type.String(),
   valid_until: Type.Union([Type.String(), Type.Null()]),
-  config: Type.Union([Type.String(), Type.Null()]),
+  config: Type.Union([
+    Type.String(),
+    Type.Null(),
+    Type.Record(Type.String(), Type.Union([Type.String()])),
+  ]),
 })
 export type PostgresRole = Static<typeof postgresRoleSchema>
 
