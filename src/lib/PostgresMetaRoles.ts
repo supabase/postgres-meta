@@ -2,7 +2,22 @@ import { ident, literal } from 'pg-format'
 import { DEFAULT_ROLES } from './constants'
 import { rolesSql } from './sql'
 import { PostgresMetaResult, PostgresRole } from './types'
-
+export interface PostgresMetaRoleConfig {
+  // https://www.rfc-editor.org/rfc/rfc6902
+  op: 'remove' | 'add' | 'replace'
+  path: string
+  value?: string
+}
+export function changeRoleConfig2Object(config: string[]) {
+  if (!config) {
+    return null
+  }
+  return config.reduce((acc: any, cur) => {
+    const [key, value] = cur.split('=')
+    acc[key] = value
+    return acc
+  }, {})
+}
 export default class PostgresMetaRoles {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
 
@@ -37,7 +52,14 @@ WHERE
     if (offset) {
       sql += ` OFFSET ${offset}`
     }
-    return await this.query(sql)
+    const result = await this.query(sql)
+    if (result.data) {
+      result.data = result.data.map((role: any) => {
+        role.config = changeRoleConfig2Object(role.config)
+        return role
+      })
+    }
+    return result
   }
 
   async retrieve({ id }: { id: number }): Promise<PostgresMetaResult<PostgresRole>>
@@ -52,11 +74,13 @@ WHERE
     if (id) {
       const sql = `${rolesSql} WHERE oid = ${literal(id)};`
       const { data, error } = await this.query(sql)
+
       if (error) {
         return { data, error }
       } else if (data.length === 0) {
         return { data: null, error: { message: `Cannot find a role with ID ${id}` } }
       } else {
+        data[0].config = changeRoleConfig2Object(data[0].config)
         return { data: data[0], error }
       }
     } else if (name) {
@@ -67,6 +91,7 @@ WHERE
       } else if (data.length === 0) {
         return { data: null, error: { message: `Cannot find a role named ${name}` } }
       } else {
+        data[0].config = changeRoleConfig2Object(data[0].config)
         return { data: data[0], error }
       }
     } else {
@@ -89,6 +114,7 @@ WHERE
     member_of,
     members,
     admins,
+    config,
   }: {
     name: string
     is_superuser?: boolean
@@ -104,6 +130,7 @@ WHERE
     member_of?: string[]
     members?: string[]
     admins?: string[]
+    config?: Record<string, string>
   }): Promise<PostgresMetaResult<PostgresRole>> {
     const isSuperuserClause = is_superuser ? 'SUPERUSER' : 'NOSUPERUSER'
     const canCreateDbClause = can_create_db ? 'CREATEDB' : 'NOCREATEDB'
@@ -118,8 +145,20 @@ WHERE
     const memberOfClause = member_of === undefined ? '' : `IN ROLE ${member_of.join(',')}`
     const membersClause = members === undefined ? '' : `ROLE ${members.join(',')}`
     const adminsClause = admins === undefined ? '' : `ADMIN ${admins.join(',')}`
-
+    let configClause = ''
+    if (config !== undefined) {
+      configClause = Object.keys(config)
+        .map((k) => {
+          const v = config[k]
+          if (!k || !v) {
+            return ''
+          }
+          return `ALTER ROLE ${name} SET ${k} = ${v};`
+        })
+        .join('\n')
+    }
     const sql = `
+BEGIN;
 CREATE ROLE ${ident(name)}
 WITH
   ${isSuperuserClause}
@@ -134,7 +173,9 @@ WITH
   ${validUntilClause}
   ${memberOfClause}
   ${membersClause}
-  ${adminsClause};`
+  ${adminsClause};
+${configClause ? configClause : ''}
+COMMIT;`
     const { error } = await this.query(sql)
     if (error) {
       return { data: null, error }
@@ -156,6 +197,7 @@ WITH
       connection_limit,
       password,
       valid_until,
+      config,
     }: {
       name?: string
       is_superuser?: boolean
@@ -168,6 +210,7 @@ WITH
       connection_limit?: number
       password?: string
       valid_until?: string
+      config?: PostgresMetaRoleConfig[]
     }
   ): Promise<PostgresMetaResult<PostgresRole>> {
     const { data: old, error } = await this.retrieve({ id })
@@ -209,7 +252,27 @@ WITH
       connection_limit === undefined ? '' : `CONNECTION LIMIT ${connection_limit}`
     const passwordClause = password === undefined ? '' : `PASSWORD ${literal(password)}`
     const validUntilClause = valid_until === undefined ? '' : `VALID UNTIL ${literal(valid_until)}`
-
+    let configClause = ''
+    if (config !== undefined) {
+      const configSql = config.map((c) => {
+        const { op, path, value } = c
+        const k = path
+        const v = value || null
+        if (!k) {
+          throw new Error(`Invalid config value ${value}`)
+        }
+        switch (op) {
+          case 'add':
+          case 'replace':
+            return `ALTER ROLE ${ident(old!.name)} SET ${ident(k)} = ${literal(v)};`
+          case 'remove':
+            return `ALTER ROLE ${ident(old!.name)} RESET ${ident(k)};`
+          default:
+            throw new Error(`Invalid config op ${op}`)
+        }
+      })
+      configClause = configSql.filter(Boolean).join('')
+    }
     // nameSql must be last
     const sql = `
 BEGIN;
@@ -224,6 +287,7 @@ BEGIN;
     ${connectionLimitClause}
     ${passwordClause}
     ${validUntilClause};
+  ${configClause ? configClause : ''}
   ${nameSql}
 COMMIT;`
     {
