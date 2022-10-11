@@ -24,31 +24,41 @@ export const apply = ({
 export type Json = string | number | boolean | null | { [key: string]: Json } | Json[]
 
 export interface Database {
-  ${schemas.map((schema) => {
-    const schemaTables = tables.filter((table) => table.schema === schema.name)
-    const schemaViews = views.filter((view) => view.schema === schema.name)
-    const schemaFunctions = functions.filter((func) => {
-      if (func.schema !== schema.name) {
-        return false
-      }
+  ${schemas
+    .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+    .map((schema) => {
+      const schemaTables = tables
+        .filter((table) => table.schema === schema.name)
+        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+      const schemaViews = views
+        .filter((view) => view.schema === schema.name)
+        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+      const schemaFunctions = functions
+        .filter((func) => {
+          if (func.schema !== schema.name) {
+            return false
+          }
 
-      // Either:
-      // 1. All input args are be named, or
-      // 2. There is only one input arg which is unnamed
-      const inArgs = func.args.filter(({ mode }) => ['in', 'inout', 'variadic'].includes(mode))
+          // Either:
+          // 1. All input args are be named, or
+          // 2. There is only one input arg which is unnamed
+          const inArgs = func.args.filter(({ mode }) => ['in', 'inout', 'variadic'].includes(mode))
 
-      if (!inArgs.some(({ name }) => name === '')) {
-        return true
-      }
+          if (!inArgs.some(({ name }) => name === '')) {
+            return true
+          }
 
-      if (inArgs.length === 1) {
-        return true
-      }
+          if (inArgs.length === 1) {
+            return true
+          }
 
-      return false
-    })
-    const schemaEnums = types.filter((type) => type.schema === schema.name && type.enums.length > 0)
-    return `${JSON.stringify(schema.name)}: {
+          return false
+        })
+        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+      const schemaEnums = types
+        .filter((type) => type.schema === schema.name && type.enums.length > 0)
+        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+      return `${JSON.stringify(schema.name)}: {
           Tables: {
             ${
               schemaTables.length === 0
@@ -235,7 +245,7 @@ export interface Database {
             }
           }
         }`
-  })}
+    })}
 }`
 
   output = prettier.format(output, {
