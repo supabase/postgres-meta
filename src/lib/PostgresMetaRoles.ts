@@ -1,13 +1,7 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_ROLES } from './constants'
 import { rolesSql } from './sql'
-import { PostgresMetaResult, PostgresRole } from './types'
-export interface PostgresMetaRoleConfig {
-  // https://www.rfc-editor.org/rfc/rfc6902
-  op: 'remove' | 'add' | 'replace'
-  path: string
-  value?: string
-}
+import { PostgresMetaResult, PostgresRole, PostgresRoleCreate, PostgresRoleUpdate } from './types'
 export function changeRoleConfig2Object(config: string[]) {
   if (!config) {
     return null
@@ -115,23 +109,7 @@ WHERE
     members,
     admins,
     config,
-  }: {
-    name: string
-    is_superuser?: boolean
-    can_create_db?: boolean
-    can_create_role?: boolean
-    inherit_role?: boolean
-    can_login?: boolean
-    is_replication_role?: boolean
-    can_bypass_rls?: boolean
-    connection_limit?: number
-    password?: string
-    valid_until?: string
-    member_of?: string[]
-    members?: string[]
-    admins?: string[]
-    config?: Record<string, string>
-  }): Promise<PostgresMetaResult<PostgresRole>> {
+  }: PostgresRoleCreate): Promise<PostgresMetaResult<PostgresRole>> {
     const isSuperuserClause = is_superuser ? 'SUPERUSER' : 'NOSUPERUSER'
     const canCreateDbClause = can_create_db ? 'CREATEDB' : 'NOCREATEDB'
     const canCreateRoleClause = can_create_role ? 'CREATEROLE' : 'NOCREATEROLE'
@@ -198,20 +176,7 @@ COMMIT;`
       password,
       valid_until,
       config,
-    }: {
-      name?: string
-      is_superuser?: boolean
-      can_create_db?: boolean
-      can_create_role?: boolean
-      inherit_role?: boolean
-      can_login?: boolean
-      is_replication_role?: boolean
-      can_bypass_rls?: boolean
-      connection_limit?: number
-      password?: string
-      valid_until?: string
-      config?: PostgresMetaRoleConfig[]
-    }
+    }: PostgresRoleUpdate
   ): Promise<PostgresMetaResult<PostgresRole>> {
     const { data: old, error } = await this.retrieve({ id })
     if (error) {
