@@ -486,7 +486,8 @@ test('formatter', async () => {
     FROM
       users
     where
-      user_id = 1234",
+      user_id = 1234
+    ",
       "error": null,
     }
   `)
