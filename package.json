@@ -35,7 +35,7 @@
     "npm": ">=8"
   },
   "dependencies": {
-    "@sinclair/typebox": "^0.24.47",
+    "@sinclair/typebox": "^0.25.1",
     "fastify-metrics": "^8.0.0",
     "pg": "^8.7.1",
     "pg-format": "^1.0.4",
