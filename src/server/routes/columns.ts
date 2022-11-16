@@ -33,68 +33,62 @@ export default async (fastify: FastifyInstance) => {
     return data
   })
 
-  // HACK: Dark arts to get around https://github.com/delvedor/find-my-way/issues/285:
-  // - this route has to be before /:tableId(^\\d+$)
-  // - can't do :tableId(^\\d+$) instead of :tableId(^\\d+)
-  // - need to separate :ordinalPosition as a 2nd param
-  //
-  // Anyhow, this probably just happens to work.
   fastify.get<{
     Headers: { pg: string }
     Params: {
       tableId: string
       ordinalPosition: string
     }
-  }>('/:tableId(^\\d+).:ordinalPosition(^\\d+$)', async (request, reply) => {
-    const {
-      headers: { pg: connectionString },
-      params: { tableId, ordinalPosition },
-    } = request
-
-    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
-    const { data, error } = await pgMeta.columns.retrieve({ id: `${tableId}.${ordinalPosition}` })
-    await pgMeta.end()
-    if (error) {
-      request.log.error({ error, request: extractRequestForLogging(request) })
-      reply.code(400)
-      if (error.message.startsWith('Cannot find')) reply.code(404)
-      return { error: error.message }
-    }
-
-    return data
-  })
-
-  fastify.get<{
-    Headers: { pg: string }
-    Params: { tableId: number }
     Querystring: {
       include_system_schemas?: string
-      limit?: number
-      offset?: number
+      limit?: string
+      offset?: string
     }
-  }>('/:tableId(^\\d+$)', async (request, reply) => {
-    const {
-      headers: { pg: connectionString },
-      query: { limit, offset },
-      params: { tableId },
-    } = request
-    const includeSystemSchemas = request.query.include_system_schemas === 'true'
+  }>('/:tableId(^\\d+):ordinalPosition', async (request, reply) => {
+    if (request.params.ordinalPosition === '') {
+      const {
+        headers: { pg: connectionString },
+        query: { limit, offset },
+        params: { tableId },
+      } = request
+      const includeSystemSchemas = request.query.include_system_schemas === 'true'
 
-    const pgMeta: PostgresMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
-    const { data, error } = await pgMeta.columns.list({
-      tableId,
-      includeSystemSchemas,
-      limit,
-      offset,
-    })
-    await pgMeta.end()
-    if (error) {
-      request.log.error({ error, request: extractRequestForLogging(request) })
-      reply.code(500)
-      return { error: error.message }
+      const pgMeta: PostgresMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const { data, error } = await pgMeta.columns.list({
+        tableId: Number(tableId),
+        includeSystemSchemas,
+        limit: Number(limit),
+        offset: Number(offset),
+      })
+      await pgMeta.end()
+      if (error) {
+        request.log.error({ error, request: extractRequestForLogging(request) })
+        reply.code(500)
+        return { error: error.message }
+      }
+
+      return data
+    } else if (/^\.\d+$/.test(request.params.ordinalPosition)) {
+      const {
+        headers: { pg: connectionString },
+        params: { tableId, ordinalPosition: ordinalPositionWithDot },
+      } = request
+      const ordinalPosition = ordinalPositionWithDot.slice(1)
+
+      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const { data, error } = await pgMeta.columns.retrieve({ id: `${tableId}.${ordinalPosition}` })
+      await pgMeta.end()
+      if (error) {
+        request.log.error({ error, request: extractRequestForLogging(request) })
+        reply.code(400)
+        if (error.message.startsWith('Cannot find')) reply.code(404)
+        return { error: error.message }
+      }
+
+      return data
+    } else {
+      return reply.callNotFound()
     }
-
-    return data
   })
 
   fastify.post<{
