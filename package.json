@@ -45,6 +45,7 @@
     "prettier-plugin-sql": "^0.12.1"
   },
   "devDependencies": {
+    "@fastify/cors": "^8.2.0",
     "@types/crypto-js": "^4.1.1",
     "@types/jest": "^27.0.1",
     "@types/node": "^16.18.3",
@@ -53,7 +54,6 @@
     "cpy-cli": "^4.1.0",
     "crypto-js": "^4.0.0",
     "fastify": "^4.8.1",
-    "fastify-cors": "^6.0.3",
     "fastify-metrics": "^8.0.0",
     "fastify-swagger": "^5.0.0",
     "jest": "^27.1.0",
