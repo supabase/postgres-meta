@@ -13,6 +13,7 @@
   "module": "dist/module/index.js",
   "repository": "supabase/postgres-meta",
   "scripts": {
+    "check": "tsc --project tsconfig.server.json --noEmit",
     "clean": "rimraf bin dist",
     "format": "prettier --write \"{src,test}/**/*.ts\"",
     "build": "run-s clean build:*",
