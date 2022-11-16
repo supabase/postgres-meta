@@ -1,4 +1,4 @@
-import * as CryptoJS from 'crypto-js'
+import CryptoJS from 'crypto-js'
 import { FastifyInstance } from 'fastify'
 import { PG_CONNECTION, CRYPTO_KEY } from '../constants'
 
