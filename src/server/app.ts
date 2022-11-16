@@ -118,7 +118,7 @@ if (EXPORT_DOCS) {
   })
 }
 
-app.register(require('fastify-cors'))
+app.register(require('@fastify/cors'))
 
 app.get('/', async (_request, _reply) => {
   return {
