@@ -28,6 +28,7 @@ export default async (fastify: FastifyInstance) => {
   fastify.register(require('./columns'), { prefix: '/columns' })
   fastify.register(require('./config'), { prefix: '/config' })
   fastify.register(require('./extensions'), { prefix: '/extensions' })
+  fastify.register(require('./foreign-tables'), { prefix: '/foreign-tables' })
   fastify.register(require('./functions'), { prefix: '/functions' })
   fastify.register(require('./policies'), { prefix: '/policies' })
   fastify.register(require('./publications'), { prefix: '/publications' })
