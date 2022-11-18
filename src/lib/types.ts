@@ -75,6 +75,15 @@ export const postgresExtensionSchema = Type.Object({
 })
 export type PostgresExtension = Static<typeof postgresExtensionSchema>
 
+export const postgresForeignTableSchema = Type.Object({
+  id: Type.Integer(),
+  schema: Type.String(),
+  name: Type.String(),
+  comment: Type.Union([Type.String(), Type.Null()]),
+  columns: Type.Array(postgresColumnSchema),
+})
+export type PostgresForeignTable = Static<typeof postgresForeignTableSchema>
+
 const postgresFunctionSchema = Type.Object({
   id: Type.Integer(),
   schema: Type.String(),

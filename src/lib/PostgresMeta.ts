@@ -3,6 +3,7 @@ import * as Parser from './Parser'
 import PostgresMetaColumns from './PostgresMetaColumns'
 import PostgresMetaConfig from './PostgresMetaConfig'
 import PostgresMetaExtensions from './PostgresMetaExtensions'
+import PostgresMetaForeignTables from './PostgresMetaForeignTables'
 import PostgresMetaFunctions from './PostgresMetaFunctions'
 import PostgresMetaPolicies from './PostgresMetaPolicies'
 import PostgresMetaPublications from './PostgresMetaPublications'
@@ -15,12 +16,14 @@ import PostgresMetaVersion from './PostgresMetaVersion'
 import PostgresMetaViews from './PostgresMetaViews'
 import { init } from './db'
 import { PostgresMetaResult } from './types'
+
 export default class PostgresMeta {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
   end: () => Promise<void>
   columns: PostgresMetaColumns
   config: PostgresMetaConfig
   extensions: PostgresMetaExtensions
+  foreignTables: PostgresMetaForeignTables
   functions: PostgresMetaFunctions
   policies: PostgresMetaPolicies
   publications: PostgresMetaPublications
@@ -43,6 +46,7 @@ export default class PostgresMeta {
     this.columns = new PostgresMetaColumns(this.query)
     this.config = new PostgresMetaConfig(this.query)
     this.extensions = new PostgresMetaExtensions(this.query)
+    this.foreignTables = new PostgresMetaForeignTables(this.query)
     this.functions = new PostgresMetaFunctions(this.query)
     this.policies = new PostgresMetaPolicies(this.query)
     this.publications = new PostgresMetaPublications(this.query)
