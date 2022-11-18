@@ -148,7 +148,7 @@ export interface Database {
                           column.format,
                           types,
                           schemas
-                        )} | null`
+                        )} ${column.is_nullable ? '| null' : ''}`
                     )}
                   }
                   ${
