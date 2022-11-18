@@ -1,7 +1,7 @@
 SELECT
   p.oid :: int8 AS id,
   p.pubname AS name,
-  r.rolname AS owner,
+  p.pubowner::regrole::text AS owner,
   p.pubinsert AS publish_insert,
   p.pubupdate AS publish_update,
   p.pubdelete AS publish_delete,
@@ -34,4 +34,3 @@ FROM
     WHERE
       pr.prpubid = p.oid
   ) AS pr ON 1 = 1
-  JOIN pg_roles AS r ON p.pubowner = r.oid
