@@ -225,7 +225,25 @@ export interface Database {
                       ({ name, type }) => `${JSON.stringify(name)}: ${type}`
                     )} }`
                   })()}
-                  Returns: ${pgTypeToTsType(return_type, types, schemas)}
+                  Returns: ${(() => {
+                    const tableArgs = args.filter(({ mode }) => mode === 'table')
+
+                    if (tableArgs.length > 0) {
+                      const argsNameAndType = tableArgs.map(({ name, type_id }) => {
+                        const type = types.find(({ id }) => id === type_id)
+                        if (!type) {
+                          return { name, type: 'unknown' }
+                        }
+                        return { name, type: pgTypeToTsType(type.name, types, schemas) }
+                      })
+
+                      return `{ ${argsNameAndType.map(
+                        ({ name, type }) => `${JSON.stringify(name)}: ${type}`
+                      )} }[]`
+                    }
+
+                    return pgTypeToTsType(return_type, types, schemas)
+                  })()}
                 }`
                     )
                     .join('|')}`
