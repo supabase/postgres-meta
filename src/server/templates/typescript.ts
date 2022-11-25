@@ -13,12 +13,14 @@ export const apply = ({
   views,
   functions,
   types,
+  arrayTypes,
 }: {
   schemas: PostgresSchema[]
   tables: PostgresTable[]
   views: PostgresView[]
   functions: PostgresFunction[]
   types: PostgresType[]
+  arrayTypes: PostgresType[]
 }): string => {
   let output = `
 export type Json = string | number | boolean | null | { [key: string]: Json } | Json[]
@@ -214,11 +216,20 @@ export interface Database {
                     }
 
                     const argsNameAndType = inArgs.map(({ name, type_id }) => {
-                      const type = types.find(({ id }) => id === type_id)
-                      if (!type) {
-                        return { name, type: 'unknown' }
+                      let type = arrayTypes.find(({ id }) => id === type_id)
+                      if (type) {
+                        // If it's an array type, the name looks like `_int8`.
+                        const elementTypeName = type.name.substring(1)
+                        return {
+                          name,
+                          type: `(${pgTypeToTsType(elementTypeName, types, schemas)})[]`,
+                        }
                       }
-                      return { name, type: pgTypeToTsType(type.name, types, schemas) }
+                      type = types.find(({ id }) => id === type_id)
+                      if (type) {
+                        return { name, type: pgTypeToTsType(type.name, types, schemas) }
+                      }
+                      return { name, type: 'unknown' }
                     })
 
                     return `{ ${argsNameAndType.map(
@@ -230,11 +241,20 @@ export interface Database {
 
                     if (tableArgs.length > 0) {
                       const argsNameAndType = tableArgs.map(({ name, type_id }) => {
-                        const type = types.find(({ id }) => id === type_id)
-                        if (!type) {
-                          return { name, type: 'unknown' }
+                        let type = arrayTypes.find(({ id }) => id === type_id)
+                        if (type) {
+                          // If it's an array type, the name looks like `_int8`.
+                          const elementTypeName = type.name.substring(1)
+                          return {
+                            name,
+                            type: `(${pgTypeToTsType(elementTypeName, types, schemas)})[]`,
+                          }
                         }
-                        return { name, type: pgTypeToTsType(type.name, types, schemas) }
+                        type = types.find(({ id }) => id === type_id)
+                        if (type) {
+                          return { name, type: pgTypeToTsType(type.name, types, schemas) }
+                        }
+                        return { name, type: 'unknown' }
                       })
 
                       return `{ ${argsNameAndType.map(
