@@ -226,6 +226,9 @@ end $$;
 with publications as (${publicationsSql}) select * from publications where name = (select name from pg_meta_publication_tmp);
 `
     const { data, error } = await this.query(sql)
+    if (error) {
+      return { data: null, error }
+    }
     return { data: data[0], error }
   }
 
