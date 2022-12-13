@@ -142,9 +142,10 @@ export default async (fastify: FastifyInstance) => {
     }
   }>('/:id(\\d+\\.\\d+)', async (request, reply) => {
     const connectionString = request.headers.pg
+    const cascade = request.query.cascade === 'true'
 
     const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
-    const { data, error } = await pgMeta.columns.remove(request.params.id)
+    const { data, error } = await pgMeta.columns.remove(request.params.id, { cascade })
     await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })

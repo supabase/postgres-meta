@@ -342,14 +342,14 @@ COMMIT;`
     return await this.retrieve({ id })
   }
 
-  async remove(id: string): Promise<PostgresMetaResult<PostgresColumn>> {
+  async remove(id: string, { cascade = false } = {}): Promise<PostgresMetaResult<PostgresColumn>> {
     const { data: column, error } = await this.retrieve({ id })
     if (error) {
       return { data: null, error }
     }
     const sql = `ALTER TABLE ${ident(column!.schema)}.${ident(column!.table)} DROP COLUMN ${ident(
       column!.name
-    )};`
+    )} ${cascade ? 'CASCADE' : 'RESTRICT'};`
     {
       const { error } = await this.query(sql)
       if (error) {
