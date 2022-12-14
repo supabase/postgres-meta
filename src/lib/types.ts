@@ -37,7 +37,7 @@ export const postgresColumnSchema = Type.Object({
   is_nullable: Type.Boolean(),
   is_updatable: Type.Boolean(),
   is_unique: Type.Boolean(),
-  enums: Type.Array(Type.Unknown()),
+  enums: Type.Array(Type.String()),
   comment: Type.Union([Type.String(), Type.Null()]),
 })
 export type PostgresColumn = Static<typeof postgresColumnSchema>
@@ -326,7 +326,13 @@ export const postgresTypeSchema = Type.Object({
   name: Type.String(),
   schema: Type.String(),
   format: Type.String(),
-  enums: Type.Array(Type.Unknown()),
+  enums: Type.Array(Type.String()),
+  attributes: Type.Array(
+    Type.Object({
+      name: Type.String(),
+      type_id: Type.Integer(),
+    })
+  ),
   comment: Type.Union([Type.String(), Type.Null()]),
 })
 export type PostgresType = Static<typeof postgresTypeSchema>
