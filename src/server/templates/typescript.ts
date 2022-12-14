@@ -69,14 +69,16 @@ export interface Database {
                     (table) => `${JSON.stringify(table.name)}: {
                   Row: {
                     ${[
-                      ...table.columns.map(
-                        (column) =>
-                          `${JSON.stringify(column.name)}: ${pgTypeToTsType(
-                            column.format,
-                            types,
-                            schemas
-                          )} ${column.is_nullable ? '| null' : ''}`
-                      ),
+                      ...table.columns
+                        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                        .map(
+                          (column) =>
+                            `${JSON.stringify(column.name)}: ${pgTypeToTsType(
+                              column.format,
+                              types,
+                              schemas
+                            )} ${column.is_nullable ? '| null' : ''}`
+                        ),
                       ...schemaFunctions
                         .filter((fn) => fn.argument_types === table.name)
                         .map(
@@ -90,48 +92,52 @@ export interface Database {
                     ]}
                   }
                   Insert: {
-                    ${table.columns.map((column) => {
-                      let output = JSON.stringify(column.name)
+                    ${table.columns
+                      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                      .map((column) => {
+                        let output = JSON.stringify(column.name)
 
-                      if (column.identity_generation === 'ALWAYS') {
-                        return `${output}?: never`
-                      }
+                        if (column.identity_generation === 'ALWAYS') {
+                          return `${output}?: never`
+                        }
 
-                      if (
-                        column.is_nullable ||
-                        column.is_identity ||
-                        column.default_value !== null
-                      ) {
-                        output += '?:'
-                      } else {
-                        output += ':'
-                      }
+                        if (
+                          column.is_nullable ||
+                          column.is_identity ||
+                          column.default_value !== null
+                        ) {
+                          output += '?:'
+                        } else {
+                          output += ':'
+                        }
 
-                      output += pgTypeToTsType(column.format, types, schemas)
+                        output += pgTypeToTsType(column.format, types, schemas)
 
-                      if (column.is_nullable) {
-                        output += '| null'
-                      }
+                        if (column.is_nullable) {
+                          output += '| null'
+                        }
 
-                      return output
-                    })}
+                        return output
+                      })}
                   }
                   Update: {
-                    ${table.columns.map((column) => {
-                      let output = JSON.stringify(column.name)
+                    ${table.columns
+                      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                      .map((column) => {
+                        let output = JSON.stringify(column.name)
 
-                      if (column.identity_generation === 'ALWAYS') {
-                        return `${output}?: never`
-                      }
+                        if (column.identity_generation === 'ALWAYS') {
+                          return `${output}?: never`
+                        }
 
-                      output += `?: ${pgTypeToTsType(column.format, types, schemas)}`
+                        output += `?: ${pgTypeToTsType(column.format, types, schemas)}`
 
-                      if (column.is_nullable) {
-                        output += '| null'
-                      }
+                        if (column.is_nullable) {
+                          output += '| null'
+                        }
 
-                      return output
-                    })}
+                        return output
+                      })}
                   }
                 }`
                   )
@@ -144,46 +150,52 @@ export interface Database {
                 : schemaViews.map(
                     (view) => `${JSON.stringify(view.name)}: {
                   Row: {
-                    ${view.columns.map(
-                      (column) =>
-                        `${JSON.stringify(column.name)}: ${pgTypeToTsType(
-                          column.format,
-                          types,
-                          schemas
-                        )} ${column.is_nullable ? '| null' : ''}`
-                    )}
+                    ${view.columns
+                      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                      .map(
+                        (column) =>
+                          `${JSON.stringify(column.name)}: ${pgTypeToTsType(
+                            column.format,
+                            types,
+                            schemas
+                          )} ${column.is_nullable ? '| null' : ''}`
+                      )}
                   }
                   ${
                     view.is_updatable
                       ? `Insert: {
-                    ${view.columns.map((column) => {
-                      let output = JSON.stringify(column.name)
+                    ${view.columns
+                      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                      .map((column) => {
+                        let output = JSON.stringify(column.name)
 
-                      if (!column.is_updatable) {
-                        return `${output}?: never`
-                      }
+                        if (!column.is_updatable) {
+                          return `${output}?: never`
+                        }
 
-                      output += `?: ${pgTypeToTsType(column.format, types, schemas)} | null`
+                        output += `?: ${pgTypeToTsType(column.format, types, schemas)} | null`
 
-                      return output
-                    })}
+                        return output
+                      })}
                   }`
                       : ''
                   }
                   ${
                     view.is_updatable
                       ? `Update: {
-                    ${view.columns.map((column) => {
-                      let output = JSON.stringify(column.name)
+                    ${view.columns
+                      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                      .map((column) => {
+                        let output = JSON.stringify(column.name)
 
-                      if (!column.is_updatable) {
-                        return `${output}?: never`
-                      }
+                        if (!column.is_updatable) {
+                          return `${output}?: never`
+                        }
 
-                      output += `?: ${pgTypeToTsType(column.format, types, schemas)} | null`
+                        output += `?: ${pgTypeToTsType(column.format, types, schemas)} | null`
 
-                      return output
-                    })}
+                        return output
+                      })}
                   }`
                       : ''
                   }
