@@ -13,15 +13,19 @@ export default class PostgresMetaTables {
 
   async list({
     includeSystemSchemas = false,
+    schemas,
     limit,
     offset,
   }: {
     includeSystemSchemas?: boolean
+    schemas?: string[]
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresTable[]>> {
     let sql = enrichedTablesSql
-    if (!includeSystemSchemas) {
+    if (schemas) {
+      sql = `${sql} WHERE (schema IN (${schemas.map(literal).join(',')}))`
+    } else if (!includeSystemSchemas) {
       sql = `${sql} WHERE NOT (schema IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
     }
     if (limit) {
