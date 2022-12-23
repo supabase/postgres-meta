@@ -1,9 +1,9 @@
 import { ident, literal } from 'pg-format'
-import PostgresMetaTables from './PostgresMetaTables'
-import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
-import { columnsSql } from './sql'
-import { PostgresMetaResult, PostgresColumn } from './types'
-import { filterByList } from './helpers'
+import PostgresMetaTables from './PostgresMetaTables.js'
+import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
+import { columnsSql } from './sql/index.js'
+import { PostgresMetaResult, PostgresColumn } from './types.js'
+import { filterByList } from './helpers.js'
 
 export default class PostgresMetaColumns {
   query: (sql: string) => Promise<PostgresMetaResult<any>>

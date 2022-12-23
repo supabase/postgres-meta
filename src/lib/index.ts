@@ -1,4 +1,4 @@
-import PostgresMeta from './PostgresMeta'
+import PostgresMeta from './PostgresMeta.js'
 export { PostgresMeta }
 export {
   PostgresMetaOk,
@@ -22,4 +22,4 @@ export {
   PostgresType,
   PostgresVersion,
   PostgresView,
-} from './types'
+} from './types.js'
