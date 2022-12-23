@@ -1,15 +1,15 @@
 import { Type } from '@sinclair/typebox'
 import { FastifyInstance } from 'fastify'
-import { PostgresMeta } from '../../lib'
+import { PostgresMeta } from '../../lib/index.js'
 import {
   PostgresSchemaCreate,
   PostgresSchemaUpdate,
   postgresSchemaSchema,
   postgresSchemaCreateSchema,
   postgresSchemaUpdateSchema,
-} from '../../lib/types'
-import { DEFAULT_POOL_CONFIG } from '../constants'
-import { extractRequestForLogging } from '../utils'
+} from '../../lib/types.js'
+import { DEFAULT_POOL_CONFIG } from '../constants.js'
+import { extractRequestForLogging } from '../utils.js'
 
 export default async (fastify: FastifyInstance) => {
   fastify.get<{
