@@ -16,15 +16,15 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number), table_id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "activation": "AFTER",
         "condition": "(old.* IS DISTINCT FROM new.*)",
         "enabled_mode": "ORIGIN",
-        "events": Array [
+        "events": [
           "UPDATE",
         ],
-        "function_args": Array [
+        "function_args": [
           "test1",
           "test2",
         ],
@@ -45,15 +45,15 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number), table_id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "activation": "AFTER",
         "condition": "(old.* IS DISTINCT FROM new.*)",
         "enabled_mode": "ORIGIN",
-        "events": Array [
+        "events": [
           "UPDATE",
         ],
-        "function_args": Array [
+        "function_args": [
           "test1",
           "test2",
         ],
@@ -77,15 +77,15 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number), table_id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "activation": "AFTER",
         "condition": "(old.* IS DISTINCT FROM new.*)",
         "enabled_mode": "DISABLED",
-        "events": Array [
+        "events": [
           "UPDATE",
         ],
-        "function_args": Array [
+        "function_args": [
           "test1",
           "test2",
         ],
@@ -108,15 +108,15 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number), table_id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "activation": "AFTER",
         "condition": "(old.* IS DISTINCT FROM new.*)",
         "enabled_mode": "REPLICA",
-        "events": Array [
+        "events": [
           "UPDATE",
         ],
-        "function_args": Array [
+        "function_args": [
           "test1",
           "test2",
         ],
@@ -137,15 +137,15 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number), table_id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "activation": "AFTER",
         "condition": "(old.* IS DISTINCT FROM new.*)",
         "enabled_mode": "REPLICA",
-        "events": Array [
+        "events": [
           "UPDATE",
         ],
-        "function_args": Array [
+        "function_args": [
           "test1",
           "test2",
         ],
@@ -187,17 +187,17 @@ test('multi event', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number), table_id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "activation": "AFTER",
         "condition": null,
         "enabled_mode": "ORIGIN",
-        "events": Array [
+        "events": [
           "INSERT",
           "DELETE",
           "UPDATE",
         ],
-        "function_args": Array [
+        "function_args": [
           "test1",
           "test2",
         ],

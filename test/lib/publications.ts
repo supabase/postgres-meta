@@ -27,8 +27,8 @@ test('retrieve, create, update, delete', async () => {
   expect(cleanNondet(res)).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "id": Any<Number>,
         "name": "a",
         "owner": "postgres",
@@ -36,8 +36,8 @@ test('retrieve, create, update, delete', async () => {
         "publish_insert": true,
         "publish_truncate": false,
         "publish_update": true,
-        "tables": Array [
-          Object {
+        "tables": [
+          {
             "name": "users",
             "schema": "public",
           },
@@ -51,8 +51,8 @@ test('retrieve, create, update, delete', async () => {
   expect(cleanNondet(res)).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "id": Any<Number>,
         "name": "a",
         "owner": "postgres",
@@ -60,8 +60,8 @@ test('retrieve, create, update, delete', async () => {
         "publish_insert": true,
         "publish_truncate": false,
         "publish_update": true,
-        "tables": Array [
-          Object {
+        "tables": [
+          {
             "name": "users",
             "schema": "public",
           },
@@ -79,8 +79,8 @@ test('retrieve, create, update, delete', async () => {
   expect(cleanNondet(res)).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "id": Any<Number>,
         "name": "b",
         "owner": "postgres",
@@ -88,7 +88,7 @@ test('retrieve, create, update, delete', async () => {
         "publish_insert": false,
         "publish_truncate": false,
         "publish_update": true,
-        "tables": Array [],
+        "tables": [],
       },
       "error": null,
     }
@@ -98,8 +98,8 @@ test('retrieve, create, update, delete', async () => {
   expect(cleanNondet(res)).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "id": Any<Number>,
         "name": "b",
         "owner": "postgres",
@@ -107,7 +107,7 @@ test('retrieve, create, update, delete', async () => {
         "publish_insert": false,
         "publish_truncate": false,
         "publish_update": true,
-        "tables": Array [],
+        "tables": [],
       },
       "error": null,
     }
@@ -134,8 +134,8 @@ test('tables with uppercase', async () => {
   expect(cleanNondet(res)).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "id": Any<Number>,
         "name": "pub",
         "owner": "postgres",
@@ -143,8 +143,8 @@ test('tables with uppercase', async () => {
         "publish_insert": false,
         "publish_truncate": false,
         "publish_update": false,
-        "tables": Array [
-          Object {
+        "tables": [
+          {
             "name": "T",
             "schema": "public",
           },
@@ -160,8 +160,8 @@ test('tables with uppercase', async () => {
   expect(cleanNondet(res)).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "id": Any<Number>,
         "name": "pub",
         "owner": "postgres",
@@ -169,8 +169,8 @@ test('tables with uppercase', async () => {
         "publish_insert": false,
         "publish_truncate": false,
         "publish_update": false,
-        "tables": Array [
-          Object {
+        "tables": [
+          {
             "name": "T",
             "schema": "public",
           },
@@ -196,8 +196,8 @@ test('FOR ALL TABLES', async () => {
   expect(cleanNondet(res)).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "id": Any<Number>,
         "name": "for_all",
         "owner": "postgres",
@@ -223,8 +223,8 @@ test('update no tables -> all tables', async () => {
   expect(cleanNondet(res)).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "id": Any<Number>,
         "name": "pub",
         "owner": "postgres",
@@ -250,8 +250,8 @@ test('update all tables -> no tables', async () => {
   expect(cleanNondet(res)).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "id": Any<Number>,
         "name": "pub",
         "owner": "postgres",
@@ -259,7 +259,7 @@ test('update all tables -> no tables', async () => {
         "publish_insert": false,
         "publish_truncate": false,
         "publish_update": false,
-        "tables": Array [],
+        "tables": [],
       },
       "error": null,
     }

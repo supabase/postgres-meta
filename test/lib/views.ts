@@ -5,13 +5,13 @@ test('list', async () => {
   expect(res.data?.find(({ name }) => name === 'todos_view')).toMatchInlineSnapshot(
     { id: expect.any(Number) },
     `
-    Object {
-      "columns": Array [
-        Object {
+    {
+      "columns": [
+        {
           "comment": null,
           "data_type": "bigint",
           "default_value": null,
-          "enums": Array [],
+          "enums": [],
           "format": "int8",
           "id": "16420.1",
           "identity_generation": null,
@@ -26,11 +26,11 @@ test('list', async () => {
           "table": "todos_view",
           "table_id": 16420,
         },
-        Object {
+        {
           "comment": null,
           "data_type": "text",
           "default_value": null,
-          "enums": Array [],
+          "enums": [],
           "format": "text",
           "id": "16420.2",
           "identity_generation": null,
@@ -45,11 +45,11 @@ test('list', async () => {
           "table": "todos_view",
           "table_id": 16420,
         },
-        Object {
+        {
           "comment": null,
           "data_type": "bigint",
           "default_value": null,
-          "enums": Array [],
+          "enums": [],
           "format": "int8",
           "id": "16420.3",
           "identity_generation": null,
