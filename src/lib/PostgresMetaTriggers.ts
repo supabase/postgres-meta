@@ -1,4 +1,6 @@
 import { ident, literal } from 'pg-format'
+import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
+import { filterByList } from './helpers'
 import { triggersSql } from './sql'
 import { PostgresMetaResult, PostgresTrigger } from './types'
 
@@ -10,18 +12,32 @@ export default class PostgresMetaTriggers {
   }
 
   async list({
+    includeSystemSchemas = false,
+    includedSchemas,
+    excludedSchemas,
     limit,
     offset,
   }: {
+    includeSystemSchemas?: boolean
+    includedSchemas?: string[]
+    excludedSchemas?: string[]
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresTrigger[]>> {
     let sql = enrichedTriggersSql
+    const filter = filterByList(
+      includedSchemas,
+      excludedSchemas,
+      !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
+    )
+    if (filter) {
+      sql += ` WHERE schema ${filter}`
+    }
     if (limit) {
-      sql = `${sql} LIMIT ${limit}`
+      sql += ` LIMIT ${limit}`
     }
     if (offset) {
-      sql = `${sql} OFFSET ${offset}`
+      sql += ` OFFSET ${offset}`
     }
     return await this.query(sql)
   }

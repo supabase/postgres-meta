@@ -75,6 +75,15 @@ export const postgresExtensionSchema = Type.Object({
 })
 export type PostgresExtension = Static<typeof postgresExtensionSchema>
 
+export const postgresForeignTableSchema = Type.Object({
+  id: Type.Integer(),
+  schema: Type.String(),
+  name: Type.String(),
+  comment: Type.Union([Type.String(), Type.Null()]),
+  columns: Type.Array(postgresColumnSchema),
+})
+export type PostgresForeignTable = Static<typeof postgresForeignTableSchema>
+
 const postgresFunctionSchema = Type.Object({
   id: Type.Integer(),
   schema: Type.String(),
@@ -184,6 +193,13 @@ export const postgresRelationshipSchema = Type.Object({
 })
 export type PostgresRelationship = Static<typeof postgresRelationshipSchema>
 
+export const PostgresMetaRoleConfigSchema = Type.Object({
+  op: Type.Union([Type.Literal('remove'), Type.Literal('add'), Type.Literal('replace')]),
+  path: Type.String(),
+  value: Type.Optional(Type.String()),
+})
+export type PostgresMetaRoleConfig = Static<typeof PostgresMetaRoleConfigSchema>
+
 export const postgresRoleSchema = Type.Object({
   id: Type.Integer(),
   name: Type.String(),
@@ -198,9 +214,44 @@ export const postgresRoleSchema = Type.Object({
   connection_limit: Type.Integer(),
   password: Type.String(),
   valid_until: Type.Union([Type.String(), Type.Null()]),
-  config: Type.Union([Type.String(), Type.Null()]),
+  config: Type.Union([Type.String(), Type.Null(), Type.Record(Type.String(), Type.String())]),
 })
 export type PostgresRole = Static<typeof postgresRoleSchema>
+
+export const postgresRoleCreateSchema = Type.Object({
+  name: Type.String(),
+  password: Type.Optional(Type.String()),
+  inherit_role: Type.Optional(Type.Boolean()),
+  can_login: Type.Optional(Type.Boolean()),
+  is_superuser: Type.Optional(Type.Boolean()),
+  can_create_db: Type.Optional(Type.Boolean()),
+  can_create_role: Type.Optional(Type.Boolean()),
+  is_replication_role: Type.Optional(Type.Boolean()),
+  can_bypass_rls: Type.Optional(Type.Boolean()),
+  connection_limit: Type.Optional(Type.Integer()),
+  member_of: Type.Optional(Type.Array(Type.String())),
+  members: Type.Optional(Type.Array(Type.String())),
+  admins: Type.Optional(Type.Array(Type.String())),
+  valid_until: Type.Optional(Type.String()),
+  config: Type.Optional(Type.Record(Type.String(), Type.String())),
+})
+export type PostgresRoleCreate = Static<typeof postgresRoleCreateSchema>
+
+export const postgresRoleUpdateSchema = Type.Object({
+  name: Type.Optional(Type.String()),
+  password: Type.Optional(Type.String()),
+  inherit_role: Type.Optional(Type.Boolean()),
+  can_login: Type.Optional(Type.Boolean()),
+  is_superuser: Type.Optional(Type.Boolean()),
+  can_create_db: Type.Optional(Type.Boolean()),
+  can_create_role: Type.Optional(Type.Boolean()),
+  is_replication_role: Type.Optional(Type.Boolean()),
+  can_bypass_rls: Type.Optional(Type.Boolean()),
+  connection_limit: Type.Optional(Type.Integer()),
+  valid_until: Type.Optional(Type.String()),
+  config: Type.Optional(Type.Array(PostgresMetaRoleConfigSchema)),
+})
+export type PostgresRoleUpdate = Static<typeof postgresRoleUpdateSchema>
 
 export const postgresSchemaSchema = Type.Object({
   id: Type.Integer(),

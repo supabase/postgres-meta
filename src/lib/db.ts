@@ -35,13 +35,19 @@ export const init: (config: PoolConfig) => {
       try {
         if (!pool) {
           const pool = new Pool(config)
-          const { rows } = await pool.query(sql)
+          let res = await pool.query(sql)
+          if (Array.isArray(res)) {
+            res = res.reverse().find((x) => x.rows.length !== 0) ?? { rows: [] }
+          }
           await pool.end()
-          return { data: rows, error: null }
+          return { data: res.rows, error: null }
         }
 
-        const { rows } = await pool.query(sql)
-        return { data: rows, error: null }
+        let res = await pool.query(sql)
+        if (Array.isArray(res)) {
+          res = res.reverse().find((x) => x.rows.length !== 0) ?? { rows: [] }
+        }
+        return { data: res.rows, error: null }
       } catch (e: any) {
         return { data: null, error: { message: e.message } }
       }

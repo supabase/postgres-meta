@@ -1,5 +1,6 @@
 import { literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
+import { filterByList } from './helpers'
 import { typesSql } from './sql'
 import { PostgresMetaResult, PostgresType } from './types'
 
@@ -11,12 +12,14 @@ export default class PostgresMetaTypes {
   }
 
   async list({
+    includeArrayTypes = false,
     includeSystemSchemas = false,
     includedSchemas,
     excludedSchemas,
     limit,
     offset,
   }: {
+    includeArrayTypes?: boolean
     includeSystemSchemas?: boolean
     includedSchemas?: string[]
     excludedSchemas?: string[]
@@ -24,22 +27,29 @@ export default class PostgresMetaTypes {
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresType[]>> {
     let sql = typesSql
-
-    if (includedSchemas?.length) {
-      sql = `${sql} AND (n.nspname IN (${includedSchemas.map(literal).join(',')}))`
-    } else if (!includeSystemSchemas) {
-      sql = `${sql} AND NOT (n.nspname IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
+    if (!includeArrayTypes) {
+      sql += ` and not exists (
+                 select
+                 from
+                   pg_type el
+                 where
+                   el.oid = t.typelem
+                   and el.typarray = t.oid
+               )`
     }
-
-    if (excludedSchemas?.length) {
-      sql = `${sql} AND NOT (n.nspname IN (${excludedSchemas.map(literal).join(',')}))`
+    const filter = filterByList(
+      includedSchemas,
+      excludedSchemas,
+      !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
+    )
+    if (filter) {
+      sql += ` and n.nspname ${filter}`
     }
-
     if (limit) {
-      sql = `${sql} LIMIT ${limit}`
+      sql += ` limit ${limit}`
     }
     if (offset) {
-      sql = `${sql} OFFSET ${offset}`
+      sql += ` offset ${offset}`
     }
     return await this.query(sql)
   }

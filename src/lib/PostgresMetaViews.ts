@@ -1,6 +1,5 @@
-import { literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
-import { coalesceRowsToArray } from './helpers'
+import { coalesceRowsToArray, filterByList } from './helpers'
 import { columnsSql, viewsSql } from './sql'
 import { PostgresMetaResult, PostgresView } from './types'
 
@@ -13,22 +12,31 @@ export default class PostgresMetaViews {
 
   async list({
     includeSystemSchemas = false,
+    includedSchemas,
+    excludedSchemas,
     limit,
     offset,
   }: {
     includeSystemSchemas?: boolean
+    includedSchemas?: string[]
+    excludedSchemas?: string[]
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresView[]>> {
     let sql = enrichedViewsSql
-    if (!includeSystemSchemas) {
-      sql = `${sql} WHERE schema NOT IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')})`
+    const filter = filterByList(
+      includedSchemas,
+      excludedSchemas,
+      !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
+    )
+    if (filter) {
+      sql += ` WHERE schema ${filter}`
     }
     if (limit) {
-      sql = `${sql} LIMIT ${limit}`
+      sql += ` LIMIT ${limit}`
     }
     if (offset) {
-      sql = `${sql} OFFSET ${offset}`
+      sql += ` OFFSET ${offset}`
     }
     return await this.query(sql)
   }

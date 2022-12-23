@@ -25,7 +25,7 @@ jobs:
           npm run build
 
       - id: semantic-release
-        uses: cycjimmy/semantic-release-action@v2
+        uses: cycjimmy/semantic-release-action@v3
         with:
           semantic_version: 18
         env:
@@ -67,13 +67,17 @@ jobs:
       - semantic-release
     if: needs.semantic-release.outputs.new-release-published == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - id: meta
         uses: docker/metadata-action@v4
         with:
           images: |
             supabase/postgres-meta
-            public.ecr.aws/t3w2s2c9/postgres-meta
+            public.ecr.aws/supabase/postgres-meta
+            ghcr.io/supabase/postgres-meta
           tags: |
             type=raw,value=v${{ needs.semantic-release.outputs.new-release-version }}
 
@@ -94,6 +98,13 @@ jobs:
           registry: public.ecr.aws
           username: ${{ secrets.PROD_ACCESS_KEY_ID }}
           password: ${{ secrets.PROD_SECRET_ACCESS_KEY }}
+
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: docker/build-push-action@v3
         with:

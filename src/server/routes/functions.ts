@@ -68,7 +68,7 @@ export default async (fastify: FastifyInstance) => {
     const connectionString = request.headers.pg
 
     const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
-    const { data, error } = await pgMeta.functions.create(request.body)
+    const { data, error } = await pgMeta.functions.create(request.body as any)
     await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
@@ -89,7 +89,7 @@ export default async (fastify: FastifyInstance) => {
     const id = Number(request.params.id)
 
     const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
-    const { data, error } = await pgMeta.functions.update(id, request.body)
+    const { data, error } = await pgMeta.functions.update(id, request.body as any)
     await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })

@@ -3,6 +3,7 @@ import PostgresMetaTables from './PostgresMetaTables'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
 import { columnsSql } from './sql'
 import { PostgresMetaResult, PostgresColumn } from './types'
+import { filterByList } from './helpers'
 
 export default class PostgresMetaColumns {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -38,16 +39,14 @@ FROM
 WHERE
   true`
 
-    if (includedSchemas?.length) {
-      sql = `${sql} AND (schema IN (${includedSchemas.map(literal).join(',')}))`
-    } else if (!includeSystemSchemas) {
-      sql = `${sql} AND NOT (schema IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
+    const filter = filterByList(
+      includedSchemas,
+      excludedSchemas,
+      !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
+    )
+    if (filter) {
+      sql += ` AND schema ${filter}`
     }
-
-    if (excludedSchemas?.length) {
-      sql = `${sql} AND NOT (schema IN (${excludedSchemas.map(literal).join(',')}))`
-    }
-
     if (tableId !== undefined) {
       sql += ` AND table_id = ${literal(tableId)}`
     }
@@ -354,14 +353,14 @@ COMMIT;`
     return await this.retrieve({ id })
   }
 
-  async remove(id: string): Promise<PostgresMetaResult<PostgresColumn>> {
+  async remove(id: string, { cascade = false } = {}): Promise<PostgresMetaResult<PostgresColumn>> {
     const { data: column, error } = await this.retrieve({ id })
     if (error) {
       return { data: null, error }
     }
     const sql = `ALTER TABLE ${ident(column!.schema)}.${ident(column!.table)} DROP COLUMN ${ident(
       column!.name
-    )};`
+    )} ${cascade ? 'CASCADE' : 'RESTRICT'};`
     {
       const { error } = await this.query(sql)
       if (error) {

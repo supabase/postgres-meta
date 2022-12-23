@@ -40,6 +40,7 @@ test('retrieve, create, update, delete', async () => {
     can_bypass_rls: true,
     connection_limit: 100,
     valid_until: '2020-01-01T00:00:00.000Z',
+    config: { search_path: 'extension, public' },
   })
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
@@ -51,7 +52,9 @@ test('retrieve, create, update, delete', async () => {
         "can_create_db": true,
         "can_create_role": true,
         "can_login": true,
-        "config": null,
+        "config": Object {
+          "search_path": "extension, public",
+        },
         "connection_limit": 100,
         "id": Any<Number>,
         "inherit_role": false,
@@ -76,7 +79,9 @@ test('retrieve, create, update, delete', async () => {
         "can_create_db": true,
         "can_create_role": true,
         "can_login": true,
-        "config": null,
+        "config": Object {
+          "search_path": "extension, public",
+        },
         "connection_limit": 100,
         "id": Any<Number>,
         "inherit_role": false,
@@ -105,6 +110,18 @@ test('retrieve, create, update, delete', async () => {
     can_bypass_rls: true,
     connection_limit: 100,
     valid_until: '2020-01-01T00:00:00.000Z',
+    config: [
+      {
+        op: 'replace',
+        path: 'search_path',
+        value: 'public',
+      },
+      {
+        op: 'add',
+        path: 'log_statement',
+        value: 'all',
+      },
+    ],
   })
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
@@ -116,7 +133,45 @@ test('retrieve, create, update, delete', async () => {
         "can_create_db": true,
         "can_create_role": true,
         "can_login": true,
-        "config": null,
+        "config": Object {
+          "log_statement": "all",
+          "search_path": "public",
+        },
+        "connection_limit": 100,
+        "id": Any<Number>,
+        "inherit_role": false,
+        "is_replication_role": true,
+        "is_superuser": true,
+        "name": "rr",
+        "password": "********",
+        "valid_until": "2020-01-01 00:00:00+00",
+      },
+      "error": null,
+    }
+  `
+  )
+  // Test remove config
+  res = await pgMeta.roles.update(res.data!.id, {
+    config: [
+      {
+        op: 'remove',
+        path: 'log_statement',
+      },
+    ],
+  })
+  expect(res).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    Object {
+      "data": Object {
+        "active_connections": 0,
+        "can_bypass_rls": true,
+        "can_create_db": true,
+        "can_create_role": true,
+        "can_login": true,
+        "config": Object {
+          "search_path": "public",
+        },
         "connection_limit": 100,
         "id": Any<Number>,
         "inherit_role": false,
@@ -141,7 +196,9 @@ test('retrieve, create, update, delete', async () => {
         "can_create_db": true,
         "can_create_role": true,
         "can_login": true,
-        "config": null,
+        "config": Object {
+          "search_path": "public",
+        },
         "connection_limit": 100,
         "id": Any<Number>,
         "inherit_role": false,

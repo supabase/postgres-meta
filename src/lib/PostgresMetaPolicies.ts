@@ -1,5 +1,6 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
+import { filterByList } from './helpers'
 import { policiesSql } from './sql'
 import { PostgresMetaResult, PostgresPolicy } from './types'
 
@@ -24,21 +25,14 @@ export default class PostgresMetaPolicies {
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresPolicy[]>> {
     let sql = policiesSql
-
-    if (includedSchemas?.length) {
-      sql = `${sql} WHERE (n.nspname IN (${includedSchemas.map(literal).join(',')}))`
-    } else if (!includeSystemSchemas) {
-      sql = `${sql} WHERE NOT (n.nspname IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
+    const filter = filterByList(
+      includedSchemas,
+      excludedSchemas,
+      !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
+    )
+    if (filter) {
+      sql += ` WHERE n.nspname ${filter}`
     }
-
-    if (excludedSchemas?.length) {
-      if (includedSchemas?.length || !includeSystemSchemas) {
-        sql = `${sql} AND NOT (n.nspname IN (${excludedSchemas.map(literal).join(',')}))`
-      } else {
-        sql = `${sql} WHERE NOT (n.nspname IN (${excludedSchemas.map(literal).join(',')}))`
-      }
-    }
-
     if (limit) {
       sql = `${sql} LIMIT ${limit}`
     }

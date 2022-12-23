@@ -56,3 +56,12 @@ create function public.blurb(public.todos) returns text as
 $$
 select substring($1.details, 1, 3);
 $$ language sql stable;
+
+create extension postgres_fdw;
+create server foreign_server foreign data wrapper postgres_fdw options (host 'localhost', port '5432', dbname 'postgres');
+create user mapping for postgres server foreign_server options (user 'postgres', password 'postgres');
+create foreign table foreign_table (
+  id int8,
+  name text,
+  status user_status
+) server foreign_server options (schema_name 'public', table_name 'users');
