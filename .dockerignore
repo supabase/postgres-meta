@@ -1,4 +1,4 @@
 *
 !src
 !package*.json
-!tsconfig.server.json
+!tsconfig*.json
