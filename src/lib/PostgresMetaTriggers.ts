@@ -34,7 +34,7 @@ export default class PostgresMetaTriggers {
       sql += ` WHERE schema ${filter}`
     }
     if (limit) {
-      sql += `${sql} LIMIT ${limit}`
+      sql = `${sql} LIMIT ${limit}`
     }
     if (offset) {
       sql = `${sql} OFFSET ${offset}`
