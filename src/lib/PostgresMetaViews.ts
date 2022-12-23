@@ -33,10 +33,10 @@ export default class PostgresMetaViews {
       sql += ` WHERE schema ${filter}`
     }
     if (limit) {
-      sql += ` LIMIT ${limit}`
+      sql = `${sql} LIMIT ${limit}`
     }
     if (offset) {
-      sql += ` OFFSET ${offset}`
+      sql = `${sql} OFFSET ${offset}`
     }
     return await this.query(sql)
   }

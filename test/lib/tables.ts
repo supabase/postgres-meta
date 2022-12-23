@@ -17,12 +17,6 @@ const cleanNondet = (x: any) => {
   }
 }
 
-test('list schemas', async () => {
-  const res = await pgMeta.tables.list({ schemas: ['private'] })
-  const data = res.data?.find(({ name }) => name === 'users')
-  expect(data).toBeUndefined()
-})
-
 test('list', async () => {
   const res = await pgMeta.tables.list()
 
