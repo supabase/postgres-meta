@@ -4,6 +4,7 @@ import { resolve } from 'path'
 export const columnsSql = readFileSync(resolve(__dirname, 'columns.sql'), 'utf-8')
 export const configSql = readFileSync(resolve(__dirname, 'config.sql'), 'utf-8')
 export const extensionsSql = readFileSync(resolve(__dirname, 'extensions.sql'), 'utf-8')
+export const foreignTablesSql = readFileSync(resolve(__dirname, 'foreign_tables.sql'), 'utf-8')
 export const functionsSql = readFileSync(resolve(__dirname, 'functions.sql'), 'utf-8')
 export const policiesSql = readFileSync(resolve(__dirname, 'policies.sql'), 'utf-8')
 export const primaryKeysSql = readFileSync(resolve(__dirname, 'primary_keys.sql'), 'utf-8')

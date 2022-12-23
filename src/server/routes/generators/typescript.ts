@@ -24,6 +24,7 @@ export default async (fastify: FastifyInstance) => {
     const { data: views, error: viewsError } = await pgMeta.views.list()
     const { data: functions, error: functionsError } = await pgMeta.functions.list()
     const { data: types, error: typesError } = await pgMeta.types.list({
+      includeArrayTypes: true,
       includeSystemSchemas: true,
     })
     await pgMeta.end()
@@ -65,7 +66,8 @@ export default async (fastify: FastifyInstance) => {
       functions: functions.filter(
         ({ return_type }) => !['trigger', 'event_trigger'].includes(return_type)
       ),
-      types,
+      types: types.filter(({ name }) => name[0] !== '_'),
+      arrayTypes: types.filter(({ name }) => name[0] === '_'),
     })
   })
 }

@@ -1,6 +1,6 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
-import { coalesceRowsToArray } from './helpers'
+import { coalesceRowsToArray, filterByList } from './helpers'
 import { columnsSql, primaryKeysSql, relationshipsSql, tablesSql } from './sql'
 import { PostgresMetaResult, PostgresTable } from './types'
 
@@ -25,26 +25,19 @@ export default class PostgresMetaTables {
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresTable[]>> {
     let sql = enrichedTablesSql
-
-    if (includedSchemas?.length) {
-      sql = `${sql} WHERE (schema IN (${includedSchemas.map(literal).join(',')}))`
-    } else if (!includeSystemSchemas) {
-      sql = `${sql} WHERE NOT (schema IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
+    const filter = filterByList(
+      includedSchemas,
+      excludedSchemas,
+      !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
+    )
+    if (filter) {
+      sql += ` WHERE schema ${filter}`
     }
-
-    if (excludedSchemas?.length) {
-      if (includedSchemas?.length || !includeSystemSchemas) {
-        sql = `${sql} AND NOT (schema IN (${excludedSchemas.map(literal).join(',')}))`
-      } else {
-        sql = `${sql} WHERE NOT (schema IN (${excludedSchemas.map(literal).join(',')}))`
-      }
-    }
-
     if (limit) {
-      sql = `${sql} LIMIT ${limit}`
+      sql += ` LIMIT ${limit}`
     }
     if (offset) {
-      sql = `${sql} OFFSET ${offset}`
+      sql += ` OFFSET ${offset}`
     }
     return await this.query(sql)
   }

@@ -1,5 +1,6 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
+import { filterByList } from './helpers'
 import { functionsSql } from './sql'
 import { PostgresMetaResult, PostgresFunction, PostgresFunctionCreate } from './types'
 
@@ -24,21 +25,14 @@ export default class PostgresMetaFunctions {
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresFunction[]>> {
     let sql = enrichedFunctionsSql
-
-    if (includedSchemas?.length) {
-      sql = `${sql} WHERE (schema IN (${includedSchemas.map(literal).join(',')}))`
-    } else if (!includeSystemSchemas) {
-      sql = `${sql} WHERE NOT (schema IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
+    const filter = filterByList(
+      includedSchemas,
+      excludedSchemas,
+      !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
+    )
+    if (filter) {
+      sql += ` WHERE schema ${filter}`
     }
-
-    if (excludedSchemas?.length) {
-      if (includedSchemas?.length || !includeSystemSchemas) {
-        sql = `${sql} AND NOT (schema IN (${excludedSchemas.map(literal).join(',')}))`
-      } else {
-        sql = `${sql} WHERE NOT (schema IN (${excludedSchemas.map(literal).join(',')}))`
-      }
-    }
-
     if (limit) {
       sql = `${sql} LIMIT ${limit}`
     }

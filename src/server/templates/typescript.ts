@@ -13,42 +13,54 @@ export const apply = ({
   views,
   functions,
   types,
+  arrayTypes,
 }: {
   schemas: PostgresSchema[]
   tables: PostgresTable[]
   views: PostgresView[]
   functions: PostgresFunction[]
   types: PostgresType[]
+  arrayTypes: PostgresType[]
 }): string => {
   let output = `
 export type Json = string | number | boolean | null | { [key: string]: Json } | Json[]
 
 export interface Database {
-  ${schemas.map((schema) => {
-    const schemaTables = tables.filter((table) => table.schema === schema.name)
-    const schemaViews = views.filter((view) => view.schema === schema.name)
-    const schemaFunctions = functions.filter((func) => {
-      if (func.schema !== schema.name) {
-        return false
-      }
+  ${schemas
+    .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+    .map((schema) => {
+      const schemaTables = tables
+        .filter((table) => table.schema === schema.name)
+        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+      const schemaViews = views
+        .filter((view) => view.schema === schema.name)
+        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+      const schemaFunctions = functions
+        .filter((func) => {
+          if (func.schema !== schema.name) {
+            return false
+          }
 
-      // Either:
-      // 1. All input args are be named, or
-      // 2. There is only one input arg which is unnamed
-      const inArgs = func.args.filter(({ mode }) => ['in', 'inout', 'variadic'].includes(mode))
+          // Either:
+          // 1. All input args are be named, or
+          // 2. There is only one input arg which is unnamed
+          const inArgs = func.args.filter(({ mode }) => ['in', 'inout', 'variadic'].includes(mode))
 
-      if (!inArgs.some(({ name }) => name === '')) {
-        return true
-      }
+          if (!inArgs.some(({ name }) => name === '')) {
+            return true
+          }
 
-      if (inArgs.length === 1) {
-        return true
-      }
+          if (inArgs.length === 1) {
+            return true
+          }
 
-      return false
-    })
-    const schemaEnums = types.filter((type) => type.schema === schema.name && type.enums.length > 0)
-    return `${JSON.stringify(schema.name)}: {
+          return false
+        })
+        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+      const schemaEnums = types
+        .filter((type) => type.schema === schema.name && type.enums.length > 0)
+        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+      return `${JSON.stringify(schema.name)}: {
           Tables: {
             ${
               schemaTables.length === 0
@@ -57,14 +69,16 @@ export interface Database {
                     (table) => `${JSON.stringify(table.name)}: {
                   Row: {
                     ${[
-                      ...table.columns.map(
-                        (column) =>
-                          `${JSON.stringify(column.name)}: ${pgTypeToTsType(
-                            column.format,
-                            types,
-                            schemas
-                          )} ${column.is_nullable ? '| null' : ''}`
-                      ),
+                      ...table.columns
+                        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                        .map(
+                          (column) =>
+                            `${JSON.stringify(column.name)}: ${pgTypeToTsType(
+                              column.format,
+                              types,
+                              schemas
+                            )} ${column.is_nullable ? '| null' : ''}`
+                        ),
                       ...schemaFunctions
                         .filter((fn) => fn.argument_types === table.name)
                         .map(
@@ -78,48 +92,52 @@ export interface Database {
                     ]}
                   }
                   Insert: {
-                    ${table.columns.map((column) => {
-                      let output = JSON.stringify(column.name)
+                    ${table.columns
+                      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                      .map((column) => {
+                        let output = JSON.stringify(column.name)
 
-                      if (column.identity_generation === 'ALWAYS') {
-                        return `${output}?: never`
-                      }
+                        if (column.identity_generation === 'ALWAYS') {
+                          return `${output}?: never`
+                        }
 
-                      if (
-                        column.is_nullable ||
-                        column.is_identity ||
-                        column.default_value !== null
-                      ) {
-                        output += '?:'
-                      } else {
-                        output += ':'
-                      }
+                        if (
+                          column.is_nullable ||
+                          column.is_identity ||
+                          column.default_value !== null
+                        ) {
+                          output += '?:'
+                        } else {
+                          output += ':'
+                        }
 
-                      output += pgTypeToTsType(column.format, types, schemas)
+                        output += pgTypeToTsType(column.format, types, schemas)
 
-                      if (column.is_nullable) {
-                        output += '| null'
-                      }
+                        if (column.is_nullable) {
+                          output += '| null'
+                        }
 
-                      return output
-                    })}
+                        return output
+                      })}
                   }
                   Update: {
-                    ${table.columns.map((column) => {
-                      let output = JSON.stringify(column.name)
+                    ${table.columns
+                      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                      .map((column) => {
+                        let output = JSON.stringify(column.name)
 
-                      if (column.identity_generation === 'ALWAYS') {
-                        return `${output}?: never`
-                      }
+                        if (column.identity_generation === 'ALWAYS') {
+                          return `${output}?: never`
+                        }
 
-                      output += `?: ${pgTypeToTsType(column.format, types, schemas)}`
+                        output += `?: ${pgTypeToTsType(column.format, types, schemas)}`
 
-                      if (column.is_nullable) {
-                        output += '| null'
-                      }
+                        if (column.is_nullable) {
+                          output += '| null'
+                        }
 
-                      return output
-                    })}
+                        return output
+                      })}
                   }
                 }`
                   )
@@ -132,46 +150,52 @@ export interface Database {
                 : schemaViews.map(
                     (view) => `${JSON.stringify(view.name)}: {
                   Row: {
-                    ${view.columns.map(
-                      (column) =>
-                        `${JSON.stringify(column.name)}: ${pgTypeToTsType(
-                          column.format,
-                          types,
-                          schemas
-                        )} | null`
-                    )}
+                    ${view.columns
+                      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                      .map(
+                        (column) =>
+                          `${JSON.stringify(column.name)}: ${pgTypeToTsType(
+                            column.format,
+                            types,
+                            schemas
+                          )} ${column.is_nullable ? '| null' : ''}`
+                      )}
                   }
                   ${
                     view.is_updatable
                       ? `Insert: {
-                    ${view.columns.map((column) => {
-                      let output = JSON.stringify(column.name)
+                    ${view.columns
+                      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                      .map((column) => {
+                        let output = JSON.stringify(column.name)
 
-                      if (!column.is_updatable) {
-                        return `${output}?: never`
-                      }
+                        if (!column.is_updatable) {
+                          return `${output}?: never`
+                        }
 
-                      output += `?: ${pgTypeToTsType(column.format, types, schemas)} | null`
+                        output += `?: ${pgTypeToTsType(column.format, types, schemas)} | null`
 
-                      return output
-                    })}
+                        return output
+                      })}
                   }`
                       : ''
                   }
                   ${
                     view.is_updatable
                       ? `Update: {
-                    ${view.columns.map((column) => {
-                      let output = JSON.stringify(column.name)
+                    ${view.columns
+                      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                      .map((column) => {
+                        let output = JSON.stringify(column.name)
 
-                      if (!column.is_updatable) {
-                        return `${output}?: never`
-                      }
+                        if (!column.is_updatable) {
+                          return `${output}?: never`
+                        }
 
-                      output += `?: ${pgTypeToTsType(column.format, types, schemas)} | null`
+                        output += `?: ${pgTypeToTsType(column.format, types, schemas)} | null`
 
-                      return output
-                    })}
+                        return output
+                      })}
                   }`
                       : ''
                   }
@@ -204,18 +228,54 @@ export interface Database {
                     }
 
                     const argsNameAndType = inArgs.map(({ name, type_id }) => {
-                      const type = types.find(({ id }) => id === type_id)
-                      if (!type) {
-                        return { name, type: 'unknown' }
+                      let type = arrayTypes.find(({ id }) => id === type_id)
+                      if (type) {
+                        // If it's an array type, the name looks like `_int8`.
+                        const elementTypeName = type.name.substring(1)
+                        return {
+                          name,
+                          type: `(${pgTypeToTsType(elementTypeName, types, schemas)})[]`,
+                        }
                       }
-                      return { name, type: pgTypeToTsType(type.name, types, schemas) }
+                      type = types.find(({ id }) => id === type_id)
+                      if (type) {
+                        return { name, type: pgTypeToTsType(type.name, types, schemas) }
+                      }
+                      return { name, type: 'unknown' }
                     })
 
                     return `{ ${argsNameAndType.map(
                       ({ name, type }) => `${JSON.stringify(name)}: ${type}`
                     )} }`
                   })()}
-                  Returns: ${pgTypeToTsType(return_type, types, schemas)}
+                  Returns: ${(() => {
+                    const tableArgs = args.filter(({ mode }) => mode === 'table')
+
+                    if (tableArgs.length > 0) {
+                      const argsNameAndType = tableArgs.map(({ name, type_id }) => {
+                        let type = arrayTypes.find(({ id }) => id === type_id)
+                        if (type) {
+                          // If it's an array type, the name looks like `_int8`.
+                          const elementTypeName = type.name.substring(1)
+                          return {
+                            name,
+                            type: `(${pgTypeToTsType(elementTypeName, types, schemas)})[]`,
+                          }
+                        }
+                        type = types.find(({ id }) => id === type_id)
+                        if (type) {
+                          return { name, type: pgTypeToTsType(type.name, types, schemas) }
+                        }
+                        return { name, type: 'unknown' }
+                      })
+
+                      return `{ ${argsNameAndType.map(
+                        ({ name, type }) => `${JSON.stringify(name)}: ${type}`
+                      )} }[]`
+                    }
+
+                    return pgTypeToTsType(return_type, types, schemas)
+                  })()}
                 }`
                     )
                     .join('|')}`
@@ -235,7 +295,7 @@ export interface Database {
             }
           }
         }`
-  })}
+    })}
 }`
 
   output = prettier.format(output, {

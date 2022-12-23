@@ -31,12 +31,3 @@ WHERE
         c.oid = t.typrelid
     )
   )
-  AND NOT EXISTS (
-    SELECT
-      1
-    FROM
-      pg_type el
-    WHERE
-      el.oid = t.typelem
-      AND el.typarray = t.oid
-  )
