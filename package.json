@@ -9,6 +9,7 @@
   "files": [
     "dist"
   ],
+  "type": "module",
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
   "repository": "supabase/postgres-meta",
