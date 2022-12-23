@@ -38,7 +38,6 @@ FROM
   columns
 WHERE
   true`
-
     const filter = filterByList(
       includedSchemas,
       excludedSchemas,
