@@ -36,6 +36,13 @@
     "node": ">=16",
     "npm": ">=8"
   },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/*.test.ts"
+    ]
+  },
   "dependencies": {
     "@sinclair/typebox": "^0.25.1",
     "pg": "^8.7.1",
