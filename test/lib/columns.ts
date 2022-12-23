@@ -99,6 +99,41 @@ test('list from a single table', async () => {
   await pgMeta.tables.remove(testTable!.id)
 })
 
+test('list columns with included schemas', async () => {
+  let res = await pgMeta.columns.list({
+    includedSchemas: ['public'],
+  })
+
+  expect(res.data?.length).toBeGreaterThan(0)
+
+  res.data?.forEach((column) => {
+    expect(column.schema).toBe('public')
+  })
+})
+
+test('list columns with excluded schemas', async () => {
+  let res = await pgMeta.columns.list({
+    excludedSchemas: ['public'],
+  })
+
+  res.data?.forEach((column) => {
+    expect(column.schema).not.toBe('public')
+  })
+})
+
+test('list columns with excluded schemas and include System Schemas', async () => {
+  let res = await pgMeta.columns.list({
+    excludedSchemas: ['public'],
+    includeSystemSchemas: true,
+  })
+
+  expect(res.data?.length).toBeGreaterThan(0)
+
+  res.data?.forEach((column) => {
+    expect(column.schema).not.toBe('public')
+  })
+})
+
 test('retrieve, create, update, delete', async () => {
   const { data: testTable }: any = await pgMeta.tables.create({ name: 't' })
 

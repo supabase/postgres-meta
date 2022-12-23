@@ -9,6 +9,7 @@
   "files": [
     "dist"
   ],
+  "type": "module",
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
   "repository": "supabase/postgres-meta",
@@ -34,6 +35,13 @@
   "engines": {
     "node": ">=16",
     "npm": ">=8"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/*.test.ts"
+    ]
   },
   "dependencies": {
     "@sinclair/typebox": "^0.25.1",
