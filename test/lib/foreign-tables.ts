@@ -5,13 +5,13 @@ test('list', async () => {
   expect(res.data?.find(({ name }) => name === 'foreign_table')).toMatchInlineSnapshot(
     { id: expect.any(Number) },
     `
-    Object {
-      "columns": Array [
-        Object {
+    {
+      "columns": [
+        {
           "comment": null,
           "data_type": "bigint",
           "default_value": null,
-          "enums": Array [],
+          "enums": [],
           "format": "int8",
           "id": "16434.1",
           "identity_generation": null,
@@ -26,11 +26,11 @@ test('list', async () => {
           "table": "foreign_table",
           "table_id": 16434,
         },
-        Object {
+        {
           "comment": null,
           "data_type": "text",
           "default_value": null,
-          "enums": Array [],
+          "enums": [],
           "format": "text",
           "id": "16434.2",
           "identity_generation": null,
@@ -45,11 +45,11 @@ test('list', async () => {
           "table": "foreign_table",
           "table_id": 16434,
         },
-        Object {
+        {
           "comment": null,
           "data_type": "USER-DEFINED",
           "default_value": null,
-          "enums": Array [
+          "enums": [
             "ACTIVE",
             "INACTIVE",
           ],

@@ -5,7 +5,7 @@ test('list with system schemas', async () => {
   expect(res.data?.find(({ name }) => name === 'pg_catalog')).toMatchInlineSnapshot(
     { id: expect.any(Number) },
     `
-    Object {
+    {
       "id": Any<Number>,
       "name": "pg_catalog",
       "owner": "postgres",
@@ -20,7 +20,7 @@ test('list without system schemas', async () => {
   expect(res.data?.find(({ name }) => name === 'public')).toMatchInlineSnapshot(
     { id: expect.any(Number) },
     `
-    Object {
+    {
       "id": Any<Number>,
       "name": "public",
       "owner": "postgres",
@@ -34,8 +34,8 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "id": Any<Number>,
         "name": "s",
         "owner": "postgres",
@@ -48,8 +48,8 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "id": Any<Number>,
         "name": "s",
         "owner": "postgres",
@@ -62,8 +62,8 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "id": Any<Number>,
         "name": "ss",
         "owner": "postgres",
@@ -76,8 +76,8 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "id": Any<Number>,
         "name": "ss",
         "owner": "postgres",
