@@ -5,14 +5,14 @@ test('list', async () => {
   expect(res.data?.find(({ name }) => name === 'categories_update_policy')).toMatchInlineSnapshot(
     { id: expect.any(Number), table_id: expect.any(Number) },
     `
-    Object {
+    {
       "action": "PERMISSIVE",
       "check": null,
       "command": "UPDATE",
       "definition": "(current_setting('my.username'::text) = name)",
       "id": Any<Number>,
       "name": "categories_update_policy",
-      "roles": Array [
+      "roles": [
         "postgres",
       ],
       "schema": "public",
@@ -71,15 +71,15 @@ test('retrieve, create, update, delete', async () => {
       },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "action": "RESTRICTIVE",
         "check": null,
         "command": "ALL",
         "definition": null,
         "id": Any<Number>,
         "name": "test policy",
-        "roles": Array [
+        "roles": [
           "public",
         ],
         "schema": "public",
@@ -99,15 +99,15 @@ test('retrieve, create, update, delete', async () => {
       },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "action": "RESTRICTIVE",
         "check": null,
         "command": "ALL",
         "definition": null,
         "id": Any<Number>,
         "name": "test policy",
-        "roles": Array [
+        "roles": [
           "public",
         ],
         "schema": "public",
@@ -132,15 +132,15 @@ test('retrieve, create, update, delete', async () => {
       },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "action": "RESTRICTIVE",
         "check": "(current_setting('my.username'::text) = name)",
         "command": "ALL",
         "definition": "(current_setting('my.username'::text) = name)",
         "id": Any<Number>,
         "name": "policy updated",
-        "roles": Array [
+        "roles": [
           "postgres",
         ],
         "schema": "public",
@@ -160,15 +160,15 @@ test('retrieve, create, update, delete', async () => {
       },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "action": "RESTRICTIVE",
         "check": "(current_setting('my.username'::text) = name)",
         "command": "ALL",
         "definition": "(current_setting('my.username'::text) = name)",
         "id": Any<Number>,
         "name": "policy updated",
-        "roles": Array [
+        "roles": [
           "postgres",
         ],
         "schema": "public",
