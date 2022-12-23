@@ -1,6 +1,6 @@
-import { coalesceRowsToArray } from './helpers'
-import { columnsSql, foreignTablesSql } from './sql'
-import { PostgresMetaResult, PostgresForeignTable } from './types'
+import { coalesceRowsToArray } from './helpers.js'
+import { columnsSql, foreignTablesSql } from './sql/index.js'
+import { PostgresMetaResult, PostgresForeignTable } from './types.js'
 
 export default class PostgresMetaForeignTables {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
