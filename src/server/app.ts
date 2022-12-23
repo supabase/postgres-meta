@@ -1,4 +1,6 @@
 import fastify from 'fastify'
+import swagger from '@fastify/swagger'
+import cors from '@fastify/cors'
 import { PostgresMeta } from '../lib'
 import {
   DEFAULT_POOL_CONFIG,
@@ -43,7 +45,7 @@ app.setNotFoundHandler((request, reply) => {
 })
 
 if (EXPORT_DOCS) {
-  app.register(require('fastify-swagger'), {
+  app.register(swagger, {
     openapi: {
       servers: [],
       info: {
@@ -120,7 +122,7 @@ if (EXPORT_DOCS) {
   })
 }
 
-app.register(require('@fastify/cors'))
+app.register(cors)
 
 app.get('/', async (_request, _reply) => {
   return {
