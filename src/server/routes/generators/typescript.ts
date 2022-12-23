@@ -9,17 +9,22 @@ export default async (fastify: FastifyInstance) => {
     Headers: { pg: string }
     Querystring: {
       excluded_schemas?: string
+      included_schemas?: string
     }
   }>('/', async (request, reply) => {
     const connectionString = request.headers.pg
     const excludedSchemas =
       request.query.excluded_schemas?.split(',').map((schema) => schema.trim()) ?? []
+    const includedSchemas =
+      request.query.included_schemas?.split(',').map((schema) => schema.trim()) ?? []
 
     const pgMeta: PostgresMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data: schemas, error: schemasError } = await pgMeta.schemas.list()
     const { data: tables, error: tablesError } = await pgMeta.tables.list()
+    const { data: views, error: viewsError } = await pgMeta.views.list()
     const { data: functions, error: functionsError } = await pgMeta.functions.list()
     const { data: types, error: typesError } = await pgMeta.types.list({
+      includeArrayTypes: true,
       includeSystemSchemas: true,
     })
     await pgMeta.end()
@@ -34,6 +39,11 @@ export default async (fastify: FastifyInstance) => {
       reply.code(500)
       return { error: tablesError.message }
     }
+    if (viewsError) {
+      request.log.error({ error: viewsError, request: extractRequestForLogging(request) })
+      reply.code(500)
+      return { error: viewsError.message }
+    }
     if (functionsError) {
       request.log.error({ error: functionsError, request: extractRequestForLogging(request) })
       reply.code(500)
@@ -46,10 +56,18 @@ export default async (fastify: FastifyInstance) => {
     }
 
     return applyTypescriptTemplate({
-      schemas: schemas.filter(({ name }) => !excludedSchemas.includes(name)),
+      schemas: schemas.filter(
+        ({ name }) =>
+          !excludedSchemas.includes(name) &&
+          (includedSchemas.length === 0 || includedSchemas.includes(name))
+      ),
       tables,
-      functions,
-      types,
+      views,
+      functions: functions.filter(
+        ({ return_type }) => !['trigger', 'event_trigger'].includes(return_type)
+      ),
+      types: types.filter(({ name }) => name[0] !== '_'),
+      arrayTypes: types.filter(({ name }) => name[0] === '_'),
     })
   })
 }

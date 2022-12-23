@@ -4,8 +4,9 @@ import {
   DEFAULT_POOL_CONFIG,
   EXPORT_DOCS,
   GENERATE_TYPES,
-  GENERATE_TYPES_EXCLUDED_SCHEMAS,
+  GENERATE_TYPES_INCLUDED_SCHEMAS,
   PG_CONNECTION,
+  PG_META_HOST,
   PG_META_PORT,
   PG_META_REQ_HEADER,
 } from './constants'
@@ -66,48 +67,61 @@ if (EXPORT_DOCS) {
     })
     const { data: schemas, error: schemasError } = await pgMeta.schemas.list()
     const { data: tables, error: tablesError } = await pgMeta.tables.list()
+    const { data: views, error: viewsError } = await pgMeta.views.list()
     const { data: functions, error: functionsError } = await pgMeta.functions.list()
     const { data: types, error: typesError } = await pgMeta.types.list({
+      includeArrayTypes: true,
       includeSystemSchemas: true,
     })
     await pgMeta.end()
 
     if (schemasError) {
-      throw schemasError
+      throw new Error(schemasError.message)
     }
     if (tablesError) {
-      throw schemasError
+      throw new Error(tablesError.message)
+    }
+    if (viewsError) {
+      throw new Error(viewsError.message)
     }
     if (functionsError) {
-      throw schemasError
+      throw new Error(functionsError.message)
     }
     if (typesError) {
-      throw typesError
+      throw new Error(typesError.message)
     }
 
     console.log(
       applyTypescriptTemplate({
-        schemas: schemas.filter(({ name }) => !GENERATE_TYPES_EXCLUDED_SCHEMAS.includes(name)),
+        schemas: schemas.filter(
+          ({ name }) =>
+            GENERATE_TYPES_INCLUDED_SCHEMAS.length === 0 ||
+            GENERATE_TYPES_INCLUDED_SCHEMAS.includes(name)
+        ),
         tables,
-        functions,
-        types,
+        views,
+        functions: functions.filter(
+          ({ return_type }) => !['trigger', 'event_trigger'].includes(return_type)
+        ),
+        types: types.filter(({ name }) => name[0] !== '_'),
+        arrayTypes: types.filter(({ name }) => name[0] === '_'),
       })
     )
   })()
 } else {
   app.ready(() => {
-    app.listen(PG_META_PORT, '0.0.0.0', () => {
+    app.listen({ port: PG_META_PORT, host: PG_META_HOST }, () => {
       app.log.info(`App started on port ${PG_META_PORT}`)
       const adminApp = buildAdminApp({ logger })
       const adminPort = PG_META_PORT + 1
-      adminApp.listen(adminPort, '0.0.0.0', () => {
+      adminApp.listen({ port: adminPort, host: PG_META_HOST }, () => {
         adminApp.log.info(`Admin App started on port ${adminPort}`)
       })
     })
   })
 }
 
-app.register(require('fastify-cors'))
+app.register(require('@fastify/cors'))
 
 app.get('/', async (_request, _reply) => {
   return {

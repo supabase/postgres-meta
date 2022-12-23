@@ -1,6 +1,6 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
-import { coalesceRowsToArray } from './helpers'
+import { coalesceRowsToArray, filterByList } from './helpers'
 import { columnsSql, primaryKeysSql, relationshipsSql, tablesSql } from './sql'
 import { PostgresMetaResult, PostgresTable } from './types'
 
@@ -29,16 +29,25 @@ export default class PostgresMetaTables {
 
   async list({
     includeSystemSchemas = false,
+    includedSchemas,
+    excludedSchemas,
     limit,
     offset,
   }: {
     includeSystemSchemas?: boolean
+    includedSchemas?: string[]
+    excludedSchemas?: string[]
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresTable[]>> {
     let sql = enrichedTablesSql
-    if (!includeSystemSchemas) {
-      sql = `${sql} WHERE NOT (schema IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
+    const filter = filterByList(
+      includedSchemas,
+      excludedSchemas,
+      !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
+    )
+    if (filter) {
+      sql += ` WHERE schema ${filter}`
     }
     if (limit) {
       sql = `${sql} LIMIT ${limit}`

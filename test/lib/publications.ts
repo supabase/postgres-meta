@@ -213,3 +213,57 @@ test('FOR ALL TABLES', async () => {
   )
   await pgMeta.publications.remove(res.data!.id)
 })
+
+test('update no tables -> all tables', async () => {
+  const { data } = await pgMeta.publications.create({
+    name: 'pub',
+    tables: [],
+  })
+  const res = await pgMeta.publications.update(data!.id, { tables: null })
+  expect(cleanNondet(res)).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    Object {
+      "data": Object {
+        "id": Any<Number>,
+        "name": "pub",
+        "owner": "postgres",
+        "publish_delete": false,
+        "publish_insert": false,
+        "publish_truncate": false,
+        "publish_update": false,
+        "tables": null,
+      },
+      "error": null,
+    }
+  `
+  )
+  await pgMeta.publications.remove(res.data!.id)
+})
+
+test('update all tables -> no tables', async () => {
+  const { data } = await pgMeta.publications.create({
+    name: 'pub',
+    tables: null,
+  })
+  const res = await pgMeta.publications.update(data!.id, { tables: [] })
+  expect(cleanNondet(res)).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    Object {
+      "data": Object {
+        "id": Any<Number>,
+        "name": "pub",
+        "owner": "postgres",
+        "publish_delete": false,
+        "publish_insert": false,
+        "publish_truncate": false,
+        "publish_update": false,
+        "tables": Array [],
+      },
+      "error": null,
+    }
+  `
+  )
+  await pgMeta.publications.remove(res.data!.id)
+})

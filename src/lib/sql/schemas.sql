@@ -6,7 +6,7 @@ SELECT
   u.rolname AS owner
 FROM
   pg_namespace n,
-  pg_authid u
+  pg_roles u
 WHERE
   n.nspowner = u.oid
   AND (

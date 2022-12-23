@@ -99,6 +99,41 @@ test('list from a single table', async () => {
   await pgMeta.tables.remove(testTable!.id)
 })
 
+test('list columns with included schemas', async () => {
+  let res = await pgMeta.columns.list({
+    includedSchemas: ['public'],
+  })
+
+  expect(res.data?.length).toBeGreaterThan(0)
+
+  res.data?.forEach((column) => {
+    expect(column.schema).toBe('public')
+  })
+})
+
+test('list columns with excluded schemas', async () => {
+  let res = await pgMeta.columns.list({
+    excludedSchemas: ['public'],
+  })
+
+  res.data?.forEach((column) => {
+    expect(column.schema).not.toBe('public')
+  })
+})
+
+test('list columns with excluded schemas and include System Schemas', async () => {
+  let res = await pgMeta.columns.list({
+    excludedSchemas: ['public'],
+    includeSystemSchemas: true,
+  })
+
+  expect(res.data?.length).toBeGreaterThan(0)
+
+  res.data?.forEach((column) => {
+    expect(column.schema).not.toBe('public')
+  })
+})
+
 test('retrieve, create, update, delete', async () => {
   const { data: testTable }: any = await pgMeta.tables.create({ name: 't' })
 
@@ -732,4 +767,116 @@ test('alter column to type with uppercase', async () => {
 
   await pgMeta.tables.remove(testTable!.id)
   await pgMeta.query('DROP TYPE "T"')
+})
+
+test('enums are populated in enum array columns', async () => {
+  await pgMeta.query(`create type test_enum as enum ('a')`)
+  const { data: testTable } = await pgMeta.tables.create({ name: 't' })
+
+  let res = await pgMeta.columns.create({
+    table_id: testTable!.id,
+    name: 'c',
+    type: '_test_enum',
+  })
+  expect(res).toMatchInlineSnapshot(
+    {
+      data: {
+        id: expect.stringMatching(/^\d+\.1$/),
+        table_id: expect.any(Number),
+      },
+    },
+    `
+    Object {
+      "data": Object {
+        "comment": null,
+        "data_type": "ARRAY",
+        "default_value": null,
+        "enums": Array [
+          "a",
+        ],
+        "format": "_test_enum",
+        "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
+        "identity_generation": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_updatable": true,
+        "name": "c",
+        "ordinal_position": 1,
+        "schema": "public",
+        "table": "t",
+        "table_id": Any<Number>,
+      },
+      "error": null,
+    }
+  `
+  )
+
+  await pgMeta.tables.remove(testTable!.id)
+  await pgMeta.query(`drop type test_enum`)
+})
+
+test('drop with cascade', async () => {
+  await pgMeta.query(`
+create table public.t (
+  id int8 primary key,
+  t_id int8 generated always as (id) stored
+);
+`)
+
+  let res = await pgMeta.columns.retrieve({
+    schema: 'public',
+    table: 't',
+    name: 'id',
+  })
+  res = await pgMeta.columns.remove(res.data!.id, { cascade: true })
+  expect(res).toMatchInlineSnapshot(
+    {
+      data: {
+        id: expect.stringMatching(/^\d+\.1$/),
+        table_id: expect.any(Number),
+      },
+    },
+    `
+    Object {
+      "data": Object {
+        "comment": null,
+        "data_type": "bigint",
+        "default_value": null,
+        "enums": Array [],
+        "format": "int8",
+        "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
+        "identity_generation": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_updatable": true,
+        "name": "id",
+        "ordinal_position": 1,
+        "schema": "public",
+        "table": "t",
+        "table_id": Any<Number>,
+      },
+      "error": null,
+    }
+  `
+  )
+
+  res = await pgMeta.columns.retrieve({
+    schema: 'public',
+    table: 't',
+    name: 't_id',
+  })
+  expect(res).toMatchInlineSnapshot(`
+    Object {
+      "data": null,
+      "error": Object {
+        "message": "Cannot find a column named t_id in table public.t",
+      },
+    }
+  `)
+
+  await pgMeta.query(`drop table public.t;`)
 })

@@ -66,17 +66,17 @@ export default class PostgresMetaPublications {
     publish_update = false,
     publish_delete = false,
     publish_truncate = false,
-    tables,
+    tables = null,
   }: {
     name: string
     publish_insert?: boolean
     publish_update?: boolean
     publish_delete?: boolean
     publish_truncate?: boolean
-    tables?: string[]
+    tables?: string[] | null
   }): Promise<PostgresMetaResult<PostgresPublication>> {
     let tableClause: string
-    if (tables === undefined) {
+    if (tables === undefined || tables === null) {
       tableClause = 'FOR ALL TABLES'
     } else if (tables.length === 0) {
       tableClause = ''
@@ -127,87 +127,109 @@ CREATE PUBLICATION ${ident(name)} ${tableClause}
       publish_update?: boolean
       publish_delete?: boolean
       publish_truncate?: boolean
-      tables?: string[]
+      tables?: string[] | null
     }
   ): Promise<PostgresMetaResult<PostgresPublication>> {
-    const { data: old, error } = await this.retrieve({ id })
+    const sql = `
+do $$
+declare
+  id oid := ${literal(id)};
+  old record;
+  new_name text := ${name === undefined ? null : literal(name)};
+  new_owner text := ${owner === undefined ? null : literal(owner)};
+  new_publish_insert bool := ${publish_insert ?? null};
+  new_publish_update bool := ${publish_update ?? null};
+  new_publish_delete bool := ${publish_delete ?? null};
+  new_publish_truncate bool := ${publish_truncate ?? null};
+  new_tables text := ${
+    tables === undefined
+      ? null
+      : literal(
+          tables === null
+            ? 'all tables'
+            : tables
+                .map((t) => {
+                  if (!t.includes('.')) {
+                    return ident(t)
+                  }
+
+                  const [schema, ...rest] = t.split('.')
+                  const table = rest.join('.')
+                  return `${ident(schema)}.${ident(table)}`
+                })
+                .join(',')
+        )
+  };
+begin
+  select * into old from pg_publication where oid = id;
+  if old is null then
+    raise exception 'Cannot find publication with id %', id;
+  end if;
+
+  if new_tables is null then
+    null;
+  elsif new_tables = 'all tables' then
+    if old.puballtables then
+      null;
+    else
+      -- Need to recreate because going from list of tables <-> all tables with alter is not possible.
+      execute(format('drop publication %1$I; create publication %1$I for all tables;', old.pubname));
+    end if;
+  else
+    if old.puballtables then
+      -- Need to recreate because going from list of tables <-> all tables with alter is not possible.
+      execute(format('drop publication %1$I; create publication %1$I;', old.pubname));
+    elsif exists(select from pg_publication_rel where prpubid = id) then
+      execute(
+        format(
+          'alter publication %I drop table %s',
+          old.pubname,
+          (select string_agg(prrelid::regclass::text, ', ') from pg_publication_rel where prpubid = id)
+        )
+      );
+    end if;
+
+    -- At this point the publication must have no tables.
+
+    if new_tables != '' then
+      execute(format('alter publication %I add table %s', old.pubname, new_tables));
+    end if;
+  end if;
+
+  execute(
+    format(
+      'alter publication %I set (publish = %L);',
+      old.pubname,
+      concat_ws(
+        ', ',
+        case when coalesce(new_publish_insert, old.pubinsert) then 'insert' end,
+        case when coalesce(new_publish_update, old.pubupdate) then 'update' end,
+        case when coalesce(new_publish_delete, old.pubdelete) then 'delete' end,
+        case when coalesce(new_publish_truncate, old.pubtruncate) then 'truncate' end
+      )
+    )
+  );
+
+  execute(format('alter publication %I owner to %I;', old.pubname, coalesce(new_owner, old.pubowner::regrole::name)));
+
+  -- Using the same name in the rename clause gives an error, so only do it if the new name is different.
+  if new_name is not null and new_name != old.pubname then
+    execute(format('alter publication %I rename to %I;', old.pubname, coalesce(new_name, old.pubname)));
+  end if;
+
+  -- We need to retrieve the publication later, so we need a way to uniquely identify which publication this is.
+  -- We can't rely on id because it gets changed if it got recreated.
+  -- We use a temp table to store the unique name - DO blocks can't return a value.
+  create temp table pg_meta_publication_tmp (name) on commit drop as values (coalesce(new_name, old.pubname));
+end $$;
+
+with publications as (${publicationsSql}) select * from publications where name = (select name from pg_meta_publication_tmp);
+`
+    const { data, error } = await this.query(sql)
     if (error) {
       return { data: null, error }
     }
-
-    // Need to work around the limitations of the SQL. Can't add/drop tables from
-    // a publication with FOR ALL TABLES. Can't use the SET TABLE clause without
-    // at least one table.
-    //
-    //                              new tables
-    //
-    //                      | undefined |    string[]     |
-    //             ---------|-----------|-----------------|
-    //                 null |    ''     | 400 Bad Request |
-    // old tables  ---------|-----------|-----------------|
-    //             object[] |    ''     |    See below    |
-    //
-    //                              new tables
-    //
-    //                      |    []     |      [...]      |
-    //             ---------|-----------|-----------------|
-    //                   [] |    ''     |    SET TABLE    |
-    // old tables  ---------|-----------|-----------------|
-    //                [...] | DROP all  |    SET TABLE    |
-    //
-    let tableSql: string
-    if (tables === undefined) {
-      tableSql = ''
-    } else if (old!.tables === null) {
-      throw new Error('Tables cannot be added to or dropped from FOR ALL TABLES publications')
-    } else if (tables.length > 0) {
-      tableSql = `ALTER PUBLICATION ${ident(old!.name)} SET TABLE ${tables
-        .map((t) => {
-          if (!t.includes('.')) {
-            return ident(t)
-          }
-
-          const [schema, ...rest] = t.split('.')
-          const table = rest.join('.')
-          return `${ident(schema)}.${ident(table)}`
-        })
-        .join(',')};`
-    } else if (old!.tables.length === 0) {
-      tableSql = ''
-    } else {
-      tableSql = `ALTER PUBLICATION ${ident(old!.name)} DROP TABLE ${old!.tables
-        .map(
-          (table: { schema: string; name: string }) => `${ident(table.schema)}.${ident(table.name)}`
-        )
-        .join(',')};`
-    }
-
-    let publishOps = []
-    if (publish_insert ?? old!.publish_insert) publishOps.push('insert')
-    if (publish_update ?? old!.publish_update) publishOps.push('update')
-    if (publish_delete ?? old!.publish_delete) publishOps.push('delete')
-    if (publish_truncate ?? old!.publish_truncate) publishOps.push('truncate')
-    const publishSql = `ALTER PUBLICATION ${ident(old!.name)} SET (publish = '${publishOps.join(
-      ','
-    )}');`
-
-    const ownerSql =
-      owner === undefined ? '' : `ALTER PUBLICATION ${ident(old!.name)} OWNER TO ${ident(owner)};`
-
-    const nameSql =
-      name === undefined || name === old!.name
-        ? ''
-        : `ALTER PUBLICATION ${ident(old!.name)} RENAME TO ${ident(name)};`
-
-    // nameSql must be last
-    const sql = `BEGIN; ${tableSql} ${publishSql} ${ownerSql} ${nameSql} COMMIT;`
-    {
-      const { error } = await this.query(sql)
-      if (error) {
-        return { data: null, error }
-      }
-    }
-    return await this.retrieve({ id })
+    return { data: data[0], error }
   }
 
   async remove(id: number): Promise<PostgresMetaResult<PostgresPublication>> {

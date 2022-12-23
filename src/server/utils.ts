@@ -27,6 +27,8 @@ export function translateErrorToResponseCode(
 ): number {
   if (error.message === 'Connection terminated due to connection timeout') {
     return 504
+  } else if (error.message === 'sorry, too many clients already') {
+    return 503
   }
   return defaultResponseCode
 }

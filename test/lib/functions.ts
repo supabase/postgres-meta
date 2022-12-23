@@ -6,6 +6,18 @@ test('list', async () => {
     { id: expect.any(Number) },
     `
     Object {
+      "args": Array [
+        Object {
+          "mode": "in",
+          "name": "",
+          "type_id": 23,
+        },
+        Object {
+          "mode": "in",
+          "name": "",
+          "type_id": 23,
+        },
+      ],
       "argument_types": "integer, integer",
       "behavior": "IMMUTABLE",
       "complete_statement": "CREATE OR REPLACE FUNCTION public.add(integer, integer)
@@ -26,6 +38,41 @@ test('list', async () => {
     }
   `
   )
+})
+
+test('list functions with included schemas', async () => {
+  let res = await pgMeta.functions.list({
+    includedSchemas: ['public'],
+  })
+
+  expect(res.data?.length).toBeGreaterThan(0)
+
+  res.data?.forEach((func) => {
+    expect(func.schema).toBe('public')
+  })
+})
+
+test('list functions with excluded schemas', async () => {
+  let res = await pgMeta.functions.list({
+    excludedSchemas: ['public'],
+  })
+
+  res.data?.forEach((func) => {
+    expect(func.schema).not.toBe('public')
+  })
+})
+
+test('list functions with excluded schemas and include System Schemas', async () => {
+  let res = await pgMeta.functions.list({
+    excludedSchemas: ['public'],
+    includeSystemSchemas: true,
+  })
+
+  expect(res.data?.length).toBeGreaterThan(0)
+
+  res.data?.forEach((func) => {
+    expect(func.schema).not.toBe('public')
+  })
 })
 
 test('retrieve, create, update, delete', async () => {
@@ -49,6 +96,18 @@ test('retrieve, create, update, delete', async () => {
     `
     Object {
       "data": Object {
+        "args": Array [
+          Object {
+            "mode": "in",
+            "name": "a",
+            "type_id": 21,
+          },
+          Object {
+            "mode": "in",
+            "name": "b",
+            "type_id": 21,
+          },
+        ],
         "argument_types": "a smallint, b smallint",
         "behavior": "STABLE",
         "complete_statement": "CREATE OR REPLACE FUNCTION public.test_func(a smallint, b smallint)
@@ -82,6 +141,18 @@ test('retrieve, create, update, delete', async () => {
     `
     Object {
       "data": Object {
+        "args": Array [
+          Object {
+            "mode": "in",
+            "name": "a",
+            "type_id": 21,
+          },
+          Object {
+            "mode": "in",
+            "name": "b",
+            "type_id": 21,
+          },
+        ],
         "argument_types": "a smallint, b smallint",
         "behavior": "STABLE",
         "complete_statement": "CREATE OR REPLACE FUNCTION public.test_func(a smallint, b smallint)
@@ -119,14 +190,26 @@ test('retrieve, create, update, delete', async () => {
     `
     Object {
       "data": Object {
+        "args": Array [
+          Object {
+            "mode": "in",
+            "name": "a",
+            "type_id": 21,
+          },
+          Object {
+            "mode": "in",
+            "name": "b",
+            "type_id": 21,
+          },
+        ],
         "argument_types": "a smallint, b smallint",
         "behavior": "STABLE",
         "complete_statement": "CREATE OR REPLACE FUNCTION test_schema.test_func_renamed(a smallint, b smallint)
      RETURNS integer
      LANGUAGE sql
      STABLE SECURITY DEFINER
-     SET search_path TO 'hooks', 'auth'
      SET role TO 'postgres'
+     SET search_path TO 'hooks', 'auth'
     AS $function$select b - a$function$
     ",
         "config_params": Object {
@@ -152,14 +235,26 @@ test('retrieve, create, update, delete', async () => {
     `
     Object {
       "data": Object {
+        "args": Array [
+          Object {
+            "mode": "in",
+            "name": "a",
+            "type_id": 21,
+          },
+          Object {
+            "mode": "in",
+            "name": "b",
+            "type_id": 21,
+          },
+        ],
         "argument_types": "a smallint, b smallint",
         "behavior": "STABLE",
         "complete_statement": "CREATE OR REPLACE FUNCTION test_schema.test_func_renamed(a smallint, b smallint)
      RETURNS integer
      LANGUAGE sql
      STABLE SECURITY DEFINER
-     SET search_path TO 'hooks', 'auth'
      SET role TO 'postgres'
+     SET search_path TO 'hooks', 'auth'
     AS $function$select b - a$function$
     ",
         "config_params": Object {

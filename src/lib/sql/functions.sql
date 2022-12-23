@@ -1,46 +1,95 @@
-SELECT
-  p.oid :: int8 AS id,
-  n.nspname AS schema,
-  p.proname AS name,
-  l.lanname AS language,
-  CASE
-    WHEN l.lanname = 'internal' THEN ''
-    ELSE p.prosrc
-  END AS definition,
-  CASE
-    WHEN l.lanname = 'internal' THEN p.prosrc
-    ELSE pg_get_functiondef(p.oid)
-  END AS complete_statement,
-  pg_get_function_arguments(p.oid) AS argument_types,
-  pg_get_function_identity_arguments(p.oid) AS identity_argument_types,
-  t.typname AS return_type,
-  CASE
-    WHEN p.provolatile = 'i' THEN 'IMMUTABLE'
-    WHEN p.provolatile = 's' THEN 'STABLE'
-    WHEN p.provolatile = 'v' THEN 'VOLATILE'
-  END AS behavior,
-  p.prosecdef AS security_definer,
-  JSON_OBJECT_AGG(p_config.param, p_config.value)
-    FILTER (WHERE p_config.param IS NOT NULL) AS config_params
-FROM
-  pg_proc p
-  LEFT JOIN pg_namespace n ON p.pronamespace = n.oid
-  LEFT JOIN pg_language l ON p.prolang = l.oid
-  LEFT JOIN pg_type t ON t.oid = p.prorettype
-  LEFT JOIN (
-    SELECT
-      oid as id,
-      (string_to_array(unnest(proconfig), '='))[1] AS param,
-      (string_to_array(unnest(proconfig), '='))[2] AS value
-    FROM
-      pg_proc
-  ) p_config ON p_config.id = p.oid
-GROUP BY
-  p.oid,
-  n.nspname,
-  p.proname,
-  l.lanname,
-  p.prosrc,
-  t.typname,
-  p.provolatile,
-  p.prosecdef
+-- CTE with sane arg_modes, arg_names, and arg_types.
+-- All three are always of the same length.
+-- All three include all args, including OUT and TABLE args.
+with functions as (
+  select
+    *,
+    -- proargmodes is null when all arg modes are IN
+    coalesce(
+      p.proargmodes,
+      array_fill('i'::text, array[cardinality(coalesce(p.proallargtypes, p.proargtypes))])
+    ) as arg_modes,
+    -- proargnames is null when all args are unnamed
+    coalesce(
+      p.proargnames,
+      array_fill(''::text, array[cardinality(coalesce(p.proallargtypes, p.proargtypes))])
+    ) as arg_names,
+    -- proallargtypes is null when all arg modes are IN
+    coalesce(p.proallargtypes, p.proargtypes) as arg_types
+  from
+    pg_proc as p
+  where
+    p.prokind = 'f'
+)
+select
+  f.oid :: int8 as id,
+  n.nspname as schema,
+  f.proname as name,
+  l.lanname as language,
+  case
+    when l.lanname = 'internal' then ''
+    else f.prosrc
+  end as definition,
+  case
+    when l.lanname = 'internal' then f.prosrc
+    else pg_get_functiondef(f.oid)
+  end as complete_statement,
+  coalesce(f_args.args, '[]') as args,
+  pg_get_function_arguments(f.oid) as argument_types,
+  pg_get_function_identity_arguments(f.oid) as identity_argument_types,
+  t.typname as return_type,
+  case
+    when f.provolatile = 'i' then 'IMMUTABLE'
+    when f.provolatile = 's' then 'STABLE'
+    when f.provolatile = 'v' then 'VOLATILE'
+  end as behavior,
+  f.prosecdef as security_definer,
+  f_config.config_params as config_params
+from
+  functions f
+  left join pg_namespace n on f.pronamespace = n.oid
+  left join pg_language l on f.prolang = l.oid
+  left join pg_type t on t.oid = f.prorettype
+  left join (
+    select
+      oid,
+      jsonb_object_agg(param, value) filter (where param is not null) as config_params
+    from
+      (
+        select
+          oid,
+          (string_to_array(unnest(proconfig), '='))[1] as param,
+          (string_to_array(unnest(proconfig), '='))[2] as value
+        from
+          functions
+      ) as t
+    group by
+      oid
+  ) f_config on f_config.oid = f.oid
+  left join (
+    select
+      oid,
+      jsonb_agg(jsonb_build_object('mode', t2.mode, 'name', name, 'type_id', type_id)) as args
+    from
+      (
+        select
+          oid,
+          unnest(arg_modes) as mode,
+          unnest(arg_names) as name,
+          unnest(arg_types)::int8 as type_id
+        from
+          functions
+      ) as t1,
+      lateral (
+        select
+          case
+            when t1.mode = 'i' then 'in'
+            when t1.mode = 'o' then 'out'
+            when t1.mode = 'b' then 'inout'
+            when t1.mode = 'v' then 'variadic'
+            else 'table'
+          end as mode
+      ) as t2
+    group by
+      t1.oid
+  ) f_args on f_args.oid = f.oid
