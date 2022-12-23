@@ -3,6 +3,7 @@ import PostgresMetaTables from './PostgresMetaTables'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
 import { columnsSql } from './sql'
 import { PostgresMetaResult, PostgresColumn } from './types'
+import { filterByList } from './helpers'
 
 export default class PostgresMetaColumns {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -16,11 +17,15 @@ export default class PostgresMetaColumns {
   async list({
     tableId,
     includeSystemSchemas = false,
+    includedSchemas,
+    excludedSchemas,
     limit,
     offset,
   }: {
     tableId?: number
     includeSystemSchemas?: boolean
+    includedSchemas?: string[]
+    excludedSchemas?: string[]
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresColumn[]>> {
@@ -33,8 +38,13 @@ FROM
   columns
 WHERE
   true`
-    if (!includeSystemSchemas) {
-      sql += ` AND schema NOT IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')})`
+    const filter = filterByList(
+      includedSchemas,
+      excludedSchemas,
+      !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
+    )
+    if (filter) {
+      sql += ` AND schema ${filter}`
     }
     if (tableId !== undefined) {
       sql += ` AND table_id = ${literal(tableId)}`

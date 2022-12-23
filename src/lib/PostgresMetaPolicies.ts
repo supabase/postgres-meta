@@ -1,5 +1,6 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
+import { filterByList } from './helpers'
 import { policiesSql } from './sql'
 import { PostgresMetaResult, PostgresPolicy } from './types'
 
@@ -12,16 +13,25 @@ export default class PostgresMetaPolicies {
 
   async list({
     includeSystemSchemas = false,
+    includedSchemas,
+    excludedSchemas,
     limit,
     offset,
   }: {
     includeSystemSchemas?: boolean
+    includedSchemas?: string[]
+    excludedSchemas?: string[]
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresPolicy[]>> {
     let sql = policiesSql
-    if (!includeSystemSchemas) {
-      sql = `${sql} WHERE NOT (n.nspname IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
+    const filter = filterByList(
+      includedSchemas,
+      excludedSchemas,
+      !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
+    )
+    if (filter) {
+      sql += ` WHERE n.nspname ${filter}`
     }
     if (limit) {
       sql = `${sql} LIMIT ${limit}`

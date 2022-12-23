@@ -1,5 +1,6 @@
 import { literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
+import { filterByList } from './helpers'
 import { typesSql } from './sql'
 import { PostgresMetaResult, PostgresType } from './types'
 
@@ -13,11 +14,15 @@ export default class PostgresMetaTypes {
   async list({
     includeArrayTypes = false,
     includeSystemSchemas = false,
+    includedSchemas,
+    excludedSchemas,
     limit,
     offset,
   }: {
     includeArrayTypes?: boolean
     includeSystemSchemas?: boolean
+    includedSchemas?: string[]
+    excludedSchemas?: string[]
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresType[]>> {
@@ -32,8 +37,13 @@ export default class PostgresMetaTypes {
                    and el.typarray = t.oid
                )`
     }
-    if (!includeSystemSchemas) {
-      sql += ` and n.nspname not in (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')})`
+    const filter = filterByList(
+      includedSchemas,
+      excludedSchemas,
+      !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
+    )
+    if (filter) {
+      sql += ` and n.nspname ${filter}`
     }
     if (limit) {
       sql += ` limit ${limit}`
