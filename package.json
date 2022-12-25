@@ -24,7 +24,7 @@
     "gen:types:typescript": "ts-node-dev --quiet src/server/app.ts gen types typescript",
     "start": "NODE_ENV=production node dist/server/app.js",
     "dev": "trap 'npm run db:clean' INT && run-s db:clean db:run && NODE_ENV=development ts-node-dev src/server/app.ts | pino-pretty --colorize",
-    "pkg": "run-s clean build:server && pkg --out-path dist .pkg.config.json",
+    "pkg": "run-s clean build && pkg .pkg.config.json",
     "test": "run-s db:clean db:run test:run db:clean",
     "db:clean": "cd test/db && docker-compose down",
     "db:run": "cd test/db && docker-compose up --detach && sleep 5",

@@ -4,6 +4,7 @@
     "postgres-meta": "dist/server/app.js"
   },
   "pkg": {
+    "outputPath": "bin",
     "assets": ["dist/**/*.sql"],
     "scripts": ["node_modules/pg-format/lib/reserved.js"]
   }
