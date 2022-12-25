@@ -16,7 +16,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: '16'
 
       - run: |
           npm clean-install
@@ -32,3 +32,9 @@ jobs:
       - uses: actionsx/prettier@v2
         with:
           args: --check "{src,test}/**/*.ts"
+
+  start:
+    runs-on: ubuntu-latest
+    steps:
+      - run: docker build . -t pgmeta
+      - run: docker run --rm -it pgmeta node dist/server/app.js gen types typescript
