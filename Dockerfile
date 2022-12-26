@@ -5,12 +5,12 @@ WORKDIR /usr/src/app
 COPY package.json package-lock.json ./
 RUN npm clean-install
 COPY . .
-RUN npm run build:server
+RUN npm run build
 
 FROM node:16-slim
 WORKDIR /usr/src/app
 COPY --from=build /usr/src/app/node_modules node_modules
-COPY --from=build /usr/src/app/bin bin
+COPY --from=build /usr/src/app/dist dist
 COPY package.json ./
 ENV PG_META_PORT=8080
 CMD ["npm", "run", "start"]

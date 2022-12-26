@@ -3,14 +3,14 @@ import { pgMeta } from './utils'
 test('query', async () => {
   const res = await pgMeta.query('SELECT * FROM users')
   expect(res).toMatchInlineSnapshot(`
-    Object {
-      "data": Array [
-        Object {
+    {
+      "data": [
+        {
           "id": 1,
           "name": "Joe Bloggs",
           "status": "ACTIVE",
         },
-        Object {
+        {
           "id": 2,
           "name": "Jane Doe",
           "status": "ACTIVE",
@@ -24,10 +24,10 @@ test('query', async () => {
 test('error', async () => {
   const res = await pgMeta.query('DROP TABLE missing_table')
   expect(res).toMatchInlineSnapshot(`
-    Object {
+    {
       "data": null,
-      "error": Object {
-        "message": "table \\"missing_table\\" does not exist",
+      "error": {
+        "message": "table "missing_table" does not exist",
       },
     }
   `)
@@ -36,15 +36,15 @@ test('error', async () => {
 test('parser select statements', async () => {
   const res = pgMeta.parse('SELECT id, name FROM users where user_id = 1234')
   expect(res).toMatchInlineSnapshot(`
-    Object {
-      "data": Array [
-        Object {
-          "RawStmt": Object {
-            "stmt": Object {
-              "SelectStmt": Object {
-                "fromClause": Array [
-                  Object {
-                    "RangeVar": Object {
+    {
+      "data": [
+        {
+          "RawStmt": {
+            "stmt": {
+              "SelectStmt": {
+                "fromClause": [
+                  {
+                    "RangeVar": {
                       "inh": true,
                       "location": 21,
                       "relname": "users",
@@ -54,15 +54,15 @@ test('parser select statements', async () => {
                 ],
                 "limitOption": "LIMIT_OPTION_DEFAULT",
                 "op": "SETOP_NONE",
-                "targetList": Array [
-                  Object {
-                    "ResTarget": Object {
+                "targetList": [
+                  {
+                    "ResTarget": {
                       "location": 7,
-                      "val": Object {
-                        "ColumnRef": Object {
-                          "fields": Array [
-                            Object {
-                              "String": Object {
+                      "val": {
+                        "ColumnRef": {
+                          "fields": [
+                            {
+                              "String": {
                                 "str": "id",
                               },
                             },
@@ -72,14 +72,14 @@ test('parser select statements', async () => {
                       },
                     },
                   },
-                  Object {
-                    "ResTarget": Object {
+                  {
+                    "ResTarget": {
                       "location": 11,
-                      "val": Object {
-                        "ColumnRef": Object {
-                          "fields": Array [
-                            Object {
-                              "String": Object {
+                      "val": {
+                        "ColumnRef": {
+                          "fields": [
+                            {
+                              "String": {
                                 "str": "name",
                               },
                             },
@@ -90,14 +90,14 @@ test('parser select statements', async () => {
                     },
                   },
                 ],
-                "whereClause": Object {
-                  "A_Expr": Object {
+                "whereClause": {
+                  "A_Expr": {
                     "kind": "AEXPR_OP",
-                    "lexpr": Object {
-                      "ColumnRef": Object {
-                        "fields": Array [
-                          Object {
-                            "String": Object {
+                    "lexpr": {
+                      "ColumnRef": {
+                        "fields": [
+                          {
+                            "String": {
                               "str": "user_id",
                             },
                           },
@@ -106,18 +106,18 @@ test('parser select statements', async () => {
                       },
                     },
                     "location": 41,
-                    "name": Array [
-                      Object {
-                        "String": Object {
+                    "name": [
+                      {
+                        "String": {
                           "str": "=",
                         },
                       },
                     ],
-                    "rexpr": Object {
-                      "A_Const": Object {
+                    "rexpr": {
+                      "A_Const": {
                         "location": 43,
-                        "val": Object {
-                          "Integer": Object {
+                        "val": {
+                          "Integer": {
                             "ival": 1234,
                           },
                         },
@@ -142,8 +142,8 @@ test('parser comments', async () => {
 -- test comments
 `)
   expect(res).toMatchInlineSnapshot(`
-    Object {
-      "data": Array [],
+    {
+      "data": [],
       "error": null,
     }
   `)
@@ -154,12 +154,12 @@ test('parser create schema', async () => {
 create schema if not exists test_schema;
 `)
   expect(res).toMatchInlineSnapshot(`
-    Object {
-      "data": Array [
-        Object {
-          "RawStmt": Object {
-            "stmt": Object {
-              "CreateSchemaStmt": Object {
+    {
+      "data": [
+        {
+          "RawStmt": {
+            "stmt": {
+              "CreateSchemaStmt": {
                 "if_not_exists": true,
                 "schemaname": "test_schema",
               },
@@ -186,33 +186,33 @@ CREATE TABLE table_name (
 `
   const res = pgMeta.parse(query)
   expect(res).toMatchInlineSnapshot(`
-    Object {
-      "data": Array [
-        Object {
-          "RawStmt": Object {
-            "stmt": Object {
-              "CreateStmt": Object {
+    {
+      "data": [
+        {
+          "RawStmt": {
+            "stmt": {
+              "CreateStmt": {
                 "oncommit": "ONCOMMIT_NOOP",
-                "relation": Object {
+                "relation": {
                   "inh": true,
                   "location": 14,
                   "relname": "table_name",
                   "relpersistence": "p",
                 },
-                "tableElts": Array [
-                  Object {
-                    "ColumnDef": Object {
+                "tableElts": [
+                  {
+                    "ColumnDef": {
                       "colname": "id",
-                      "constraints": Array [
-                        Object {
-                          "Constraint": Object {
+                      "constraints": [
+                        {
+                          "Constraint": {
                             "contype": "CONSTR_IDENTITY",
                             "generated_when": "d",
                             "location": 39,
                           },
                         },
-                        Object {
-                          "Constraint": Object {
+                        {
+                          "Constraint": {
                             "contype": "CONSTR_PRIMARY",
                             "location": 72,
                           },
@@ -220,16 +220,16 @@ CREATE TABLE table_name (
                       ],
                       "is_local": true,
                       "location": 29,
-                      "typeName": Object {
+                      "typeName": {
                         "location": 32,
-                        "names": Array [
-                          Object {
-                            "String": Object {
+                        "names": [
+                          {
+                            "String": {
                               "str": "pg_catalog",
                             },
                           },
-                          Object {
-                            "String": Object {
+                          {
+                            "String": {
                               "str": "int8",
                             },
                           },
@@ -238,35 +238,35 @@ CREATE TABLE table_name (
                       },
                     },
                   },
-                  Object {
-                    "ColumnDef": Object {
+                  {
+                    "ColumnDef": {
                       "colname": "inserted_at",
-                      "constraints": Array [
-                        Object {
-                          "Constraint": Object {
+                      "constraints": [
+                        {
+                          "Constraint": {
                             "contype": "CONSTR_DEFAULT",
                             "location": 124,
-                            "raw_expr": Object {
-                              "FuncCall": Object {
-                                "args": Array [
-                                  Object {
-                                    "TypeCast": Object {
-                                      "arg": Object {
-                                        "A_Const": Object {
+                            "raw_expr": {
+                              "FuncCall": {
+                                "args": [
+                                  {
+                                    "TypeCast": {
+                                      "arg": {
+                                        "A_Const": {
                                           "location": 141,
-                                          "val": Object {
-                                            "String": Object {
+                                          "val": {
+                                            "String": {
                                               "str": "utc",
                                             },
                                           },
                                         },
                                       },
                                       "location": 146,
-                                      "typeName": Object {
+                                      "typeName": {
                                         "location": 148,
-                                        "names": Array [
-                                          Object {
-                                            "String": Object {
+                                        "names": [
+                                          {
+                                            "String": {
                                               "str": "text",
                                             },
                                           },
@@ -275,11 +275,11 @@ CREATE TABLE table_name (
                                       },
                                     },
                                   },
-                                  Object {
-                                    "FuncCall": Object {
-                                      "funcname": Array [
-                                        Object {
-                                          "String": Object {
+                                  {
+                                    "FuncCall": {
+                                      "funcname": [
+                                        {
+                                          "String": {
                                             "str": "now",
                                           },
                                         },
@@ -288,9 +288,9 @@ CREATE TABLE table_name (
                                     },
                                   },
                                 ],
-                                "funcname": Array [
-                                  Object {
-                                    "String": Object {
+                                "funcname": [
+                                  {
+                                    "String": {
                                       "str": "timezone",
                                     },
                                   },
@@ -300,8 +300,8 @@ CREATE TABLE table_name (
                             },
                           },
                         },
-                        Object {
-                          "Constraint": Object {
+                        {
+                          "Constraint": {
                             "contype": "CONSTR_NOTNULL",
                             "location": 161,
                           },
@@ -309,16 +309,16 @@ CREATE TABLE table_name (
                       ],
                       "is_local": true,
                       "location": 87,
-                      "typeName": Object {
+                      "typeName": {
                         "location": 99,
-                        "names": Array [
-                          Object {
-                            "String": Object {
+                        "names": [
+                          {
+                            "String": {
                               "str": "pg_catalog",
                             },
                           },
-                          Object {
-                            "String": Object {
+                          {
+                            "String": {
                               "str": "timestamptz",
                             },
                           },
@@ -327,35 +327,35 @@ CREATE TABLE table_name (
                       },
                     },
                   },
-                  Object {
-                    "ColumnDef": Object {
+                  {
+                    "ColumnDef": {
                       "colname": "updated_at",
-                      "constraints": Array [
-                        Object {
-                          "Constraint": Object {
+                      "constraints": [
+                        {
+                          "Constraint": {
                             "contype": "CONSTR_DEFAULT",
                             "location": 209,
-                            "raw_expr": Object {
-                              "FuncCall": Object {
-                                "args": Array [
-                                  Object {
-                                    "TypeCast": Object {
-                                      "arg": Object {
-                                        "A_Const": Object {
+                            "raw_expr": {
+                              "FuncCall": {
+                                "args": [
+                                  {
+                                    "TypeCast": {
+                                      "arg": {
+                                        "A_Const": {
                                           "location": 226,
-                                          "val": Object {
-                                            "String": Object {
+                                          "val": {
+                                            "String": {
                                               "str": "utc",
                                             },
                                           },
                                         },
                                       },
                                       "location": 231,
-                                      "typeName": Object {
+                                      "typeName": {
                                         "location": 233,
-                                        "names": Array [
-                                          Object {
-                                            "String": Object {
+                                        "names": [
+                                          {
+                                            "String": {
                                               "str": "text",
                                             },
                                           },
@@ -364,11 +364,11 @@ CREATE TABLE table_name (
                                       },
                                     },
                                   },
-                                  Object {
-                                    "FuncCall": Object {
-                                      "funcname": Array [
-                                        Object {
-                                          "String": Object {
+                                  {
+                                    "FuncCall": {
+                                      "funcname": [
+                                        {
+                                          "String": {
                                             "str": "now",
                                           },
                                         },
@@ -377,9 +377,9 @@ CREATE TABLE table_name (
                                     },
                                   },
                                 ],
-                                "funcname": Array [
-                                  Object {
-                                    "String": Object {
+                                "funcname": [
+                                  {
+                                    "String": {
                                       "str": "timezone",
                                     },
                                   },
@@ -389,8 +389,8 @@ CREATE TABLE table_name (
                             },
                           },
                         },
-                        Object {
-                          "Constraint": Object {
+                        {
+                          "Constraint": {
                             "contype": "CONSTR_NOTNULL",
                             "location": 246,
                           },
@@ -398,16 +398,16 @@ CREATE TABLE table_name (
                       ],
                       "is_local": true,
                       "location": 173,
-                      "typeName": Object {
+                      "typeName": {
                         "location": 184,
-                        "names": Array [
-                          Object {
-                            "String": Object {
+                        "names": [
+                          {
+                            "String": {
                               "str": "pg_catalog",
                             },
                           },
-                          Object {
-                            "String": Object {
+                          {
+                            "String": {
                               "str": "timestamptz",
                             },
                           },
@@ -416,16 +416,16 @@ CREATE TABLE table_name (
                       },
                     },
                   },
-                  Object {
-                    "ColumnDef": Object {
+                  {
+                    "ColumnDef": {
                       "colname": "data",
                       "is_local": true,
                       "location": 258,
-                      "typeName": Object {
+                      "typeName": {
                         "location": 263,
-                        "names": Array [
-                          Object {
-                            "String": Object {
+                        "names": [
+                          {
+                            "String": {
                               "str": "jsonb",
                             },
                           },
@@ -434,16 +434,16 @@ CREATE TABLE table_name (
                       },
                     },
                   },
-                  Object {
-                    "ColumnDef": Object {
+                  {
+                    "ColumnDef": {
                       "colname": "name",
                       "is_local": true,
                       "location": 272,
-                      "typeName": Object {
+                      "typeName": {
                         "location": 277,
-                        "names": Array [
-                          Object {
-                            "String": Object {
+                        "names": [
+                          {
+                            "String": {
                               "str": "text",
                             },
                           },
@@ -479,7 +479,7 @@ CREATE TABLE table_name (
 test('formatter', async () => {
   const res = pgMeta.format('SELECT id, name FROM users where user_id = 1234')
   expect(res).toMatchInlineSnapshot(`
-    Object {
+    {
       "data": "SELECT
       id,
       name
@@ -498,10 +498,10 @@ test('very big number', async () => {
     `SELECT ${Number.MAX_SAFE_INTEGER + 1}::int8, ARRAY[${Number.MIN_SAFE_INTEGER - 1}::int8]`
   )
   expect(res).toMatchInlineSnapshot(`
-    Object {
-      "data": Array [
-        Object {
-          "array": Array [
+    {
+      "data": [
+        {
+          "array": [
             "-9007199254740992",
           ],
           "int8": "9007199254740992",

@@ -1,7 +1,7 @@
-import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
-import { coalesceRowsToArray, filterByList } from './helpers'
-import { columnsSql, viewsSql } from './sql'
-import { PostgresMetaResult, PostgresView } from './types'
+import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
+import { coalesceRowsToArray, filterByList } from './helpers.js'
+import { columnsSql, viewsSql } from './sql/index.js'
+import { PostgresMetaResult, PostgresView } from './types.js'
 
 export default class PostgresMetaViews {
   query: (sql: string) => Promise<PostgresMetaResult<any>>

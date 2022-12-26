@@ -1,6 +1,6 @@
 import { ident, literal } from 'pg-format'
-import { publicationsSql } from './sql'
-import { PostgresMetaResult, PostgresPublication, PostgresTable } from './types'
+import { publicationsSql } from './sql/index.js'
+import { PostgresMetaResult, PostgresPublication, PostgresTable } from './types.js'
 
 export default class PostgresMetaPublications {
   query: (sql: string) => Promise<PostgresMetaResult<any>>

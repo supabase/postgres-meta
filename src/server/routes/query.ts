@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyRequest } from 'fastify'
-import { PostgresMeta } from '../../lib'
-import * as Parser from '../../lib/Parser'
-import { DEFAULT_POOL_CONFIG } from '../constants'
-import { extractRequestForLogging, translateErrorToResponseCode } from '../utils'
+import { PostgresMeta } from '../../lib/index.js'
+import * as Parser from '../../lib/Parser.js'
+import { DEFAULT_POOL_CONFIG } from '../constants.js'
+import { extractRequestForLogging, translateErrorToResponseCode } from '../utils.js'
 
 const errorOnEmptyQuery = (request: FastifyRequest) => {
   if (!(request.body as any).query) {

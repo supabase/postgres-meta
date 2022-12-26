@@ -1,5 +1,8 @@
-import fastify from 'fastify'
-import { PostgresMeta } from '../lib'
+import swagger from '@fastify/swagger'
+import cors from '@fastify/cors'
+import { fastify } from 'fastify'
+import { pino } from 'pino'
+import { PostgresMeta } from '../lib/index.js'
 import {
   DEFAULT_POOL_CONFIG,
   EXPORT_DOCS,
@@ -9,13 +12,13 @@ import {
   PG_META_HOST,
   PG_META_PORT,
   PG_META_REQ_HEADER,
-} from './constants'
-import routes from './routes'
-import { apply as applyTypescriptTemplate } from './templates/typescript'
-import { extractRequestForLogging } from './utils'
-import pino from 'pino'
-import pkg from '../../package.json'
-import { build as buildAdminApp } from './admin-app'
+} from './constants.js'
+import routes from './routes/index.js'
+import { apply as applyTypescriptTemplate } from './templates/typescript.js'
+import { extractRequestForLogging } from './utils.js'
+import { build as buildAdminApp } from './admin-app.js'
+// Pseudo package declared only for this module
+import pkg from '#package.json' assert { type: 'json' }
 
 const logger = pino({
   formatters: {
@@ -43,7 +46,7 @@ app.setNotFoundHandler((request, reply) => {
 })
 
 if (EXPORT_DOCS) {
-  app.register(require('fastify-swagger'), {
+  app.register(swagger, {
     openapi: {
       servers: [],
       info: {
@@ -120,7 +123,7 @@ if (EXPORT_DOCS) {
   })
 }
 
-app.register(require('@fastify/cors'))
+app.register(cors)
 
 app.get('/', async (_request, _reply) => {
   return {

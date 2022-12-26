@@ -8,11 +8,11 @@ test('list', async () => {
       table_id: expect.any(Number),
     },
     `
-    Object {
+    {
       "comment": null,
       "data_type": "bigint",
       "default_value": null,
-      "enums": Array [],
+      "enums": [],
       "format": "int8",
       "id": StringMatching /\\^\\\\d\\+\\\\\\.3\\$/,
       "identity_generation": null,
@@ -43,6 +43,7 @@ test('list from a single table', async () => {
           id: expect.stringMatching(/^\d+\.\d+$/),
           table_id: expect.any(Number),
         },
+
         {
           id: expect.stringMatching(/^\d+\.\d+$/),
           table_id: expect.any(Number),
@@ -50,13 +51,13 @@ test('list from a single table', async () => {
       ],
     },
     `
-    Object {
-      "data": Array [
-        Object {
+    {
+      "data": [
+        {
           "comment": null,
           "data_type": "text",
           "default_value": null,
-          "enums": Array [],
+          "enums": [],
           "format": "text",
           "id": StringMatching /\\^\\\\d\\+\\\\\\.\\\\d\\+\\$/,
           "identity_generation": null,
@@ -71,11 +72,11 @@ test('list from a single table', async () => {
           "table": "t",
           "table_id": Any<Number>,
         },
-        Object {
+        {
           "comment": null,
           "data_type": "text",
           "default_value": null,
-          "enums": Array [],
+          "enums": [],
           "format": "text",
           "id": StringMatching /\\^\\\\d\\+\\\\\\.\\\\d\\+\\$/,
           "identity_generation": null,
@@ -147,12 +148,12 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.stringMatching(/^\d+\.1$/), table_id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "comment": "foo",
         "data_type": "smallint",
         "default_value": "'42'::smallint",
-        "enums": Array [],
+        "enums": [],
         "format": "int2",
         "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
         "identity_generation": null,
@@ -177,12 +178,12 @@ test('retrieve, create, update, delete', async () => {
       data: { id: expect.stringMatching(/^\d+\.1$/), table_id: expect.any(Number) },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "comment": "foo",
         "data_type": "smallint",
         "default_value": "'42'::smallint",
-        "enums": Array [],
+        "enums": [],
         "format": "int2",
         "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
         "identity_generation": null,
@@ -215,12 +216,12 @@ test('retrieve, create, update, delete', async () => {
       data: { id: expect.stringMatching(/^\d+\.1$/), table_id: expect.any(Number) },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "comment": "bar",
         "data_type": "integer",
         "default_value": null,
-        "enums": Array [],
+        "enums": [],
         "format": "int4",
         "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
         "identity_generation": "ALWAYS",
@@ -245,12 +246,12 @@ test('retrieve, create, update, delete', async () => {
       data: { id: expect.stringMatching(/^\d+\.1$/), table_id: expect.any(Number) },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "comment": "bar",
         "data_type": "integer",
         "default_value": null,
-        "enums": Array [],
+        "enums": [],
         "format": "int4",
         "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
         "identity_generation": "ALWAYS",
@@ -290,11 +291,11 @@ test('enum column with quoted name', async () => {
       table_id: expect.any(Number),
     },
     `
-    Object {
+    {
       "comment": null,
       "data_type": "USER-DEFINED",
       "default_value": null,
-      "enums": Array [
+      "enums": [
         "v",
       ],
       "format": "T",
@@ -335,9 +336,9 @@ WHERE  i.indrelid = '${testTable!.name}'::regclass
 AND    i.indisprimary;
 `)
   expect(res).toMatchInlineSnapshot(`
-    Object {
-      "data": Array [
-        Object {
+    {
+      "data": [
+        {
           "attname": "c",
         },
       ],
@@ -367,9 +368,9 @@ WHERE  i.indrelid = '${testTable!.name}'::regclass
 AND    i.indisunique;
 `)
   expect(res).toMatchInlineSnapshot(`
-    Object {
-      "data": Array [
-        Object {
+    {
+      "data": [
+        {
           "attname": "c",
         },
       ],
@@ -396,12 +397,12 @@ test('array column', async () => {
       },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "comment": null,
         "data_type": "ARRAY",
         "default_value": null,
-        "enums": Array [],
+        "enums": [],
         "format": "_int2",
         "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
         "identity_generation": null,
@@ -442,12 +443,12 @@ test('column with default value', async () => {
       },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "comment": null,
         "data_type": "timestamp with time zone",
         "default_value": "now()",
-        "enums": Array [],
+        "enums": [],
         "format": "timestamptz",
         "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
         "identity_generation": null,
@@ -487,9 +488,9 @@ SELECT pg_get_constraintdef((
 ));
 `)
   expect(res).toMatchInlineSnapshot(`
-    Object {
-      "data": Array [
-        Object {
+    {
+      "data": [
+        {
           "pg_get_constraintdef": null,
         },
       ],
@@ -519,12 +520,12 @@ test('update with name unchanged', async () => {
       },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "comment": null,
         "data_type": "smallint",
         "default_value": null,
-        "enums": Array [],
+        "enums": [],
         "format": "int2",
         "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
         "identity_generation": null,
@@ -566,12 +567,12 @@ test('update with array types', async () => {
       },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "comment": null,
         "data_type": "ARRAY",
         "default_value": null,
-        "enums": Array [],
+        "enums": [],
         "format": "_text",
         "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
         "identity_generation": null,
@@ -613,12 +614,12 @@ test('update with incompatible types', async () => {
       },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "comment": null,
         "data_type": "integer",
         "default_value": null,
-        "enums": Array [],
+        "enums": [],
         "format": "int4",
         "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
         "identity_generation": null,
@@ -659,12 +660,12 @@ test('update is_unique', async () => {
       },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "comment": null,
         "data_type": "text",
         "default_value": null,
-        "enums": Array [],
+        "enums": [],
         "format": "text",
         "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
         "identity_generation": null,
@@ -692,12 +693,12 @@ test('update is_unique', async () => {
       },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "comment": null,
         "data_type": "text",
         "default_value": null,
-        "enums": Array [],
+        "enums": [],
         "format": "text",
         "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
         "identity_generation": null,
@@ -740,12 +741,12 @@ test('alter column to type with uppercase', async () => {
       },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "comment": null,
         "data_type": "USER-DEFINED",
         "default_value": null,
-        "enums": Array [],
+        "enums": [],
         "format": "T",
         "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
         "identity_generation": null,
@@ -786,12 +787,12 @@ test('enums are populated in enum array columns', async () => {
       },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "comment": null,
         "data_type": "ARRAY",
         "default_value": null,
-        "enums": Array [
+        "enums": [
           "a",
         ],
         "format": "_test_enum",
@@ -839,12 +840,12 @@ create table public.t (
       },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "comment": null,
         "data_type": "bigint",
         "default_value": null,
-        "enums": Array [],
+        "enums": [],
         "format": "int8",
         "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
         "identity_generation": null,
@@ -870,9 +871,9 @@ create table public.t (
     name: 't_id',
   })
   expect(res).toMatchInlineSnapshot(`
-    Object {
+    {
       "data": null,
-      "error": Object {
+      "error": {
         "message": "Cannot find a column named t_id in table public.t",
       },
     }

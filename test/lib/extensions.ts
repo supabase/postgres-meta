@@ -5,7 +5,7 @@ test('list', async () => {
   expect(res.data?.find(({ name }) => name === 'hstore')).toMatchInlineSnapshot(
     { default_version: expect.stringMatching(/^\d+.\d+$/) },
     `
-    Object {
+    {
       "comment": "data type for storing sets of (key, value) pairs",
       "default_version": StringMatching /\\^\\\\d\\+\\.\\\\d\\+\\$/,
       "installed_version": null,
@@ -27,8 +27,8 @@ test('retrieve, create, update, delete', async () => {
       },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "comment": "data type for storing sets of (key, value) pairs",
         "default_version": StringMatching /\\^\\\\d\\+\\.\\\\d\\+\\$/,
         "installed_version": "1.4",
@@ -47,8 +47,8 @@ test('retrieve, create, update, delete', async () => {
       },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "comment": "data type for storing sets of (key, value) pairs",
         "default_version": StringMatching /\\^\\\\d\\+\\.\\\\d\\+\\$/,
         "installed_version": "1.4",
@@ -68,8 +68,8 @@ test('retrieve, create, update, delete', async () => {
       },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "comment": "data type for storing sets of (key, value) pairs",
         "default_version": StringMatching /\\^\\\\d\\+\\.\\\\d\\+\\$/,
         "installed_version": StringMatching /\\^\\\\d\\+\\.\\\\d\\+\\$/,
@@ -89,8 +89,8 @@ test('retrieve, create, update, delete', async () => {
       },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "comment": "data type for storing sets of (key, value) pairs",
         "default_version": StringMatching /\\^\\\\d\\+\\.\\\\d\\+\\$/,
         "installed_version": StringMatching /\\^\\\\d\\+\\.\\\\d\\+\\$/,
@@ -105,8 +105,8 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { default_version: expect.stringMatching(/^\d+.\d+$/) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "comment": "data type for storing sets of (key, value) pairs",
         "default_version": StringMatching /\\^\\\\d\\+\\.\\\\d\\+\\$/,
         "installed_version": null,

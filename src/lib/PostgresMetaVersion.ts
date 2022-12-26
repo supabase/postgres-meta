@@ -1,5 +1,5 @@
-import { versionSql } from './sql'
-import { PostgresMetaResult, PostgresVersion } from './types'
+import { versionSql } from './sql/index.js'
+import { PostgresMetaResult, PostgresVersion } from './types.js'
 
 export default class PostgresMetaVersion {
   query: (sql: string) => Promise<PostgresMetaResult<any>>

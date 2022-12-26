@@ -5,14 +5,14 @@ test('list', async () => {
   expect(res.data?.find(({ name }) => name === 'add')).toMatchInlineSnapshot(
     { id: expect.any(Number) },
     `
-    Object {
-      "args": Array [
-        Object {
+    {
+      "args": [
+        {
           "mode": "in",
           "name": "",
           "type_id": 23,
         },
-        Object {
+        {
           "mode": "in",
           "name": "",
           "type_id": 23,
@@ -94,15 +94,15 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
-        "args": Array [
-          Object {
+    {
+      "data": {
+        "args": [
+          {
             "mode": "in",
             "name": "a",
             "type_id": 21,
           },
-          Object {
+          {
             "mode": "in",
             "name": "b",
             "type_id": 21,
@@ -118,7 +118,7 @@ test('retrieve, create, update, delete', async () => {
      SET role TO 'postgres'
     AS $function$select a + b$function$
     ",
-        "config_params": Object {
+        "config_params": {
           "role": "postgres",
           "search_path": "hooks, auth",
         },
@@ -139,15 +139,15 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
-        "args": Array [
-          Object {
+    {
+      "data": {
+        "args": [
+          {
             "mode": "in",
             "name": "a",
             "type_id": 21,
           },
-          Object {
+          {
             "mode": "in",
             "name": "b",
             "type_id": 21,
@@ -163,7 +163,7 @@ test('retrieve, create, update, delete', async () => {
      SET role TO 'postgres'
     AS $function$select a + b$function$
     ",
-        "config_params": Object {
+        "config_params": {
           "role": "postgres",
           "search_path": "hooks, auth",
         },
@@ -188,15 +188,15 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
-        "args": Array [
-          Object {
+    {
+      "data": {
+        "args": [
+          {
             "mode": "in",
             "name": "a",
             "type_id": 21,
           },
-          Object {
+          {
             "mode": "in",
             "name": "b",
             "type_id": 21,
@@ -212,7 +212,7 @@ test('retrieve, create, update, delete', async () => {
      SET search_path TO 'hooks', 'auth'
     AS $function$select b - a$function$
     ",
-        "config_params": Object {
+        "config_params": {
           "role": "postgres",
           "search_path": "hooks, auth",
         },
@@ -233,15 +233,15 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
-        "args": Array [
-          Object {
+    {
+      "data": {
+        "args": [
+          {
             "mode": "in",
             "name": "a",
             "type_id": 21,
           },
-          Object {
+          {
             "mode": "in",
             "name": "b",
             "type_id": 21,
@@ -257,7 +257,7 @@ test('retrieve, create, update, delete', async () => {
      SET search_path TO 'hooks', 'auth'
     AS $function$select b - a$function$
     ",
-        "config_params": Object {
+        "config_params": {
           "role": "postgres",
           "search_path": "hooks, auth",
         },

@@ -8,7 +8,7 @@ test('list', async () => {
   expect(role).toMatchInlineSnapshot(
     { active_connections: expect.any(Number), id: expect.any(Number) },
     `
-    Object {
+    {
       "active_connections": Any<Number>,
       "can_bypass_rls": true,
       "can_create_db": true,
@@ -45,14 +45,14 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "active_connections": 0,
         "can_bypass_rls": true,
         "can_create_db": true,
         "can_create_role": true,
         "can_login": true,
-        "config": Object {
+        "config": {
           "search_path": "extension, public",
         },
         "connection_limit": 100,
@@ -72,14 +72,14 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "active_connections": 0,
         "can_bypass_rls": true,
         "can_create_db": true,
         "can_create_role": true,
         "can_login": true,
-        "config": Object {
+        "config": {
           "search_path": "extension, public",
         },
         "connection_limit": 100,
@@ -126,14 +126,14 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "active_connections": 0,
         "can_bypass_rls": true,
         "can_create_db": true,
         "can_create_role": true,
         "can_login": true,
-        "config": Object {
+        "config": {
           "log_statement": "all",
           "search_path": "public",
         },
@@ -162,14 +162,14 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "active_connections": 0,
         "can_bypass_rls": true,
         "can_create_db": true,
         "can_create_role": true,
         "can_login": true,
-        "config": Object {
+        "config": {
           "search_path": "public",
         },
         "connection_limit": 100,
@@ -189,14 +189,14 @@ test('retrieve, create, update, delete', async () => {
   expect(res).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "active_connections": 0,
         "can_bypass_rls": true,
         "can_create_db": true,
         "can_create_role": true,
         "can_login": true,
-        "config": Object {
+        "config": {
           "search_path": "public",
         },
         "connection_limit": 100,
