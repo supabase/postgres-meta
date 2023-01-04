@@ -1,5 +1,6 @@
 import { jest } from '@jest/globals'
 
+// Ref: https://jestjs.io/docs/ecmascript-modules
 jest.unstable_mockModule('fs/promises', () => ({
   readFile: jest.fn(),
 }))
