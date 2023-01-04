@@ -1,12 +1,14 @@
+import { getSecret } from '../lib/secrets.js'
+
 export const PG_META_HOST = process.env.PG_META_HOST || '0.0.0.0'
 export const PG_META_PORT = Number(process.env.PG_META_PORT || 1337)
-export const CRYPTO_KEY = process.env.CRYPTO_KEY || 'SAMPLE_KEY'
+export const CRYPTO_KEY = (await getSecret('CRYPTO_KEY')) || 'SAMPLE_KEY'
 
 const PG_META_DB_HOST = process.env.PG_META_DB_HOST || 'localhost'
 const PG_META_DB_NAME = process.env.PG_META_DB_NAME || 'postgres'
 const PG_META_DB_USER = process.env.PG_META_DB_USER || 'postgres'
 const PG_META_DB_PORT = Number(process.env.PG_META_DB_PORT) || 5432
-const PG_META_DB_PASSWORD = process.env.PG_META_DB_PASSWORD || 'postgres'
+const PG_META_DB_PASSWORD = (await getSecret('PG_META_DB_PASSWORD')) || 'postgres'
 const PG_META_DB_SSL_MODE = process.env.PG_META_DB_SSL_MODE || 'disable'
 
 const PG_CONN_TIMEOUT_SECS = Number(process.env.PG_CONN_TIMEOUT_SECS || 15)
