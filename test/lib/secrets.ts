@@ -1,7 +1,10 @@
-import { readFile } from 'fs/promises'
-import { getSecret } from '../../src/lib/secrets'
+import { jest } from '@jest/globals'
 
-jest.mock('fs/promises')
+jest.unstable_mockModule('fs/promises', () => ({
+  readFile: jest.fn(),
+}))
+const { readFile } = await import('fs/promises')
+const { getSecret } = await import('../../src/lib/secrets')
 
 describe('getSecret', () => {
   const value = 'dummy'
@@ -24,7 +27,7 @@ describe('getSecret', () => {
 
   it('loads from file', async () => {
     process.env.SECRET_FILE = '/run/secrets/db_password'
-    jest.mocked(readFile, true).mockResolvedValueOnce(value)
+    jest.mocked(readFile).mockResolvedValueOnce(value)
     const res = await getSecret('SECRET')
     expect(res).toBe(value)
   })
@@ -38,7 +41,7 @@ describe('getSecret', () => {
     process.env.SECRET_FILE = '/run/secrets/db_password'
     const e: NodeJS.ErrnoException = new Error('no such file or directory')
     e.code = 'ENOENT'
-    jest.mocked(readFile, true).mockRejectedValueOnce(e)
+    jest.mocked(readFile).mockRejectedValueOnce(e)
     const res = await getSecret('SECRET')
     expect(res).toBe('')
   })
@@ -47,7 +50,7 @@ describe('getSecret', () => {
     process.env.SECRET_FILE = '/run/secrets/db_password'
     const e: NodeJS.ErrnoException = new Error('permission denied')
     e.code = 'EACCES'
-    jest.mocked(readFile, true).mockRejectedValueOnce(e)
+    jest.mocked(readFile).mockRejectedValueOnce(e)
     expect(getSecret('SECRET')).rejects.toThrow()
   })
 })

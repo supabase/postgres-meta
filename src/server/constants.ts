@@ -1,4 +1,4 @@
-import { getSecret } from '../lib/secrets'
+import { getSecret } from '../lib/secrets.js'
 
 export const PG_META_HOST = process.env.PG_META_HOST || '0.0.0.0'
 export const PG_META_PORT = Number(process.env.PG_META_PORT || 1337)
