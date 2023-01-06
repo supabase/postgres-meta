@@ -51,14 +51,14 @@ test('list', async () => {
       size: expect.any(String),
     },
     `
-    Object {
+    {
       "bytes": Any<Number>,
-      "columns": Array [
-        Object {
+      "columns": [
+        {
           "comment": null,
           "data_type": "bigint",
           "default_value": null,
-          "enums": Array [],
+          "enums": [],
           "format": "int8",
           "identity_generation": "BY DEFAULT",
           "is_generated": false,
@@ -71,11 +71,11 @@ test('list', async () => {
           "schema": "public",
           "table": "users",
         },
-        Object {
+        {
           "comment": null,
           "data_type": "text",
           "default_value": null,
-          "enums": Array [],
+          "enums": [],
           "format": "text",
           "identity_generation": null,
           "is_generated": false,
@@ -88,11 +88,11 @@ test('list', async () => {
           "schema": "public",
           "table": "users",
         },
-        Object {
+        {
           "comment": null,
           "data_type": "USER-DEFINED",
           "default_value": "'ACTIVE'::user_status",
-          "enums": Array [
+          "enums": [
             "ACTIVE",
             "INACTIVE",
           ],
@@ -114,15 +114,15 @@ test('list', async () => {
       "id": Any<Number>,
       "live_rows_estimate": Any<Number>,
       "name": "users",
-      "primary_keys": Array [
-        Object {
+      "primary_keys": [
+        {
           "name": "id",
           "schema": "public",
           "table_name": "users",
         },
       ],
-      "relationships": Array [
-        Object {
+      "relationships": [
+        {
           "constraint_name": "todos_user-id_fkey",
           "source_column_name": "user-id",
           "source_schema": "public",
@@ -182,17 +182,17 @@ test('retrieve, create, update, delete', async () => {
   expect(cleanNondet(res)).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "bytes": 0,
-        "columns": Array [],
+        "columns": [],
         "comment": "foo",
         "dead_rows_estimate": 0,
         "id": Any<Number>,
         "live_rows_estimate": 0,
         "name": "test",
-        "primary_keys": Array [],
-        "relationships": Array [],
+        "primary_keys": [],
+        "relationships": [],
         "replica_identity": "DEFAULT",
         "rls_enabled": false,
         "rls_forced": false,
@@ -207,17 +207,17 @@ test('retrieve, create, update, delete', async () => {
   expect(cleanNondet(res)).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "bytes": 0,
-        "columns": Array [],
+        "columns": [],
         "comment": "foo",
         "dead_rows_estimate": 0,
         "id": Any<Number>,
         "live_rows_estimate": 0,
         "name": "test",
-        "primary_keys": Array [],
-        "relationships": Array [],
+        "primary_keys": [],
+        "relationships": [],
         "replica_identity": "DEFAULT",
         "rls_enabled": false,
         "rls_forced": false,
@@ -238,17 +238,17 @@ test('retrieve, create, update, delete', async () => {
   expect(cleanNondet(res)).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "bytes": 0,
-        "columns": Array [],
+        "columns": [],
         "comment": "foo",
         "dead_rows_estimate": 0,
         "id": Any<Number>,
         "live_rows_estimate": 0,
         "name": "test a",
-        "primary_keys": Array [],
-        "relationships": Array [],
+        "primary_keys": [],
+        "relationships": [],
         "replica_identity": "NOTHING",
         "rls_enabled": true,
         "rls_forced": true,
@@ -263,17 +263,17 @@ test('retrieve, create, update, delete', async () => {
   expect(cleanNondet(res)).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "bytes": 0,
-        "columns": Array [],
+        "columns": [],
         "comment": "foo",
         "dead_rows_estimate": 0,
         "id": Any<Number>,
         "live_rows_estimate": 0,
         "name": "test a",
-        "primary_keys": Array [],
-        "relationships": Array [],
+        "primary_keys": [],
+        "relationships": [],
         "replica_identity": "NOTHING",
         "rls_enabled": true,
         "rls_forced": true,
@@ -301,17 +301,17 @@ test('update with name unchanged', async () => {
   expect(cleanNondet(res)).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "bytes": 0,
-        "columns": Array [],
+        "columns": [],
         "comment": null,
         "dead_rows_estimate": 0,
         "id": Any<Number>,
         "live_rows_estimate": 0,
         "name": "t",
-        "primary_keys": Array [],
-        "relationships": Array [],
+        "primary_keys": [],
+        "relationships": [],
         "replica_identity": "DEFAULT",
         "rls_enabled": false,
         "rls_forced": false,
@@ -330,17 +330,17 @@ test("allow ' in comments", async () => {
   expect(cleanNondet(res)).toMatchInlineSnapshot(
     { data: { id: expect.any(Number) } },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "bytes": 0,
-        "columns": Array [],
+        "columns": [],
         "comment": "'",
         "dead_rows_estimate": 0,
         "id": Any<Number>,
         "live_rows_estimate": 0,
         "name": "t",
-        "primary_keys": Array [],
-        "relationships": Array [],
+        "primary_keys": [],
+        "relationships": [],
         "replica_identity": "DEFAULT",
         "rls_enabled": false,
         "rls_forced": false,
@@ -372,15 +372,15 @@ test('primary keys', async () => {
       },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "bytes": Any<Number>,
-        "columns": Array [
-          Object {
+        "columns": [
+          {
             "comment": null,
             "data_type": "bigint",
             "default_value": null,
-            "enums": Array [],
+            "enums": [],
             "format": "int8",
             "identity_generation": null,
             "is_generated": false,
@@ -393,11 +393,11 @@ test('primary keys', async () => {
             "schema": "public",
             "table": "t",
           },
-          Object {
+          {
             "comment": null,
             "data_type": "text",
             "default_value": null,
-            "enums": Array [],
+            "enums": [],
             "format": "text",
             "identity_generation": null,
             "is_generated": false,
@@ -416,19 +416,19 @@ test('primary keys', async () => {
         "id": Any<Number>,
         "live_rows_estimate": Any<Number>,
         "name": "t",
-        "primary_keys": Array [
-          Object {
+        "primary_keys": [
+          {
             "name": "c",
             "schema": "public",
             "table_name": "t",
           },
-          Object {
+          {
             "name": "cc",
             "schema": "public",
             "table_name": "t",
           },
         ],
-        "relationships": Array [],
+        "relationships": [],
         "replica_identity": "DEFAULT",
         "rls_enabled": false,
         "rls_forced": false,

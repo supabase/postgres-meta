@@ -1,7 +1,12 @@
 import { ident, literal } from 'pg-format'
-import { DEFAULT_ROLES } from './constants'
-import { rolesSql } from './sql'
-import { PostgresMetaResult, PostgresRole, PostgresRoleCreate, PostgresRoleUpdate } from './types'
+import { DEFAULT_ROLES } from './constants.js'
+import { rolesSql } from './sql/index.js'
+import {
+  PostgresMetaResult,
+  PostgresRole,
+  PostgresRoleCreate,
+  PostgresRoleUpdate,
+} from './types.js'
 export function changeRoleConfig2Object(config: string[]) {
   if (!config) {
     return null

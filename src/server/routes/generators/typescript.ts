@@ -1,8 +1,8 @@
 import type { FastifyInstance } from 'fastify'
-import { PostgresMeta } from '../../../lib'
-import { DEFAULT_POOL_CONFIG } from '../../constants'
-import { extractRequestForLogging } from '../../utils'
-import { apply as applyTypescriptTemplate } from '../../templates/typescript'
+import { PostgresMeta } from '../../../lib/index.js'
+import { DEFAULT_POOL_CONFIG } from '../../constants.js'
+import { extractRequestForLogging } from '../../utils.js'
+import { apply as applyTypescriptTemplate } from '../../templates/typescript.js'
 
 export default async (fastify: FastifyInstance) => {
   fastify.get<{

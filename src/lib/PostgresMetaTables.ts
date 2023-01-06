@@ -1,8 +1,8 @@
 import { ident, literal } from 'pg-format'
-import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
-import { coalesceRowsToArray, filterByList } from './helpers'
-import { columnsSql, primaryKeysSql, relationshipsSql, tablesSql } from './sql'
-import { PaginationParams, PostgresMetaResult, PostgresTable, FilterParams } from './types'
+import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
+import { coalesceRowsToArray, filterByList } from './helpers.js'
+import { columnsSql, primaryKeysSql, relationshipsSql, tablesSql } from './sql/index.js'
+import { FilterParams, PaginationParams, PostgresMetaResult, PostgresTable } from './types.js'
 
 export default class PostgresMetaTables {
   query: (sql: string) => Promise<PostgresMetaResult<any>>

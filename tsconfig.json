@@ -1,18 +1,19 @@
 {
-  "include": ["src/lib"],
+  "include": ["src"],
   "compilerOptions": {
+    "incremental": true,
     "declaration": true,
     "declarationMap": true,
     "module": "esnext",
-    "outDir": "dist/main",
-    "rootDir": "src/lib",
+    "outDir": "dist",
+    "rootDir": "src",
     "sourceMap": true,
     "target": "esnext",
 
     "strict": true,
 
     "esModuleInterop": true,
-    "moduleResolution": "Node",
+    "moduleResolution": "NodeNext",
     "resolveJsonModule": true,
 
     "forceConsistentCasingInFileNames": true,

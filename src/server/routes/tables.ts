@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify'
-import { PostgresMeta } from '../../lib'
-import { DEFAULT_POOL_CONFIG } from '../constants'
-import { extractRequestForLogging, translateErrorToResponseCode } from '../utils'
+import { PostgresMeta } from '../../lib/index.js'
+import { DEFAULT_POOL_CONFIG } from '../constants.js'
+import { extractRequestForLogging, translateErrorToResponseCode } from '../utils.js'
 
 export default async (fastify: FastifyInstance) => {
   fastify.head<{

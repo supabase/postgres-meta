@@ -1,8 +1,7 @@
-import { literal } from 'pg-format'
-import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
-import { filterByList } from './helpers'
-import { typesSql } from './sql'
-import { PostgresMetaResult, PostgresType } from './types'
+import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
+import { filterByList } from './helpers.js'
+import { typesSql } from './sql/index.js'
+import { PostgresMetaResult, PostgresType } from './types.js'
 
 export default class PostgresMetaTypes {
   query: (sql: string) => Promise<PostgresMetaResult<any>>

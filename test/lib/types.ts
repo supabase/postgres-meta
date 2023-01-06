@@ -5,9 +5,9 @@ test('list', async () => {
   expect(res.data?.find(({ name }) => name === 'user_status')).toMatchInlineSnapshot(
     { id: expect.any(Number) },
     `
-    Object {
+    {
       "comment": null,
-      "enums": Array [
+      "enums": [
         "ACTIVE",
         "INACTIVE",
       ],

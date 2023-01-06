@@ -12,8 +12,8 @@ test('retrieve', async () => {
       },
     },
     `
-    Object {
-      "data": Object {
+    {
+      "data": {
         "active_connections": Any<Number>,
         "max_connections": Any<Number>,
         "version": StringMatching /\\^PostgreSQL/,

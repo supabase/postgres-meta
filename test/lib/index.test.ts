@@ -2,6 +2,7 @@
 // TODO: Test server.
 import './query'
 import './config'
+import './secrets'
 import './version'
 import './schemas'
 import './types'

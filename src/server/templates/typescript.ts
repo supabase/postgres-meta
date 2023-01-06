@@ -5,7 +5,7 @@ import type {
   PostgresTable,
   PostgresType,
   PostgresView,
-} from '../../lib'
+} from '../../lib/index.js'
 
 export const apply = ({
   schemas,
