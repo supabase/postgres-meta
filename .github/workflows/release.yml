@@ -6,14 +6,13 @@ on:
       - master
   workflow_dispatch:
 
-permissions:
-  id-token: write # This is required for requesting the JWT from AWS
-  contents: read # This is required for actions/checkout
-
 jobs:
   semantic-release:
     name: Release
     runs-on: ubuntu-20.04
+    permissions:
+      id-token: write # This is required for requesting the JWT from AWS
+      contents: read # This is required for actions/checkout
     outputs:
       new-release-published: ${{ steps.semantic-release.outputs.new_release_published }}
       new-release-version: ${{ steps.semantic-release.outputs.new_release_version }}
