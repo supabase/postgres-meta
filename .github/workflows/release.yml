@@ -28,6 +28,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${{ secrets.PROD_AWS_ROLE }}
+          aws-region: us-east-1
 
       - run: |
           npm clean-install
