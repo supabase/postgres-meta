@@ -27,7 +27,7 @@ jobs:
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: { secrets.PROD_AWS_ROLE }
+          role-to-assume: ${{ secrets.PROD_AWS_ROLE }}
 
       - run: |
           npm clean-install
