@@ -10,6 +10,9 @@ jobs:
   semantic-release:
     name: Release
     runs-on: ubuntu-20.04
+    permissions:
+      id-token: write # This is required for requesting the JWT from AWS
+      contents: read # This is required for actions/checkout
     outputs:
       new-release-published: ${{ steps.semantic-release.outputs.new_release_published }}
       new-release-version: ${{ steps.semantic-release.outputs.new_release_version }}
@@ -18,7 +21,13 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: '16'
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.PROD_AWS_ROLE }}
+          aws-region: us-east-1
 
       - run: |
           npm clean-install
@@ -43,7 +52,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: '16'
 
       - name: Prepare release
         run: |
@@ -96,8 +105,6 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: public.ecr.aws
-          username: ${{ secrets.PROD_ACCESS_KEY_ID }}
-          password: ${{ secrets.PROD_SECRET_ACCESS_KEY }}
 
       - name: Login to GHCR
         uses: docker/login-action@v2
