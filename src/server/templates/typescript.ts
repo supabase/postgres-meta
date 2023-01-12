@@ -60,6 +60,9 @@ export interface Database {
       const schemaEnums = types
         .filter((type) => type.schema === schema.name && type.enums.length > 0)
         .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+      const schemaCompositeTypes = types
+        .filter((type) => type.schema === schema.name && type.attributes.length > 0)
+        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
       return `${JSON.stringify(schema.name)}: {
           Tables: {
             ${
@@ -294,6 +297,28 @@ export interface Database {
                   )
             }
           }
+          CompositeTypes: {
+            ${
+              schemaCompositeTypes.length === 0
+                ? '[_ in never]: never'
+                : schemaCompositeTypes.map(
+                    ({ name, attributes }) =>
+                      `${JSON.stringify(name)}: {
+                        ${attributes.map(({ name, type_id }) => {
+                          const type = types.find(({ id }) => id === type_id)
+                          if (type) {
+                            return `${JSON.stringify(name)}: ${pgTypeToTsType(
+                              type.name,
+                              types,
+                              schemas
+                            )}`
+                          }
+                          return 'unknown'
+                        })}
+                      }`
+                  )
+            }
+          }
         }`
     })}
 }`
@@ -305,7 +330,7 @@ export interface Database {
   return output
 }
 
-// TODO: Make this more robust. Currently doesn't handle composite types - returns them as unknown.
+// TODO: Make this more robust. Currently doesn't handle range types - returns them as unknown.
 const pgTypeToTsType = (
   pgType: string,
   types: PostgresType[],
@@ -340,12 +365,24 @@ const pgTypeToTsType = (
   } else if (pgType.startsWith('_')) {
     return `(${pgTypeToTsType(pgType.substring(1), types, schemas)})[]`
   } else {
-    const type = types.find((type) => type.name === pgType && type.enums.length > 0)
-    if (type) {
-      if (schemas.some(({ name }) => name === type.schema)) {
-        return `Database[${JSON.stringify(type.schema)}]['Enums'][${JSON.stringify(type.name)}]`
+    const enumType = types.find((type) => type.name === pgType && type.enums.length > 0)
+    if (enumType) {
+      if (schemas.some(({ name }) => name === enumType.schema)) {
+        return `Database[${JSON.stringify(enumType.schema)}]['Enums'][${JSON.stringify(
+          enumType.name
+        )}]`
       }
-      return type.enums.map((variant) => JSON.stringify(variant)).join('|')
+      return enumType.enums.map((variant) => JSON.stringify(variant)).join('|')
+    }
+
+    const compositeType = types.find((type) => type.name === pgType && type.attributes.length > 0)
+    if (compositeType) {
+      if (schemas.some(({ name }) => name === compositeType.schema)) {
+        return `Database[${JSON.stringify(
+          compositeType.schema
+        )}]['CompositeTypes'][${JSON.stringify(compositeType.name)}]`
+      }
+      return 'unknown'
     }
 
     return 'unknown'

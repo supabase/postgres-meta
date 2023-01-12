@@ -5,8 +5,8 @@ test('list', async () => {
   expect(res.data?.find(({ name }) => name === 'user_status')).toMatchInlineSnapshot(
     { id: expect.any(Number) },
     `
-    Object {
-      "attributes": Array [],
+    {
+      "attributes": [],
       "comment": null,
       "enums": [
         "ACTIVE",
@@ -63,19 +63,19 @@ test('composite type attributes', async () => {
   expect(res.data?.find(({ name }) => name === 'test_composite')).toMatchInlineSnapshot(
     { id: expect.any(Number) },
     `
-    Object {
-      "attributes": Array [
-        Object {
+    {
+      "attributes": [
+        {
           "name": "id",
           "type_id": 20,
         },
-        Object {
+        {
           "name": "data",
           "type_id": 25,
         },
       ],
       "comment": null,
-      "enums": Array [],
+      "enums": [],
       "format": "test_composite",
       "id": Any<Number>,
       "name": "test_composite",
