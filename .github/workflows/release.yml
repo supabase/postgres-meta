@@ -12,7 +12,10 @@ jobs:
     runs-on: ubuntu-20.04
     permissions:
       id-token: write # This is required for requesting the JWT from AWS
-      contents: read # This is required for actions/checkout
+      # These required for @semantic-release/github
+      contents: write
+      issues: write
+      pull-requests: write
     outputs:
       new-release-published: ${{ steps.semantic-release.outputs.new_release_published }}
       new-release-version: ${{ steps.semantic-release.outputs.new_release_version }}
