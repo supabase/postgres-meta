@@ -322,6 +322,7 @@ const pgTypeToTsType = (
       'varchar',
       'date',
       'text',
+      'citext',
       'time',
       'timetz',
       'timestamp',
