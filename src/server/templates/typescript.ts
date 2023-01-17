@@ -222,7 +222,7 @@ export interface Database {
                 ([fnName, fns]) =>
                   `${JSON.stringify(fnName)}: ${fns
                     .map(
-                      ({ args, return_type }) => `{
+                      ({ args, return_type, complete_statement }) => `{
                   Args: ${(() => {
                     const inArgs = args.filter(({ mode }) => mode === 'in')
 
@@ -275,6 +275,16 @@ export interface Database {
                       return `{ ${argsNameAndType.map(
                         ({ name, type }) => `${JSON.stringify(name)}: ${type}`
                       )} }[]`
+                    }
+
+                    const setOfTable = schemaTables.find(
+                      ({ schema: _schema, name }) => _schema === schema.name && name === return_type
+                    )
+
+                    if (setOfTable) {
+                      return `Database[${JSON.stringify(schema.name)}]['Tables'][${JSON.stringify(
+                        return_type
+                      )}]['Row']${complete_statement.includes('SETOF') ? '[]' : ''}`
                     }
 
                     return pgTypeToTsType(return_type, types, schemas)

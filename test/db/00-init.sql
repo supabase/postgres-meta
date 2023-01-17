@@ -65,3 +65,15 @@ create foreign table foreign_table (
   name text,
   status user_status
 ) server foreign_server options (schema_name 'public', table_name 'users');
+
+create or replace function public.get_user_by_id(integer) returns public.users as $$
+select * from public.users where id = $1;
+$$ language sql stable;
+
+create or replace function public.get_users() returns setof public.users as $$
+select * from public.users;
+$$ language sql stable;
+
+create or replace function public.get_users_typed() returns table (id int, name text) as $$
+select id, name from public.users;
+$$ language sql stable;
