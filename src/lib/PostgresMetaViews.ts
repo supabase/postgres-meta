@@ -1,3 +1,4 @@
+import { literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
 import { coalesceRowsToArray, filterByList } from './helpers.js'
 import { columnsSql, viewsSql } from './sql/index.js'
@@ -57,6 +58,55 @@ export default class PostgresMetaViews {
       sql += ` offset ${offset}`
     }
     return await this.query(sql)
+  }
+
+  async retrieve({ id }: { id: number }): Promise<PostgresMetaResult<PostgresView>>
+  async retrieve({
+    name,
+    schema,
+  }: {
+    name: string
+    schema: string
+  }): Promise<PostgresMetaResult<PostgresView>>
+  async retrieve({
+    id,
+    name,
+    schema = 'public',
+  }: {
+    id?: number
+    name?: string
+    schema?: string
+  }): Promise<PostgresMetaResult<PostgresView>> {
+    if (id) {
+      const sql = `${generateEnrichedViewsSql({
+        includeColumns: true,
+      })} where views.id = ${literal(id)};`
+      const { data, error } = await this.query(sql)
+      if (error) {
+        return { data, error }
+      } else if (data.length === 0) {
+        return { data: null, error: { message: `Cannot find a view with ID ${id}` } }
+      } else {
+        return { data: data[0], error }
+      }
+    } else if (name) {
+      const sql = `${generateEnrichedViewsSql({
+        includeColumns: true,
+      })} where views.name = ${literal(name)} and views.schema = ${literal(schema)};`
+      const { data, error } = await this.query(sql)
+      if (error) {
+        return { data, error }
+      } else if (data.length === 0) {
+        return {
+          data: null,
+          error: { message: `Cannot find a view named ${name} in schema ${schema}` },
+        }
+      } else {
+        return { data: data[0], error }
+      }
+    } else {
+      return { data: null, error: { message: 'Invalid parameters on view retrieve' } }
+    }
   }
 }
 
