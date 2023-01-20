@@ -9,28 +9,44 @@ export default class PostgresMetaForeignTables {
     this.query = query
   }
 
+  async list(options: {
+    limit?: number
+    offset?: number
+    includeColumns: false
+  }): Promise<PostgresMetaResult<(PostgresForeignTable & { columns: never })[]>>
+  async list(options?: {
+    limit?: number
+    offset?: number
+    includeColumns?: boolean
+  }): Promise<PostgresMetaResult<(PostgresForeignTable & { columns: unknown[] })[]>>
   async list({
     limit,
     offset,
+    includeColumns = true,
   }: {
     limit?: number
     offset?: number
+    includeColumns?: boolean
   } = {}): Promise<PostgresMetaResult<PostgresForeignTable[]>> {
-    let sql = enrichedForeignTablesSql
+    let sql = generateEnrichedForeignTablesSql({ includeColumns })
     if (limit) {
-      sql = `${sql} LIMIT ${limit}`
+      sql += ` limit ${limit}`
     }
     if (offset) {
-      sql = `${sql} OFFSET ${offset}`
+      sql += ` offset ${offset}`
     }
     return await this.query(sql)
   }
 }
 
-const enrichedForeignTablesSql = `
-WITH foreign_tables AS (${foreignTablesSql}),
-  columns AS (${columnsSql})
-SELECT
-  *,
-  ${coalesceRowsToArray('columns', 'columns.table_id = foreign_tables.id')}
-FROM foreign_tables`
+const generateEnrichedForeignTablesSql = ({ includeColumns }: { includeColumns: boolean }) => `
+with foreign_tables as (${foreignTablesSql})
+  ${includeColumns ? `, columns as (${columnsSql})` : ''}
+select
+  *
+  ${
+    includeColumns
+      ? `, ${coalesceRowsToArray('columns', 'columns.table_id = foreign_tables.id')}`
+      : ''
+  }
+from foreign_tables`

@@ -16,8 +16,8 @@ export const apply = ({
   arrayTypes,
 }: {
   schemas: PostgresSchema[]
-  tables: PostgresTable[]
-  views: PostgresView[]
+  tables: (PostgresTable & { columns: unknown[] })[]
+  views: (PostgresView & { columns: unknown[] })[]
   functions: PostgresFunction[]
   types: PostgresType[]
   arrayTypes: PostgresType[]
