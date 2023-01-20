@@ -129,6 +129,61 @@ test('list', async () => {
   )
 })
 
+test('list without columns', async () => {
+  const res = await pgMeta.tables.list({ includeColumns: false })
+
+  const { columns, primary_keys, relationships, ...rest }: any = res.data?.find(
+    ({ name }) => name === 'users'
+  )
+
+  expect({
+    primary_keys: primary_keys.map(({ table_id, ...rest }: any) => rest),
+    relationships: relationships.map(({ id, ...rest }: any) => rest),
+    ...rest,
+  }).toMatchInlineSnapshot(
+    {
+      bytes: expect.any(Number),
+      dead_rows_estimate: expect.any(Number),
+      id: expect.any(Number),
+      live_rows_estimate: expect.any(Number),
+      size: expect.any(String),
+    },
+    `
+    {
+      "bytes": Any<Number>,
+      "comment": null,
+      "dead_rows_estimate": Any<Number>,
+      "id": Any<Number>,
+      "live_rows_estimate": Any<Number>,
+      "name": "users",
+      "primary_keys": [
+        {
+          "name": "id",
+          "schema": "public",
+          "table_name": "users",
+        },
+      ],
+      "relationships": [
+        {
+          "constraint_name": "todos_user-id_fkey",
+          "source_column_name": "user-id",
+          "source_schema": "public",
+          "source_table_name": "todos",
+          "target_column_name": "id",
+          "target_table_name": "users",
+          "target_table_schema": "public",
+        },
+      ],
+      "replica_identity": "DEFAULT",
+      "rls_enabled": false,
+      "rls_forced": false,
+      "schema": "public",
+      "size": Any<String>,
+    }
+  `
+  )
+})
+
 test('list tables with included schemas', async () => {
   let res = await pgMeta.tables.list({
     includedSchemas: ['public'],

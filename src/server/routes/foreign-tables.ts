@@ -16,6 +16,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
         querystring: Type.Object({
           limit: Type.Optional(Type.Integer()),
           offset: Type.Optional(Type.Integer()),
+          include_columns: Type.Optional(Type.Boolean()),
         }),
         response: {
           200: Type.Array(postgresForeignTableSchema),
@@ -29,9 +30,10 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       const connectionString = request.headers.pg
       const limit = request.query.limit
       const offset = request.query.offset
+      const includeColumns = request.query.include_columns
 
       const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
-      const { data, error } = await pgMeta.foreignTables.list({ limit, offset })
+      const { data, error } = await pgMeta.foreignTables.list({ limit, offset, includeColumns })
       await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })

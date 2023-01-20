@@ -80,7 +80,7 @@ export const postgresForeignTableSchema = Type.Object({
   schema: Type.String(),
   name: Type.String(),
   comment: Type.Union([Type.String(), Type.Null()]),
-  columns: Type.Array(postgresColumnSchema),
+  columns: Type.Optional(Type.Array(postgresColumnSchema)),
 })
 export type PostgresForeignTable = Static<typeof postgresForeignTableSchema>
 
@@ -289,7 +289,7 @@ export const postgresTableSchema = Type.Object({
   live_rows_estimate: Type.Integer(),
   dead_rows_estimate: Type.Integer(),
   comment: Type.Union([Type.String(), Type.Null()]),
-  columns: Type.Array(postgresColumnSchema),
+  columns: Type.Optional(Type.Array(postgresColumnSchema)),
   primary_keys: Type.Array(postgresPrimaryKeySchema),
   relationships: Type.Array(postgresRelationshipSchema),
 })
@@ -377,6 +377,6 @@ export const postgresViewSchema = Type.Object({
   name: Type.String(),
   is_updatable: Type.Boolean(),
   comment: Type.Union([Type.String(), Type.Null()]),
-  columns: Type.Array(postgresColumnSchema),
+  columns: Type.Optional(Type.Array(postgresColumnSchema)),
 })
 export type PostgresView = Static<typeof postgresViewSchema>
