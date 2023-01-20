@@ -16,33 +16,51 @@ export default class PostgresMetaTables {
     this.query = query
   }
 
+  async list(options: {
+    includeSystemSchemas?: boolean
+    includedSchemas?: string[]
+    excludedSchemas?: string[]
+    limit?: number
+    offset?: number
+    includeColumns: false
+  }): Promise<PostgresMetaResult<(PostgresTable & { columns: never })[]>>
+  async list(options?: {
+    includeSystemSchemas?: boolean
+    includedSchemas?: string[]
+    excludedSchemas?: string[]
+    limit?: number
+    offset?: number
+    includeColumns?: boolean
+  }): Promise<PostgresMetaResult<(PostgresTable & { columns: unknown[] })[]>>
   async list({
     includeSystemSchemas = false,
     includedSchemas,
     excludedSchemas,
     limit,
     offset,
+    includeColumns = true,
   }: {
     includeSystemSchemas?: boolean
     includedSchemas?: string[]
     excludedSchemas?: string[]
     limit?: number
     offset?: number
+    includeColumns?: boolean
   } = {}): Promise<PostgresMetaResult<PostgresTable[]>> {
-    let sql = enrichedTablesSql
+    let sql = generateEnrichedTablesSql({ includeColumns })
     const filter = filterByList(
       includedSchemas,
       excludedSchemas,
       !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
     )
     if (filter) {
-      sql += ` WHERE schema ${filter}`
+      sql += ` where schema ${filter}`
     }
     if (limit) {
-      sql = `${sql} LIMIT ${limit}`
+      sql += ` limit ${limit}`
     }
     if (offset) {
-      sql = `${sql} OFFSET ${offset}`
+      sql += ` offset ${offset}`
     }
     return await this.query(sql)
   }
@@ -65,7 +83,9 @@ export default class PostgresMetaTables {
     schema?: string
   }): Promise<PostgresMetaResult<PostgresTable>> {
     if (id) {
-      const sql = `${enrichedTablesSql} WHERE tables.id = ${literal(id)};`
+      const sql = `${generateEnrichedTablesSql({
+        includeColumns: true,
+      })} where tables.id = ${literal(id)};`
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -75,9 +95,9 @@ export default class PostgresMetaTables {
         return { data: data[0], error }
       }
     } else if (name) {
-      const sql = `${enrichedTablesSql} WHERE tables.name = ${literal(
-        name
-      )} AND tables.schema = ${literal(schema)};`
+      const sql = `${generateEnrichedTablesSql({
+        includeColumns: true,
+      })} where tables.name = ${literal(name)} and tables.schema = ${literal(schema)};`
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -227,18 +247,18 @@ COMMIT;`
   }
 }
 
-const enrichedTablesSql = `
-WITH tables AS (${tablesSql}),
-  columns AS (${columnsSql}),
-  primary_keys AS (${primaryKeysSql}),
-  relationships AS (${relationshipsSql})
-SELECT
-  *,
-  ${coalesceRowsToArray('columns', 'columns.table_id = tables.id')},
-  ${coalesceRowsToArray('primary_keys', 'primary_keys.table_id = tables.id')},
-  ${coalesceRowsToArray(
+const generateEnrichedTablesSql = ({ includeColumns }: { includeColumns: boolean }) => `
+with tables as (${tablesSql})
+  ${includeColumns ? `, columns as (${columnsSql})` : ''}
+  , primary_keys as (${primaryKeysSql})
+  , relationships as (${relationshipsSql})
+select
+  *
+  ${includeColumns ? `, ${coalesceRowsToArray('columns', 'columns.table_id = tables.id')}` : ''}
+  , ${coalesceRowsToArray('primary_keys', 'primary_keys.table_id = tables.id')}
+  , ${coalesceRowsToArray(
     'relationships',
     `(relationships.source_schema = tables.schema AND relationships.source_table_name = tables.name)
        OR (relationships.target_table_schema = tables.schema AND relationships.target_table_name = tables.name)`
   )}
-FROM tables`
+from tables`

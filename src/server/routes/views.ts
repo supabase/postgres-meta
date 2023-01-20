@@ -20,6 +20,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
           excluded_schemas: Type.Optional(Type.String()),
           limit: Type.Optional(Type.Integer()),
           offset: Type.Optional(Type.Integer()),
+          include_columns: Type.Optional(Type.Boolean()),
         }),
         response: {
           200: Type.Array(postgresViewSchema),
@@ -36,6 +37,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       const excludedSchemas = request.query.excluded_schemas?.split(',')
       const limit = request.query.limit
       const offset = request.query.offset
+      const includeColumns = request.query.include_columns
 
       const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
       const { data, error } = await pgMeta.views.list({
@@ -44,6 +46,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
         excludedSchemas,
         limit,
         offset,
+        includeColumns,
       })
       await pgMeta.end()
       if (error) {
