@@ -100,6 +100,8 @@ To start developing, run `npm run dev`. It will set up the database with Docker 
 
 If you are fixing a bug, you should create a new test case. To test your changes, add the `-u/--updateSnapshot` flag to `jest` on the `test:run` script, run `npm run test`, and then review the git diff of the snapshots. Depending on your change, you may see `id` fields being changed - this is expected and you are free to commit it, as long as it passes the CI. Don't forget to remove the `-u/--updateSnapshot` flag when committing.
 
+To make changes to the TypeScript type generation, run `npm run gen:types:typescript` while you have `npm run dev` running.
+
 ## Licence
 
 Apache 2.0
