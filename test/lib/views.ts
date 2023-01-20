@@ -74,3 +74,21 @@ test('list', async () => {
   `
   )
 })
+
+test('list without columns', async () => {
+  const res = await pgMeta.views.list({ includeColumns: false })
+  expect(res.data?.find(({ name }) => name === 'todos_view')).toMatchInlineSnapshot(
+    {
+      id: expect.any(Number),
+    },
+    `
+    {
+      "comment": null,
+      "id": Any<Number>,
+      "is_updatable": true,
+      "name": "todos_view",
+      "schema": "public",
+    }
+  `
+  )
+})
