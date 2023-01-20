@@ -76,3 +76,20 @@ test('list', async () => {
   `
   )
 })
+
+test('list without columns', async () => {
+  const res = await pgMeta.foreignTables.list({ includeColumns: false })
+  expect(res.data?.find(({ name }) => name === 'foreign_table')).toMatchInlineSnapshot(
+    {
+      id: expect.any(Number),
+    },
+    `
+    {
+      "comment": null,
+      "id": Any<Number>,
+      "name": "foreign_table",
+      "schema": "public",
+    }
+  `
+  )
+})
