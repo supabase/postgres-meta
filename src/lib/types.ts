@@ -295,6 +295,32 @@ export const postgresTableSchema = Type.Object({
 })
 export type PostgresTable = Static<typeof postgresTableSchema>
 
+export const postgresTableCreateSchema = Type.Object({
+  name: Type.String(),
+  schema: Type.Optional(Type.String()),
+  comment: Type.Optional(Type.String()),
+})
+export type PostgresTableCreate = Static<typeof postgresTableCreateSchema>
+
+export const postgresTableUpdateSchema = Type.Object({
+  name: Type.Optional(Type.String()),
+  schema: Type.Optional(Type.String()),
+  rls_enabled: Type.Optional(Type.Boolean()),
+  rls_forced: Type.Optional(Type.Boolean()),
+  replica_identity: Type.Optional(
+    Type.Union([
+      Type.Literal('DEFAULT'),
+      Type.Literal('INDEX'),
+      Type.Literal('FULL'),
+      Type.Literal('NOTHING'),
+    ])
+  ),
+  replica_identity_index: Type.Optional(Type.String()),
+  primary_keys: Type.Optional(Type.Array(Type.Object({ name: Type.String() }))),
+  comment: Type.Optional(Type.String()),
+})
+export type PostgresTableUpdate = Static<typeof postgresTableUpdateSchema>
+
 export const postgresTriggerSchema = Type.Object({
   id: Type.Integer(),
   table_id: Type.Integer(),
