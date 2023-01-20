@@ -33,6 +33,7 @@ const app = fastify({
   logger,
   disableRequestLogging: true,
   requestIdHeader: PG_META_REQ_HEADER,
+  ignoreTrailingSlash: true,
 })
 
 app.setErrorHandler((error, request, reply) => {

@@ -2,7 +2,7 @@ import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
 import { coalesceRowsToArray, filterByList } from './helpers.js'
 import { columnsSql, primaryKeysSql, relationshipsSql, tablesSql } from './sql/index.js'
-import { PostgresMetaResult, PostgresTable } from './types.js'
+import { FilterParams, PaginationParams, PostgresMetaResult, PostgresTable } from './types.js'
 
 export default class PostgresMetaTables {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -11,19 +11,36 @@ export default class PostgresMetaTables {
     this.query = query
   }
 
+  async count({
+    includeSystemSchemas = false,
+    includedSchemas,
+    excludedSchemas,
+  }: FilterParams = {}): Promise<PostgresMetaResult<{ count: number }>> {
+    let sql = `WITH tables AS (${tablesSql}) SELECT count(1) FROM tables`
+    const filter = filterByList(
+      includedSchemas,
+      excludedSchemas,
+      !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
+    )
+    if (filter) {
+      sql += ` WHERE schema ${filter}`
+    }
+
+    const { data, error } = await this.query(sql)
+    if (error) {
+      return { data, error }
+    } else {
+      return { data: data[0], error }
+    }
+  }
+
   async list({
     includeSystemSchemas = false,
     includedSchemas,
     excludedSchemas,
     limit,
     offset,
-  }: {
-    includeSystemSchemas?: boolean
-    includedSchemas?: string[]
-    excludedSchemas?: string[]
-    limit?: number
-    offset?: number
-  } = {}): Promise<PostgresMetaResult<PostgresTable[]>> {
+  }: FilterParams & PaginationParams = {}): Promise<PostgresMetaResult<PostgresTable[]>> {
     let sql = enrichedTablesSql
     const filter = filterByList(
       includedSchemas,

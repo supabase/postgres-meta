@@ -3,6 +3,19 @@ import { Options as PrettierOptions } from 'prettier'
 
 export interface FormatterOptions extends PrettierOptions {}
 
+// Request types
+export interface FilterParams {
+  includeSystemSchemas?: boolean
+  includedSchemas?: string[]
+  excludedSchemas?: string[]
+}
+
+export interface PaginationParams {
+  limit?: number
+  offset?: number
+}
+
+// Response types
 export interface PostgresMetaOk<T> {
   data: T
   error: null
