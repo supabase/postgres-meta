@@ -2,7 +2,12 @@ import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
 import { coalesceRowsToArray, filterByList } from './helpers.js'
 import { columnsSql, primaryKeysSql, relationshipsSql, tablesSql } from './sql/index.js'
-import { PostgresMetaResult, PostgresTable } from './types.js'
+import {
+  PostgresMetaResult,
+  PostgresTable,
+  PostgresTableCreate,
+  PostgresTableUpdate,
+} from './types.js'
 
 export default class PostgresMetaTables {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -93,11 +98,7 @@ export default class PostgresMetaTables {
     name,
     schema = 'public',
     comment,
-  }: {
-    name: string
-    schema?: string
-    comment?: string
-  }): Promise<PostgresMetaResult<PostgresTable>> {
+  }: PostgresTableCreate): Promise<PostgresMetaResult<PostgresTable>> {
     const tableSql = `CREATE TABLE ${ident(schema)}.${ident(name)} ();`
     const commentSql =
       comment === undefined
@@ -122,16 +123,7 @@ export default class PostgresMetaTables {
       replica_identity_index,
       primary_keys,
       comment,
-    }: {
-      name?: string
-      schema?: string
-      rls_enabled?: boolean
-      rls_forced?: boolean
-      replica_identity?: 'DEFAULT' | 'INDEX' | 'FULL' | 'NOTHING'
-      replica_identity_index?: string
-      primary_keys?: { name: string }[]
-      comment?: string
-    }
+    }: PostgresTableUpdate
   ): Promise<PostgresMetaResult<PostgresTable>> {
     const { data: old, error } = await this.retrieve({ id })
     if (error) {
