@@ -58,5 +58,40 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       return data
     }
   )
+
+  fastify.get(
+    '/:id(\\d+)',
+    {
+      schema: {
+        headers: Type.Object({
+          pg: Type.String(),
+        }),
+        params: Type.Object({
+          id: Type.Integer(),
+        }),
+        response: {
+          200: postgresViewSchema,
+          404: Type.Object({
+            error: Type.String(),
+          }),
+        },
+      },
+    },
+    async (request, reply) => {
+      const connectionString = request.headers.pg
+      const id = request.params.id
+
+      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const { data, error } = await pgMeta.views.retrieve({ id })
+      await pgMeta.end()
+      if (error) {
+        request.log.error({ error, request: extractRequestForLogging(request) })
+        reply.code(404)
+        return { error: error.message }
+      }
+
+      return data
+    }
+  )
 }
 export default route
