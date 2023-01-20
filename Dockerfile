@@ -15,3 +15,5 @@ COPY package.json ./
 ENV PG_META_PORT=8080
 CMD ["npm", "run", "start"]
 EXPOSE 8080
+# --start-period defaults to 0s, but can't be set to 0s (to be explicit) by now
+HEALTHCHECK --interval=5s --timeout=5s --retries=3 CMD node -e "require('http').get('http://localhost:8080/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
