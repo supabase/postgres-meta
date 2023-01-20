@@ -32,3 +32,40 @@ jobs:
       - uses: actionsx/prettier@v2
         with:
           args: --check "{src,test}/**/*.ts"
+  
+  docker:
+    name: Build with docker
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout Repo
+
+      - uses: docker/setup-buildx-action@v2
+        name: Set up Docker Buildx
+      
+      - uses: docker/build-push-action@v3
+        with:
+          push: false
+          tags: pg-meta:test
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Check Health status
+        run: |
+          docker run -d --name pg-meta-test pg-meta:test
+          state=$(docker inspect -f '{{ .State.Health.Status}}' pg-meta-test)
+          if [ $state != "starting" ]; then
+            exit 1
+          fi
+          sleep 10
+          state=$(docker inspect -f '{{ .State.Health.Status}}' pg-meta-test)
+          docker stop pg-meta-test
+          if [ $state == "healthy" ]; then
+            exit 0
+          else
+            exit 1
+          fi
+      
+      
+
