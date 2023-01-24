@@ -11,6 +11,7 @@
   ],
   "type": "module",
   "main": "dist/server/app.js",
+  "types": "dist/lib/types.d.ts",
   "imports": {
     "#package.json": "./package.json"
   },
