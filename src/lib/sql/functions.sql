@@ -15,7 +15,10 @@ with functions as (
       array_fill(''::text, array[cardinality(coalesce(p.proallargtypes, p.proargtypes))])
     ) as arg_names,
     -- proallargtypes is null when all arg modes are IN
-    coalesce(p.proallargtypes, p.proargtypes) as arg_types
+    coalesce(p.proallargtypes, p.proargtypes) as arg_types,
+    array_cat(
+      array_fill(false, array[pronargs - pronargdefaults]),
+      array_fill(true, array[pronargdefaults])) as arg_has_defaults
   from
     pg_proc as p
   where
@@ -69,14 +72,20 @@ from
   left join (
     select
       oid,
-      jsonb_agg(jsonb_build_object('mode', t2.mode, 'name', name, 'type_id', type_id)) as args
+      jsonb_agg(jsonb_build_object(
+        'mode', t2.mode,
+        'name', name,
+        'type_id', type_id,
+        'has_default', has_default
+      )) as args
     from
       (
         select
           oid,
           unnest(arg_modes) as mode,
           unnest(arg_names) as name,
-          unnest(arg_types)::int8 as type_id
+          unnest(arg_types)::int8 as type_id,
+          unnest(arg_has_defaults) as has_default
         from
           functions
       ) as t1,

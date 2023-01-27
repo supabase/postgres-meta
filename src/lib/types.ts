@@ -102,6 +102,7 @@ const postgresFunctionSchema = Type.Object({
       ]),
       name: Type.String(),
       type_id: Type.Number(),
+      has_default: Type.Boolean(),
     })
   ),
   argument_types: Type.String(),

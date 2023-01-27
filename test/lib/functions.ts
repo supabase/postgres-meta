@@ -8,11 +8,13 @@ test('list', async () => {
     {
       "args": [
         {
+          "has_default": false,
           "mode": "in",
           "name": "",
           "type_id": 23,
         },
         {
+          "has_default": false,
           "mode": "in",
           "name": "",
           "type_id": 23,
@@ -98,11 +100,13 @@ test('retrieve, create, update, delete', async () => {
       "data": {
         "args": [
           {
+            "has_default": false,
             "mode": "in",
             "name": "a",
             "type_id": 21,
           },
           {
+            "has_default": false,
             "mode": "in",
             "name": "b",
             "type_id": 21,
@@ -143,11 +147,13 @@ test('retrieve, create, update, delete', async () => {
       "data": {
         "args": [
           {
+            "has_default": false,
             "mode": "in",
             "name": "a",
             "type_id": 21,
           },
           {
+            "has_default": false,
             "mode": "in",
             "name": "b",
             "type_id": 21,
@@ -192,11 +198,13 @@ test('retrieve, create, update, delete', async () => {
       "data": {
         "args": [
           {
+            "has_default": false,
             "mode": "in",
             "name": "a",
             "type_id": 21,
           },
           {
+            "has_default": false,
             "mode": "in",
             "name": "b",
             "type_id": 21,
@@ -237,11 +245,13 @@ test('retrieve, create, update, delete', async () => {
       "data": {
         "args": [
           {
+            "has_default": false,
             "mode": "in",
             "name": "a",
             "type_id": 21,
           },
           {
+            "has_default": false,
             "mode": "in",
             "name": "b",
             "type_id": 21,
