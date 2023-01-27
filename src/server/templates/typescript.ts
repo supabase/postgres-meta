@@ -313,7 +313,7 @@ export interface Database {
                               schemas
                             )}`
                           }
-                          return 'unknown'
+                          return `${JSON.stringify(name)}: unknown`
                         })}
                       }`
                   )
