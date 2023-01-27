@@ -37,7 +37,7 @@ export const postgresColumnSchema = Type.Object({
   is_nullable: Type.Boolean(),
   is_updatable: Type.Boolean(),
   is_unique: Type.Boolean(),
-  enums: Type.Array(Type.Unknown()),
+  enums: Type.Array(Type.String()),
   comment: Type.Union([Type.String(), Type.Null()]),
 })
 export type PostgresColumn = Static<typeof postgresColumnSchema>
@@ -80,7 +80,7 @@ export const postgresForeignTableSchema = Type.Object({
   schema: Type.String(),
   name: Type.String(),
   comment: Type.Union([Type.String(), Type.Null()]),
-  columns: Type.Array(postgresColumnSchema),
+  columns: Type.Optional(Type.Array(postgresColumnSchema)),
 })
 export type PostgresForeignTable = Static<typeof postgresForeignTableSchema>
 
@@ -290,11 +290,37 @@ export const postgresTableSchema = Type.Object({
   live_rows_estimate: Type.Integer(),
   dead_rows_estimate: Type.Integer(),
   comment: Type.Union([Type.String(), Type.Null()]),
-  columns: Type.Array(postgresColumnSchema),
+  columns: Type.Optional(Type.Array(postgresColumnSchema)),
   primary_keys: Type.Array(postgresPrimaryKeySchema),
   relationships: Type.Array(postgresRelationshipSchema),
 })
 export type PostgresTable = Static<typeof postgresTableSchema>
+
+export const postgresTableCreateSchema = Type.Object({
+  name: Type.String(),
+  schema: Type.Optional(Type.String()),
+  comment: Type.Optional(Type.String()),
+})
+export type PostgresTableCreate = Static<typeof postgresTableCreateSchema>
+
+export const postgresTableUpdateSchema = Type.Object({
+  name: Type.Optional(Type.String()),
+  schema: Type.Optional(Type.String()),
+  rls_enabled: Type.Optional(Type.Boolean()),
+  rls_forced: Type.Optional(Type.Boolean()),
+  replica_identity: Type.Optional(
+    Type.Union([
+      Type.Literal('DEFAULT'),
+      Type.Literal('INDEX'),
+      Type.Literal('FULL'),
+      Type.Literal('NOTHING'),
+    ])
+  ),
+  replica_identity_index: Type.Optional(Type.String()),
+  primary_keys: Type.Optional(Type.Array(Type.Object({ name: Type.String() }))),
+  comment: Type.Optional(Type.String()),
+})
+export type PostgresTableUpdate = Static<typeof postgresTableUpdateSchema>
 
 export const postgresTriggerSchema = Type.Object({
   id: Type.Integer(),
@@ -327,7 +353,13 @@ export const postgresTypeSchema = Type.Object({
   name: Type.String(),
   schema: Type.String(),
   format: Type.String(),
-  enums: Type.Array(Type.Unknown()),
+  enums: Type.Array(Type.String()),
+  attributes: Type.Array(
+    Type.Object({
+      name: Type.String(),
+      type_id: Type.Integer(),
+    })
+  ),
   comment: Type.Union([Type.String(), Type.Null()]),
 })
 export type PostgresType = Static<typeof postgresTypeSchema>
@@ -346,6 +378,6 @@ export const postgresViewSchema = Type.Object({
   name: Type.String(),
   is_updatable: Type.Boolean(),
   comment: Type.Union([Type.String(), Type.Null()]),
-  columns: Type.Array(postgresColumnSchema),
+  columns: Type.Optional(Type.Array(postgresColumnSchema)),
 })
 export type PostgresView = Static<typeof postgresViewSchema>
