@@ -230,7 +230,7 @@ export interface Database {
                       return 'Record<PropertyKey, never>'
                     }
 
-                    const argsNameAndType = inArgs.map(({ name, type_id }) => {
+                    const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
                       let type = arrayTypes.find(({ id }) => id === type_id)
                       if (type) {
                         // If it's an array type, the name looks like `_int8`.
@@ -238,17 +238,23 @@ export interface Database {
                         return {
                           name,
                           type: `(${pgTypeToTsType(elementTypeName, types, schemas)})[]`,
+                          has_default,
                         }
                       }
                       type = types.find(({ id }) => id === type_id)
                       if (type) {
-                        return { name, type: pgTypeToTsType(type.name, types, schemas) }
+                        return {
+                          name,
+                          type: pgTypeToTsType(type.name, types, schemas),
+                          has_default,
+                        }
                       }
-                      return { name, type: 'unknown' }
+                      return { name, type: 'unknown', has_default }
                     })
 
                     return `{ ${argsNameAndType.map(
-                      ({ name, type }) => `${JSON.stringify(name)}: ${type}`
+                      ({ name, type, has_default }) =>
+                        `${JSON.stringify(name)}${has_default ? '?' : ''}: ${type}`
                     )} }`
                   })()}
                   Returns: ${(() => {
