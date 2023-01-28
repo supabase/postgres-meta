@@ -90,7 +90,7 @@ export interface Database {
                               fn.return_type,
                               types,
                               schemas
-                            )}`
+                            )} | null`
                         ),
                     ]}
                   }
