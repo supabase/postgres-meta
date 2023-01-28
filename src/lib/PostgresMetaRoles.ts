@@ -42,7 +42,7 @@ FROM
   roles
 WHERE
   true`
-    if (includeDefaultRoles) {
+    if (!includeDefaultRoles) {
       sql += ` AND name NOT IN (${DEFAULT_ROLES.map(literal).join(',')})`
     }
     if (limit) {
