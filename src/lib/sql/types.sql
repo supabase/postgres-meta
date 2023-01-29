@@ -29,7 +29,7 @@ from
       pg_class c
       join pg_attribute a on a.attrelid = c.oid
     where
-      c.relkind = 'c'
+      c.relkind = 'c' and a.attisdropped = false
     group by
       c.oid
   ) as t_attributes on t_attributes.oid = t.typrelid
