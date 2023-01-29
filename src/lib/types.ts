@@ -17,6 +17,19 @@ export interface PostgresMetaErr {
 
 export type PostgresMetaResult<T> = PostgresMetaOk<T> | PostgresMetaErr
 
+export const postgresColumnPermissionSchema = Type.Object({
+  role: Type.String(),
+  table_schema: Type.String(),
+  table_name: Type.String(),
+  column_name: Type.String(),
+  privilege_type: Type.Union([
+    Type.Literal('SELECT'),
+    Type.Literal('INSERT'),
+    Type.Literal('UPDATE'),
+  ]),
+})
+export type PostgresColumnPermission = Static<typeof postgresColumnPermissionSchema>
+
 export const postgresColumnSchema = Type.Object({
   table_id: Type.Integer(),
   schema: Type.String(),

@@ -3,6 +3,7 @@ export {
   PostgresMetaOk,
   PostgresMetaErr,
   PostgresMetaResult,
+  PostgresColumnPermission,
   PostgresColumn,
   PostgresConfig,
   PostgresExtension,

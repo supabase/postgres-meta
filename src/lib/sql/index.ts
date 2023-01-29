@@ -3,6 +3,10 @@ import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
+export const columnPermissionsSql = await readFile(
+  join(__dirname, 'column_permissions.sql'),
+  'utf-8'
+)
 export const columnsSql = await readFile(join(__dirname, 'columns.sql'), 'utf-8')
 export const configSql = await readFile(join(__dirname, 'config.sql'), 'utf-8')
 export const extensionsSql = await readFile(join(__dirname, 'extensions.sql'), 'utf-8')

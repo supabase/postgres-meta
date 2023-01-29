@@ -1,5 +1,6 @@
 import { PoolConfig } from 'pg'
 import * as Parser from './Parser.js'
+import PostgresMetaColumnPermissions from './PostgresMetaColumnPermissions.js'
 import PostgresMetaColumns from './PostgresMetaColumns.js'
 import PostgresMetaConfig from './PostgresMetaConfig.js'
 import PostgresMetaExtensions from './PostgresMetaExtensions.js'
@@ -20,6 +21,7 @@ import { PostgresMetaResult } from './types.js'
 export default class PostgresMeta {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
   end: () => Promise<void>
+  columnPermissions: PostgresMetaColumnPermissions
   columns: PostgresMetaColumns
   config: PostgresMetaConfig
   extensions: PostgresMetaExtensions
@@ -44,6 +46,7 @@ export default class PostgresMeta {
     this.query = query
     this.end = end
     this.columns = new PostgresMetaColumns(this.query)
+    this.columnPermissions = new PostgresMetaColumnPermissions(this.query)
     this.config = new PostgresMetaConfig(this.query)
     this.extensions = new PostgresMetaExtensions(this.query)
     this.foreignTables = new PostgresMetaForeignTables(this.query)
