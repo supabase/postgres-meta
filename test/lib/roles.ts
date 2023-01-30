@@ -3,7 +3,7 @@ import { pgMeta } from './utils'
 test('list', async () => {
   const res = await pgMeta.roles.list()
 
-  const role: any = res.data?.find(({ name }) => name === 'postgres')
+  let role = res.data?.find(({ name }) => name === 'postgres')
 
   expect(role).toMatchInlineSnapshot(
     { active_connections: expect.any(Number), id: expect.any(Number) },
@@ -21,6 +21,43 @@ test('list', async () => {
       "is_replication_role": true,
       "is_superuser": true,
       "name": "postgres",
+      "password": "********",
+      "valid_until": null,
+    }
+  `
+  )
+
+  // pg_monitor is a predefined role. `includeDefaultRoles` defaults to false,
+  // so it shouldn't be included in the result.
+  role = res.data?.find(({ name }) => name === 'pg_monitor')
+
+  expect(role).toMatchInlineSnapshot(`undefined`)
+})
+
+test('list w/ default roles', async () => {
+  const res = await pgMeta.roles.list({ includeDefaultRoles: true })
+
+  const role = res.data?.find(({ name }) => name === 'pg_monitor')
+
+  expect(role).toMatchInlineSnapshot(
+    {
+      active_connections: expect.any(Number),
+      id: expect.any(Number),
+    },
+    `
+    {
+      "active_connections": Any<Number>,
+      "can_bypass_rls": false,
+      "can_create_db": false,
+      "can_create_role": false,
+      "can_login": false,
+      "config": null,
+      "connection_limit": 100,
+      "id": Any<Number>,
+      "inherit_role": true,
+      "is_replication_role": false,
+      "is_superuser": false,
+      "name": "pg_monitor",
       "password": "********",
       "valid_until": null,
     }

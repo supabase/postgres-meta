@@ -1,5 +1,4 @@
 import { ident, literal } from 'pg-format'
-import { DEFAULT_ROLES } from './constants.js'
 import { rolesSql } from './sql/index.js'
 import {
   PostgresMetaResult,
@@ -42,8 +41,16 @@ FROM
   roles
 WHERE
   true`
-    if (includeDefaultRoles) {
-      sql += ` AND name NOT IN (${DEFAULT_ROLES.map(literal).join(',')})`
+    if (!includeDefaultRoles) {
+      // All default/predefined roles start with pg_: https://www.postgresql.org/docs/15/predefined-roles.html
+      // The pg_ prefix is also reserved:
+      //
+      // ```
+      // postgres=# create role pg_mytmp;
+      // ERROR:  role name "pg_mytmp" is reserved
+      // DETAIL:  Role names starting with "pg_" are reserved.
+      // ```
+      sql += ` AND NOT pg_catalog.starts_with(name, 'pg_')`
     }
     if (limit) {
       sql += ` LIMIT ${limit}`
