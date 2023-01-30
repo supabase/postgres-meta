@@ -1,16 +1,12 @@
-import prettier from 'prettier/standalone.js'
-import SqlFormatter from 'prettier-plugin-sql'
+import { format, type FormatOptions } from 'sql-formatter'
 // @ts-ignore library does not export types yet
 // Related: https://github.com/pyramation/pgsql-parser/issues/22
 import { parse, deparse } from 'pgsql-parser'
-import { FormatterOptions } from './types.js'
 
 const DEFAULT_FORMATTER_OPTIONS = {
-  plugins: [SqlFormatter],
-  formatter: 'sql-formatter',
   language: 'postgresql',
-  database: 'postgresql',
-  parser: 'sql',
+  tabWidth: 2,
+  keywordCase: 'upper',
 }
 
 /**
@@ -50,9 +46,10 @@ interface DeparseReturnValues {
 /**
  * Formats a SQL string into a prettier-formatted SQL string.
  */
-export function Format(sql: string, options: FormatterOptions = {}): FormatReturnValues {
+export function Format(sql: string, options?: FormatOptions): FormatReturnValues {
   try {
-    const formatted = prettier.format(sql, {
+    // @ts-ignore
+    const formatted = format(sql, {
       ...DEFAULT_FORMATTER_OPTIONS,
       ...options,
     })
