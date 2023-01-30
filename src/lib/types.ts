@@ -1,7 +1,4 @@
 import { Static, Type } from '@sinclair/typebox'
-import { Options as PrettierOptions } from 'prettier'
-
-export interface FormatterOptions extends PrettierOptions {}
 
 export interface PostgresMetaOk<T> {
   data: T
