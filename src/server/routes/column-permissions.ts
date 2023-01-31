@@ -4,6 +4,7 @@ import { PostgresMeta } from '../../lib/index.js'
 import { postgresColumnPermissionSchema } from '../../lib/types.js'
 import { DEFAULT_POOL_CONFIG } from '../constants.js'
 import { extractRequestForLogging } from '../utils.js'
+import { columnPermissionListSchema } from '../../lib/inputs.js'
 
 const route: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get(
@@ -11,16 +12,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
     {
       schema: {
         headers: Type.Object({ pg: Type.String() }),
-        querystring: Type.Object({
-          table_schema: Type.Optional(Type.String()),
-          table_name: Type.Optional(Type.String()),
-          column_name: Type.Optional(Type.String()),
-          privilege_type: Type.Optional(
-            Type.Union([Type.Literal('SELECT'), Type.Literal('INSERT'), Type.Literal('UPDATE')])
-          ),
-          limit: Type.Optional(Type.Integer()),
-          offset: Type.Optional(Type.Integer()),
-        }),
+        querystring: columnPermissionListSchema,
         response: {
           200: Type.Array(postgresColumnPermissionSchema),
           500: Type.Object({

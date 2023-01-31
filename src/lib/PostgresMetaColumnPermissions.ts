@@ -1,4 +1,5 @@
 import { ident, literal } from 'pg-format'
+import { ColumnPermissionListSchema } from './inputs.js'
 import { columnPermissionsSql } from './sql/index.js'
 import { PostgresMetaResult, PostgresColumnPermission } from './types.js'
 
@@ -17,15 +18,7 @@ export default class PostgresMetaColumns {
     include_system_schemas = false,
     limit,
     offset,
-  }: {
-    table_schema?: string
-    table_name?: string
-    column_name?: string
-    privilege_type?: 'SELECT' | 'INSERT' | 'UPDATE'
-    include_system_schemas?: boolean
-    limit?: number
-    offset?: number
-  } = {}): Promise<PostgresMetaResult<PostgresColumnPermission[]>> {
+  }: ColumnPermissionListSchema = {}): Promise<PostgresMetaResult<PostgresColumnPermission[]>> {
     let sql = `
 WITH
   column_permissions AS (${columnPermissionsSql})
