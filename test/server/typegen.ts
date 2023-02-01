@@ -139,6 +139,29 @@ test('typegen', async () => {
             }
             Returns: string
           }
+          function_returning_row: {
+            Args: Record<PropertyKey, never>
+            Returns: {
+              id: number
+              name: string | null
+              status: Database["public"]["Enums"]["user_status"] | null
+            }
+          }
+          function_returning_set_of_rows: {
+            Args: Record<PropertyKey, never>
+            Returns: {
+              id: number
+              name: string | null
+              status: Database["public"]["Enums"]["user_status"] | null
+            }[]
+          }
+          function_returning_table: {
+            Args: Record<PropertyKey, never>
+            Returns: {
+              id: number
+              name: string
+            }[]
+          }
           postgres_fdw_disconnect: {
             Args: {
               "": string
