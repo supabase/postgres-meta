@@ -65,3 +65,27 @@ create foreign table foreign_table (
   name text,
   status user_status
 ) server foreign_server options (schema_name 'public', table_name 'users');
+
+create or replace function public.function_returning_row()
+returns public.users
+language sql
+stable
+as $$
+  select * from public.users limit 1;
+$$;
+
+create or replace function public.function_returning_set_of_rows()
+returns setof public.users
+language sql
+stable
+as $$
+  select * from public.users;
+$$;
+
+create or replace function public.function_returning_table()
+returns table (id int, name text)
+language sql
+stable
+as $$
+  select id, name from public.users;
+$$;
