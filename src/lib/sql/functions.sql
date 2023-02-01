@@ -25,7 +25,7 @@ with functions as (
     p.prokind = 'f'
 )
 select
-  f.oid :: int8 as id,
+  f.oid::int8 as id,
   n.nspname as schema,
   f.proname as name,
   l.lanname as language,
@@ -40,7 +40,9 @@ select
   coalesce(f_args.args, '[]') as args,
   pg_get_function_arguments(f.oid) as argument_types,
   pg_get_function_identity_arguments(f.oid) as identity_argument_types,
-  t.typname as return_type,
+  rt.typname as return_type,
+  nullif(rt.typrelid::int8, 0) as return_type_relation_id,
+  f.proretset as is_set_returning_function,
   case
     when f.provolatile = 'i' then 'IMMUTABLE'
     when f.provolatile = 's' then 'STABLE'
@@ -52,7 +54,7 @@ from
   functions f
   left join pg_namespace n on f.pronamespace = n.oid
   left join pg_language l on f.prolang = l.oid
-  left join pg_type t on t.oid = f.prorettype
+  left join pg_type rt on rt.oid = f.prorettype
   left join (
     select
       oid,
