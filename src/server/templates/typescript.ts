@@ -222,7 +222,12 @@ export interface Database {
                 ([fnName, fns]) =>
                   `${JSON.stringify(fnName)}: ${fns
                     .map(
-                      ({ args, return_type }) => `{
+                      ({
+                        args,
+                        return_type,
+                        return_type_relation_id,
+                        is_set_returning_function,
+                      }) => `{
                   Args: ${(() => {
                     const inArgs = args.filter(({ mode }) => mode === 'in')
 
@@ -252,14 +257,16 @@ export interface Database {
                       return { name, type: 'unknown', has_default }
                     })
 
-                    return `{ ${argsNameAndType.map(
-                      ({ name, type, has_default }) =>
-                        `${JSON.stringify(name)}${has_default ? '?' : ''}: ${type}`
-                    )} }`
+                    return `{
+                      ${argsNameAndType.map(
+                        ({ name, type, has_default }) =>
+                          `${JSON.stringify(name)}${has_default ? '?' : ''}: ${type}`
+                      )}
+                    }`
                   })()}
-                  Returns: ${(() => {
+                  Returns: (${(() => {
+                    // Case 1: `returns table`.
                     const tableArgs = args.filter(({ mode }) => mode === 'table')
-
                     if (tableArgs.length > 0) {
                       const argsNameAndType = tableArgs.map(({ name, type_id }) => {
                         let type = arrayTypes.find(({ id }) => id === type_id)
@@ -278,13 +285,35 @@ export interface Database {
                         return { name, type: 'unknown' }
                       })
 
-                      return `{ ${argsNameAndType.map(
-                        ({ name, type }) => `${JSON.stringify(name)}: ${type}`
-                      )} }[]`
+                      return `{
+                        ${argsNameAndType.map(
+                          ({ name, type }) => `${JSON.stringify(name)}: ${type}`
+                        )}
+                      }`
                     }
 
+                    // Case 2: returns a relation's row type.
+                    const relation = [...tables, ...views].find(
+                      ({ id }) => id === return_type_relation_id
+                    )
+                    if (relation) {
+                      return `{
+                        ${relation.columns
+                          .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                          .map(
+                            (column) =>
+                              `${JSON.stringify(column.name)}: ${pgTypeToTsType(
+                                column.format,
+                                types,
+                                schemas
+                              )} ${column.is_nullable ? '| null' : ''}`
+                          )}
+                      }`
+                    }
+
+                    // Case 3: returns base/composite/enum type.
                     return pgTypeToTsType(return_type, types, schemas)
-                  })()}
+                  })()})${is_set_returning_function ? '[]' : ''}
                 }`
                     )
                     .join('|')}`
@@ -367,7 +396,7 @@ const pgTypeToTsType = (
   } else if (pgType === 'void') {
     return 'undefined'
   } else if (pgType === 'record') {
-    return 'Record<string, unknown>[]'
+    return 'Record<string, unknown>'
   } else if (pgType.startsWith('_')) {
     return `(${pgTypeToTsType(pgType.substring(1), types, schemas)})[]`
   } else {
