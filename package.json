@@ -30,7 +30,7 @@
     "db:clean": "cd test/db && docker-compose down",
     "db:run": "cd test/db && docker-compose up --detach && sleep 5",
     "test:run": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
-    "test:update": "run-s db:clean db:run && jest --runInBand --updateSnapshot && run-s db:clean"
+    "test:update": "run-s db:clean db:run && node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --updateSnapshot && run-s db:clean"
   },
   "engines": {
     "node": ">=16",
