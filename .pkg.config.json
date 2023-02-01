@@ -1,7 +1,7 @@
 {
   "name": "@supabase/postgres-meta",
   "bin": {
-    "postgres-meta": "dist/server/app.js"
+    "postgres-meta": "dist/server/server.js"
   },
   "pkg": {
     "outputPath": "bin",
