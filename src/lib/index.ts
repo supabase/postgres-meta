@@ -1,5 +1,4 @@
-import PostgresMeta from './PostgresMeta.js'
-export { PostgresMeta }
+export { default as PostgresMeta } from './PostgresMeta.js'
 export {
   PostgresMetaOk,
   PostgresMetaErr,
