@@ -10,7 +10,7 @@
     "dist"
   ],
   "type": "module",
-  "main": "dist/server/app.js",
+  "main": "dist/lib/index.js",
   "types": "dist/lib/index.d.ts",
   "imports": {
     "#package.json": "./package.json"
