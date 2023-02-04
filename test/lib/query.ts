@@ -482,12 +482,11 @@ test('formatter', async () => {
     {
       "data": "SELECT
       id,
-      name
+      NAME
     FROM
       users
-    where
-      user_id = 1234
-    ",
+    WHERE
+      user_id = 1234",
       "error": null,
     }
   `)
