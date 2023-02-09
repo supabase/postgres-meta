@@ -18,6 +18,7 @@ export const publicationsSql = await readFile(join(__dirname, 'publications.sql'
 export const relationshipsSql = await readFile(join(__dirname, 'relationships.sql'), 'utf-8')
 export const rolesSql = await readFile(join(__dirname, 'roles.sql'), 'utf-8')
 export const schemasSql = await readFile(join(__dirname, 'schemas.sql'), 'utf-8')
+export const tablePermissionsSql = await readFile(join(__dirname, 'table_permissions.sql'), 'utf-8')
 export const tablesSql = await readFile(join(__dirname, 'tables.sql'), 'utf-8')
 export const triggersSql = await readFile(join(__dirname, 'triggers.sql'), 'utf-8')
 export const typesSql = await readFile(join(__dirname, 'types.sql'), 'utf-8')
