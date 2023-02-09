@@ -23,19 +23,14 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
     },
     async (request, reply) => {
       const connectionString = request.headers.pg
-      const table_schema = request.query.table_schema
-      const table_name = request.query.table_name
-      const column_name = request.query.column_name
-      const privilege_type = request.query.privilege_type
-      const limit = request.query.limit
-      const offset = request.query.offset
+      const { table_schema, table_name, column_name, privilege, limit, offset } = request.query
 
       const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
       const { data, error } = await pgMeta.columnPermissions.list({
         table_schema,
         table_name,
         column_name,
-        privilege_type,
+        privilege,
         limit,
         offset,
       })
@@ -62,7 +57,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
           table_schema: Type.String(),
           table_name: Type.String(),
           role: Type.String(),
-          privilege_type: Type.Optional(
+          privilege: Type.Optional(
             Type.Union([Type.Literal('SELECT'), Type.Literal('INSERT'), Type.Literal('UPDATE')])
           ),
         }),
@@ -106,7 +101,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
           table_schema: Type.String(),
           table_name: Type.String(),
           role: Type.String(),
-          privilege_type: Type.Optional(
+          privilege: Type.Optional(
             Type.Union([Type.Literal('SELECT'), Type.Literal('INSERT'), Type.Literal('UPDATE')])
           ),
         }),
