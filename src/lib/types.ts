@@ -303,6 +303,20 @@ export const postgresSchemaUpdateSchema = Type.Object({
 })
 export type PostgresSchemaUpdate = Static<typeof postgresSchemaUpdateSchema>
 
+export const postgresTablePermissionSchema = Type.Object({
+  table_schema: Type.String(),
+  table_name: Type.String(),
+  column_name: Type.String(),
+  privilege_type: Type.Union([
+    Type.Literal('SELECT'),
+    Type.Literal('INSERT'),
+    Type.Literal('UPDATE'),
+  ]),
+  grantor: Type.String(),
+  grantee: Type.String(),
+})
+export type PostgresTablePermission = Static<typeof postgresTablePermissionSchema>
+
 export const postgresTableSchema = Type.Object({
   id: Type.Integer(),
   schema: Type.String(),
