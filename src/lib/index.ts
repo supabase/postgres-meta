@@ -17,6 +17,7 @@ export {
   PostgresSchema,
   PostgresSchemaCreate,
   PostgresSchemaUpdate,
+  PostgresTablePermission,
   PostgresTable,
   PostgresTrigger,
   PostgresType,
