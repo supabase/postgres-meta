@@ -9,7 +9,7 @@ export const columnPermissionListSchema = Type.Object({
   table_schema: Type.Optional(Type.String()),
   table_name: Type.Optional(Type.String()),
   column_name: Type.Optional(Type.String()),
-  privilege_type: Type.Optional(
+  privilege: Type.Optional(
     Type.Union([Type.Literal('SELECT'), Type.Literal('INSERT'), Type.Literal('UPDATE')])
   ),
   include_system_schemas: Type.Optional(
