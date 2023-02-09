@@ -9,6 +9,7 @@ export {
   PostgresExtension,
   PostgresFunction,
   PostgresFunctionCreate,
+  PostgresPermission,
   PostgresPolicy,
   PostgresPrimaryKey,
   PostgresPublication,
