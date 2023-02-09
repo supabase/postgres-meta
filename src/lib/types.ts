@@ -149,6 +149,20 @@ export const postgresFunctionCreateFunction = Type.Object({
 })
 export type PostgresFunctionCreate = Static<typeof postgresFunctionCreateFunction>
 
+export const postgresPermissionSchema = Type.Object({
+  table_schema: Type.String(),
+  table_name: Type.String(),
+  column_name: Type.String(),
+  privilege: Type.Union([
+    Type.Literal('SELECT'),
+    Type.Literal('INSERT'),
+    Type.Literal('UPDATE'),
+  ]),
+  grantor: Type.String(),
+  grantee: Type.String(),
+})
+export type PostgresPermission = Static<typeof postgresPermissionSchema>
+
 export const postgresPolicySchema = Type.Object({
   id: Type.Integer(),
   schema: Type.String(),
