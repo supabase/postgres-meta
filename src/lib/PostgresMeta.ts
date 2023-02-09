@@ -6,6 +6,7 @@ import PostgresMetaConfig from './PostgresMetaConfig.js'
 import PostgresMetaExtensions from './PostgresMetaExtensions.js'
 import PostgresMetaForeignTables from './PostgresMetaForeignTables.js'
 import PostgresMetaFunctions from './PostgresMetaFunctions.js'
+import PostgresMetaPermissions from './PostgresMetaPermissions.js'
 import PostgresMetaPolicies from './PostgresMetaPolicies.js'
 import PostgresMetaPublications from './PostgresMetaPublications.js'
 import PostgresMetaRoles from './PostgresMetaRoles.js'
@@ -28,6 +29,7 @@ export default class PostgresMeta {
   extensions: PostgresMetaExtensions
   foreignTables: PostgresMetaForeignTables
   functions: PostgresMetaFunctions
+  permissions: PostgresMetaPermissions
   policies: PostgresMetaPolicies
   publications: PostgresMetaPublications
   roles: PostgresMetaRoles
@@ -53,6 +55,7 @@ export default class PostgresMeta {
     this.extensions = new PostgresMetaExtensions(this.query)
     this.foreignTables = new PostgresMetaForeignTables(this.query)
     this.functions = new PostgresMetaFunctions(this.query)
+    this.permissions = new PostgresMetaPermissions(this.query)
     this.policies = new PostgresMetaPolicies(this.query)
     this.publications = new PostgresMetaPublications(this.query)
     this.roles = new PostgresMetaRoles(this.query)
