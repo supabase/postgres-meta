@@ -39,3 +39,18 @@ export const permissionListSchema = Type.Object({
 })
 export type PermissionListSchema = Static<typeof permissionListSchema>
 
+export const tablePermissionListSchema = Type.Object({
+  table_schema: Type.Optional(Type.String()),
+  table_name: Type.Optional(Type.String()),
+  privilege: Type.Optional(
+    Type.Union([Type.Literal('SELECT'), Type.Literal('INSERT'), Type.Literal('UPDATE')])
+  ),
+  include_system_schemas: Type.Optional(
+    Type.Boolean({
+      default: false,
+    })
+  ),
+  limit,
+  offset,
+})
+export type TablePermissionListSchema = Static<typeof tablePermissionListSchema>
