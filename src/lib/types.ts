@@ -21,11 +21,7 @@ export const postgresColumnPermissionSchema = Type.Object({
   table_schema: Type.String(),
   table_name: Type.String(),
   column_name: Type.String(),
-  privilege: Type.Union([
-    Type.Literal('SELECT'),
-    Type.Literal('INSERT'),
-    Type.Literal('UPDATE'),
-  ]),
+  privilege: Type.Union([Type.Literal('SELECT'), Type.Literal('INSERT'), Type.Literal('UPDATE')]),
   grantor: Type.String(),
   grantee: Type.String(),
 })
@@ -153,11 +149,7 @@ export const postgresPermissionSchema = Type.Object({
   table_schema: Type.String(),
   table_name: Type.String(),
   column_name: Type.String(),
-  privilege: Type.Union([
-    Type.Literal('SELECT'),
-    Type.Literal('INSERT'),
-    Type.Literal('UPDATE'),
-  ]),
+  privilege: Type.Union([Type.Literal('SELECT'), Type.Literal('INSERT'), Type.Literal('UPDATE')]),
   grantor: Type.String(),
   grantee: Type.String(),
 })
