@@ -2,7 +2,7 @@ SELECT
   n.nspname AS schema,
   c.relname AS table_name,
   a.attname AS name,
-  c.oid :: int8 AS table_id
+  c.oid::int8 AS table_id
 FROM
   pg_index i,
   pg_class c,

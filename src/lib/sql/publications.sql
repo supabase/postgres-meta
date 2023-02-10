@@ -1,5 +1,5 @@
 SELECT
-  p.oid :: int8 AS id,
+  p.oid::int8 AS id,
   p.pubname AS name,
   p.pubowner::regrole::text AS owner,
   p.pubinsert AS publish_insert,
@@ -18,7 +18,7 @@ FROM
         array_agg(
           json_build_object(
             'id',
-            c.oid :: int8,
+            c.oid::int8,
             'name',
             c.relname,
             'schema',

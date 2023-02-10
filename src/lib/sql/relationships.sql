@@ -1,5 +1,5 @@
 SELECT
-  c.oid :: int8 AS id,
+  c.oid::int8 AS id,
   c.conname AS constraint_name,
   nsa.nspname AS source_schema,
   csa.relname AS source_table_name,

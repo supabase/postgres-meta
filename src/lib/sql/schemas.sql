@@ -1,5 +1,4 @@
 -- Adapted from information_schema.schemata
-
 select
   n.oid::int8 as id,
   n.nspname as name,
@@ -13,5 +12,5 @@ where
     pg_has_role(n.nspowner, 'USAGE')
     or has_schema_privilege(n.oid, 'CREATE, USAGE')
   )
-  and not pg_catalog.starts_with(n.nspname, 'pg_temp_')
-  and not pg_catalog.starts_with(n.nspname, 'pg_toast_temp_')
+  and not pg_catalog.starts_with (n.nspname, 'pg_temp_')
+  and not pg_catalog.starts_with (n.nspname, 'pg_toast_temp_')

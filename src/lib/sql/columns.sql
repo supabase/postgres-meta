@@ -1,7 +1,6 @@
 -- Adapted from information_schema.columns
-
 SELECT
-  c.oid :: int8 AS table_id,
+  c.oid::int8 AS table_id,
   nc.nspname AS schema,
   c.relname AS table,
   (c.oid || '.' || a.attnum) AS id,
@@ -13,13 +12,13 @@ SELECT
   END AS default_value,
   CASE
     WHEN t.typtype = 'd' THEN CASE
-      WHEN bt.typelem <> 0 :: oid
+      WHEN bt.typelem <> 0::oid
       AND bt.typlen = -1 THEN 'ARRAY'
       WHEN nbt.nspname = 'pg_catalog' THEN format_type(t.typbasetype, NULL)
       ELSE 'USER-DEFINED'
     END
     ELSE CASE
-      WHEN t.typelem <> 0 :: oid
+      WHEN t.typelem <> 0::oid
       AND t.typlen = -1 THEN 'ARRAY'
       WHEN nt.nspname = 'pg_catalog' THEN format_type(a.atttypid, NULL)
       ELSE 'USER-DEFINED'
@@ -27,8 +26,7 @@ SELECT
   END AS data_type,
   COALESCE(bt.typname, t.typname) AS format,
   a.attidentity IN ('a', 'd') AS is_identity,
-  CASE
-    a.attidentity
+  CASE a.attidentity
     WHEN 'a' THEN 'ALWAYS'
     WHEN 'd' THEN 'BY DEFAULT'
     ELSE NULL
@@ -36,15 +34,17 @@ SELECT
   a.attgenerated IN ('s') AS is_generated,
   NOT (
     a.attnotnull
-    OR t.typtype = 'd' AND t.typnotnull
+    OR t.typtype = 'd'
+    AND t.typnotnull
   ) AS is_nullable,
   (
     c.relkind IN ('r', 'p')
-    OR c.relkind IN ('v', 'f') AND pg_column_is_updatable(c.oid, a.attnum, FALSE)
+    OR c.relkind IN ('v', 'f')
+    AND pg_column_is_updatable (c.oid, a.attnum, FALSE)
   ) AS is_updatable,
   uniques.table_id IS NOT NULL AS is_unique,
   array_to_json(
-    array(
+    array (
       SELECT
         enumlabel
       FROM
@@ -56,7 +56,8 @@ SELECT
         enums.enumsortorder
     )
   ) AS enums,
-  col_description(c.oid, a.attnum) AS comment
+  col_description(c.oid, a.attnum) AS
+comment
 FROM
   pg_attribute a
   LEFT JOIN pg_attrdef ad ON a.attrelid = ad.adrelid
@@ -78,9 +79,13 @@ FROM
     SELECT
       conrelid AS table_id,
       conkey[1] AS ordinal_position
-    FROM pg_catalog.pg_constraint
-    WHERE contype = 'u' AND cardinality(conkey) = 1
-  ) AS uniques ON uniques.table_id = c.oid AND uniques.ordinal_position = a.attnum
+    FROM
+      pg_catalog.pg_constraint
+    WHERE
+      contype = 'u'
+      AND cardinality(conkey) = 1
+  ) AS uniques ON uniques.table_id = c.oid
+  AND uniques.ordinal_position = a.attnum
 WHERE
   NOT pg_is_other_temp_schema(nc.oid)
   AND a.attnum > 0

@@ -1,29 +1,41 @@
 -- CTE with sane arg_modes, arg_names, and arg_types.
 -- All three are always of the same length.
 -- All three include all args, including OUT and TABLE args.
-with functions as (
-  select
-    *,
-    -- proargmodes is null when all arg modes are IN
-    coalesce(
-      p.proargmodes,
-      array_fill('i'::text, array[cardinality(coalesce(p.proallargtypes, p.proargtypes))])
-    ) as arg_modes,
-    -- proargnames is null when all args are unnamed
-    coalesce(
-      p.proargnames,
-      array_fill(''::text, array[cardinality(coalesce(p.proallargtypes, p.proargtypes))])
-    ) as arg_names,
-    -- proallargtypes is null when all arg modes are IN
-    coalesce(p.proallargtypes, p.proargtypes) as arg_types,
-    array_cat(
-      array_fill(false, array[pronargs - pronargdefaults]),
-      array_fill(true, array[pronargdefaults])) as arg_has_defaults
-  from
-    pg_proc as p
-  where
-    p.prokind = 'f'
-)
+with
+  functions as (
+    select
+      *,
+      -- proargmodes is null when all arg modes are IN
+      coalesce(
+        p.proargmodes,
+        array_fill(
+          'i'::text,
+          array[
+            cardinality(coalesce(p.proallargtypes, p.proargtypes))
+          ]
+        )
+      ) as arg_modes,
+      -- proargnames is null when all args are unnamed
+      coalesce(
+        p.proargnames,
+        array_fill(
+          ''::text,
+          array[
+            cardinality(coalesce(p.proallargtypes, p.proargtypes))
+          ]
+        )
+      ) as arg_names,
+      -- proallargtypes is null when all arg modes are IN
+      coalesce(p.proallargtypes, p.proargtypes) as arg_types,
+      array_cat(
+        array_fill(false, array[pronargs - pronargdefaults]),
+        array_fill(true, array[pronargdefaults])
+      ) as arg_has_defaults
+    from
+      pg_proc as p
+    where
+      p.prokind = 'f'
+  )
 select
   f.oid::int8 as id,
   n.nspname as schema,
@@ -58,13 +70,16 @@ from
   left join (
     select
       oid,
-      jsonb_object_agg(param, value) filter (where param is not null) as config_params
+      jsonb_object_agg(param, value) filter (
+        where
+          param is not null
+      ) as config_params
     from
       (
         select
           oid,
-          (string_to_array(unnest(proconfig), '='))[1] as param,
-          (string_to_array(unnest(proconfig), '='))[2] as value
+          (string_to_array(unnest(proconfig), '=')) [1] as param,
+          (string_to_array(unnest(proconfig), '=')) [2] as value
         from
           functions
       ) as t
@@ -74,12 +89,18 @@ from
   left join (
     select
       oid,
-      jsonb_agg(jsonb_build_object(
-        'mode', t2.mode,
-        'name', name,
-        'type_id', type_id,
-        'has_default', has_default
-      )) as args
+      jsonb_agg(
+        jsonb_build_object(
+          'mode',
+          t2.mode,
+          'name',
+          name,
+          'type_id',
+          type_id,
+          'has_default',
+          has_default
+        )
+      ) as args
     from
       (
         select

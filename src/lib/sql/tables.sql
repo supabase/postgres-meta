@@ -1,5 +1,5 @@
 SELECT
-  c.oid :: int8 AS id,
+  c.oid::int8 AS id,
   nc.nspname AS schema,
   c.relname AS name,
   c.relrowsecurity AS rls_enabled,
@@ -10,13 +10,14 @@ SELECT
     WHEN c.relreplident = 'f' THEN 'FULL'
     ELSE 'NOTHING'
   END AS replica_identity,
-  pg_total_relation_size(format('%I.%I', nc.nspname, c.relname)) :: int8 AS bytes,
+  pg_total_relation_size(format('%I.%I', nc.nspname, c.relname))::int8 AS bytes,
   pg_size_pretty(
     pg_total_relation_size(format('%I.%I', nc.nspname, c.relname))
   ) AS size,
-  pg_stat_get_live_tuples(c.oid) AS live_rows_estimate,
-  pg_stat_get_dead_tuples(c.oid) AS dead_rows_estimate,
-  obj_description(c.oid) AS comment
+  pg_stat_get_live_tuples (c.oid) AS live_rows_estimate,
+  pg_stat_get_dead_tuples (c.oid) AS dead_rows_estimate,
+  obj_description(c.oid) AS
+comment
 FROM
   pg_namespace nc
   JOIN pg_class c ON nc.oid = c.relnamespace
