@@ -62,7 +62,7 @@
     "pgsql-parser": "^13.3.0",
     "postgres-array": "^3.0.1",
     "prettier": "^2.6.0",
-    "prettier-plugin-sql": "^0.12.1"
+    "prettier-plugin-sql": "^0.13.0"
   },
   "devDependencies": {
     "@fastify/cors": "^8.2.0",
