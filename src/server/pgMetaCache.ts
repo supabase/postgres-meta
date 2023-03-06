@@ -1,9 +1,10 @@
 import LruCache from 'lru-cache'
-import { PostgresMeta } from '../lib'
+import PostgresMeta from '../lib/PostgresMeta.js'
+import { DEFAULT_POOL_CONFIG } from './constants.js'
 
 const cache = new LruCache<string, PostgresMeta>({
   max: 100,
-  dispose: async (_, value) => {
+  dispose: async (value) => {
     await value.end()
   },
 })
@@ -16,7 +17,7 @@ const get = (connectionString: string): PostgresMeta => {
   let pgMeta: PostgresMeta | undefined = cache.get(connectionString)
 
   if (pgMeta === undefined) {
-    pgMeta = new PostgresMeta({ connectionString, max: 1 })
+    pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     cache.set(connectionString, pgMeta)
   }
 

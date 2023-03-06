@@ -1,14 +1,15 @@
-import { FormatterOptions } from './types'
-const { parse, deparse } = require('pgsql-parser')
-import prettier from 'prettier/standalone'
+import prettier from 'prettier/standalone.js'
 import SqlFormatter from 'prettier-plugin-sql'
+// @ts-ignore library does not export types yet
+// Related: https://github.com/pyramation/pgsql-parser/issues/22
+import { parse, deparse } from 'pgsql-parser'
+import { FormatterOptions } from './types.js'
 
 const DEFAULT_FORMATTER_OPTIONS = {
   plugins: [SqlFormatter],
   formatter: 'sql-formatter',
   language: 'postgresql',
   database: 'postgresql',
-  uppercase: false, // I thought this would "lowercase" everything, but it doesn't. There is not option to convert everything to lowercase.
   parser: 'sql',
 }
 

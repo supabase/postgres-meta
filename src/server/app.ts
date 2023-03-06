@@ -1,22 +1,30 @@
-import fastify from 'fastify'
-import { PG_META_EXPORT_DOCS, PG_META_PORT } from './constants'
-import routes from './routes'
-import pkg from '../../package.json'
+import cors from '@fastify/cors'
+import swagger from '@fastify/swagger'
+import { fastify, FastifyInstance, FastifyServerOptions } from 'fastify'
+import { PG_META_REQ_HEADER } from './constants.js'
+import routes from './routes/index.js'
+import { extractRequestForLogging } from './utils.js'
+// Pseudo package declared only for this module
+import pkg from '#package.json' assert { type: 'json' }
 
-const app = fastify({ logger: true, disableRequestLogging: true })
+export const build = (opts: FastifyServerOptions = {}): FastifyInstance => {
+  const app = fastify({
+    disableRequestLogging: true,
+    requestIdHeader: PG_META_REQ_HEADER,
+    ...opts,
+  })
 
-app.setErrorHandler((error, request, reply) => {
-  app.log.error(JSON.stringify({ error, req: request.body }))
-  reply.code(500).send({ error: error.message })
-})
+  app.setErrorHandler((error, request, reply) => {
+    app.log.error({ error: error.toString(), request: extractRequestForLogging(request) })
+    reply.code(500).send({ error: error.message })
+  })
 
-app.setNotFoundHandler((request, reply) => {
-  app.log.error(JSON.stringify({ error: 'Not found', req: request.body }))
-  reply.code(404).send({ error: 'Not found' })
-})
+  app.setNotFoundHandler((request, reply) => {
+    app.log.error({ error: 'Not found', request: extractRequestForLogging(request) })
+    reply.code(404).send({ error: 'Not found' })
+  })
 
-if (PG_META_EXPORT_DOCS) {
-  app.register(require('fastify-swagger'), {
+  app.register(swagger, {
     openapi: {
       servers: [],
       info: {
@@ -27,38 +35,22 @@ if (PG_META_EXPORT_DOCS) {
     },
   })
 
-  app.ready(() => {
-    require('fs').writeFileSync(
-      'openapi.json',
-      JSON.stringify(
-        // @ts-ignore: app.swagger() is a Fastify decorator, so doesn't show up in the types
-        app.swagger(),
-        null,
-        2
-      ) + '\n'
-    )
+  app.register(cors)
+
+  app.get('/', async (_request, _reply) => {
+    return {
+      status: 200,
+      name: pkg.name,
+      version: pkg.version,
+      documentation: 'https://github.com/supabase/postgres-meta',
+    }
   })
-} else {
-  app.ready(() => {
-    app.listen(PG_META_PORT, '0.0.0.0', () => {
-      app.log.info(`App started on port ${PG_META_PORT}`)
-    })
+
+  app.get('/health', async (_request, _reply) => {
+    return { date: new Date() }
   })
+
+  app.register(routes)
+
+  return app
 }
-
-app.register(require('fastify-cors'))
-
-app.get('/', async (_request, _reply) => {
-  return {
-    status: 200,
-    name: pkg.name,
-    version: pkg.version,
-    documentation: 'https://github.com/supabase/postgres-meta',
-  }
-})
-
-app.get('/health', async (_request, _reply) => {
-  return { date: new Date() }
-})
-
-app.register(routes)

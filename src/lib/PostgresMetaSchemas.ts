@@ -1,12 +1,12 @@
 import { ident, literal } from 'pg-format'
-import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
-import { schemasSql } from './sql'
+import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
+import { schemasSql } from './sql/index.js'
 import {
   PostgresMetaResult,
   PostgresSchema,
   PostgresSchemaCreate,
   PostgresSchemaUpdate,
-} from './types'
+} from './types.js'
 
 export default class PostgresMetaSchemas {
   query: (sql: string) => Promise<PostgresMetaResult<any>>

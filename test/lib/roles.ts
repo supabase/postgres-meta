@@ -2,381 +2,67 @@ import { pgMeta } from './utils'
 
 test('list', async () => {
   const res = await pgMeta.roles.list()
-  expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Array [
-    Object {
-      "active_connections": 2,
+
+  let role = res.data?.find(({ name }) => name === 'postgres')
+
+  expect(role).toMatchInlineSnapshot(
+    { active_connections: expect.any(Number), id: expect.any(Number) },
+    `
+    {
+      "active_connections": Any<Number>,
       "can_bypass_rls": true,
       "can_create_db": true,
       "can_create_role": true,
       "can_login": true,
       "config": null,
       "connection_limit": 100,
-      "grants": Array [
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "INSERT",
-          "schema": "public",
-          "table_id": 16391,
-          "table_name": "users",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "SELECT",
-          "schema": "public",
-          "table_id": 16391,
-          "table_name": "users",
-          "with_hierarchy": true,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "UPDATE",
-          "schema": "public",
-          "table_id": 16391,
-          "table_name": "users",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "DELETE",
-          "schema": "public",
-          "table_id": 16391,
-          "table_name": "users",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "TRUNCATE",
-          "schema": "public",
-          "table_id": 16391,
-          "table_name": "users",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "REFERENCES",
-          "schema": "public",
-          "table_id": 16391,
-          "table_name": "users",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "TRIGGER",
-          "schema": "public",
-          "table_id": 16391,
-          "table_name": "users",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "INSERT",
-          "schema": "public",
-          "table_id": 16402,
-          "table_name": "todos",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "SELECT",
-          "schema": "public",
-          "table_id": 16402,
-          "table_name": "todos",
-          "with_hierarchy": true,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "UPDATE",
-          "schema": "public",
-          "table_id": 16402,
-          "table_name": "todos",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "DELETE",
-          "schema": "public",
-          "table_id": 16402,
-          "table_name": "todos",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "TRUNCATE",
-          "schema": "public",
-          "table_id": 16402,
-          "table_name": "todos",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "REFERENCES",
-          "schema": "public",
-          "table_id": 16402,
-          "table_name": "todos",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "TRIGGER",
-          "schema": "public",
-          "table_id": 16402,
-          "table_name": "todos",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "INSERT",
-          "schema": "public",
-          "table_id": 16418,
-          "table_name": "users_audit",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "SELECT",
-          "schema": "public",
-          "table_id": 16418,
-          "table_name": "users_audit",
-          "with_hierarchy": true,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "UPDATE",
-          "schema": "public",
-          "table_id": 16418,
-          "table_name": "users_audit",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "DELETE",
-          "schema": "public",
-          "table_id": 16418,
-          "table_name": "users_audit",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "TRUNCATE",
-          "schema": "public",
-          "table_id": 16418,
-          "table_name": "users_audit",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "REFERENCES",
-          "schema": "public",
-          "table_id": 16418,
-          "table_name": "users_audit",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "TRIGGER",
-          "schema": "public",
-          "table_id": 16418,
-          "table_name": "users_audit",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "INSERT",
-          "schema": "public",
-          "table_id": 16428,
-          "table_name": "category",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "SELECT",
-          "schema": "public",
-          "table_id": 16428,
-          "table_name": "category",
-          "with_hierarchy": true,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "UPDATE",
-          "schema": "public",
-          "table_id": 16428,
-          "table_name": "category",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "DELETE",
-          "schema": "public",
-          "table_id": 16428,
-          "table_name": "category",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "TRUNCATE",
-          "schema": "public",
-          "table_id": 16428,
-          "table_name": "category",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "REFERENCES",
-          "schema": "public",
-          "table_id": 16428,
-          "table_name": "category",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "TRIGGER",
-          "schema": "public",
-          "table_id": 16428,
-          "table_name": "category",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "INSERT",
-          "schema": "public",
-          "table_id": 16447,
-          "table_name": "memes",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "SELECT",
-          "schema": "public",
-          "table_id": 16447,
-          "table_name": "memes",
-          "with_hierarchy": true,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "UPDATE",
-          "schema": "public",
-          "table_id": 16447,
-          "table_name": "memes",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "DELETE",
-          "schema": "public",
-          "table_id": 16447,
-          "table_name": "memes",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "TRUNCATE",
-          "schema": "public",
-          "table_id": 16447,
-          "table_name": "memes",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "REFERENCES",
-          "schema": "public",
-          "table_id": 16447,
-          "table_name": "memes",
-          "with_hierarchy": false,
-        },
-        Object {
-          "grantee": "postgres",
-          "grantor": "postgres",
-          "is_grantable": true,
-          "privilege_type": "TRIGGER",
-          "schema": "public",
-          "table_id": 16447,
-          "table_name": "memes",
-          "with_hierarchy": false,
-        },
-      ],
-      "id": 10,
+      "id": Any<Number>,
       "inherit_role": true,
       "is_replication_role": true,
       "is_superuser": true,
       "name": "postgres",
       "password": "********",
       "valid_until": null,
+    }
+  `
+  )
+
+  // pg_monitor is a predefined role. `includeDefaultRoles` defaults to false,
+  // so it shouldn't be included in the result.
+  role = res.data?.find(({ name }) => name === 'pg_monitor')
+
+  expect(role).toMatchInlineSnapshot(`undefined`)
+})
+
+test('list w/ default roles', async () => {
+  const res = await pgMeta.roles.list({ includeDefaultRoles: true })
+
+  const role = res.data?.find(({ name }) => name === 'pg_monitor')
+
+  expect(role).toMatchInlineSnapshot(
+    {
+      active_connections: expect.any(Number),
+      id: expect.any(Number),
     },
-  ],
-  "error": null,
-}
-`)
+    `
+    {
+      "active_connections": Any<Number>,
+      "can_bypass_rls": false,
+      "can_create_db": false,
+      "can_create_role": false,
+      "can_login": false,
+      "config": null,
+      "connection_limit": 100,
+      "id": Any<Number>,
+      "inherit_role": true,
+      "is_replication_role": false,
+      "is_superuser": false,
+      "name": "pg_monitor",
+      "password": "********",
+      "valid_until": null,
+    }
+  `
+  )
 })
 
 test('retrieve, create, update, delete', async () => {
@@ -391,50 +77,61 @@ test('retrieve, create, update, delete', async () => {
     can_bypass_rls: true,
     connection_limit: 100,
     valid_until: '2020-01-01T00:00:00.000Z',
+    config: { search_path: 'extension, public' },
   })
-  expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "active_connections": 0,
-    "can_bypass_rls": true,
-    "can_create_db": true,
-    "can_create_role": true,
-    "can_login": true,
-    "config": null,
-    "connection_limit": 100,
-    "id": 16672,
-    "inherit_role": false,
-    "is_replication_role": true,
-    "is_superuser": true,
-    "name": "r",
-    "password": "********",
-    "valid_until": 2020-01-01T00:00:00.000Z,
-  },
-  "error": null,
-}
-`)
+  expect(res).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    {
+      "data": {
+        "active_connections": 0,
+        "can_bypass_rls": true,
+        "can_create_db": true,
+        "can_create_role": true,
+        "can_login": true,
+        "config": {
+          "search_path": "extension, public",
+        },
+        "connection_limit": 100,
+        "id": Any<Number>,
+        "inherit_role": false,
+        "is_replication_role": true,
+        "is_superuser": true,
+        "name": "r",
+        "password": "********",
+        "valid_until": "2020-01-01 00:00:00+00",
+      },
+      "error": null,
+    }
+  `
+  )
   res = await pgMeta.roles.retrieve({ id: res.data!.id })
-  expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "active_connections": 0,
-    "can_bypass_rls": true,
-    "can_create_db": true,
-    "can_create_role": true,
-    "can_login": true,
-    "config": null,
-    "connection_limit": 100,
-    "id": 16672,
-    "inherit_role": false,
-    "is_replication_role": true,
-    "is_superuser": true,
-    "name": "r",
-    "password": "********",
-    "valid_until": 2020-01-01T00:00:00.000Z,
-  },
-  "error": null,
-}
-`)
+  expect(res).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    {
+      "data": {
+        "active_connections": 0,
+        "can_bypass_rls": true,
+        "can_create_db": true,
+        "can_create_role": true,
+        "can_login": true,
+        "config": {
+          "search_path": "extension, public",
+        },
+        "connection_limit": 100,
+        "id": Any<Number>,
+        "inherit_role": false,
+        "is_replication_role": true,
+        "is_superuser": true,
+        "name": "r",
+        "password": "********",
+        "valid_until": "2020-01-01 00:00:00+00",
+      },
+      "error": null,
+    }
+  `
+  )
   await pgMeta.roles.remove(res.data!.id)
   res = await pgMeta.roles.create({
     name: 'r',
@@ -450,50 +147,108 @@ Object {
     can_bypass_rls: true,
     connection_limit: 100,
     valid_until: '2020-01-01T00:00:00.000Z',
+    config: [
+      {
+        op: 'replace',
+        path: 'search_path',
+        value: 'public',
+      },
+      {
+        op: 'add',
+        path: 'log_statement',
+        value: 'all',
+      },
+    ],
   })
-  expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "active_connections": 0,
-    "can_bypass_rls": true,
-    "can_create_db": true,
-    "can_create_role": true,
-    "can_login": true,
-    "config": null,
-    "connection_limit": 100,
-    "id": 16673,
-    "inherit_role": false,
-    "is_replication_role": true,
-    "is_superuser": true,
-    "name": "rr",
-    "password": "********",
-    "valid_until": 2020-01-01T00:00:00.000Z,
-  },
-  "error": null,
-}
-`)
+  expect(res).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    {
+      "data": {
+        "active_connections": 0,
+        "can_bypass_rls": true,
+        "can_create_db": true,
+        "can_create_role": true,
+        "can_login": true,
+        "config": {
+          "log_statement": "all",
+          "search_path": "public",
+        },
+        "connection_limit": 100,
+        "id": Any<Number>,
+        "inherit_role": false,
+        "is_replication_role": true,
+        "is_superuser": true,
+        "name": "rr",
+        "password": "********",
+        "valid_until": "2020-01-01 00:00:00+00",
+      },
+      "error": null,
+    }
+  `
+  )
+  // Test remove config
+  res = await pgMeta.roles.update(res.data!.id, {
+    config: [
+      {
+        op: 'remove',
+        path: 'log_statement',
+      },
+    ],
+  })
+  expect(res).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    {
+      "data": {
+        "active_connections": 0,
+        "can_bypass_rls": true,
+        "can_create_db": true,
+        "can_create_role": true,
+        "can_login": true,
+        "config": {
+          "search_path": "public",
+        },
+        "connection_limit": 100,
+        "id": Any<Number>,
+        "inherit_role": false,
+        "is_replication_role": true,
+        "is_superuser": true,
+        "name": "rr",
+        "password": "********",
+        "valid_until": "2020-01-01 00:00:00+00",
+      },
+      "error": null,
+    }
+  `
+  )
   res = await pgMeta.roles.remove(res.data!.id)
-  expect(res).toMatchInlineSnapshot(`
-Object {
-  "data": Object {
-    "active_connections": 0,
-    "can_bypass_rls": true,
-    "can_create_db": true,
-    "can_create_role": true,
-    "can_login": true,
-    "config": null,
-    "connection_limit": 100,
-    "id": 16673,
-    "inherit_role": false,
-    "is_replication_role": true,
-    "is_superuser": true,
-    "name": "rr",
-    "password": "********",
-    "valid_until": 2020-01-01T00:00:00.000Z,
-  },
-  "error": null,
-}
-`)
+  expect(res).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    {
+      "data": {
+        "active_connections": 0,
+        "can_bypass_rls": true,
+        "can_create_db": true,
+        "can_create_role": true,
+        "can_login": true,
+        "config": {
+          "search_path": "public",
+        },
+        "connection_limit": 100,
+        "id": Any<Number>,
+        "inherit_role": false,
+        "is_replication_role": true,
+        "is_superuser": true,
+        "name": "rr",
+        "password": "********",
+        "valid_until": "2020-01-01 00:00:00+00",
+      },
+      "error": null,
+    }
+  `
+  )
   res = await pgMeta.roles.retrieve({ id: res.data!.id })
   expect(res).toMatchObject({
     data: null,

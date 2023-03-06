@@ -1,7 +1,8 @@
 import { ident, literal } from 'pg-format'
-import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
-import { policiesSql } from './sql'
-import { PostgresMetaResult, PostgresPolicy } from './types'
+import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
+import { filterByList } from './helpers.js'
+import { policiesSql } from './sql/index.js'
+import { PostgresMetaResult, PostgresPolicy } from './types.js'
 
 export default class PostgresMetaPolicies {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -12,16 +13,25 @@ export default class PostgresMetaPolicies {
 
   async list({
     includeSystemSchemas = false,
+    includedSchemas,
+    excludedSchemas,
     limit,
     offset,
   }: {
     includeSystemSchemas?: boolean
+    includedSchemas?: string[]
+    excludedSchemas?: string[]
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresPolicy[]>> {
     let sql = policiesSql
-    if (!includeSystemSchemas) {
-      sql = `${sql} WHERE NOT (n.nspname IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
+    const filter = filterByList(
+      includedSchemas,
+      excludedSchemas,
+      !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
+    )
+    if (filter) {
+      sql += ` WHERE n.nspname ${filter}`
     }
     if (limit) {
       sql = `${sql} LIMIT ${limit}`
@@ -91,7 +101,7 @@ export default class PostgresMetaPolicies {
     check,
     action = 'PERMISSIVE',
     command = 'ALL',
-    roles = ['PUBLIC'],
+    roles = ['public'],
   }: {
     name: string
     table: string
@@ -108,7 +118,7 @@ export default class PostgresMetaPolicies {
 CREATE POLICY ${ident(name)} ON ${ident(schema)}.${ident(table)}
   AS ${action}
   FOR ${command}
-  TO ${roles.join(',')}
+  TO ${roles.map(ident).join(',')}
   ${definitionClause} ${checkClause};`
     const { error } = await this.query(sql)
     if (error) {
@@ -140,7 +150,7 @@ CREATE POLICY ${ident(name)} ON ${ident(schema)}.${ident(table)}
     const nameSql = name === undefined ? '' : `${alter} RENAME TO ${ident(name)};`
     const definitionSql = definition === undefined ? '' : `${alter} USING (${definition});`
     const checkSql = check === undefined ? '' : `${alter} WITH CHECK (${check});`
-    const rolesSql = roles === undefined ? '' : `${alter} TO (${roles.join(',')});`
+    const rolesSql = roles === undefined ? '' : `${alter} TO ${roles.map(ident).join(',')};`
 
     // nameSql must be last
     const sql = `BEGIN; ${definitionSql} ${checkSql} ${rolesSql} ${nameSql} COMMIT;`

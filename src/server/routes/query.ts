@@ -1,6 +1,13 @@
-import { FastifyInstance } from 'fastify'
-import * as Parser from '../../lib/Parser'
-import PgMetaCache from '../pgMetaCache'
+import PgMetaCache from '../pgMetaCache.js'
+import { FastifyInstance, FastifyRequest } from 'fastify'
+import * as Parser from '../../lib/Parser.js'
+import { extractRequestForLogging, translateErrorToResponseCode } from '../utils.js'
+
+const errorOnEmptyQuery = (request: FastifyRequest) => {
+  if (!(request.body as any).query) {
+    throw new Error('query not found')
+  }
+}
 
 export default async (fastify: FastifyInstance) => {
   fastify.post<{
@@ -9,13 +16,14 @@ export default async (fastify: FastifyInstance) => {
       query: string
     }
   }>('/', async (request, reply) => {
+    errorOnEmptyQuery(request)
     const connectionString = request.headers.pg
 
     const pgMeta = PgMetaCache.get(connectionString)
     const { data, error } = await pgMeta.query(request.body.query)
     if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
-      reply.code(400)
+      request.log.error({ error, request: extractRequestForLogging(request) })
+      reply.code(translateErrorToResponseCode(error))
       return { error: error.message }
     }
 
@@ -28,11 +36,12 @@ export default async (fastify: FastifyInstance) => {
       query: string
     }
   }>('/format', async (request, reply) => {
-    const { data, error } = await Parser.Format(request.body.query)
+    errorOnEmptyQuery(request)
+    const { data, error } = Parser.Format(request.body.query)
 
     if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
-      reply.code(400)
+      request.log.error({ error, request: extractRequestForLogging(request) })
+      reply.code(translateErrorToResponseCode(error))
       return { error: error.message }
     }
 
@@ -45,11 +54,12 @@ export default async (fastify: FastifyInstance) => {
       query: string
     }
   }>('/parse', async (request, reply) => {
-    const { data, error } = await Parser.Parse(request.body.query)
+    errorOnEmptyQuery(request)
+    const { data, error } = Parser.Parse(request.body.query)
 
     if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
-      reply.code(400)
+      request.log.error({ error, request: extractRequestForLogging(request) })
+      reply.code(translateErrorToResponseCode(error))
       return { error: error.message }
     }
 
@@ -62,11 +72,11 @@ export default async (fastify: FastifyInstance) => {
       ast: object
     }
   }>('/deparse', async (request, reply) => {
-    const { data, error } = await Parser.Deparse(request.body.ast)
+    const { data, error } = Parser.Deparse(request.body.ast)
 
     if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
-      reply.code(400)
+      request.log.error({ error, request: extractRequestForLogging(request) })
+      reply.code(translateErrorToResponseCode(error))
       return { error: error.message }
     }
 

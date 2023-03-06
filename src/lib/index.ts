@@ -1,5 +1,4 @@
-import PostgresMeta from './PostgresMeta'
-export { PostgresMeta }
+export { default as PostgresMeta } from './PostgresMeta.js'
 export {
   PostgresMetaOk,
   PostgresMetaErr,
@@ -8,15 +7,18 @@ export {
   PostgresConfig,
   PostgresExtension,
   PostgresFunction,
-  PostgresGrant,
+  PostgresFunctionCreate,
   PostgresPolicy,
   PostgresPrimaryKey,
   PostgresPublication,
   PostgresRelationship,
   PostgresRole,
   PostgresSchema,
+  PostgresSchemaCreate,
+  PostgresSchemaUpdate,
   PostgresTable,
   PostgresTrigger,
   PostgresType,
   PostgresVersion,
-} from './types'
+  PostgresView,
+} from './types.js'
