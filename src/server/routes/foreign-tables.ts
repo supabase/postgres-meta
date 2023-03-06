@@ -1,8 +1,7 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox'
 import { Type } from '@sinclair/typebox'
-import { PostgresMeta } from '../../lib/index.js'
 import { postgresForeignTableSchema } from '../../lib/types.js'
-import { DEFAULT_POOL_CONFIG } from '../constants.js'
+import PgMetaCache from '../pgMetaCache.js'
 import { extractRequestForLogging } from '../utils.js'
 
 const route: FastifyPluginAsyncTypebox = async (fastify) => {
@@ -32,9 +31,8 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       const offset = request.query.offset
       const includeColumns = request.query.include_columns
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const pgMeta = PgMetaCache.get(connectionString)
       const { data, error } = await pgMeta.foreignTables.list({ limit, offset, includeColumns })
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(500)
@@ -67,9 +65,8 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       const connectionString = request.headers.pg
       const id = request.params.id
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const pgMeta = PgMetaCache.get(connectionString)
       const { data, error } = await pgMeta.foreignTables.retrieve({ id })
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(404)

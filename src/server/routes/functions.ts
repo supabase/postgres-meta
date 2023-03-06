@@ -29,7 +29,6 @@ export default async (fastify: FastifyInstance) => {
       limit,
       offset,
     })
-    await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(500)
@@ -67,7 +66,6 @@ export default async (fastify: FastifyInstance) => {
 
     const pgMeta = PgMetaCache.get(connectionString)
     const { data, error } = await pgMeta.functions.create(request.body as any)
-    await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(400)
@@ -88,7 +86,6 @@ export default async (fastify: FastifyInstance) => {
 
     const pgMeta = PgMetaCache.get(connectionString)
     const { data, error } = await pgMeta.functions.update(id, request.body as any)
-    await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(400)

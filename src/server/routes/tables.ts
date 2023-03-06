@@ -51,7 +51,6 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
         offset,
         includeColumns,
       })
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(translateErrorToResponseCode(error, 500))
@@ -86,7 +85,6 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
 
       const pgMeta = PgMetaCache.get(connectionString)
       const { data, error } = await pgMeta.tables.retrieve({ id })
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(404)
@@ -118,7 +116,6 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
 
       const pgMeta = PgMetaCache.get(connectionString)
       const { data, error } = await pgMeta.tables.create(request.body)
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(400)
@@ -157,7 +154,6 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
 
       const pgMeta = PgMetaCache.get(connectionString)
       const { data, error } = await pgMeta.tables.update(id, request.body)
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(400)
@@ -200,7 +196,6 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
 
       const pgMeta = PgMetaCache.get(connectionString)
       const { data, error } = await pgMeta.tables.remove(id, { cascade })
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(400)
