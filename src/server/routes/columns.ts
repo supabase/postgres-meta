@@ -1,6 +1,4 @@
 import { FastifyInstance } from 'fastify'
-import { PostgresMeta } from '../../lib/index.js'
-import { DEFAULT_POOL_CONFIG } from '../constants.js'
 import PgMetaCache from '../pgMetaCache.js'
 import { extractRequestForLogging } from '../utils.js'
 
@@ -67,7 +65,6 @@ export default async (fastify: FastifyInstance) => {
         limit: Number(limit),
         offset: Number(offset),
       })
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(500)
@@ -82,9 +79,8 @@ export default async (fastify: FastifyInstance) => {
       } = request
       const ordinalPosition = ordinalPositionWithDot.slice(1)
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const pgMeta = PgMetaCache.get(connectionString)
       const { data, error } = await pgMeta.columns.retrieve({ id: `${tableId}.${ordinalPosition}` })
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(400)
@@ -151,7 +147,6 @@ export default async (fastify: FastifyInstance) => {
 
     const pgMeta = PgMetaCache.get(connectionString)
     const { data, error } = await pgMeta.columns.remove(request.params.id, { cascade })
-    await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(400)

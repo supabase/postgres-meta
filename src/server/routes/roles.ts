@@ -50,7 +50,6 @@ export default async (fastify: FastifyInstance) => {
         limit,
         offset,
       })
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(500)
@@ -90,7 +89,6 @@ export default async (fastify: FastifyInstance) => {
 
       const pgMeta = PgMetaCache.get(connectionString)
       const { data, error } = await pgMeta.roles.retrieve({ id })
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(404)
@@ -125,7 +123,6 @@ export default async (fastify: FastifyInstance) => {
 
       const pgMeta = PgMetaCache.get(connectionString)
       const { data, error } = await pgMeta.roles.create(request.body)
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(400)
@@ -170,7 +167,6 @@ export default async (fastify: FastifyInstance) => {
 
       const pgMeta = PgMetaCache.get(connectionString)
       const { data, error } = await pgMeta.roles.update(id, request.body)
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(400)
@@ -217,7 +213,6 @@ export default async (fastify: FastifyInstance) => {
 
       const pgMeta = PgMetaCache.get(connectionString)
       const { data, error } = await pgMeta.roles.remove(id)
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(400)

@@ -32,7 +32,6 @@ export default async (fastify: FastifyInstance) => {
       limit,
       offset,
     })
-    await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(500)
