@@ -1,7 +1,8 @@
 import { ident, literal } from 'pg-format'
-import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
-import { functionsSql } from './sql'
-import { PostgresMetaResult, PostgresFunction, PostgresFunctionCreate } from './types'
+import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
+import { filterByList } from './helpers.js'
+import { functionsSql } from './sql/index.js'
+import { PostgresMetaResult, PostgresFunction, PostgresFunctionCreate } from './types.js'
 
 export default class PostgresMetaFunctions {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -12,16 +13,25 @@ export default class PostgresMetaFunctions {
 
   async list({
     includeSystemSchemas = false,
+    includedSchemas,
+    excludedSchemas,
     limit,
     offset,
   }: {
     includeSystemSchemas?: boolean
+    includedSchemas?: string[]
+    excludedSchemas?: string[]
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresFunction[]>> {
     let sql = enrichedFunctionsSql
-    if (!includeSystemSchemas) {
-      sql = `${sql} WHERE NOT (schema IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
+    const filter = filterByList(
+      includedSchemas,
+      excludedSchemas,
+      !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
+    )
+    if (filter) {
+      sql += ` WHERE schema ${filter}`
     }
     if (limit) {
       sql = `${sql} LIMIT ${limit}`
@@ -244,7 +254,7 @@ export default class PostgresMetaFunctions {
         config_params
           ? Object.entries(config_params)
               .map(
-                ([param, value]) =>
+                ([param, value]: string[]) =>
                   `SET ${param} ${value[0] === 'FROM CURRENT' ? 'FROM CURRENT' : 'TO ' + value}`
               )
               .join('\n')

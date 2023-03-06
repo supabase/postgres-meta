@@ -1,26 +1,26 @@
-export const coalesceRowsToArray = (source: string, joinQuery: string) => {
-  // Note that array_to_json(array_agg(row_to_json())) seems to perform better than json_agg
+import { literal } from 'pg-format'
+
+export const coalesceRowsToArray = (source: string, filter: string) => {
   return `
 COALESCE(
   (
     SELECT
-      array_to_json(array_agg(row_to_json(${source})))
+      array_agg(row_to_json(${source})) FILTER (WHERE ${filter})
     FROM
-      ( ${joinQuery} ) ${source}
+      ${source}
   ),
-  '[]'
+  '{}'
 ) AS ${source}`
 }
 
-/**
- * Transforms an array of SQL strings into a transaction
- */
-export const toTransaction = (statements: string[]) => {
-  let cleansed = statements.map((x) => {
-    let sql = x.trim()
-    if (sql.length > 0 && x.slice(-1) !== ';') sql += ';'
-    return sql
-  })
-  const allStatements = cleansed.join('')
-  return `BEGIN; ${allStatements} COMMIT;`
+export const filterByList = (include?: string[], exclude?: string[], defaultExclude?: string[]) => {
+  if (defaultExclude) {
+    exclude = defaultExclude.concat(exclude ?? [])
+  }
+  if (include?.length) {
+    return `IN (${include.map(literal).join(',')})`
+  } else if (exclude?.length) {
+    return `NOT IN (${exclude.map(literal).join(',')})`
+  }
+  return ''
 }

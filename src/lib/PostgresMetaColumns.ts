@@ -1,8 +1,9 @@
 import { ident, literal } from 'pg-format'
-import PostgresMetaTables from './PostgresMetaTables'
-import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
-import { columnsSql } from './sql'
-import { PostgresMetaResult, PostgresColumn } from './types'
+import PostgresMetaTables from './PostgresMetaTables.js'
+import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
+import { columnsSql } from './sql/index.js'
+import { PostgresMetaResult, PostgresColumn } from './types.js'
+import { filterByList } from './helpers.js'
 
 export default class PostgresMetaColumns {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -14,23 +15,45 @@ export default class PostgresMetaColumns {
   }
 
   async list({
+    tableId,
     includeSystemSchemas = false,
+    includedSchemas,
+    excludedSchemas,
     limit,
     offset,
   }: {
+    tableId?: number
     includeSystemSchemas?: boolean
+    includedSchemas?: string[]
+    excludedSchemas?: string[]
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresColumn[]>> {
-    let sql = columnsSql
-    if (!includeSystemSchemas) {
-      sql = `${sql} AND NOT (nc.nspname IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
+    let sql = `
+WITH
+  columns AS (${columnsSql})
+SELECT
+  *
+FROM
+  columns
+WHERE
+  true`
+    const filter = filterByList(
+      includedSchemas,
+      excludedSchemas,
+      !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
+    )
+    if (filter) {
+      sql += ` AND schema ${filter}`
+    }
+    if (tableId !== undefined) {
+      sql += ` AND table_id = ${literal(tableId)}`
     }
     if (limit) {
-      sql = `${sql} LIMIT ${limit}`
+      sql += ` LIMIT ${limit}`
     }
     if (offset) {
-      sql = `${sql} OFFSET ${offset}`
+      sql += ` OFFSET ${offset}`
     }
     return await this.query(sql)
   }
@@ -126,15 +149,26 @@ export default class PostgresMetaColumns {
     }
     const { name: table, schema } = data!
 
-    let defaultValueClause: string
-    if (default_value === undefined) {
-      defaultValueClause = ''
-    } else if (default_value_format === 'expression') {
-      defaultValueClause = `DEFAULT ${default_value}`
+    let defaultValueClause = ''
+    if (is_identity) {
+      if (default_value !== undefined) {
+        return {
+          data: null,
+          error: { message: 'Columns cannot both be identity and have a default value' },
+        }
+      }
+
+      defaultValueClause = `GENERATED ${identity_generation} AS IDENTITY`
     } else {
-      defaultValueClause = `DEFAULT ${literal(default_value)}`
+      if (default_value === undefined) {
+        // skip
+      } else if (default_value_format === 'expression') {
+        defaultValueClause = `DEFAULT ${default_value}`
+      } else {
+        defaultValueClause = `DEFAULT ${literal(default_value)}`
+      }
     }
-    const isIdentityClause = is_identity ? `GENERATED ${identity_generation} AS IDENTITY` : ''
+
     let isNullableClause = ''
     if (is_nullable !== undefined) {
       isNullableClause = is_nullable ? 'NULL' : 'NOT NULL'
@@ -149,9 +183,8 @@ export default class PostgresMetaColumns {
 
     const sql = `
 BEGIN;
-  ALTER TABLE ${ident(schema)}.${ident(table)} ADD COLUMN ${ident(name)} ${type}
+  ALTER TABLE ${ident(schema)}.${ident(table)} ADD COLUMN ${ident(name)} ${typeIdent(type)}
     ${defaultValueClause}
-    ${isIdentityClause}
     ${isNullableClause}
     ${isPrimaryKeyClause}
     ${isUniqueClause}
@@ -210,7 +243,7 @@ COMMIT;`
         ? ''
         : `ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} ALTER COLUMN ${ident(
             old!.name
-          )} SET DATA TYPE ${ident(type)} USING ${ident(old!.name)}::${ident(type)};`
+          )} SET DATA TYPE ${typeIdent(type)} USING ${ident(old!.name)}::${typeIdent(type)};`
 
     let defaultValueSql: string
     if (drop_default) {
@@ -319,14 +352,14 @@ COMMIT;`
     return await this.retrieve({ id })
   }
 
-  async remove(id: string): Promise<PostgresMetaResult<PostgresColumn>> {
+  async remove(id: string, { cascade = false } = {}): Promise<PostgresMetaResult<PostgresColumn>> {
     const { data: column, error } = await this.retrieve({ id })
     if (error) {
       return { data: null, error }
     }
     const sql = `ALTER TABLE ${ident(column!.schema)}.${ident(column!.table)} DROP COLUMN ${ident(
       column!.name
-    )};`
+    )} ${cascade ? 'CASCADE' : 'RESTRICT'};`
     {
       const { error } = await this.query(sql)
       if (error) {
@@ -335,4 +368,8 @@ COMMIT;`
     }
     return { data: column!, error: null }
   }
+}
+
+const typeIdent = (type: string) => {
+  return type.endsWith('[]') ? `${ident(type.slice(0, -2))}[]` : ident(type)
 }

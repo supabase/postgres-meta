@@ -33,6 +33,7 @@ SELECT
     WHEN 'd' THEN 'BY DEFAULT'
     ELSE NULL
   END AS identity_generation,
+  a.attgenerated IN ('s') AS is_generated,
   NOT (
     a.attnotnull
     OR t.typtype = 'd' AND t.typnotnull
@@ -49,7 +50,8 @@ SELECT
       FROM
         pg_catalog.pg_enum enums
       WHERE
-        quote_ident(COALESCE(bt.typname, t.typname)) = format_type(enums.enumtypid, NULL)
+        enums.enumtypid = coalesce(bt.oid, t.oid)
+        OR enums.enumtypid = coalesce(bt.typelem, t.typelem)
       ORDER BY
         enums.enumsortorder
     )

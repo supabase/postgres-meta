@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify'
-import PgMetaCache from '../pgMetaCache'
+import PgMetaCache from '../pgMetaCache.js'
+import { extractRequestForLogging } from '../utils.js'
 
 export default async (fastify: FastifyInstance) => {
   fastify.get<{
@@ -16,7 +17,7 @@ export default async (fastify: FastifyInstance) => {
     const pgMeta = PgMetaCache.get(connectionString)
     const { data, error } = await pgMeta.extensions.list({ limit, offset })
     if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
+      request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(500)
       return { error: error.message }
     }
@@ -35,7 +36,7 @@ export default async (fastify: FastifyInstance) => {
     const pgMeta = PgMetaCache.get(connectionString)
     const { data, error } = await pgMeta.extensions.retrieve({ name: request.params.name })
     if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
+      request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(404)
       return { error: error.message }
     }
@@ -50,9 +51,9 @@ export default async (fastify: FastifyInstance) => {
     const connectionString = request.headers.pg
 
     const pgMeta = PgMetaCache.get(connectionString)
-    const { data, error } = await pgMeta.extensions.create(request.body)
+    const { data, error } = await pgMeta.extensions.create(request.body as any)
     if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
+      request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(400)
       return { error: error.message }
     }
@@ -70,9 +71,9 @@ export default async (fastify: FastifyInstance) => {
     const connectionString = request.headers.pg
 
     const pgMeta = PgMetaCache.get(connectionString)
-    const { data, error } = await pgMeta.extensions.update(request.params.name, request.body)
+    const { data, error } = await pgMeta.extensions.update(request.params.name, request.body as any)
     if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
+      request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(400)
       if (error.message.startsWith('Cannot find')) reply.code(404)
       return { error: error.message }
@@ -96,7 +97,7 @@ export default async (fastify: FastifyInstance) => {
     const pgMeta = PgMetaCache.get(connectionString)
     const { data, error } = await pgMeta.extensions.remove(request.params.name, { cascade })
     if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
+      request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(400)
       if (error.message.startsWith('Cannot find')) reply.code(404)
       return { error: error.message }

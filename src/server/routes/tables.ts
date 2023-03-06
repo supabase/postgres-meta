@@ -1,112 +1,215 @@
-import { FastifyInstance } from 'fastify'
-import PgMetaCache from '../pgMetaCache'
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox'
+import { Type } from '@sinclair/typebox'
+import PgMetaCache from '../pgMetaCache.js'
+import {
+  postgresTableCreateSchema,
+  postgresTableSchema,
+  postgresTableUpdateSchema,
+} from '../../lib/types.js'
+import { extractRequestForLogging, translateErrorToResponseCode } from '../utils.js'
 
-export default async (fastify: FastifyInstance) => {
-  fastify.get<{
-    Headers: { pg: string }
-    Querystring: {
-      include_system_schemas?: string
-      limit?: number
-      offset?: number
+const route: FastifyPluginAsyncTypebox = async (fastify) => {
+  fastify.get(
+    '/',
+    {
+      schema: {
+        headers: Type.Object({
+          pg: Type.String(),
+        }),
+        querystring: Type.Object({
+          include_system_schemas: Type.Optional(Type.Boolean()),
+          // Note: this only supports comma separated values (e.g., ".../tables?included_schemas=public,core")
+          included_schemas: Type.Optional(Type.String()),
+          excluded_schemas: Type.Optional(Type.String()),
+          limit: Type.Optional(Type.Integer()),
+          offset: Type.Optional(Type.Integer()),
+          include_columns: Type.Optional(Type.Boolean()),
+        }),
+        response: {
+          200: Type.Array(postgresTableSchema),
+          500: Type.Object({
+            error: Type.String(),
+          }),
+        },
+      },
+    },
+    async (request, reply) => {
+      const connectionString = request.headers.pg
+      const includeSystemSchemas = request.query.include_system_schemas
+      const includedSchemas = request.query.included_schemas?.split(',')
+      const excludedSchemas = request.query.excluded_schemas?.split(',')
+      const limit = request.query.limit
+      const offset = request.query.offset
+      const includeColumns = request.query.include_columns
+
+      const pgMeta = PgMetaCache.get(connectionString)
+      const { data, error } = await pgMeta.tables.list({
+        includeSystemSchemas,
+        includedSchemas,
+        excludedSchemas,
+        limit,
+        offset,
+        includeColumns,
+      })
+      await pgMeta.end()
+      if (error) {
+        request.log.error({ error, request: extractRequestForLogging(request) })
+        reply.code(translateErrorToResponseCode(error, 500))
+        return { error: error.message }
+      }
+
+      return data
     }
-  }>('/', async (request, reply) => {
-    const connectionString = request.headers.pg
-    const includeSystemSchemas = request.query.include_system_schemas === 'true'
-    const limit = request.query.limit
-    const offset = request.query.offset
+  )
 
-    const pgMeta = PgMetaCache.get(connectionString)
-    const { data, error } = await pgMeta.tables.list({ includeSystemSchemas, limit, offset })
-    if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
-      reply.code(500)
-      return { error: error.message }
+  fastify.get(
+    '/:id(\\d+)',
+    {
+      schema: {
+        headers: Type.Object({
+          pg: Type.String(),
+        }),
+        params: Type.Object({
+          id: Type.Integer(),
+        }),
+        response: {
+          200: postgresTableSchema,
+          404: Type.Object({
+            error: Type.String(),
+          }),
+        },
+      },
+    },
+    async (request, reply) => {
+      const connectionString = request.headers.pg
+      const id = request.params.id
+
+      const pgMeta = PgMetaCache.get(connectionString)
+      const { data, error } = await pgMeta.tables.retrieve({ id })
+      await pgMeta.end()
+      if (error) {
+        request.log.error({ error, request: extractRequestForLogging(request) })
+        reply.code(404)
+        return { error: error.message }
+      }
+
+      return data
     }
+  )
 
-    return data
-  })
+  fastify.post(
+    '/',
+    {
+      schema: {
+        headers: Type.Object({
+          pg: Type.String(),
+        }),
+        body: postgresTableCreateSchema,
+        response: {
+          200: postgresTableSchema,
+          400: Type.Object({
+            error: Type.String(),
+          }),
+        },
+      },
+    },
+    async (request, reply) => {
+      const connectionString = request.headers.pg
 
-  fastify.get<{
-    Headers: { pg: string }
-    Params: {
-      id: string
+      const pgMeta = PgMetaCache.get(connectionString)
+      const { data, error } = await pgMeta.tables.create(request.body)
+      await pgMeta.end()
+      if (error) {
+        request.log.error({ error, request: extractRequestForLogging(request) })
+        reply.code(400)
+        return { error: error.message }
+      }
+
+      return data
     }
-  }>('/:id(\\d+)', async (request, reply) => {
-    const connectionString = request.headers.pg
-    const id = Number(request.params.id)
+  )
 
-    const pgMeta = PgMetaCache.get(connectionString)
-    const { data, error } = await pgMeta.tables.retrieve({ id })
-    if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
-      reply.code(404)
-      return { error: error.message }
+  fastify.patch(
+    '/:id(\\d+)',
+    {
+      schema: {
+        headers: Type.Object({
+          pg: Type.String(),
+        }),
+        params: Type.Object({
+          id: Type.Integer(),
+        }),
+        body: postgresTableUpdateSchema,
+        response: {
+          200: postgresTableSchema,
+          400: Type.Object({
+            error: Type.String(),
+          }),
+          404: Type.Object({
+            error: Type.String(),
+          }),
+        },
+      },
+    },
+    async (request, reply) => {
+      const connectionString = request.headers.pg
+      const id = request.params.id
+
+      const pgMeta = PgMetaCache.get(connectionString)
+      const { data, error } = await pgMeta.tables.update(id, request.body)
+      await pgMeta.end()
+      if (error) {
+        request.log.error({ error, request: extractRequestForLogging(request) })
+        reply.code(400)
+        if (error.message.startsWith('Cannot find')) reply.code(404)
+        return { error: error.message }
+      }
+
+      return data
     }
+  )
 
-    return data
-  })
+  fastify.delete(
+    '/:id(\\d+)',
+    {
+      schema: {
+        headers: Type.Object({
+          pg: Type.String(),
+        }),
+        params: Type.Object({
+          id: Type.Integer(),
+        }),
+        querystring: Type.Object({
+          cascade: Type.Optional(Type.Boolean()),
+        }),
+        response: {
+          200: postgresTableSchema,
+          400: Type.Object({
+            error: Type.String(),
+          }),
+          404: Type.Object({
+            error: Type.String(),
+          }),
+        },
+      },
+    },
+    async (request, reply) => {
+      const connectionString = request.headers.pg
+      const id = request.params.id
+      const cascade = request.query.cascade
 
-  fastify.post<{
-    Headers: { pg: string }
-    Body: any
-  }>('/', async (request, reply) => {
-    const connectionString = request.headers.pg
+      const pgMeta = PgMetaCache.get(connectionString)
+      const { data, error } = await pgMeta.tables.remove(id, { cascade })
+      await pgMeta.end()
+      if (error) {
+        request.log.error({ error, request: extractRequestForLogging(request) })
+        reply.code(400)
+        if (error.message.startsWith('Cannot find')) reply.code(404)
+        return { error: error.message }
+      }
 
-    const pgMeta = PgMetaCache.get(connectionString)
-    const { data, error } = await pgMeta.tables.create(request.body)
-    if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
-      reply.code(400)
-      return { error: error.message }
+      return data
     }
-
-    return data
-  })
-
-  fastify.patch<{
-    Headers: { pg: string }
-    Params: {
-      id: string
-    }
-    Body: any
-  }>('/:id(\\d+)', async (request, reply) => {
-    const connectionString = request.headers.pg
-    const id = Number(request.params.id)
-
-    const pgMeta = PgMetaCache.get(connectionString)
-    const { data, error } = await pgMeta.tables.update(id, request.body)
-    if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
-      reply.code(400)
-      if (error.message.startsWith('Cannot find')) reply.code(404)
-      return { error: error.message }
-    }
-
-    return data
-  })
-
-  fastify.delete<{
-    Headers: { pg: string }
-    Params: {
-      id: string
-    }
-    Querystring: {
-      cascade?: string
-    }
-  }>('/:id(\\d+)', async (request, reply) => {
-    const connectionString = request.headers.pg
-    const id = Number(request.params.id)
-    const cascade = request.query.cascade === 'true'
-
-    const pgMeta = PgMetaCache.get(connectionString)
-    const { data, error } = await pgMeta.tables.remove(id, { cascade })
-    if (error) {
-      request.log.error(JSON.stringify({ error, req: request.body }))
-      reply.code(400)
-      if (error.message.startsWith('Cannot find')) reply.code(404)
-      return { error: error.message }
-    }
-
-    return data
-  })
+  )
 }
+export default route

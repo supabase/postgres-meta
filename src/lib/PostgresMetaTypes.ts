@@ -1,7 +1,7 @@
-import { literal } from 'pg-format'
-import { DEFAULT_SYSTEM_SCHEMAS } from './constants'
-import { typesSql } from './sql'
-import { PostgresMetaResult, PostgresType } from './types'
+import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
+import { filterByList } from './helpers.js'
+import { typesSql } from './sql/index.js'
+import { PostgresMetaResult, PostgresType } from './types.js'
 
 export default class PostgresMetaTypes {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -11,23 +11,44 @@ export default class PostgresMetaTypes {
   }
 
   async list({
+    includeArrayTypes = false,
     includeSystemSchemas = false,
+    includedSchemas,
+    excludedSchemas,
     limit,
     offset,
   }: {
+    includeArrayTypes?: boolean
     includeSystemSchemas?: boolean
+    includedSchemas?: string[]
+    excludedSchemas?: string[]
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresType[]>> {
     let sql = typesSql
-    if (!includeSystemSchemas) {
-      sql = `${sql} AND NOT (n.nspname IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
+    if (!includeArrayTypes) {
+      sql += ` and not exists (
+                 select
+                 from
+                   pg_type el
+                 where
+                   el.oid = t.typelem
+                   and el.typarray = t.oid
+               )`
+    }
+    const filter = filterByList(
+      includedSchemas,
+      excludedSchemas,
+      !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
+    )
+    if (filter) {
+      sql += ` and n.nspname ${filter}`
     }
     if (limit) {
-      sql = `${sql} LIMIT ${limit}`
+      sql += ` limit ${limit}`
     }
     if (offset) {
-      sql = `${sql} OFFSET ${offset}`
+      sql += ` offset ${offset}`
     }
     return await this.query(sql)
   }

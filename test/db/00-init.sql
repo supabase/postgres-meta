@@ -49,3 +49,43 @@ begin
     return new;
 end;
 $$ language plpgsql;
+
+CREATE VIEW todos_view AS SELECT * FROM public.todos;
+
+create function public.blurb(public.todos) returns text as
+$$
+select substring($1.details, 1, 3);
+$$ language sql stable;
+
+create extension postgres_fdw;
+create server foreign_server foreign data wrapper postgres_fdw options (host 'localhost', port '5432', dbname 'postgres');
+create user mapping for postgres server foreign_server options (user 'postgres', password 'postgres');
+create foreign table foreign_table (
+  id int8,
+  name text,
+  status user_status
+) server foreign_server options (schema_name 'public', table_name 'users');
+
+create or replace function public.function_returning_row()
+returns public.users
+language sql
+stable
+as $$
+  select * from public.users limit 1;
+$$;
+
+create or replace function public.function_returning_set_of_rows()
+returns setof public.users
+language sql
+stable
+as $$
+  select * from public.users;
+$$;
+
+create or replace function public.function_returning_table()
+returns table (id int, name text)
+language sql
+stable
+as $$
+  select id, name from public.users;
+$$;

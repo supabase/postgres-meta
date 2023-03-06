@@ -1,0 +1,28 @@
+name: Publish Dependencies
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    # Must match glibc verison in node:16-bullseye
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: 'pyramation/libpg-query-node'
+          ref: 'v13'
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - run: npm i
+      - run: npm run binary:build
+
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.PROD_AWS_ROLE }}
+          aws-region: us-east-1
+
+      - run: npx node-pre-gyp publish

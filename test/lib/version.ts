@@ -5,15 +5,17 @@ test('retrieve', async () => {
   expect(res).toMatchInlineSnapshot(
     {
       data: {
+        active_connections: expect.any(Number),
+        max_connections: expect.any(Number),
         version: expect.stringMatching(/^PostgreSQL/),
         version_number: expect.any(Number),
       },
     },
     `
-    Object {
-      "data": Object {
-        "active_connections": 6,
-        "max_connections": 100,
+    {
+      "data": {
+        "active_connections": Any<Number>,
+        "max_connections": Any<Number>,
         "version": StringMatching /\\^PostgreSQL/,
         "version_number": Any<Number>,
       },

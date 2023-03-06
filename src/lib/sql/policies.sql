@@ -15,13 +15,13 @@ SELECT
     ELSE array_to_json(
       ARRAY(
         SELECT
-          pg_authid.rolname
+          pg_roles.rolname
         FROM
-          pg_authid
+          pg_roles
         WHERE
-          pg_authid.oid = ANY (pol.polroles)
+          pg_roles.oid = ANY (pol.polroles)
         ORDER BY
-          pg_authid.rolname
+          pg_roles.rolname
       )
     )
   END AS roles,
