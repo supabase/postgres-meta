@@ -20,7 +20,7 @@ jobs:
       - run: npm i
       - run: npm run binary:build
 
-      - uses: aws-actions/configure-aws-credentials@v1
+      - uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.PROD_AWS_ROLE }}
           aws-region: us-east-1
