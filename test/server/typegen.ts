@@ -131,6 +131,13 @@ test('typegen', async () => {
               "user-id"?: number | null
             }
           }
+          todos_with_user_view: {
+            Row: {
+              details: string | null
+              id: number | null
+              user: Database["public"]["Tables"]["users"]["Row"] | null
+            }
+          }
         }
         Functions: {
           blurb: {
