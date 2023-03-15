@@ -1,9 +1,9 @@
 import LruCache from 'lru-cache'
 import PostgresMeta from '../lib/PostgresMeta.js'
-import { DEFAULT_POOL_CONFIG } from './constants.js'
+import { CONNECTIONS_CACHE_SIZE, DEFAULT_POOL_CONFIG } from './constants.js'
 
 const cache = new LruCache<string, PostgresMeta>({
-  max: 100,
+  max: CONNECTIONS_CACHE_SIZE,
   dispose: async (value) => {
     await value.end()
   },
