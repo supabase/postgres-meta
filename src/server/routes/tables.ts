@@ -1,12 +1,11 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox'
 import { Type } from '@sinclair/typebox'
-import { PostgresMeta } from '../../lib/index.js'
+import PgMetaCache from '../pgMetaCache.js'
 import {
   postgresTableCreateSchema,
   postgresTableSchema,
   postgresTableUpdateSchema,
 } from '../../lib/types.js'
-import { DEFAULT_POOL_CONFIG } from '../constants.js'
 import { extractRequestForLogging, translateErrorToResponseCode } from '../utils.js'
 
 const route: FastifyPluginAsyncTypebox = async (fastify) => {
@@ -43,7 +42,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       const offset = request.query.offset
       const includeColumns = request.query.include_columns
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const pgMeta = PgMetaCache.get(connectionString)
       const { data, error } = await pgMeta.tables.list({
         includeSystemSchemas,
         includedSchemas,
@@ -52,7 +51,6 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
         offset,
         includeColumns,
       })
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(translateErrorToResponseCode(error, 500))
@@ -85,9 +83,8 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       const connectionString = request.headers.pg
       const id = request.params.id
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const pgMeta = PgMetaCache.get(connectionString)
       const { data, error } = await pgMeta.tables.retrieve({ id })
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(404)
@@ -117,9 +114,8 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
     async (request, reply) => {
       const connectionString = request.headers.pg
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const pgMeta = PgMetaCache.get(connectionString)
       const { data, error } = await pgMeta.tables.create(request.body)
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(400)
@@ -156,9 +152,8 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       const connectionString = request.headers.pg
       const id = request.params.id
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const pgMeta = PgMetaCache.get(connectionString)
       const { data, error } = await pgMeta.tables.update(id, request.body)
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(400)
@@ -199,9 +194,8 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       const id = request.params.id
       const cascade = request.query.cascade
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const pgMeta = PgMetaCache.get(connectionString)
       const { data, error } = await pgMeta.tables.remove(id, { cascade })
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(400)

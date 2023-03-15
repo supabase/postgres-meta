@@ -1,6 +1,5 @@
 import { FastifyInstance } from 'fastify'
-import { PostgresMeta } from '../../lib/index.js'
-import { DEFAULT_POOL_CONFIG } from '../constants.js'
+import PgMetaCache from '../pgMetaCache.js'
 import { extractRequestForLogging } from '../utils.js'
 
 export default async (fastify: FastifyInstance) => {
@@ -24,7 +23,7 @@ export default async (fastify: FastifyInstance) => {
     const limit = request.query.limit
     const offset = request.query.offset
 
-    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+    const pgMeta = PgMetaCache.get(connectionString)
     const { data, error } = await pgMeta.types.list({
       includeArrayTypes,
       includeSystemSchemas,
@@ -33,7 +32,6 @@ export default async (fastify: FastifyInstance) => {
       limit,
       offset,
     })
-    await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(500)
