@@ -1,6 +1,5 @@
 import { FastifyInstance } from 'fastify'
-import { PostgresMeta } from '../../lib/index.js'
-import { DEFAULT_POOL_CONFIG } from '../constants.js'
+import PgMetaCache from '../pgMetaCache.js'
 import { extractRequestForLogging } from '../utils.js'
 
 export default async (fastify: FastifyInstance) => {
@@ -22,7 +21,7 @@ export default async (fastify: FastifyInstance) => {
     const limit = request.query.limit
     const offset = request.query.offset
 
-    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+    const pgMeta = PgMetaCache.get(connectionString)
     const { data, error } = await pgMeta.columns.list({
       includeSystemSchemas,
       includedSchemas,
@@ -30,7 +29,6 @@ export default async (fastify: FastifyInstance) => {
       limit,
       offset,
     })
-    await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(500)
@@ -60,14 +58,13 @@ export default async (fastify: FastifyInstance) => {
       } = request
       const includeSystemSchemas = request.query.include_system_schemas === 'true'
 
-      const pgMeta: PostgresMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const pgMeta = PgMetaCache.get(connectionString)
       const { data, error } = await pgMeta.columns.list({
         tableId: Number(tableId),
         includeSystemSchemas,
         limit: Number(limit),
         offset: Number(offset),
       })
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(500)
@@ -82,9 +79,8 @@ export default async (fastify: FastifyInstance) => {
       } = request
       const ordinalPosition = ordinalPositionWithDot.slice(1)
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const pgMeta = PgMetaCache.get(connectionString)
       const { data, error } = await pgMeta.columns.retrieve({ id: `${tableId}.${ordinalPosition}` })
-      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(400)
@@ -104,9 +100,8 @@ export default async (fastify: FastifyInstance) => {
   }>('/', async (request, reply) => {
     const connectionString = request.headers.pg
 
-    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+    const pgMeta = PgMetaCache.get(connectionString)
     const { data, error } = await pgMeta.columns.create(request.body as any)
-    await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(400)
@@ -126,9 +121,8 @@ export default async (fastify: FastifyInstance) => {
   }>('/:id(\\d+\\.\\d+)', async (request, reply) => {
     const connectionString = request.headers.pg
 
-    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+    const pgMeta = PgMetaCache.get(connectionString)
     const { data, error } = await pgMeta.columns.update(request.params.id, request.body as any)
-    await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(400)
@@ -151,9 +145,8 @@ export default async (fastify: FastifyInstance) => {
     const connectionString = request.headers.pg
     const cascade = request.query.cascade === 'true'
 
-    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+    const pgMeta = PgMetaCache.get(connectionString)
     const { data, error } = await pgMeta.columns.remove(request.params.id, { cascade })
-    await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(400)

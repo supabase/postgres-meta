@@ -1,7 +1,6 @@
+import PgMetaCache from '../pgMetaCache.js'
 import { FastifyInstance, FastifyRequest } from 'fastify'
-import { PostgresMeta } from '../../lib/index.js'
 import * as Parser from '../../lib/Parser.js'
-import { DEFAULT_POOL_CONFIG } from '../constants.js'
 import { extractRequestForLogging, translateErrorToResponseCode } from '../utils.js'
 
 const errorOnEmptyQuery = (request: FastifyRequest) => {
@@ -20,9 +19,8 @@ export default async (fastify: FastifyInstance) => {
     errorOnEmptyQuery(request)
     const connectionString = request.headers.pg
 
-    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+    const pgMeta = PgMetaCache.get(connectionString)
     const { data, error } = await pgMeta.query(request.body.query)
-    await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(translateErrorToResponseCode(error))
