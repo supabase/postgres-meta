@@ -57,7 +57,7 @@
   },
   "dependencies": {
     "@sinclair/typebox": "^0.25.1",
-    "lru-cache": "^7.18.1",
+    "lru-cache": "^8.0.4",
     "pg": "^8.7.1",
     "pg-format": "^1.0.4",
     "pgsql-parser": "^13.3.0",
