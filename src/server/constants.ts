@@ -25,6 +25,5 @@ export const GENERATE_TYPES =
 export const GENERATE_TYPES_INCLUDED_SCHEMAS =
   GENERATE_TYPES && process.argv[5] === '--include-schemas' ? process.argv[6]?.split(',') ?? [] : []
 
-export const CONNECTIONS_CACHE_SIZE = Number(process.env.PG_META_CONNECTIONS_CACHE_SIZE || '100')
 export const DEFAULT_POOL_CONFIG = { max: 1, connectionTimeoutMillis: PG_CONN_TIMEOUT_SECS * 1000 }
 export const PG_META_REQ_HEADER = process.env.PG_META_REQ_HEADER || 'request-id'
