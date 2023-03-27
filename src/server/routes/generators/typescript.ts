@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify'
-import PgMetaCache from '../../pgMetaCache.js'
+import { PostgresMeta } from '../../../lib/index.js'
+import { DEFAULT_POOL_CONFIG } from '../../constants.js'
 import { extractRequestForLogging } from '../../utils.js'
 import { apply as applyTypescriptTemplate } from '../../templates/typescript.js'
 
@@ -17,7 +18,7 @@ export default async (fastify: FastifyInstance) => {
     const includedSchemas =
       request.query.included_schemas?.split(',').map((schema) => schema.trim()) ?? []
 
-    const pgMeta = PgMetaCache.get(connectionString)
+    const pgMeta: PostgresMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data: schemas, error: schemasError } = await pgMeta.schemas.list()
     const { data: tables, error: tablesError } = await pgMeta.tables.list()
     const { data: views, error: viewsError } = await pgMeta.views.list()
@@ -26,6 +27,7 @@ export default async (fastify: FastifyInstance) => {
       includeArrayTypes: true,
       includeSystemSchemas: true,
     })
+    await pgMeta.end()
 
     if (schemasError) {
       request.log.error({ error: schemasError, request: extractRequestForLogging(request) })

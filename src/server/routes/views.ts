@@ -1,7 +1,8 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox'
 import { Type } from '@sinclair/typebox'
-import PgMetaCache from '../pgMetaCache.js'
+import { PostgresMeta } from '../../lib/index.js'
 import { postgresViewSchema } from '../../lib/types.js'
+import { DEFAULT_POOL_CONFIG } from '../constants.js'
 import { extractRequestForLogging } from '../utils.js'
 
 const route: FastifyPluginAsyncTypebox = async (fastify) => {
@@ -38,7 +39,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       const offset = request.query.offset
       const includeColumns = request.query.include_columns
 
-      const pgMeta = PgMetaCache.get(connectionString)
+      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
       const { data, error } = await pgMeta.views.list({
         includeSystemSchemas,
         includedSchemas,
@@ -47,6 +48,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
         offset,
         includeColumns,
       })
+      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(500)
@@ -79,8 +81,9 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       const connectionString = request.headers.pg
       const id = request.params.id
 
-      const pgMeta = PgMetaCache.get(connectionString)
+      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
       const { data, error } = await pgMeta.views.retrieve({ id })
+      await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
         reply.code(404)

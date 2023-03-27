@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify'
-import PgMetaCache from '../pgMetaCache.js'
+import { PostgresMeta } from '../../lib/index.js'
+import { DEFAULT_POOL_CONFIG } from '../constants.js'
 import { extractRequestForLogging } from '../utils.js'
 
 export default async (fastify: FastifyInstance) => {
@@ -14,8 +15,9 @@ export default async (fastify: FastifyInstance) => {
     const limit = request.query.limit
     const offset = request.query.offset
 
-    const pgMeta = PgMetaCache.get(connectionString)
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.publications.list({ limit, offset })
+    await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(500)
@@ -34,8 +36,9 @@ export default async (fastify: FastifyInstance) => {
     const connectionString = request.headers.pg
     const id = Number(request.params.id)
 
-    const pgMeta = PgMetaCache.get(connectionString)
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.publications.retrieve({ id })
+    await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(404)
@@ -51,8 +54,9 @@ export default async (fastify: FastifyInstance) => {
   }>('/', async (request, reply) => {
     const connectionString = request.headers.pg
 
-    const pgMeta = PgMetaCache.get(connectionString)
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.publications.create(request.body as any)
+    await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(400)
@@ -72,8 +76,9 @@ export default async (fastify: FastifyInstance) => {
     const connectionString = request.headers.pg
     const id = Number(request.params.id)
 
-    const pgMeta = PgMetaCache.get(connectionString)
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.publications.update(id, request.body as any)
+    await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(400)
@@ -93,8 +98,9 @@ export default async (fastify: FastifyInstance) => {
     const connectionString = request.headers.pg
     const id = Number(request.params.id)
 
-    const pgMeta = PgMetaCache.get(connectionString)
+    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data, error } = await pgMeta.publications.remove(id)
+    await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(400)
