@@ -8,6 +8,10 @@ export const configSql = await readFile(join(__dirname, 'config.sql'), 'utf-8')
 export const extensionsSql = await readFile(join(__dirname, 'extensions.sql'), 'utf-8')
 export const foreignTablesSql = await readFile(join(__dirname, 'foreign_tables.sql'), 'utf-8')
 export const functionsSql = await readFile(join(__dirname, 'functions.sql'), 'utf-8')
+export const materializedViewsSql = await readFile(
+  join(__dirname, 'materialized_views.sql'),
+  'utf-8'
+)
 export const policiesSql = await readFile(join(__dirname, 'policies.sql'), 'utf-8')
 export const primaryKeysSql = await readFile(join(__dirname, 'primary_keys.sql'), 'utf-8')
 export const publicationsSql = await readFile(join(__dirname, 'publications.sql'), 'utf-8')
