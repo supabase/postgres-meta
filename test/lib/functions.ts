@@ -317,7 +317,11 @@ test('retrieve set-returning function', async () => {
     args: [],
   })
   expect(res.data).toMatchInlineSnapshot(
-    { id: expect.any(Number) },
+    {
+      id: expect.any(Number),
+      return_type_id: expect.any(Number),
+      return_type_relation_id: expect.any(Number),
+    },
     `
     {
       "args": [],
@@ -341,8 +345,8 @@ test('retrieve set-returning function', async () => {
       "language": "sql",
       "name": "function_returning_set_of_rows",
       "return_type": "SETOF users",
-      "return_type_id": 16392,
-      "return_type_relation_id": 16390,
+      "return_type_id": Any<Number>,
+      "return_type_relation_id": Any<Number>,
       "schema": "public",
       "security_definer": false,
     }
