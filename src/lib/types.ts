@@ -107,6 +107,7 @@ const postgresFunctionSchema = Type.Object({
   ),
   argument_types: Type.String(),
   identity_argument_types: Type.String(),
+  return_type_id: Type.Integer(),
   return_type: Type.String(),
   return_type_relation_id: Type.Union([Type.Integer(), Type.Null()]),
   is_set_returning_function: Type.Boolean(),
