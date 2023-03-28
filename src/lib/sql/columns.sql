@@ -85,7 +85,7 @@ WHERE
   NOT pg_is_other_temp_schema(nc.oid)
   AND a.attnum > 0
   AND NOT a.attisdropped
-  AND (c.relkind IN ('r', 'v', 'f', 'p'))
+  AND (c.relkind IN ('r', 'v', 'm', 'f', 'p'))
   AND (
     pg_has_role(c.relowner, 'USAGE')
     OR has_column_privilege(
