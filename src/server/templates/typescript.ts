@@ -224,7 +224,7 @@ export interface Database {
                     .map(
                       ({
                         args,
-                        return_type,
+                        return_type_id,
                         return_type_relation_id,
                         is_set_returning_function,
                       }) => `{
@@ -312,7 +312,12 @@ export interface Database {
                     }
 
                     // Case 3: returns base/composite/enum type.
-                    return pgTypeToTsType(return_type, types, schemas)
+                    const type = types.find(({ id }) => id === return_type_id)
+                    if (type) {
+                      return pgTypeToTsType(type.name, types, schemas)
+                    }
+
+                    return 'unknown'
                   })()})${is_set_returning_function ? '[]' : ''}
                 }`
                     )
