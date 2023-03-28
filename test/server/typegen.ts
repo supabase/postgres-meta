@@ -114,6 +114,13 @@ test('typegen', async () => {
           }
         }
         Views: {
+          todos_matview: {
+            Row: {
+              details: string | null
+              id: number | null
+              "user-id": number | null
+            }
+          }
           todos_view: {
             Row: {
               details: string | null
