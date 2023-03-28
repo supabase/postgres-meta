@@ -1,6 +1,7 @@
 import prettier from 'prettier'
 import type {
   PostgresFunction,
+  PostgresMaterializedView,
   PostgresSchema,
   PostgresTable,
   PostgresType,
@@ -11,6 +12,7 @@ export const apply = ({
   schemas,
   tables,
   views,
+  materializedViews,
   functions,
   types,
   arrayTypes,
@@ -18,6 +20,7 @@ export const apply = ({
   schemas: PostgresSchema[]
   tables: (PostgresTable & { columns: unknown[] })[]
   views: (PostgresView & { columns: unknown[] })[]
+  materializedViews: (PostgresMaterializedView & { columns: unknown[] })[]
   functions: PostgresFunction[]
   types: PostgresType[]
   arrayTypes: PostgresType[]
@@ -32,7 +35,7 @@ export interface Database {
       const schemaTables = tables
         .filter((table) => table.schema === schema.name)
         .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-      const schemaViews = views
+      const schemaViews = [...views, ...materializedViews]
         .filter((view) => view.schema === schema.name)
         .sort(({ name: a }, { name: b }) => a.localeCompare(b))
       const schemaFunctions = functions
@@ -165,7 +168,7 @@ export interface Database {
                       )}
                   }
                   ${
-                    view.is_updatable
+                    'is_updatable' in view && view.is_updatable
                       ? `Insert: {
                     ${view.columns
                       .sort(({ name: a }, { name: b }) => a.localeCompare(b))
@@ -184,7 +187,7 @@ export interface Database {
                       : ''
                   }
                   ${
-                    view.is_updatable
+                    'is_updatable' in view && view.is_updatable
                       ? `Update: {
                     ${view.columns
                       .sort(({ name: a }, { name: b }) => a.localeCompare(b))
