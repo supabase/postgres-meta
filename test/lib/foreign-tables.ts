@@ -1,10 +1,26 @@
 import { pgMeta } from './utils'
 
+const cleanNondetFromResponse = <T>(x: T) => {
+  const { data, ...rest } = x as any
+
+  const cleanNondetFromData = ({ id, columns, ...rest }: any) => {
+    const cleaned = rest
+    if (columns) {
+      cleaned.columns = columns.map(({ id, table_id, ...rest }: any) => rest)
+    }
+    return cleaned
+  }
+
+  return {
+    data: Array.isArray(data) ? data.map(cleanNondetFromData) : cleanNondetFromData(data),
+    ...rest,
+  } as T
+}
+
 test('list', async () => {
   const res = await pgMeta.foreignTables.list()
-  expect(res.data?.find(({ name }) => name === 'foreign_table')).toMatchInlineSnapshot(
-    { id: expect.any(Number) },
-    `
+  expect(cleanNondetFromResponse(res).data?.find(({ name }) => name === 'foreign_table'))
+    .toMatchInlineSnapshot(`
     {
       "columns": [
         {
@@ -13,7 +29,6 @@ test('list', async () => {
           "default_value": null,
           "enums": [],
           "format": "int8",
-          "id": "16434.1",
           "identity_generation": null,
           "is_generated": false,
           "is_identity": false,
@@ -24,7 +39,6 @@ test('list', async () => {
           "ordinal_position": 1,
           "schema": "public",
           "table": "foreign_table",
-          "table_id": 16434,
         },
         {
           "comment": null,
@@ -32,7 +46,6 @@ test('list', async () => {
           "default_value": null,
           "enums": [],
           "format": "text",
-          "id": "16434.2",
           "identity_generation": null,
           "is_generated": false,
           "is_identity": false,
@@ -43,7 +56,6 @@ test('list', async () => {
           "ordinal_position": 2,
           "schema": "public",
           "table": "foreign_table",
-          "table_id": 16434,
         },
         {
           "comment": null,
@@ -54,7 +66,6 @@ test('list', async () => {
             "INACTIVE",
           ],
           "format": "user_status",
-          "id": "16434.3",
           "identity_generation": null,
           "is_generated": false,
           "is_identity": false,
@@ -65,40 +76,30 @@ test('list', async () => {
           "ordinal_position": 3,
           "schema": "public",
           "table": "foreign_table",
-          "table_id": 16434,
         },
       ],
       "comment": null,
-      "id": Any<Number>,
       "name": "foreign_table",
       "schema": "public",
     }
-  `
-  )
+  `)
 })
 
 test('list without columns', async () => {
   const res = await pgMeta.foreignTables.list({ includeColumns: false })
-  expect(res.data?.find(({ name }) => name === 'foreign_table')).toMatchInlineSnapshot(
-    {
-      id: expect.any(Number),
-    },
-    `
+  expect(cleanNondetFromResponse(res).data?.find(({ name }) => name === 'foreign_table'))
+    .toMatchInlineSnapshot(`
     {
       "comment": null,
-      "id": Any<Number>,
       "name": "foreign_table",
       "schema": "public",
     }
-  `
-  )
+  `)
 })
 
 test('retrieve', async () => {
   const res = await pgMeta.foreignTables.retrieve({ schema: 'public', name: 'foreign_table' })
-  expect(res).toMatchInlineSnapshot(
-    { data: { id: expect.any(Number) } },
-    `
+  expect(cleanNondetFromResponse(res)).toMatchInlineSnapshot(`
     {
       "data": {
         "columns": [
@@ -108,7 +109,6 @@ test('retrieve', async () => {
             "default_value": null,
             "enums": [],
             "format": "int8",
-            "id": "16434.1",
             "identity_generation": null,
             "is_generated": false,
             "is_identity": false,
@@ -119,7 +119,6 @@ test('retrieve', async () => {
             "ordinal_position": 1,
             "schema": "public",
             "table": "foreign_table",
-            "table_id": 16434,
           },
           {
             "comment": null,
@@ -127,7 +126,6 @@ test('retrieve', async () => {
             "default_value": null,
             "enums": [],
             "format": "text",
-            "id": "16434.2",
             "identity_generation": null,
             "is_generated": false,
             "is_identity": false,
@@ -138,7 +136,6 @@ test('retrieve', async () => {
             "ordinal_position": 2,
             "schema": "public",
             "table": "foreign_table",
-            "table_id": 16434,
           },
           {
             "comment": null,
@@ -149,7 +146,6 @@ test('retrieve', async () => {
               "INACTIVE",
             ],
             "format": "user_status",
-            "id": "16434.3",
             "identity_generation": null,
             "is_generated": false,
             "is_identity": false,
@@ -160,16 +156,13 @@ test('retrieve', async () => {
             "ordinal_position": 3,
             "schema": "public",
             "table": "foreign_table",
-            "table_id": 16434,
           },
         ],
         "comment": null,
-        "id": Any<Number>,
         "name": "foreign_table",
         "schema": "public",
       },
       "error": null,
     }
-  `
-  )
+  `)
 })
