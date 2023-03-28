@@ -5,6 +5,7 @@ import ConfigRoute from './config.js'
 import ExtensionsRoute from './extensions.js'
 import ForeignTablesRoute from './foreign-tables.js'
 import FunctionsRoute from './functions.js'
+import MaterializedViewsRoute from './materialized-views.js'
 import PoliciesRoute from './policies.js'
 import PublicationsRoute from './publications.js'
 import QueryRoute from './query.js'
@@ -45,6 +46,7 @@ export default async (fastify: FastifyInstance) => {
   fastify.register(ExtensionsRoute, { prefix: '/extensions' })
   fastify.register(ForeignTablesRoute, { prefix: '/foreign-tables' })
   fastify.register(FunctionsRoute, { prefix: '/functions' })
+  fastify.register(MaterializedViewsRoute, { prefix: '/materialized-views' })
   fastify.register(PoliciesRoute, { prefix: '/policies' })
   fastify.register(PublicationsRoute, { prefix: '/publications' })
   fastify.register(QueryRoute, { prefix: '/query' })
