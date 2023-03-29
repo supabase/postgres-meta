@@ -2,6 +2,7 @@ import CryptoJS from 'crypto-js'
 import { FastifyInstance } from 'fastify'
 import ColumnRoute from './columns.js'
 import ConfigRoute from './config.js'
+import DefinitionsRoute from './definitions.js'
 import ExtensionsRoute from './extensions.js'
 import ForeignTablesRoute from './foreign-tables.js'
 import FunctionsRoute from './functions.js'
@@ -42,6 +43,7 @@ export default async (fastify: FastifyInstance) => {
 
   fastify.register(ColumnRoute, { prefix: '/columns' })
   fastify.register(ConfigRoute, { prefix: '/config' })
+  fastify.register(DefinitionsRoute, { prefix: '/definitions' })
   fastify.register(ExtensionsRoute, { prefix: '/extensions' })
   fastify.register(ForeignTablesRoute, { prefix: '/foreign-tables' })
   fastify.register(FunctionsRoute, { prefix: '/functions' })

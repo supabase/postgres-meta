@@ -384,3 +384,8 @@ export const postgresViewSchema = Type.Object({
   columns: Type.Optional(Type.Array(postgresColumnSchema)),
 })
 export type PostgresView = Static<typeof postgresViewSchema>
+
+export const postgresDefinition = Type.Object({
+  definition: Type.String(),
+})
+export type PostgresDefinition = Static<typeof postgresDefinition>

@@ -59,10 +59,12 @@
     "@sinclair/typebox": "^0.25.1",
     "pg": "^8.7.1",
     "pg-format": "^1.0.4",
+    "pg-minify": "^1.6.3",
     "pgsql-parser": "^13.3.0",
     "postgres-array": "^3.0.1",
     "prettier": "^2.6.0",
-    "prettier-plugin-sql": "^0.13.0"
+    "prettier-plugin-sql": "^0.13.0",
+    "sql-formatter": "^12.2.0"
   },
   "devDependencies": {
     "@fastify/cors": "^8.2.0",

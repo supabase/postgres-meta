@@ -3,6 +3,7 @@ import * as Parser from './Parser.js'
 import PostgresMetaColumns from './PostgresMetaColumns.js'
 import PostgresMetaConfig from './PostgresMetaConfig.js'
 import PostgresMetaExtensions from './PostgresMetaExtensions.js'
+import PostgresMetaDefinitions from './PostgresMetaDefinitions.js'
 import PostgresMetaForeignTables from './PostgresMetaForeignTables.js'
 import PostgresMetaFunctions from './PostgresMetaFunctions.js'
 import PostgresMetaPolicies from './PostgresMetaPolicies.js'
@@ -22,6 +23,7 @@ export default class PostgresMeta {
   end: () => Promise<void>
   columns: PostgresMetaColumns
   config: PostgresMetaConfig
+  definitions: PostgresMetaDefinitions
   extensions: PostgresMetaExtensions
   foreignTables: PostgresMetaForeignTables
   functions: PostgresMetaFunctions
@@ -45,6 +47,7 @@ export default class PostgresMeta {
     this.end = end
     this.columns = new PostgresMetaColumns(this.query)
     this.config = new PostgresMetaConfig(this.query)
+    this.definitions = new PostgresMetaDefinitions(this.query, config.connectionString)
     this.extensions = new PostgresMetaExtensions(this.query)
     this.foreignTables = new PostgresMetaForeignTables(this.query)
     this.functions = new PostgresMetaFunctions(this.query)
