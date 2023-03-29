@@ -8,6 +8,7 @@ export {
   PostgresExtension,
   PostgresFunction,
   PostgresFunctionCreate,
+  PostgresMaterializedView,
   PostgresPolicy,
   PostgresPrimaryKey,
   PostgresPublication,

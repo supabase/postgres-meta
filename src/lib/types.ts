@@ -385,6 +385,16 @@ export const postgresViewSchema = Type.Object({
 })
 export type PostgresView = Static<typeof postgresViewSchema>
 
+export const postgresMaterializedViewSchema = Type.Object({
+  id: Type.Integer(),
+  schema: Type.String(),
+  name: Type.String(),
+  is_populated: Type.Boolean(),
+  comment: Type.Union([Type.String(), Type.Null()]),
+  columns: Type.Optional(Type.Array(postgresColumnSchema)),
+})
+export type PostgresMaterializedView = Static<typeof postgresMaterializedViewSchema>
+
 export const postgresDefinition = Type.Object({
   definition: Type.String(),
 })

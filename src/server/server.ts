@@ -39,6 +39,8 @@ if (EXPORT_DOCS) {
   const { data: schemas, error: schemasError } = await pgMeta.schemas.list()
   const { data: tables, error: tablesError } = await pgMeta.tables.list()
   const { data: views, error: viewsError } = await pgMeta.views.list()
+  const { data: materializedViews, error: materializedViewsError } =
+    await pgMeta.materializedViews.list({ includeColumns: true })
   const { data: functions, error: functionsError } = await pgMeta.functions.list()
   const { data: types, error: typesError } = await pgMeta.types.list({
     includeArrayTypes: true,
@@ -54,6 +56,9 @@ if (EXPORT_DOCS) {
   }
   if (viewsError) {
     throw new Error(viewsError.message)
+  }
+  if (materializedViewsError) {
+    throw new Error(materializedViewsError.message)
   }
   if (functionsError) {
     throw new Error(functionsError.message)
@@ -71,6 +76,7 @@ if (EXPORT_DOCS) {
       ),
       tables,
       views,
+      materializedViews,
       functions: functions.filter(
         ({ return_type }) => !['trigger', 'event_trigger'].includes(return_type)
       ),
