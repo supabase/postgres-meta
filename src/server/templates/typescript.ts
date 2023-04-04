@@ -405,6 +405,8 @@ const pgTypeToTsType = (
     return 'undefined'
   } else if (pgType === 'record') {
     return 'Record<string, unknown>'
+  } else if (pgType === 'vector') {
+    return 'number[]'
   } else if (pgType.startsWith('_')) {
     return `(${pgTypeToTsType(pgType.substring(1), types, schemas)})[]`
   } else {
