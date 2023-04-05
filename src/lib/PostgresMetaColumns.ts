@@ -213,6 +213,7 @@ COMMIT;`
       is_nullable,
       is_unique,
       comment,
+      check,
     }: {
       name?: string
       type?: string
@@ -224,6 +225,7 @@ COMMIT;`
       is_nullable?: boolean
       is_unique?: boolean
       comment?: string
+      check?: string
     }
   ): Promise<PostgresMetaResult<PostgresColumn>> {
     const { data: old, error } = await this.retrieve({ id })
@@ -328,6 +330,34 @@ $$;
             old!.name
           )} IS ${literal(comment)};`
 
+    const checkSql =
+      check === undefined
+        ? ''
+        : `
+DO $$
+DECLARE
+  v_conname name;
+BEGIN
+  SELECT conname into v_conname FROM pg_constraint WHERE
+    contype = 'c'
+    AND cardinality(conkey) = 1
+    AND conrelid = ${literal(old!.table_id)}
+    AND conkey[1] = ${literal(old!.ordinal_position)}
+    LIMIT 1;
+
+  IF v_conname IS NOT NULL THEN
+    EXECUTE format('ALTER TABLE ${ident(old!.schema)}.${ident(
+            old!.table
+          )} DROP CONSTRAINT %s', v_conname);
+  END IF;
+
+  ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} ADD CONSTRAINT ${ident(
+            old!.table
+          )}_${ident(old!.name)}_check CHECK (${check});
+END
+$$;
+`
+
     // TODO: Can't set default if column is previously identity even if
     // is_identity: false. Must do two separate PATCHes (once to drop identity
     // and another to set default).
@@ -341,6 +371,7 @@ BEGIN;
   ${identitySql}
   ${isUniqueSql}
   ${commentSql}
+  ${checkSql}
   ${nameSql}
 COMMIT;`
     {

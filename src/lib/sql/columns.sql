@@ -43,6 +43,7 @@ SELECT
     OR c.relkind IN ('v', 'f') AND pg_column_is_updatable(c.oid, a.attnum, FALSE)
   ) AS is_updatable,
   uniques.table_id IS NOT NULL AS is_unique,
+  check_constraints.definition AS "check",
   array_to_json(
     array(
       SELECT
@@ -81,6 +82,18 @@ FROM
     FROM pg_catalog.pg_constraint
     WHERE contype = 'u' AND cardinality(conkey) = 1
   ) AS uniques ON uniques.table_id = c.oid AND uniques.ordinal_position = a.attnum
+  LEFT JOIN (
+    SELECT
+      conrelid AS table_id,
+      conkey[1] AS ordinal_position,
+      substring(
+        pg_get_constraintdef(pg_constraint.oid, true),
+        8,
+        length(pg_get_constraintdef(pg_constraint.oid, true)) - 8
+      ) AS "definition"
+    FROM pg_constraint
+    WHERE contype = 'c' AND cardinality(conkey) = 1
+  ) AS check_constraints ON check_constraints.table_id = c.oid AND check_constraints.ordinal_position = a.attnum
 WHERE
   NOT pg_is_other_temp_schema(nc.oid)
   AND a.attnum > 0
