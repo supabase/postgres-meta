@@ -9,6 +9,7 @@ test('list', async () => {
     },
     `
     {
+      "check": null,
       "comment": null,
       "data_type": "bigint",
       "default_value": null,
@@ -54,6 +55,7 @@ test('list from a single table', async () => {
     {
       "data": [
         {
+          "check": null,
           "comment": null,
           "data_type": "text",
           "default_value": null,
@@ -73,6 +75,7 @@ test('list from a single table', async () => {
           "table_id": Any<Number>,
         },
         {
+          "check": null,
           "comment": null,
           "data_type": "text",
           "default_value": null,
@@ -150,6 +153,7 @@ test('retrieve, create, update, delete', async () => {
     `
     {
       "data": {
+        "check": null,
         "comment": "foo",
         "data_type": "smallint",
         "default_value": "'42'::smallint",
@@ -180,6 +184,7 @@ test('retrieve, create, update, delete', async () => {
     `
     {
       "data": {
+        "check": null,
         "comment": "foo",
         "data_type": "smallint",
         "default_value": "'42'::smallint",
@@ -218,6 +223,7 @@ test('retrieve, create, update, delete', async () => {
     `
     {
       "data": {
+        "check": null,
         "comment": "bar",
         "data_type": "integer",
         "default_value": null,
@@ -248,6 +254,7 @@ test('retrieve, create, update, delete', async () => {
     `
     {
       "data": {
+        "check": null,
         "comment": "bar",
         "data_type": "integer",
         "default_value": null,
@@ -292,6 +299,7 @@ test('enum column with quoted name', async () => {
     },
     `
     {
+      "check": null,
       "comment": null,
       "data_type": "USER-DEFINED",
       "default_value": null,
@@ -399,6 +407,7 @@ test('array column', async () => {
     `
     {
       "data": {
+        "check": null,
         "comment": null,
         "data_type": "ARRAY",
         "default_value": null,
@@ -445,6 +454,7 @@ test('column with default value', async () => {
     `
     {
       "data": {
+        "check": null,
         "comment": null,
         "data_type": "timestamp with time zone",
         "default_value": "now()",
@@ -522,6 +532,7 @@ test('update with name unchanged', async () => {
     `
     {
       "data": {
+        "check": null,
         "comment": null,
         "data_type": "smallint",
         "default_value": null,
@@ -569,6 +580,7 @@ test('update with array types', async () => {
     `
     {
       "data": {
+        "check": null,
         "comment": null,
         "data_type": "ARRAY",
         "default_value": null,
@@ -616,6 +628,7 @@ test('update with incompatible types', async () => {
     `
     {
       "data": {
+        "check": null,
         "comment": null,
         "data_type": "integer",
         "default_value": null,
@@ -662,6 +675,7 @@ test('update is_unique', async () => {
     `
     {
       "data": {
+        "check": null,
         "comment": null,
         "data_type": "text",
         "default_value": null,
@@ -695,6 +709,7 @@ test('update is_unique', async () => {
     `
     {
       "data": {
+        "check": null,
         "comment": null,
         "data_type": "text",
         "default_value": null,
@@ -743,6 +758,7 @@ test('alter column to type with uppercase', async () => {
     `
     {
       "data": {
+        "check": null,
         "comment": null,
         "data_type": "USER-DEFINED",
         "default_value": null,
@@ -789,6 +805,7 @@ test('enums are populated in enum array columns', async () => {
     `
     {
       "data": {
+        "check": null,
         "comment": null,
         "data_type": "ARRAY",
         "default_value": null,
@@ -842,6 +859,7 @@ create table public.t (
     `
     {
       "data": {
+        "check": null,
         "comment": null,
         "data_type": "bigint",
         "default_value": null,
