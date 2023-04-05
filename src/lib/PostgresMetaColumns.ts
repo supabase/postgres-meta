@@ -343,6 +343,7 @@ BEGIN
     AND cardinality(conkey) = 1
     AND conrelid = ${literal(old!.table_id)}
     AND conkey[1] = ${literal(old!.ordinal_position)}
+    ORDER BY oid asc
     LIMIT 1;
 
   IF v_conname IS NOT NULL THEN
