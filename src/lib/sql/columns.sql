@@ -93,6 +93,7 @@ FROM
       ) AS "definition"
     FROM pg_constraint
     WHERE contype = 'c' AND cardinality(conkey) = 1
+    ORDER BY oid asc
   ) AS check_constraints ON check_constraints.table_id = c.oid AND check_constraints.ordinal_position = a.attnum
 WHERE
   NOT pg_is_other_temp_schema(nc.oid)
