@@ -24,6 +24,7 @@ test('list', async () => {
     {
       "columns": [
         {
+          "check": null,
           "comment": null,
           "data_type": "bigint",
           "default_value": null,
@@ -41,6 +42,7 @@ test('list', async () => {
           "table": "foreign_table",
         },
         {
+          "check": null,
           "comment": null,
           "data_type": "text",
           "default_value": null,
@@ -58,6 +60,7 @@ test('list', async () => {
           "table": "foreign_table",
         },
         {
+          "check": null,
           "comment": null,
           "data_type": "USER-DEFINED",
           "default_value": null,
@@ -104,6 +107,7 @@ test('retrieve', async () => {
       "data": {
         "columns": [
           {
+            "check": null,
             "comment": null,
             "data_type": "bigint",
             "default_value": null,
@@ -121,6 +125,7 @@ test('retrieve', async () => {
             "table": "foreign_table",
           },
           {
+            "check": null,
             "comment": null,
             "data_type": "text",
             "default_value": null,
@@ -138,6 +143,7 @@ test('retrieve', async () => {
             "table": "foreign_table",
           },
           {
+            "check": null,
             "comment": null,
             "data_type": "USER-DEFINED",
             "default_value": null,
