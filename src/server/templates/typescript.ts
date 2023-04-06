@@ -396,6 +396,7 @@ const pgTypeToTsType = (
       'timestamp',
       'timestamptz',
       'uuid',
+      'vector',
     ].includes(pgType)
   ) {
     return 'string'
@@ -405,8 +406,6 @@ const pgTypeToTsType = (
     return 'undefined'
   } else if (pgType === 'record') {
     return 'Record<string, unknown>'
-  } else if (pgType === 'vector') {
-    return 'number[]'
   } else if (pgType.startsWith('_')) {
     return `(${pgTypeToTsType(pgType.substring(1), types, schemas)})[]`
   } else {
