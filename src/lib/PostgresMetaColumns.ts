@@ -337,6 +337,7 @@ $$;
 DO $$
 DECLARE
   v_conname name;
+  v_conkey int2[];
 BEGIN
   SELECT conname into v_conname FROM pg_constraint WHERE
     contype = 'c'
@@ -353,8 +354,18 @@ BEGIN
   END IF;
 
   ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} ADD CONSTRAINT ${ident(
-            old!.table
-          )}_${ident(old!.name)}_check CHECK (${check});
+            `${old!.table}_${old!.name}_check`
+          )} CHECK (${check});
+
+  SELECT conkey into v_conkey FROM pg_constraint WHERE conname = ${literal(
+    `${old!.table}_${old!.name}_check`
+  )};
+
+  ASSERT v_conkey IS NOT NULL, 'error creating column constraint: check condition must refer to this column';
+  ASSERT cardinality(v_conkey) = 1, 'error creating column constraint: check condition cannot refer to multiple columns';
+  ASSERT v_conkey[1] = ${literal(
+    old!.ordinal_position
+  )}, 'error creating column constraint: check condition cannot refer to other columns';
 END
 $$;
 `
