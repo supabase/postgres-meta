@@ -213,6 +213,7 @@ COMMIT;`
       is_nullable,
       is_unique,
       comment,
+      check,
     }: {
       name?: string
       type?: string
@@ -224,6 +225,7 @@ COMMIT;`
       is_nullable?: boolean
       is_unique?: boolean
       comment?: string
+      check?: string
     }
   ): Promise<PostgresMetaResult<PostgresColumn>> {
     const { data: old, error } = await this.retrieve({ id })
@@ -328,6 +330,46 @@ $$;
             old!.name
           )} IS ${literal(comment)};`
 
+    const checkSql =
+      check === undefined
+        ? ''
+        : `
+DO $$
+DECLARE
+  v_conname name;
+  v_conkey int2[];
+BEGIN
+  SELECT conname into v_conname FROM pg_constraint WHERE
+    contype = 'c'
+    AND cardinality(conkey) = 1
+    AND conrelid = ${literal(old!.table_id)}
+    AND conkey[1] = ${literal(old!.ordinal_position)}
+    ORDER BY oid asc
+    LIMIT 1;
+
+  IF v_conname IS NOT NULL THEN
+    EXECUTE format('ALTER TABLE ${ident(old!.schema)}.${ident(
+            old!.table
+          )} DROP CONSTRAINT %s', v_conname);
+  END IF;
+
+  ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} ADD CONSTRAINT ${ident(
+            `${old!.table}_${old!.name}_check`
+          )} CHECK (${check});
+
+  SELECT conkey into v_conkey FROM pg_constraint WHERE conname = ${literal(
+    `${old!.table}_${old!.name}_check`
+  )};
+
+  ASSERT v_conkey IS NOT NULL, 'error creating column constraint: check condition must refer to this column';
+  ASSERT cardinality(v_conkey) = 1, 'error creating column constraint: check condition cannot refer to multiple columns';
+  ASSERT v_conkey[1] = ${literal(
+    old!.ordinal_position
+  )}, 'error creating column constraint: check condition cannot refer to other columns';
+END
+$$;
+`
+
     // TODO: Can't set default if column is previously identity even if
     // is_identity: false. Must do two separate PATCHes (once to drop identity
     // and another to set default).
@@ -341,6 +383,7 @@ BEGIN;
   ${identitySql}
   ${isUniqueSql}
   ${commentSql}
+  ${checkSql}
   ${nameSql}
 COMMIT;`
     {

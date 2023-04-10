@@ -42,6 +42,7 @@ test('list', async () => {
       "bytes": Any<Number>,
       "columns": [
         {
+          "check": null,
           "comment": null,
           "data_type": "bigint",
           "default_value": null,
@@ -59,6 +60,7 @@ test('list', async () => {
           "table": "users",
         },
         {
+          "check": null,
           "comment": null,
           "data_type": "text",
           "default_value": null,
@@ -76,6 +78,7 @@ test('list', async () => {
           "table": "users",
         },
         {
+          "check": null,
           "comment": null,
           "data_type": "USER-DEFINED",
           "default_value": "'ACTIVE'::user_status",
@@ -419,6 +422,7 @@ test('primary keys', async () => {
         "bytes": Any<Number>,
         "columns": [
           {
+            "check": null,
             "comment": null,
             "data_type": "bigint",
             "default_value": null,
@@ -436,6 +440,7 @@ test('primary keys', async () => {
             "table": "t",
           },
           {
+            "check": null,
             "comment": null,
             "data_type": "text",
             "default_value": null,
