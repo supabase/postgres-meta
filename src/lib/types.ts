@@ -38,6 +38,7 @@ export const postgresColumnSchema = Type.Object({
   is_updatable: Type.Boolean(),
   is_unique: Type.Boolean(),
   enums: Type.Array(Type.String()),
+  check: Type.Union([Type.String(), Type.Null()]),
   comment: Type.Union([Type.String(), Type.Null()]),
 })
 export type PostgresColumn = Static<typeof postgresColumnSchema>
