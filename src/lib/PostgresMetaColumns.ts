@@ -225,7 +225,7 @@ COMMIT;`
       is_nullable?: boolean
       is_unique?: boolean
       comment?: string
-      check?: string
+      check?: string | null
     }
   ): Promise<PostgresMetaResult<PostgresColumn>> {
     const { data: old, error } = await this.retrieve({ id })
@@ -353,9 +353,12 @@ BEGIN
           )} DROP CONSTRAINT %s', v_conname);
   END IF;
 
+  ${
+    check !== null
+      ? `
   ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} ADD CONSTRAINT ${ident(
-            `${old!.table}_${old!.name}_check`
-          )} CHECK (${check});
+          `${old!.table}_${old!.name}_check`
+        )} CHECK (${check});
 
   SELECT conkey into v_conkey FROM pg_constraint WHERE conname = ${literal(
     `${old!.table}_${old!.name}_check`
@@ -366,6 +369,9 @@ BEGIN
   ASSERT v_conkey[1] = ${literal(
     old!.ordinal_position
   )}, 'error creating column constraint: check condition cannot refer to other columns';
+  `
+      : ''
+  }
 END
 $$;
 `
