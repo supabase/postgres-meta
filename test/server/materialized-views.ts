@@ -37,6 +37,7 @@ test('materialized views with columns', async () => {
       {
         "columns": [
           {
+            "check": null,
             "comment": null,
             "data_type": "bigint",
             "default_value": null,
@@ -54,6 +55,7 @@ test('materialized views with columns', async () => {
             "table": "todos_matview",
           },
           {
+            "check": null,
             "comment": null,
             "data_type": "text",
             "default_value": null,
@@ -71,6 +73,7 @@ test('materialized views with columns', async () => {
             "table": "todos_matview",
           },
           {
+            "check": null,
             "comment": null,
             "data_type": "bigint",
             "default_value": null,
