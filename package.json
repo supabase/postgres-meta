@@ -67,7 +67,7 @@
   "devDependencies": {
     "@fastify/cors": "^8.2.0",
     "@fastify/swagger": "^8.2.1",
-    "@fastify/type-provider-typebox": "^2.4.0",
+    "@fastify/type-provider-typebox": "^3.1.0",
     "@types/crypto-js": "^4.1.1",
     "@types/jest": "^29.2.4",
     "@types/node": "^16.18.3",
