@@ -57,6 +57,20 @@ test('typegen', async () => {
               status?: Database["public"]["Enums"]["meme_status"] | null
             }
           }
+          table_with_domain: {
+            Row: {
+              name: string
+              status_code: number
+            }
+            Insert: {
+              name: string
+              status_code: number
+            }
+            Update: {
+              name?: string
+              status_code?: number
+            }
+          }
           todos: {
             Row: {
               details: string | null
@@ -144,7 +158,7 @@ test('typegen', async () => {
             Args: {
               "": unknown
             }
-            Returns: string
+            Returns: string | null
           }
           function_returning_row: {
             Args: Record<PropertyKey, never>
@@ -165,23 +179,71 @@ test('typegen', async () => {
           function_returning_table: {
             Args: Record<PropertyKey, never>
             Returns: {
-              id: number
-              name: string
+              id: number | null
+              name: string | null
             }[]
+          }
+          function_returning_table_of_strict: {
+            Args: {
+              id: Database["public"]["DomainTypes"]["int_not_null"]
+              name: Database["public"]["DomainTypes"]["text_not_null"]
+            }
+            Returns: {
+              id: Database["public"]["DomainTypes"]["int_not_null"]
+              name: Database["public"]["DomainTypes"]["text_not_null"]
+            }[]
+          }
+          function_with_array_of_strict: {
+            Args: {
+              id: Database["public"]["DomainTypes"]["int_not_null"][] | null
+              name: Database["public"]["DomainTypes"]["text_not_null"][] | null
+            }
+            Returns: {
+              id: Database["public"]["DomainTypes"]["int_not_null"][] | null
+              name: Database["public"]["DomainTypes"]["text_not_null"][] | null
+            }[]
+          }
+          function_with_composite_with_strict: {
+            Args: {
+              obj:
+                | Database["public"]["CompositeTypes"]["composite_with_strict"]
+                | null
+            }
+            Returns:
+              | Database["public"]["CompositeTypes"]["composite_with_strict"]
+              | null
+          }
+          function_with_domain_array: {
+            Args: {
+              arr: Database["public"]["DomainTypes"]["text_array"] | null
+            }
+            Returns: Database["public"]["DomainTypes"]["text_array"] | null
+          }
+          function_with_domain_array_strict: {
+            Args: {
+              arr: Database["public"]["DomainTypes"]["text_array_strict"]
+            }
+            Returns: Database["public"]["DomainTypes"]["text_array_strict"]
+          }
+          function_with_strict_composite_with_strict: {
+            Args: {
+              obj: Database["public"]["DomainTypes"]["strict_composite_with_strict"]
+            }
+            Returns: Database["public"]["DomainTypes"]["strict_composite_with_strict"]
           }
           postgres_fdw_disconnect: {
             Args: {
-              "": string
+              "": string | null
             }
-            Returns: boolean
+            Returns: boolean | null
           }
           postgres_fdw_disconnect_all: {
             Args: Record<PropertyKey, never>
-            Returns: boolean
+            Returns: boolean | null
           }
           postgres_fdw_get_connections: {
             Args: Record<PropertyKey, never>
-            Returns: Record<string, unknown>[]
+            Returns: (Record<string, unknown> | null)[]
           }
           postgres_fdw_handler: {
             Args: Record<PropertyKey, never>
@@ -192,8 +254,18 @@ test('typegen', async () => {
           meme_status: "new" | "old" | "retired"
           user_status: "ACTIVE" | "INACTIVE"
         }
+        DomainTypes: {
+          int_not_null: number
+          strict_composite_with_strict: Database["public"]["CompositeTypes"]["composite_with_strict"]
+          text_array: (string | null)[] | null
+          text_array_strict: Database["public"]["DomainTypes"]["text_not_null"][]
+          text_not_null: string
+        }
         CompositeTypes: {
-          [_ in never]: never
+          composite_with_strict: {
+            a: Database["public"]["DomainTypes"]["text_not_null"]
+            b: Database["public"]["DomainTypes"]["int_not_null"]
+          }
         }
       }
     }

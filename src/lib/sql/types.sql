@@ -3,6 +3,8 @@ select
   t.typname as name,
   n.nspname as schema,
   format_type (t.oid, null) as format,
+  nullif(t.typbasetype, 0) as base_type_id,
+  not (t.typnotnull) as is_nullable,
   coalesce(t_enums.enums, '[]') as enums,
   coalesce(t_attributes.attributes, '[]') as attributes,
   obj_description (t.oid, 'pg_type') as comment
