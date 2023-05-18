@@ -41,6 +41,7 @@ if (EXPORT_DOCS) {
   const { data: views, error: viewsError } = await pgMeta.views.list()
   const { data: materializedViews, error: materializedViewsError } =
     await pgMeta.materializedViews.list({ includeColumns: true })
+  const { data: relationships, error: relationshipsError } = await pgMeta.relationships.list()
   const { data: functions, error: functionsError } = await pgMeta.functions.list()
   const { data: types, error: typesError } = await pgMeta.types.list({
     includeArrayTypes: true,
@@ -60,6 +61,9 @@ if (EXPORT_DOCS) {
   if (materializedViewsError) {
     throw new Error(materializedViewsError.message)
   }
+  if (relationshipsError) {
+    throw new Error(relationshipsError.message)
+  }
   if (functionsError) {
     throw new Error(functionsError.message)
   }
@@ -77,6 +81,7 @@ if (EXPORT_DOCS) {
       tables,
       views,
       materializedViews,
+      relationships,
       functions: functions.filter(
         ({ return_type }) => !['trigger', 'event_trigger'].includes(return_type)
       ),
