@@ -24,6 +24,7 @@ export default async (fastify: FastifyInstance) => {
     const { data: views, error: viewsError } = await pgMeta.views.list()
     const { data: materializedViews, error: materializedViewsError } =
       await pgMeta.materializedViews.list({ includeColumns: true })
+    const { data: relationships, error: relationshipsError } = await pgMeta.relationships.list()
     const { data: functions, error: functionsError } = await pgMeta.functions.list()
     const { data: types, error: typesError } = await pgMeta.types.list({
       includeArrayTypes: true,
@@ -54,6 +55,11 @@ export default async (fastify: FastifyInstance) => {
       reply.code(500)
       return { error: materializedViewsError.message }
     }
+    if (relationshipsError) {
+      request.log.error({ error: relationshipsError, request: extractRequestForLogging(request) })
+      reply.code(500)
+      return { error: relationshipsError.message }
+    }
     if (functionsError) {
       request.log.error({ error: functionsError, request: extractRequestForLogging(request) })
       reply.code(500)
@@ -74,6 +80,7 @@ export default async (fastify: FastifyInstance) => {
       tables,
       views,
       materializedViews,
+      relationships,
       functions: functions.filter(
         ({ return_type }) => !['trigger', 'event_trigger'].includes(return_type)
       ),

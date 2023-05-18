@@ -30,6 +30,7 @@ test('typegen', async () => {
               id?: number
               name?: string
             }
+            Relationships: []
           }
           memes: {
             Row: {
@@ -56,6 +57,15 @@ test('typegen', async () => {
               name?: string
               status?: Database["public"]["Enums"]["meme_status"] | null
             }
+            Relationships: [
+              {
+                foreignKeyName: "memes_category_fkey"
+                columns: ["category"]
+                referencedSchema: "public"
+                referencedRelation: "category"
+                referencedColumns: ["id"]
+              }
+            ]
           }
           todos: {
             Row: {
@@ -74,6 +84,15 @@ test('typegen', async () => {
               id?: number
               "user-id"?: number
             }
+            Relationships: [
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                referencedSchema: "public"
+                referencedRelation: "users"
+                referencedColumns: ["id"]
+              }
+            ]
           }
           users: {
             Row: {
@@ -91,6 +110,7 @@ test('typegen', async () => {
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
             }
+            Relationships: []
           }
           users_audit: {
             Row: {
@@ -111,6 +131,7 @@ test('typegen', async () => {
               previous_value?: Json | null
               user_id?: number | null
             }
+            Relationships: []
           }
         }
         Views: {
