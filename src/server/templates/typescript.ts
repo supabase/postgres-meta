@@ -150,15 +150,20 @@ export interface Database {
                   }
                   Relationships: [
                     ${relationships
-                      .filter((relationship) => relationship.schema === table.schema && relationship.relation === table.name)
-                      .map((relationship) => `{
+                      .filter(
+                        (relationship) =>
+                          relationship.schema === table.schema &&
+                          relationship.relation === table.name
+                      )
+                      .map(
+                        (relationship) => `{
                         foreignKeyName: ${JSON.stringify(relationship.foreign_key_name)}
                         columns: ${JSON.stringify(relationship.columns)}
                         referencedSchema: ${JSON.stringify(relationship.referenced_schema)}
                         referencedRelation: ${JSON.stringify(relationship.referenced_relation)}
                         referencedColumns: ${JSON.stringify(relationship.referenced_columns)}
-                      }`)
-                    }
+                      }`
+                      )}
                   ]
                 }`
                   )
