@@ -186,7 +186,7 @@ export const postgresPublicationSchema = Type.Object({
 })
 export type PostgresPublication = Static<typeof postgresPublicationSchema>
 
-export const postgresRelationshipSchema = Type.Object({
+export const postgresRelationshipOldSchema = Type.Object({
   id: Type.Integer(),
   constraint_name: Type.String(),
   source_schema: Type.String(),
@@ -195,6 +195,16 @@ export const postgresRelationshipSchema = Type.Object({
   target_table_schema: Type.String(),
   target_table_name: Type.String(),
   target_column_name: Type.String(),
+})
+export const postgresRelationshipSchema = Type.Object({
+  id: Type.Integer(),
+  foreign_key_name: Type.String(),
+  schema: Type.String(),
+  relation: Type.String(),
+  columns: Type.Array(Type.String()),
+  referenced_schema: Type.String(),
+  referenced_relation: Type.String(),
+  referenced_columns: Type.Array(Type.String()),
 })
 export type PostgresRelationship = Static<typeof postgresRelationshipSchema>
 
@@ -296,7 +306,7 @@ export const postgresTableSchema = Type.Object({
   comment: Type.Union([Type.String(), Type.Null()]),
   columns: Type.Optional(Type.Array(postgresColumnSchema)),
   primary_keys: Type.Array(postgresPrimaryKeySchema),
-  relationships: Type.Array(postgresRelationshipSchema),
+  relationships: Type.Array(postgresRelationshipOldSchema),
 })
 export type PostgresTable = Static<typeof postgresTableSchema>
 
