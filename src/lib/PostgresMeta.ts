@@ -8,6 +8,7 @@ import PostgresMetaFunctions from './PostgresMetaFunctions.js'
 import PostgresMetaMaterializedViews from './PostgresMetaMaterializedViews.js'
 import PostgresMetaPolicies from './PostgresMetaPolicies.js'
 import PostgresMetaPublications from './PostgresMetaPublications.js'
+import PostgresMetaRelationships from './PostgresMetaRelationships.js'
 import PostgresMetaRoles from './PostgresMetaRoles.js'
 import PostgresMetaSchemas from './PostgresMetaSchemas.js'
 import PostgresMetaTables from './PostgresMetaTables.js'
@@ -29,6 +30,7 @@ export default class PostgresMeta {
   materializedViews: PostgresMetaMaterializedViews
   policies: PostgresMetaPolicies
   publications: PostgresMetaPublications
+  relationships: PostgresMetaRelationships
   roles: PostgresMetaRoles
   schemas: PostgresMetaSchemas
   tables: PostgresMetaTables
@@ -53,6 +55,7 @@ export default class PostgresMeta {
     this.materializedViews = new PostgresMetaMaterializedViews(this.query)
     this.policies = new PostgresMetaPolicies(this.query)
     this.publications = new PostgresMetaPublications(this.query)
+    this.relationships = new PostgresMetaRelationships(this.query)
     this.roles = new PostgresMetaRoles(this.query)
     this.schemas = new PostgresMetaSchemas(this.query)
     this.tables = new PostgresMetaTables(this.query)
