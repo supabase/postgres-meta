@@ -16,6 +16,7 @@ export const policiesSql = await readFile(join(__dirname, 'policies.sql'), 'utf-
 export const primaryKeysSql = await readFile(join(__dirname, 'primary_keys.sql'), 'utf-8')
 export const publicationsSql = await readFile(join(__dirname, 'publications.sql'), 'utf-8')
 export const relationshipsSql = await readFile(join(__dirname, 'relationships.sql'), 'utf-8')
+export const relationshipsOldSql = await readFile(join(__dirname, 'relationships_old.sql'), 'utf-8')
 export const rolesSql = await readFile(join(__dirname, 'roles.sql'), 'utf-8')
 export const schemasSql = await readFile(join(__dirname, 'schemas.sql'), 'utf-8')
 export const tablesSql = await readFile(join(__dirname, 'tables.sql'), 'utf-8')

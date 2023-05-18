@@ -1,25 +1,44 @@
-SELECT
-  c.oid :: int8 AS id,
-  c.conname AS constraint_name,
-  nsa.nspname AS source_schema,
-  csa.relname AS source_table_name,
-  sa.attname AS source_column_name,
-  nta.nspname AS target_table_schema,
-  cta.relname AS target_table_name,
-  ta.attname AS target_column_name
-FROM
-  pg_constraint c
-  JOIN (
-    pg_attribute sa
-    JOIN pg_class csa ON sa.attrelid = csa.oid
-    JOIN pg_namespace nsa ON csa.relnamespace = nsa.oid
-  ) ON sa.attrelid = c.conrelid
-  AND sa.attnum = ANY (c.conkey)
-  JOIN (
-    pg_attribute ta
-    JOIN pg_class cta ON ta.attrelid = cta.oid
-    JOIN pg_namespace nta ON cta.relnamespace = nta.oid
-  ) ON ta.attrelid = c.confrelid
-  AND ta.attnum = ANY (c.confkey)
-WHERE
-  c.contype = 'f'
+-- Adapted from
+-- https://github.com/PostgREST/postgrest/blob/f9f0f79fa914ac00c11fbf7f4c558e14821e67e2/src/PostgREST/SchemaCache.hs#L722
+WITH
+    pks_uniques_cols AS (
+      SELECT
+        connamespace,
+        conrelid,
+        jsonb_agg(column_info.cols) as cols
+      FROM pg_constraint
+      JOIN lateral (
+        SELECT array_agg(cols.attname order by cols.attnum) as cols
+        FROM ( select unnest(conkey) as col) _
+        JOIN pg_attribute cols on cols.attrelid = conrelid and cols.attnum = col
+      ) column_info ON TRUE
+      WHERE
+        contype IN ('p', 'u') and
+        connamespace::regnamespace::text <> 'pg_catalog'
+      GROUP BY connamespace, conrelid
+    )
+    SELECT
+      traint.oid AS id,
+      traint.conname AS foreign_key_name,
+      ns1.nspname AS schema,
+      tab.relname AS relation,
+      column_info.cols AS columns,
+      ns2.nspname AS referenced_schema,
+      other.relname AS referenced_relation,
+      column_info.refs AS referenced_columns
+    FROM pg_constraint traint
+    JOIN LATERAL (
+      SELECT
+        array_agg(row(cols.attname, refs.attname) order by ord) AS cols_and_fcols,
+        jsonb_agg(cols.attname order by ord) AS cols,
+        jsonb_agg(refs.attname order by ord) AS refs
+      FROM unnest(traint.conkey, traint.confkey) WITH ORDINALITY AS _(col, ref, ord)
+      JOIN pg_attribute cols ON cols.attrelid = traint.conrelid AND cols.attnum = col
+      JOIN pg_attribute refs ON refs.attrelid = traint.confrelid AND refs.attnum = ref
+    ) AS column_info ON TRUE
+    JOIN pg_namespace ns1 ON ns1.oid = traint.connamespace
+    JOIN pg_class tab ON tab.oid = traint.conrelid
+    JOIN pg_class other ON other.oid = traint.confrelid
+    JOIN pg_namespace ns2 ON ns2.oid = other.relnamespace
+    LEFT JOIN pks_uniques_cols pks_uqs ON pks_uqs.connamespace = traint.connamespace AND pks_uqs.conrelid = traint.conrelid
+    WHERE traint.contype = 'f'
