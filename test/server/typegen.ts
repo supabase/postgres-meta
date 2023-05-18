@@ -61,7 +61,6 @@ test('typegen', async () => {
               {
                 foreignKeyName: "memes_category_fkey"
                 columns: ["category"]
-                referencedSchema: "public"
                 referencedRelation: "category"
                 referencedColumns: ["id"]
               }
@@ -88,7 +87,6 @@ test('typegen', async () => {
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
-                referencedSchema: "public"
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               }
