@@ -155,6 +155,9 @@ export interface Database {
                           relationship.schema === table.schema &&
                           relationship.relation === table.name
                       )
+                      .sort(({ foreign_key_name: a }, { foreign_key_name: b }) =>
+                        a.localeCompare(b)
+                      )
                       .map(
                         (relationship) => `{
                         foreignKeyName: ${JSON.stringify(relationship.foreign_key_name)}
