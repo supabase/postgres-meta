@@ -7,6 +7,7 @@ test('list', async () => {
     `
     {
       "attributes": [],
+      "base_type_id": null,
       "comment": null,
       "enums": [
         "ACTIVE",
@@ -14,6 +15,7 @@ test('list', async () => {
       ],
       "format": "user_status",
       "id": Any<Number>,
+      "is_nullable": true,
       "name": "user_status",
       "schema": "public",
     }
@@ -74,10 +76,12 @@ test('composite type attributes', async () => {
           "type_id": 25,
         },
       ],
+      "base_type_id": null,
       "comment": null,
       "enums": [],
       "format": "test_composite",
       "id": Any<Number>,
+      "is_nullable": true,
       "name": "test_composite",
       "schema": "public",
     }

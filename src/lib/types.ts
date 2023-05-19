@@ -367,6 +367,8 @@ export const postgresTypeSchema = Type.Object({
   name: Type.String(),
   schema: Type.String(),
   format: Type.String(),
+  base_type_id: Type.Optional(Type.Integer()),
+  is_nullable: Type.Boolean(),
   enums: Type.Array(Type.String()),
   attributes: Type.Array(
     Type.Object({

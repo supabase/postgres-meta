@@ -91,3 +91,69 @@ stable
 as $$
   select id, name from public.users;
 $$;
+
+
+create domain text_not_null as text not null;
+create domain int_not_null as int not null;
+
+create type composite_with_strict as (
+  a text_not_null,
+  b int_not_null
+);
+create domain strict_composite_with_strict as composite_with_strict not null;
+
+create or replace function public.function_returning_table_of_strict(id int_not_null, name text_not_null)
+returns table (id int_not_null, name text_not_null)
+language sql
+immutable
+as $$
+  select id, name;
+$$;
+
+create or replace function public.function_with_array_of_strict(id int_not_null[], name text_not_null[])
+returns table (id int_not_null[], name text_not_null[])
+language sql
+immutable
+as $$
+  select id, name;
+$$;
+
+create or replace function public.function_with_composite_with_strict(obj composite_with_strict)
+returns composite_with_strict
+language sql
+immutable
+as $$
+  select obj;
+$$;
+
+create or replace function public.function_with_strict_composite_with_strict(obj strict_composite_with_strict)
+returns strict_composite_with_strict
+language sql
+immutable
+as $$
+  select obj;
+$$;
+
+create domain text_array as text[];
+create domain text_array_strict as text_not_null[] not null;
+
+create or replace function public.function_with_domain_array(arr text_array)
+returns text_array
+language sql
+immutable
+as $$
+  select arr;
+$$;
+
+create or replace function public.function_with_domain_array_strict(arr text_array_strict)
+returns text_array_strict
+language sql
+immutable
+as $$
+  select arr;
+$$;
+
+create table public.table_with_domain (
+  name text_not_null,
+  status_code int_not_null
+);
