@@ -72,7 +72,6 @@ export default class PostgresMetaMaterializedViews {
       const sql = `${generateEnrichedMaterializedViewsSql({
         includeColumns: true,
       })} where materialized_views.id = ${literal(id)};`
-      console.log(sql)
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
