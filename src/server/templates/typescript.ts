@@ -192,41 +192,63 @@ export interface Database {
                   ${
                     'is_updatable' in view && view.is_updatable
                       ? `Insert: {
-                    ${view.columns
-                      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-                      .map((column) => {
-                        let output = JSON.stringify(column.name)
+                           ${view.columns
+                             .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                             .map((column) => {
+                               let output = JSON.stringify(column.name)
 
-                        if (!column.is_updatable) {
-                          return `${output}?: never`
-                        }
+                               if (!column.is_updatable) {
+                                 return `${output}?: never`
+                               }
 
-                        output += `?: ${pgTypeToTsType(column.format, types, schemas)} | null`
+                               output += `?: ${pgTypeToTsType(
+                                 column.format,
+                                 types,
+                                 schemas
+                               )} | null`
 
-                        return output
-                      })}
-                  }`
+                               return output
+                             })}
+                         }
+                         Update: {
+                           ${view.columns
+                             .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                             .map((column) => {
+                               let output = JSON.stringify(column.name)
+
+                               if (!column.is_updatable) {
+                                 return `${output}?: never`
+                               }
+
+                               output += `?: ${pgTypeToTsType(
+                                 column.format,
+                                 types,
+                                 schemas
+                               )} | null`
+
+                               return output
+                             })}
+                         }
+                        `
                       : ''
-                  }
-                  ${
-                    'is_updatable' in view && view.is_updatable
-                      ? `Update: {
-                    ${view.columns
-                      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-                      .map((column) => {
-                        let output = JSON.stringify(column.name)
-
-                        if (!column.is_updatable) {
-                          return `${output}?: never`
-                        }
-
-                        output += `?: ${pgTypeToTsType(column.format, types, schemas)} | null`
-
-                        return output
-                      })}
-                  }`
-                      : ''
-                  }
+                  }Relationships: [
+                    ${relationships
+                      .filter(
+                        (relationship) =>
+                          relationship.schema === view.schema && relationship.relation === view.name
+                      )
+                      .sort(({ foreign_key_name: a }, { foreign_key_name: b }) =>
+                        a.localeCompare(b)
+                      )
+                      .map(
+                        (relationship) => `{
+                        foreignKeyName: ${JSON.stringify(relationship.foreign_key_name)}
+                        columns: ${JSON.stringify(relationship.columns)}
+                        referencedRelation: ${JSON.stringify(relationship.referenced_relation)}
+                        referencedColumns: ${JSON.stringify(relationship.referenced_columns)}
+                      }`
+                      )}
+                  ]
                 }`
                   )
             }

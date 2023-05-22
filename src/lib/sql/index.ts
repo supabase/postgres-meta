@@ -26,4 +26,8 @@ export const tablesSql = await readFile(join(__dirname, 'tables.sql'), 'utf-8')
 export const triggersSql = await readFile(join(__dirname, 'triggers.sql'), 'utf-8')
 export const typesSql = await readFile(join(__dirname, 'types.sql'), 'utf-8')
 export const versionSql = await readFile(join(__dirname, 'version.sql'), 'utf-8')
+export const viewsKeyDependenciesSql = await readFile(
+  join(__dirname, 'views_key_dependencies.sql'),
+  'utf-8'
+)
 export const viewsSql = await readFile(join(__dirname, 'views.sql'), 'utf-8')

@@ -89,6 +89,12 @@ test('typegen', async () => {
                 columns: ["user-id"]
                 referencedRelation: "users"
                 referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                referencedRelation: "users_view"
+                referencedColumns: ["id"]
               }
             ]
           }
@@ -139,6 +145,20 @@ test('typegen', async () => {
               id: number | null
               "user-id": number | null
             }
+            Relationships: [
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                referencedRelation: "users"
+                referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                referencedRelation: "users_view"
+                referencedColumns: ["id"]
+              }
+            ]
           }
           todos_view: {
             Row: {
@@ -156,6 +176,38 @@ test('typegen', async () => {
               id?: number | null
               "user-id"?: number | null
             }
+            Relationships: [
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                referencedRelation: "users"
+                referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                referencedRelation: "users_view"
+                referencedColumns: ["id"]
+              }
+            ]
+          }
+          users_view: {
+            Row: {
+              id: number | null
+              name: string | null
+              status: Database["public"]["Enums"]["user_status"] | null
+            }
+            Insert: {
+              id?: number | null
+              name?: string | null
+              status?: Database["public"]["Enums"]["user_status"] | null
+            }
+            Update: {
+              id?: number | null
+              name?: string | null
+              status?: Database["public"]["Enums"]["user_status"] | null
+            }
+            Relationships: []
           }
         }
         Functions: {

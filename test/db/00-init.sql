@@ -51,6 +51,8 @@ end;
 $$ language plpgsql;
 
 CREATE VIEW todos_view AS SELECT * FROM public.todos;
+-- For testing typegen on view-to-view relationships
+create view users_view as select * from public.users;
 
 create materialized view todos_matview as select * from public.todos;
 
