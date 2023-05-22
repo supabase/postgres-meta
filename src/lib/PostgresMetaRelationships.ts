@@ -1,4 +1,4 @@
-import { relationshipsSql } from './sql/index.js'
+import { tableRelationshipsSql } from './sql/index.js'
 import { PostgresMetaResult, PostgresRelationship } from './types.js'
 
 export default class PostgresMetaRelationships {
@@ -15,7 +15,7 @@ export default class PostgresMetaRelationships {
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresRelationship[]>> {
-    let sql = relationshipsSql
+    let sql = tableRelationshipsSql
     if (limit) {
       sql = `${sql} LIMIT ${limit}`
     }
