@@ -197,7 +197,6 @@ export const postgresRelationshipOldSchema = Type.Object({
   target_column_name: Type.String(),
 })
 export const postgresRelationshipSchema = Type.Object({
-  id: Type.Integer(),
   foreign_key_name: Type.String(),
   schema: Type.String(),
   relation: Type.String(),

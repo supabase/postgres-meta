@@ -1,7 +1,6 @@
 -- Adapted from
 -- https://github.com/PostgREST/postgrest/blob/f9f0f79fa914ac00c11fbf7f4c558e14821e67e2/src/PostgREST/SchemaCache.hs#L722
 SELECT
-  traint.oid AS id,
   traint.conname AS foreign_key_name,
   ns1.nspname AS schema,
   tab.relname AS relation,
