@@ -5,7 +5,7 @@ WORKDIR /usr/src/app
 COPY package.json package-lock.json ./
 RUN npm clean-install
 COPY . .
-RUN npm run build
+RUN npm run build && npm prune --omit=dev
 
 FROM node:16-bullseye-slim
 WORKDIR /usr/src/app
