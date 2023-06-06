@@ -1,5 +1,6 @@
 import prettier from 'prettier'
 import type {
+  PostgresColumn,
   PostgresFunction,
   PostgresMaterializedView,
   PostgresRelationship,
@@ -14,15 +15,17 @@ export const apply = ({
   tables,
   views,
   materializedViews,
+  columns,
   relationships,
   functions,
   types,
   arrayTypes,
 }: {
   schemas: PostgresSchema[]
-  tables: (PostgresTable & { columns: unknown[] })[]
-  views: (PostgresView & { columns: unknown[] })[]
-  materializedViews: (PostgresMaterializedView & { columns: unknown[] })[]
+  tables: Omit<PostgresTable, 'columns'>[]
+  views: Omit<PostgresView, 'columns'>[]
+  materializedViews: Omit<PostgresMaterializedView, 'columns'>[]
+  columns: PostgresColumn[]
   relationships: PostgresRelationship[]
   functions: PostgresFunction[]
   types: PostgresType[]
@@ -40,6 +43,9 @@ export interface Database {
         .sort(({ name: a }, { name: b }) => a.localeCompare(b))
       const schemaViews = [...views, ...materializedViews]
         .filter((view) => view.schema === schema.name)
+        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+      const schemaColumns = columns
+        .filter((column) => column.schema === schema.name)
         .sort(({ name: a }, { name: b }) => a.localeCompare(b))
       const schemaFunctions = functions
         .filter((func) => {
@@ -78,8 +84,8 @@ export interface Database {
                     (table) => `${JSON.stringify(table.name)}: {
                   Row: {
                     ${[
-                      ...table.columns
-                        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                      ...schemaColumns
+                        .filter((column) => column.table_id === table.id)
                         .map(
                           (column) =>
                             `${JSON.stringify(column.name)}: ${pgTypeToTsType(
@@ -101,8 +107,8 @@ export interface Database {
                     ]}
                   }
                   Insert: {
-                    ${table.columns
-                      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                    ${schemaColumns
+                      .filter((column) => column.table_id === table.id)
                       .map((column) => {
                         let output = JSON.stringify(column.name)
 
@@ -130,8 +136,8 @@ export interface Database {
                       })}
                   }
                   Update: {
-                    ${table.columns
-                      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                    ${schemaColumns
+                      .filter((column) => column.table_id === table.id)
                       .map((column) => {
                         let output = JSON.stringify(column.name)
 
@@ -178,8 +184,8 @@ export interface Database {
                 : schemaViews.map(
                     (view) => `${JSON.stringify(view.name)}: {
                   Row: {
-                    ${view.columns
-                      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                    ${schemaColumns
+                      .filter((column) => column.table_id === view.id)
                       .map(
                         (column) =>
                           `${JSON.stringify(column.name)}: ${pgTypeToTsType(
@@ -192,8 +198,8 @@ export interface Database {
                   ${
                     'is_updatable' in view && view.is_updatable
                       ? `Insert: {
-                           ${view.columns
-                             .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                           ${schemaColumns
+                             .filter((column) => column.table_id === view.id)
                              .map((column) => {
                                let output = JSON.stringify(column.name)
 
@@ -211,8 +217,8 @@ export interface Database {
                              })}
                          }
                          Update: {
-                           ${view.columns
-                             .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                           ${schemaColumns
+                             .filter((column) => column.table_id === view.id)
                              .map((column) => {
                                let output = JSON.stringify(column.name)
 
@@ -345,8 +351,8 @@ export interface Database {
                     )
                     if (relation) {
                       return `{
-                        ${relation.columns
-                          .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+                        ${schemaColumns
+                          .filter((column) => column.table_id === relation.id)
                           .map(
                             (column) =>
                               `${JSON.stringify(column.name)}: ${pgTypeToTsType(

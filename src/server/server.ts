@@ -37,12 +37,26 @@ if (EXPORT_DOCS) {
     connectionString: PG_CONNECTION,
   })
   const { data: schemas, error: schemasError } = await pgMeta.schemas.list()
-  const { data: tables, error: tablesError } = await pgMeta.tables.list()
-  const { data: views, error: viewsError } = await pgMeta.views.list()
+  const { data: tables, error: tablesError } = await pgMeta.tables.list({
+    includedSchemas: GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
+    includeColumns: false,
+  })
+  const { data: views, error: viewsError } = await pgMeta.views.list({
+    includedSchemas: GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
+    includeColumns: false,
+  })
   const { data: materializedViews, error: materializedViewsError } =
-    await pgMeta.materializedViews.list({ includeColumns: true })
+    await pgMeta.materializedViews.list({
+      includedSchemas: GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
+      includeColumns: false,
+    })
+  const { data: columns, error: columnsError } = await pgMeta.columns.list({
+    includedSchemas: GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
+  })
   const { data: relationships, error: relationshipsError } = await pgMeta.relationships.list()
-  const { data: functions, error: functionsError } = await pgMeta.functions.list()
+  const { data: functions, error: functionsError } = await pgMeta.functions.list({
+    includedSchemas: GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
+  })
   const { data: types, error: typesError } = await pgMeta.types.list({
     includeArrayTypes: true,
     includeSystemSchemas: true,
@@ -60,6 +74,9 @@ if (EXPORT_DOCS) {
   }
   if (materializedViewsError) {
     throw new Error(materializedViewsError.message)
+  }
+  if (columnsError) {
+    throw new Error(columnsError.message)
   }
   if (relationshipsError) {
     throw new Error(relationshipsError.message)
@@ -81,6 +98,7 @@ if (EXPORT_DOCS) {
       tables,
       views,
       materializedViews,
+      columns,
       relationships,
       functions: functions.filter(
         ({ return_type }) => !['trigger', 'event_trigger'].includes(return_type)
