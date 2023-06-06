@@ -31,6 +31,14 @@ export const apply = ({
   types: PostgresType[]
   arrayTypes: PostgresType[]
 }): string => {
+  const columnsByTableId = columns
+    .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+    .reduce((acc, curr) => {
+      acc[curr.table_id] ??= []
+      acc[curr.table_id].push(curr)
+      return acc
+    }, {} as Record<string, PostgresColumn[]>)
+
   let output = `
 export type Json = string | number | boolean | null | { [key: string]: Json } | Json[]
 
@@ -43,9 +51,6 @@ export interface Database {
         .sort(({ name: a }, { name: b }) => a.localeCompare(b))
       const schemaViews = [...views, ...materializedViews]
         .filter((view) => view.schema === schema.name)
-        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-      const schemaColumns = columns
-        .filter((column) => column.schema === schema.name)
         .sort(({ name: a }, { name: b }) => a.localeCompare(b))
       const schemaFunctions = functions
         .filter((func) => {
@@ -80,15 +85,11 @@ export interface Database {
             ${
               schemaTables.length === 0
                 ? '[_ in never]: never'
-                : schemaTables.map((table) => {
-                    const tableColumns = schemaColumns.filter(
-                      (column) => column.table_id === table.id
-                    )
-
-                    return `${JSON.stringify(table.name)}: {
+                : schemaTables.map(
+                    (table) => `${JSON.stringify(table.name)}: {
                   Row: {
                     ${[
-                      ...tableColumns.map(
+                      ...columnsByTableId[table.id].map(
                         (column) =>
                           `${JSON.stringify(column.name)}: ${pgTypeToTsType(
                             column.format,
@@ -109,7 +110,7 @@ export interface Database {
                     ]}
                   }
                   Insert: {
-                    ${tableColumns.map((column) => {
+                    ${columnsByTableId[table.id].map((column) => {
                       let output = JSON.stringify(column.name)
 
                       if (column.identity_generation === 'ALWAYS') {
@@ -136,7 +137,7 @@ export interface Database {
                     })}
                   }
                   Update: {
-                    ${tableColumns.map((column) => {
+                    ${columnsByTableId[table.id].map((column) => {
                       let output = JSON.stringify(column.name)
 
                       if (column.identity_generation === 'ALWAYS') {
@@ -172,20 +173,17 @@ export interface Database {
                       )}
                   ]
                 }`
-                  })
+                  )
             }
           }
           Views: {
             ${
               schemaViews.length === 0
                 ? '[_ in never]: never'
-                : schemaViews.map((view) => {
-                    const viewColumns = schemaColumns.filter(
-                      (column) => column.table_id === view.id
-                    )
-                    return `${JSON.stringify(view.name)}: {
+                : schemaViews.map(
+                    (view) => `${JSON.stringify(view.name)}: {
                   Row: {
-                    ${viewColumns.map(
+                    ${columnsByTableId[view.id].map(
                       (column) =>
                         `${JSON.stringify(column.name)}: ${pgTypeToTsType(
                           column.format,
@@ -197,7 +195,7 @@ export interface Database {
                   ${
                     'is_updatable' in view && view.is_updatable
                       ? `Insert: {
-                           ${viewColumns.map((column) => {
+                           ${columnsByTableId[view.id].map((column) => {
                              let output = JSON.stringify(column.name)
 
                              if (!column.is_updatable) {
@@ -210,7 +208,7 @@ export interface Database {
                            })}
                          }
                          Update: {
-                           ${viewColumns.map((column) => {
+                           ${columnsByTableId[view.id].map((column) => {
                              let output = JSON.stringify(column.name)
 
                              if (!column.is_updatable) {
@@ -243,7 +241,7 @@ export interface Database {
                       )}
                   ]
                 }`
-                  })
+                  )
             }
           }
           Functions: {
@@ -338,16 +336,14 @@ export interface Database {
                     )
                     if (relation) {
                       return `{
-                        ${schemaColumns
-                          .filter((column) => column.table_id === relation.id)
-                          .map(
-                            (column) =>
-                              `${JSON.stringify(column.name)}: ${pgTypeToTsType(
-                                column.format,
-                                types,
-                                schemas
-                              )} ${column.is_nullable ? '| null' : ''}`
-                          )}
+                        ${columnsByTableId[relation.id].map(
+                          (column) =>
+                            `${JSON.stringify(column.name)}: ${pgTypeToTsType(
+                              column.format,
+                              types,
+                              schemas
+                            )} ${column.is_nullable ? '| null' : ''}`
+                        )}
                       }`
                     }
 
