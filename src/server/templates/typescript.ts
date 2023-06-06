@@ -80,20 +80,22 @@ export interface Database {
             ${
               schemaTables.length === 0
                 ? '[_ in never]: never'
-                : schemaTables.map(
-                    (table) => `${JSON.stringify(table.name)}: {
+                : schemaTables.map((table) => {
+                    const tableColumns = schemaColumns.filter(
+                      (column) => column.table_id === table.id
+                    )
+
+                    return `${JSON.stringify(table.name)}: {
                   Row: {
                     ${[
-                      ...schemaColumns
-                        .filter((column) => column.table_id === table.id)
-                        .map(
-                          (column) =>
-                            `${JSON.stringify(column.name)}: ${pgTypeToTsType(
-                              column.format,
-                              types,
-                              schemas
-                            )} ${column.is_nullable ? '| null' : ''}`
-                        ),
+                      ...tableColumns.map(
+                        (column) =>
+                          `${JSON.stringify(column.name)}: ${pgTypeToTsType(
+                            column.format,
+                            types,
+                            schemas
+                          )} ${column.is_nullable ? '| null' : ''}`
+                      ),
                       ...schemaFunctions
                         .filter((fn) => fn.argument_types === table.name)
                         .map(
@@ -107,52 +109,48 @@ export interface Database {
                     ]}
                   }
                   Insert: {
-                    ${schemaColumns
-                      .filter((column) => column.table_id === table.id)
-                      .map((column) => {
-                        let output = JSON.stringify(column.name)
+                    ${tableColumns.map((column) => {
+                      let output = JSON.stringify(column.name)
 
-                        if (column.identity_generation === 'ALWAYS') {
-                          return `${output}?: never`
-                        }
+                      if (column.identity_generation === 'ALWAYS') {
+                        return `${output}?: never`
+                      }
 
-                        if (
-                          column.is_nullable ||
-                          column.is_identity ||
-                          column.default_value !== null
-                        ) {
-                          output += '?:'
-                        } else {
-                          output += ':'
-                        }
+                      if (
+                        column.is_nullable ||
+                        column.is_identity ||
+                        column.default_value !== null
+                      ) {
+                        output += '?:'
+                      } else {
+                        output += ':'
+                      }
 
-                        output += pgTypeToTsType(column.format, types, schemas)
+                      output += pgTypeToTsType(column.format, types, schemas)
 
-                        if (column.is_nullable) {
-                          output += '| null'
-                        }
+                      if (column.is_nullable) {
+                        output += '| null'
+                      }
 
-                        return output
-                      })}
+                      return output
+                    })}
                   }
                   Update: {
-                    ${schemaColumns
-                      .filter((column) => column.table_id === table.id)
-                      .map((column) => {
-                        let output = JSON.stringify(column.name)
+                    ${tableColumns.map((column) => {
+                      let output = JSON.stringify(column.name)
 
-                        if (column.identity_generation === 'ALWAYS') {
-                          return `${output}?: never`
-                        }
+                      if (column.identity_generation === 'ALWAYS') {
+                        return `${output}?: never`
+                      }
 
-                        output += `?: ${pgTypeToTsType(column.format, types, schemas)}`
+                      output += `?: ${pgTypeToTsType(column.format, types, schemas)}`
 
-                        if (column.is_nullable) {
-                          output += '| null'
-                        }
+                      if (column.is_nullable) {
+                        output += '| null'
+                      }
 
-                        return output
-                      })}
+                      return output
+                    })}
                   }
                   Relationships: [
                     ${relationships
@@ -174,66 +172,55 @@ export interface Database {
                       )}
                   ]
                 }`
-                  )
+                  })
             }
           }
           Views: {
             ${
               schemaViews.length === 0
                 ? '[_ in never]: never'
-                : schemaViews.map(
-                    (view) => `${JSON.stringify(view.name)}: {
+                : schemaViews.map((view) => {
+                    const viewColumns = schemaColumns.filter(
+                      (column) => column.table_id === view.id
+                    )
+                    return `${JSON.stringify(view.name)}: {
                   Row: {
-                    ${schemaColumns
-                      .filter((column) => column.table_id === view.id)
-                      .map(
-                        (column) =>
-                          `${JSON.stringify(column.name)}: ${pgTypeToTsType(
-                            column.format,
-                            types,
-                            schemas
-                          )} ${column.is_nullable ? '| null' : ''}`
-                      )}
+                    ${viewColumns.map(
+                      (column) =>
+                        `${JSON.stringify(column.name)}: ${pgTypeToTsType(
+                          column.format,
+                          types,
+                          schemas
+                        )} ${column.is_nullable ? '| null' : ''}`
+                    )}
                   }
                   ${
                     'is_updatable' in view && view.is_updatable
                       ? `Insert: {
-                           ${schemaColumns
-                             .filter((column) => column.table_id === view.id)
-                             .map((column) => {
-                               let output = JSON.stringify(column.name)
+                           ${viewColumns.map((column) => {
+                             let output = JSON.stringify(column.name)
 
-                               if (!column.is_updatable) {
-                                 return `${output}?: never`
-                               }
+                             if (!column.is_updatable) {
+                               return `${output}?: never`
+                             }
 
-                               output += `?: ${pgTypeToTsType(
-                                 column.format,
-                                 types,
-                                 schemas
-                               )} | null`
+                             output += `?: ${pgTypeToTsType(column.format, types, schemas)} | null`
 
-                               return output
-                             })}
+                             return output
+                           })}
                          }
                          Update: {
-                           ${schemaColumns
-                             .filter((column) => column.table_id === view.id)
-                             .map((column) => {
-                               let output = JSON.stringify(column.name)
+                           ${viewColumns.map((column) => {
+                             let output = JSON.stringify(column.name)
 
-                               if (!column.is_updatable) {
-                                 return `${output}?: never`
-                               }
+                             if (!column.is_updatable) {
+                               return `${output}?: never`
+                             }
 
-                               output += `?: ${pgTypeToTsType(
-                                 column.format,
-                                 types,
-                                 schemas
-                               )} | null`
+                             output += `?: ${pgTypeToTsType(column.format, types, schemas)} | null`
 
-                               return output
-                             })}
+                             return output
+                           })}
                          }
                         `
                       : ''
@@ -256,7 +243,7 @@ export interface Database {
                       )}
                   ]
                 }`
-                  )
+                  })
             }
           }
           Functions: {
