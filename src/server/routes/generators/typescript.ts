@@ -75,7 +75,7 @@ export default async (fastify: FastifyInstance) => {
       return { error: materializedViewsError.message }
     }
     if (columnsError) {
-      request.log.error({ error: columns, request: extractRequestForLogging(request) })
+      request.log.error({ error: columnsError, request: extractRequestForLogging(request) })
       reply.code(500)
       return { error: columnsError.message }
     }
