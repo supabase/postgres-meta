@@ -86,4 +86,9 @@ WHERE
     OR has_any_column_privilege(c.oid, 'SELECT, INSERT, UPDATE, REFERENCES')
   )
 group by
-  c.oid, nc.nspname
+  c.oid,
+  c.relname,
+  c.relrowsecurity,
+  c.relforcerowsecurity,
+  c.relreplident,
+  nc.nspname
