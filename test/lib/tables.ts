@@ -465,12 +465,12 @@ test('primary keys', async () => {
         "name": "t",
         "primary_keys": [
           {
-            "name": "cc",
+            "name": "c",
             "schema": "public",
             "table_name": "t",
           },
           {
-            "name": "c",
+            "name": "cc",
             "schema": "public",
             "table_name": "t",
           },

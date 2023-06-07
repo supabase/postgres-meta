@@ -17,10 +17,7 @@ SELECT
   pg_stat_get_live_tuples(c.oid) AS live_rows_estimate,
   pg_stat_get_dead_tuples(c.oid) AS dead_rows_estimate,
   obj_description(c.oid) AS comment,
-  coalesce(
-    jsonb_agg(primary_keys) filter (where primary_keys is not null),
-    '[]'
-  ) as primary_keys,
+  coalesce(pk.primary_keys, '[]') as primary_keys,
   coalesce(
     jsonb_agg(relationships) filter (where relationships is not null),
     '[]'
@@ -30,23 +27,29 @@ FROM
   JOIN pg_class c ON nc.oid = c.relnamespace
   left join (
     select
-      n.nspname as schema,
-      c.relname as table_name,
-      a.attname as name,
-      c.oid :: int8 as table_id
-    from
-      pg_index i,
-      pg_class c,
-      pg_attribute a,
-      pg_namespace n
-    where
-      i.indrelid = c.oid
-      and c.relnamespace = n.oid
-      and a.attrelid = c.oid
-      and a.attnum = any (i.indkey)
-      and i.indisprimary
-  ) as primary_keys
-  on primary_keys.table_id = c.oid
+      table_id,
+      jsonb_agg(_pk.*) as primary_keys
+    from (
+      select
+        n.nspname as schema,
+        c.relname as table_name,
+        a.attname as name,
+        c.oid :: int8 as table_id
+      from
+        pg_index i,
+        pg_class c,
+        pg_attribute a,
+        pg_namespace n
+      where
+        i.indrelid = c.oid
+        and c.relnamespace = n.oid
+        and a.attrelid = c.oid
+        and a.attnum = any (i.indkey)
+        and i.indisprimary
+    ) as _pk
+    group by table_id
+  ) as pk
+  on pk.table_id = c.oid
   left join (
     select
       c.oid :: int8 as id,
@@ -91,4 +94,5 @@ group by
   c.relrowsecurity,
   c.relforcerowsecurity,
   c.relreplident,
-  nc.nspname
+  nc.nspname,
+  pk.primary_keys
