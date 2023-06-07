@@ -250,15 +250,7 @@ COMMIT;`
 const generateEnrichedTablesSql = ({ includeColumns }: { includeColumns: boolean }) => `
 with tables as (${tablesSql})
   ${includeColumns ? `, columns as (${columnsSql})` : ''}
-  , primary_keys as (${primaryKeysSql})
-  , relationships as (${relationshipsOldSql})
 select
   *
   ${includeColumns ? `, ${coalesceRowsToArray('columns', 'columns.table_id = tables.id')}` : ''}
-  , ${coalesceRowsToArray('primary_keys', 'primary_keys.table_id = tables.id')}
-  , ${coalesceRowsToArray(
-    'relationships',
-    `(relationships.source_schema = tables.schema AND relationships.source_table_name = tables.name)
-       OR (relationships.target_table_schema = tables.schema AND relationships.target_table_name = tables.name)`
-  )}
 from tables`
