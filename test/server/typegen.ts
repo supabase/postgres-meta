@@ -11,7 +11,7 @@ test('typegen', async () => {
       | number
       | boolean
       | null
-      | { [key: string]: Json }
+      | { [key: string]: Json | undefined }
       | Json[]
 
     export interface Database {
