@@ -40,7 +40,7 @@ export const apply = ({
     }, {} as Record<string, PostgresColumn[]>)
 
   let output = `
-export type Json = string | number | boolean | null | { [key: string]: Json } | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export interface Database {
   ${schemas
