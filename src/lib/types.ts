@@ -467,3 +467,51 @@ export const postgresTablePrivilegesRevokeSchema = Type.Object({
   ]),
 })
 export type PostgresTablePrivilegesRevoke = Static<typeof postgresTablePrivilegesRevokeSchema>
+
+export const postgresColumnPrivilegesSchema = Type.Object({
+  column_id: Type.RegEx(/^(\d+)\.(\d+)$/),
+  relation_schema: Type.String(),
+  relation_name: Type.String(),
+  column_name: Type.String(),
+  privileges: Type.Array(
+    Type.Object({
+      grantor: Type.String(),
+      grantee: Type.String(),
+      privilege_type: Type.Union([
+        Type.Literal('SELECT'),
+        Type.Literal('INSERT'),
+        Type.Literal('UPDATE'),
+        Type.Literal('REFERENCES'),
+      ]),
+      is_grantable: Type.Boolean(),
+    })
+  ),
+})
+export type PostgresColumnPrivileges = Static<typeof postgresColumnPrivilegesSchema>
+
+export const postgresColumnPrivilegesGrantSchema = Type.Object({
+  column_id: Type.RegEx(/^(\d+)\.(\d+)$/),
+  grantee: Type.String(),
+  privilege_type: Type.Union([
+    Type.Literal('ALL'),
+    Type.Literal('SELECT'),
+    Type.Literal('INSERT'),
+    Type.Literal('UPDATE'),
+    Type.Literal('REFERENCES'),
+  ]),
+  is_grantable: Type.Optional(Type.Boolean()),
+})
+export type PostgresColumnPrivilegesGrant = Static<typeof postgresColumnPrivilegesGrantSchema>
+
+export const postgresColumnPrivilegesRevokeSchema = Type.Object({
+  column_id: Type.RegEx(/^(\d+)\.(\d+)$/),
+  grantee: Type.String(),
+  privilege_type: Type.Union([
+    Type.Literal('ALL'),
+    Type.Literal('SELECT'),
+    Type.Literal('INSERT'),
+    Type.Literal('UPDATE'),
+    Type.Literal('REFERENCES'),
+  ]),
+})
+export type PostgresColumnPrivilegesRevoke = Static<typeof postgresColumnPrivilegesRevokeSchema>
