@@ -1,5 +1,6 @@
 import CryptoJS from 'crypto-js'
 import { FastifyInstance } from 'fastify'
+import ColumnPrivilegesRoute from './column-privileges.js'
 import ColumnRoute from './columns.js'
 import ConfigRoute from './config.js'
 import ExtensionsRoute from './extensions.js'
@@ -42,6 +43,7 @@ export default async (fastify: FastifyInstance) => {
     done()
   })
 
+  fastify.register(ColumnPrivilegesRoute, { prefix: '/column-privileges' })
   fastify.register(ColumnRoute, { prefix: '/columns' })
   fastify.register(ConfigRoute, { prefix: '/config' })
   fastify.register(ExtensionsRoute, { prefix: '/extensions' })

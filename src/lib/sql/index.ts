@@ -3,6 +3,7 @@ import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
+export const columnPrivilegesSql = await readFile(join(__dirname, 'column_privileges.sql'), 'utf-8')
 export const columnsSql = await readFile(join(__dirname, 'columns.sql'), 'utf-8')
 export const configSql = await readFile(join(__dirname, 'config.sql'), 'utf-8')
 export const extensionsSql = await readFile(join(__dirname, 'extensions.sql'), 'utf-8')
@@ -20,8 +21,8 @@ export const tableRelationshipsSql = await readFile(
 )
 export const rolesSql = await readFile(join(__dirname, 'roles.sql'), 'utf-8')
 export const schemasSql = await readFile(join(__dirname, 'schemas.sql'), 'utf-8')
-export const tablesSql = await readFile(join(__dirname, 'tables.sql'), 'utf-8')
 export const tablePrivilegesSql = await readFile(join(__dirname, 'table_privileges.sql'), 'utf-8')
+export const tablesSql = await readFile(join(__dirname, 'tables.sql'), 'utf-8')
 export const triggersSql = await readFile(join(__dirname, 'triggers.sql'), 'utf-8')
 export const typesSql = await readFile(join(__dirname, 'types.sql'), 'utf-8')
 export const versionSql = await readFile(join(__dirname, 'version.sql'), 'utf-8')
