@@ -404,3 +404,66 @@ export const postgresMaterializedViewSchema = Type.Object({
   columns: Type.Optional(Type.Array(postgresColumnSchema)),
 })
 export type PostgresMaterializedView = Static<typeof postgresMaterializedViewSchema>
+
+export const postgresTablePrivilegesSchema = Type.Object({
+  relation_id: Type.Integer(),
+  schema: Type.String(),
+  name: Type.String(),
+  kind: Type.Union([
+    Type.Literal('table'),
+    Type.Literal('view'),
+    Type.Literal('materialized_view'),
+    Type.Literal('foreign_table'),
+    Type.Literal('partitioned_table'),
+  ]),
+  privileges: Type.Array(
+    Type.Object({
+      grantor: Type.String(),
+      grantee: Type.String(),
+      privilege_type: Type.Union([
+        Type.Literal('SELECT'),
+        Type.Literal('INSERT'),
+        Type.Literal('UPDATE'),
+        Type.Literal('DELETE'),
+        Type.Literal('TRUNCATE'),
+        Type.Literal('REFERENCES'),
+        Type.Literal('TRIGGER'),
+      ]),
+      is_grantable: Type.Boolean(),
+    })
+  ),
+})
+export type PostgresTablePrivileges = Static<typeof postgresTablePrivilegesSchema>
+
+export const postgresTablePrivilegesGrantSchema = Type.Object({
+  relation_id: Type.Integer(),
+  grantee: Type.String(),
+  privilege_type: Type.Union([
+    Type.Literal('ALL'),
+    Type.Literal('SELECT'),
+    Type.Literal('INSERT'),
+    Type.Literal('UPDATE'),
+    Type.Literal('DELETE'),
+    Type.Literal('TRUNCATE'),
+    Type.Literal('REFERENCES'),
+    Type.Literal('TRIGGER'),
+  ]),
+  is_grantable: Type.Optional(Type.Boolean()),
+})
+export type PostgresTablePrivilegesGrant = Static<typeof postgresTablePrivilegesGrantSchema>
+
+export const postgresTablePrivilegesRevokeSchema = Type.Object({
+  relation_id: Type.Integer(),
+  grantee: Type.String(),
+  privilege_type: Type.Union([
+    Type.Literal('ALL'),
+    Type.Literal('SELECT'),
+    Type.Literal('INSERT'),
+    Type.Literal('UPDATE'),
+    Type.Literal('DELETE'),
+    Type.Literal('TRUNCATE'),
+    Type.Literal('REFERENCES'),
+    Type.Literal('TRIGGER'),
+  ]),
+})
+export type PostgresTablePrivilegesRevoke = Static<typeof postgresTablePrivilegesRevokeSchema>
