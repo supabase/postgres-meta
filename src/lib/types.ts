@@ -412,9 +412,9 @@ export const postgresTablePrivilegesSchema = Type.Object({
   kind: Type.Union([
     Type.Literal('table'),
     Type.Literal('view'),
-    Type.Literal('materialized view'),
-    Type.Literal('foreign table'),
-    Type.Literal('partitioned table'),
+    Type.Literal('materialized_view'),
+    Type.Literal('foreign_table'),
+    Type.Literal('partitioned_table'),
   ]),
   privileges: Type.Array(
     Type.Object({
