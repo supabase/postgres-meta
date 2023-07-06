@@ -24,9 +24,9 @@ select
   case
     when c.relkind = 'r' then 'table'
     when c.relkind = 'v' then 'view'
-    when c.relkind = 'm' then 'materialized view'
-    when c.relkind = 'f' then 'foreign table'
-    when c.relkind = 'p' then 'partitioned table'
+    when c.relkind = 'm' then 'materialized_view'
+    when c.relkind = 'f' then 'foreign_table'
+    when c.relkind = 'p' then 'partitioned_table'
   end as kind,
   coalesce(
     jsonb_agg(
