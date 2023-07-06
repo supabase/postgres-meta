@@ -11,6 +11,7 @@ import PublicationsRoute from './publications.js'
 import QueryRoute from './query.js'
 import SchemasRoute from './schemas.js'
 import RolesRoute from './roles.js'
+import TablePrivilegesRoute from './table-privileges.js'
 import TablesRoute from './tables.js'
 import TriggersRoute from './triggers.js'
 import TypesRoute from './types.js'
@@ -52,6 +53,7 @@ export default async (fastify: FastifyInstance) => {
   fastify.register(QueryRoute, { prefix: '/query' })
   fastify.register(SchemasRoute, { prefix: '/schemas' })
   fastify.register(RolesRoute, { prefix: '/roles' })
+  fastify.register(TablePrivilegesRoute, { prefix: '/table-privileges' })
   fastify.register(TablesRoute, { prefix: '/tables' })
   fastify.register(TriggersRoute, { prefix: '/triggers' })
   fastify.register(TypesRoute, { prefix: '/types' })
