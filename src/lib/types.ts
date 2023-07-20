@@ -43,6 +43,45 @@ export const postgresColumnSchema = Type.Object({
 })
 export type PostgresColumn = Static<typeof postgresColumnSchema>
 
+export const postgresColumnCreateSchema = Type.Object({
+  table_id: Type.Integer(),
+  name: Type.String(),
+  type: Type.String(),
+  default_value: Type.Optional(Type.String()),
+  default_value_format: Type.Optional(
+    Type.Union([Type.Literal('expression'), Type.Literal('literal')])
+  ),
+  is_identity: Type.Optional(Type.Boolean()),
+  identity_generation: Type.Optional(
+    Type.Union([Type.Literal('BY DEFAULT'), Type.Literal('ALWAYS')])
+  ),
+  is_nullable: Type.Optional(Type.Boolean()),
+  is_primary_key: Type.Optional(Type.Boolean()),
+  is_unique: Type.Optional(Type.Boolean()),
+  comment: Type.Optional(Type.String()),
+  check: Type.Optional(Type.String()),
+})
+export type PostgresColumnCreate = Static<typeof postgresColumnCreateSchema>
+
+export const postgresColumnUpdateSchema = Type.Object({
+  name: Type.Optional(Type.String()),
+  type: Type.Optional(Type.String()),
+  drop_default: Type.Optional(Type.Boolean()),
+  default_value: Type.Optional(Type.String()),
+  default_value_format: Type.Optional(
+    Type.Union([Type.Literal('expression'), Type.Literal('literal')])
+  ),
+  is_identity: Type.Optional(Type.Boolean()),
+  identity_generation: Type.Optional(
+    Type.Union([Type.Literal('BY DEFAULT'), Type.Literal('ALWAYS')])
+  ),
+  is_nullable: Type.Optional(Type.Boolean()),
+  is_unique: Type.Optional(Type.Boolean()),
+  comment: Type.Optional(Type.String()),
+  check: Type.Optional(Type.String()),
+})
+export type PostgresColumnUpdate = Static<typeof postgresColumnUpdateSchema>
+
 // TODO Rethink config.sql
 export const postgresConfigSchema = Type.Object({
   name: Type.Unknown(),
