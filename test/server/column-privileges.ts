@@ -81,7 +81,7 @@ test('revoke & grant column privileges', async () => {
     ],
   })
   let privs = res.json<PostgresColumnPrivileges[]>()
-  expect(privs.length === 1)
+  expect(privs.length).toBe(1)
   expect(privs[0]).toMatchInlineSnapshot(
     { column_id: expect.stringMatching(/^\d+\.\d+$/) },
     `
@@ -156,7 +156,7 @@ test('revoke & grant column privileges', async () => {
     ],
   })
   privs = res.json<PostgresColumnPrivileges[]>()
-  expect(privs.length === 1)
+  expect(privs.length).toBe(1)
   expect(privs[0]).toMatchInlineSnapshot(
     { column_id: expect.stringMatching(/^\d+\.\d+$/) },
     `
@@ -200,6 +200,161 @@ test('revoke & grant column privileges', async () => {
     path: '/query',
     payload: {
       query: `drop role r;`,
+    },
+  })
+  if (res.json().error) {
+    throw new Error(res.payload)
+  }
+})
+
+test('revoke & grant column privileges w/ quoted column name', async () => {
+  let res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `create role r; create table "t 1"("c 1" int8);`,
+    },
+  })
+  if (res.json().error) {
+    throw new Error(res.payload)
+  }
+
+  res = await app.inject({ method: 'GET', path: '/column-privileges' })
+  const { column_id } = res
+    .json<PostgresColumnPrivileges[]>()
+    .find(({ relation_name, column_name }) => relation_name === 't 1' && column_name === 'c 1')!
+
+  res = await app.inject({
+    method: 'POST',
+    path: '/column-privileges',
+    payload: [
+      {
+        column_id,
+        grantee: 'r',
+        privilege_type: 'ALL',
+      },
+    ],
+  })
+  let privs = res.json<PostgresColumnPrivileges[]>()
+  expect(privs.length).toBe(1)
+  expect(privs[0]).toMatchInlineSnapshot(
+    { column_id: expect.stringMatching(/^\d+\.\d+$/) },
+    `
+    {
+      "column_id": StringMatching /\\^\\\\d\\+\\\\\\.\\\\d\\+\\$/,
+      "column_name": "c 1",
+      "privileges": [
+        {
+          "grantee": "r",
+          "grantor": "postgres",
+          "is_grantable": false,
+          "privilege_type": "UPDATE",
+        },
+        {
+          "grantee": "r",
+          "grantor": "postgres",
+          "is_grantable": false,
+          "privilege_type": "SELECT",
+        },
+        {
+          "grantee": "r",
+          "grantor": "postgres",
+          "is_grantable": false,
+          "privilege_type": "REFERENCES",
+        },
+        {
+          "grantee": "r",
+          "grantor": "postgres",
+          "is_grantable": false,
+          "privilege_type": "INSERT",
+        },
+        {
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "is_grantable": false,
+          "privilege_type": "UPDATE",
+        },
+        {
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "is_grantable": false,
+          "privilege_type": "SELECT",
+        },
+        {
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "is_grantable": false,
+          "privilege_type": "REFERENCES",
+        },
+        {
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "is_grantable": false,
+          "privilege_type": "INSERT",
+        },
+      ],
+      "relation_name": "t 1",
+      "relation_schema": "public",
+    }
+  `
+  )
+
+  res = await app.inject({
+    method: 'DELETE',
+    path: '/column-privileges',
+    payload: [
+      {
+        column_id,
+        grantee: 'r',
+        privilege_type: 'ALL',
+      },
+    ],
+  })
+  privs = res.json<PostgresColumnPrivileges[]>()
+  expect(privs.length).toBe(1)
+  expect(privs[0]).toMatchInlineSnapshot(
+    { column_id: expect.stringMatching(/^\d+\.\d+$/) },
+    `
+    {
+      "column_id": StringMatching /\\^\\\\d\\+\\\\\\.\\\\d\\+\\$/,
+      "column_name": "c 1",
+      "privileges": [
+        {
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "is_grantable": false,
+          "privilege_type": "UPDATE",
+        },
+        {
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "is_grantable": false,
+          "privilege_type": "SELECT",
+        },
+        {
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "is_grantable": false,
+          "privilege_type": "REFERENCES",
+        },
+        {
+          "grantee": "postgres",
+          "grantor": "postgres",
+          "is_grantable": false,
+          "privilege_type": "INSERT",
+        },
+      ],
+      "relation_name": "t 1",
+      "relation_schema": "public",
+    }
+  `
+  )
+
+  res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `drop role r; drop table "t 1";`,
     },
   })
   if (res.json().error) {
