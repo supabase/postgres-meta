@@ -69,7 +69,7 @@ where a.attrelid = ${literal(relationId)}
   and a.attnum = ${literal(columnNumber)}
 into col;
 execute format(
-  'grant ${privilege_type} (%I) on %I to ${
+  'grant ${privilege_type} (%I) on %s to ${
       grantee.toLowerCase() === 'public' ? 'public' : ident(grantee)
     } ${is_grantable ? 'with grant option' : ''}',
   col.attname,
@@ -113,7 +113,7 @@ where a.attrelid = ${literal(relationId)}
   and a.attnum = ${literal(columnNumber)}
 into col;
 execute format(
-  'revoke ${privilege_type} (%I) on %I from ${
+  'revoke ${privilege_type} (%I) on %s from ${
       grantee.toLowerCase() === 'public' ? 'public' : ident(grantee)
     }',
   col.attname,
