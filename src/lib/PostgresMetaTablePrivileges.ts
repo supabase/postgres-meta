@@ -115,7 +115,7 @@ begin
 ${grants
   .map(
     ({ privilege_type, relation_id, grantee, is_grantable }) =>
-      `execute format('grant ${privilege_type} on table %I to ${
+      `execute format('grant ${privilege_type} on table %s to ${
         grantee.toLowerCase() === 'public' ? 'public' : ident(grantee)
       } ${is_grantable ? 'with grant option' : ''}', ${relation_id}::regclass);`
   )
@@ -147,7 +147,7 @@ begin
 ${revokes
   .map(
     (revoke) =>
-      `execute format('revoke ${revoke.privilege_type} on table %I from ${revoke.grantee}', ${revoke.relation_id}::regclass);`
+      `execute format('revoke ${revoke.privilege_type} on table %s from ${revoke.grantee}', ${revoke.relation_id}::regclass);`
   )
   .join('\n')}
 end $$;
