@@ -1,4 +1,3 @@
-import { FastifyInstance } from 'fastify'
 import { PostgresMeta } from '../../lib/index.js'
 import { DEFAULT_POOL_CONFIG } from '../constants.js'
 import { extractRequestForLogging } from '../utils.js'
@@ -59,38 +58,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       return data
     }
   )
-  fastify.post(
-    '/',
-    {
-      schema: {
-        headers: Type.Object({
-          pg: Type.String(),
-        }),
-        body: postgresColumnCreateSchema,
-        response: {
-          200: postgresColumnSchema,
-          400: Type.Object({
-            error: Type.String(),
-          }),
-        },
-      },
-    },
-    async (request, reply) => {
-      const connectionString = request.headers.pg
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
-      const { data, error } = await pgMeta.columns.create(request.body as any)
-      await pgMeta.end()
-      if (error) {
-        request.log.error({ error, request: extractRequestForLogging(request) })
-        reply.code(400)
-        if (error.message.startsWith('Cannot find')) reply.code(404)
-        return { error: error.message }
-      }
-
-      return data
-    }
-  )
   fastify.get(
     '/:tableId(^\\d+):ordinalPosition',
     {
@@ -164,6 +132,40 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       }
     }
   )
+
+  fastify.post(
+    '/',
+    {
+      schema: {
+        headers: Type.Object({
+          pg: Type.String(),
+        }),
+        body: postgresColumnCreateSchema,
+        response: {
+          200: postgresColumnSchema,
+          400: Type.Object({
+            error: Type.String(),
+          }),
+        },
+      },
+    },
+    async (request, reply) => {
+      const connectionString = request.headers.pg
+
+      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const { data, error } = await pgMeta.columns.create(request.body)
+      await pgMeta.end()
+      if (error) {
+        request.log.error({ error, request: extractRequestForLogging(request) })
+        reply.code(400)
+        if (error.message.startsWith('Cannot find')) reply.code(404)
+        return { error: error.message }
+      }
+
+      return data
+    }
+  )
+
   fastify.patch(
     '/:id(\\d+\\.\\d+)',
     {
@@ -187,7 +189,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       const connectionString = request.headers.pg
 
       const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
-      const { data, error } = await pgMeta.columns.update(request.params.id, request.body as any)
+      const { data, error } = await pgMeta.columns.update(request.params.id, request.body)
       await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
@@ -199,6 +201,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       return data
     }
   )
+
   fastify.delete(
     '/:id(\\d+\\.\\d+)',
     {

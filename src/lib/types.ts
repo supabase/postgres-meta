@@ -47,7 +47,7 @@ export const postgresColumnCreateSchema = Type.Object({
   table_id: Type.Integer(),
   name: Type.String(),
   type: Type.String(),
-  default_value: Type.Optional(Type.String()),
+  default_value: Type.Optional(Type.Unknown()),
   default_value_format: Type.Optional(
     Type.Union([Type.Literal('expression'), Type.Literal('literal')])
   ),
@@ -67,7 +67,7 @@ export const postgresColumnUpdateSchema = Type.Object({
   name: Type.Optional(Type.String()),
   type: Type.Optional(Type.String()),
   drop_default: Type.Optional(Type.Boolean()),
-  default_value: Type.Optional(Type.String()),
+  default_value: Type.Optional(Type.Unknown()),
   default_value_format: Type.Optional(
     Type.Union([Type.Literal('expression'), Type.Literal('literal')])
   ),
@@ -78,7 +78,7 @@ export const postgresColumnUpdateSchema = Type.Object({
   is_nullable: Type.Optional(Type.Boolean()),
   is_unique: Type.Optional(Type.Boolean()),
   comment: Type.Optional(Type.String()),
-  check: Type.Optional(Type.String()),
+  check: Type.Optional(Type.Union([Type.String(), Type.Null()])),
 })
 export type PostgresColumnUpdate = Static<typeof postgresColumnUpdateSchema>
 
