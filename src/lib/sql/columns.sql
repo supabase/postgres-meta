@@ -83,7 +83,8 @@ FROM
     WHERE contype = 'u' AND cardinality(conkey) = 1
   ) AS uniques ON uniques.table_id = c.oid AND uniques.ordinal_position = a.attnum
   LEFT JOIN (
-    SELECT
+    -- We only select the first column check
+    SELECT DISTINCT ON (table_id, ordinal_position)
       conrelid AS table_id,
       conkey[1] AS ordinal_position,
       substring(
@@ -93,7 +94,7 @@ FROM
       ) AS "definition"
     FROM pg_constraint
     WHERE contype = 'c' AND cardinality(conkey) = 1
-    ORDER BY oid asc
+    ORDER BY table_id, ordinal_position, oid asc
   ) AS check_constraints ON check_constraints.table_id = c.oid AND check_constraints.ordinal_position = a.attnum
 WHERE
   NOT pg_is_other_temp_schema(nc.oid)

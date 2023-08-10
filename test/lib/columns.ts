@@ -899,3 +899,36 @@ create table public.t (
 
   await pgMeta.query(`drop table public.t;`)
 })
+
+test('column with multiple checks', async () => {
+  await pgMeta.query(`create table t(c int8 check (c != 0) check (c != -1))`)
+
+  const res = await pgMeta.columns.list()
+  const columns = res.data
+    ?.filter((c) => c.schema === 'public' && c.table === 't')
+    .map(({ id, table_id, ...c }) => c)
+  expect(columns).toMatchInlineSnapshot(`
+    [
+      {
+        "check": "c <> 0",
+        "comment": null,
+        "data_type": "bigint",
+        "default_value": null,
+        "enums": [],
+        "format": "int8",
+        "identity_generation": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_updatable": true,
+        "name": "c",
+        "ordinal_position": 1,
+        "schema": "public",
+        "table": "t",
+      },
+    ]
+  `)
+
+  await pgMeta.query(`drop table t`)
+})
