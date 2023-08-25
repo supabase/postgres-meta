@@ -23,6 +23,34 @@ export const init: (config: PoolConfig) => {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
   end: () => Promise<void>
 } = (config) => {
+  // node-postgres ignores config.ssl if any of sslmode, sslca, sslkey, sslcert,
+  // sslrootcert are in the connection string. Here we allow setting sslmode in
+  // the connection string while setting the rest in config.ssl.
+  if (config.connectionString) {
+    const u = new URL(config.connectionString)
+    const sslmode = u.searchParams.get('sslmode')
+    u.searchParams.delete('sslmode')
+    // For now, we don't support setting these from the connection string.
+    u.searchParams.delete('sslca')
+    u.searchParams.delete('sslkey')
+    u.searchParams.delete('sslcert')
+    u.searchParams.delete('sslrootcert')
+    config.connectionString = u.toString()
+
+    // sslmode:    null, 'disable', 'prefer', 'require', 'verify-ca', 'verify-full', 'no-verify'
+    // config.ssl: true, false, {}
+    if (sslmode === null) {
+      // skip
+    } else if (sslmode === 'disable') {
+      config.ssl = false
+    } else {
+      if (typeof config.ssl !== 'object') {
+        config.ssl = {}
+      }
+      config.ssl.rejectUnauthorized = sslmode !== 'no-verify'
+    }
+  }
+
   // NOTE: Race condition could happen here: one async task may be doing
   // `pool.end()` which invalidates the pool and subsequently all existing
   // handles to `query`. Normally you might only deal with one DB so you don't
