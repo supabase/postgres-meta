@@ -42,6 +42,7 @@ export const GENERATE_TYPES_INCLUDED_SCHEMAS =
 export const DEFAULT_POOL_CONFIG: PoolConfig = {
   max: 1,
   connectionTimeoutMillis: PG_CONN_TIMEOUT_SECS * 1000,
+  ssl: PG_META_DB_SSL_ROOT_CERT ? { ca: PG_META_DB_SSL_ROOT_CERT } : undefined,
 }
 
 export const PG_META_REQ_HEADER = process.env.PG_META_REQ_HEADER || 'request-id'
