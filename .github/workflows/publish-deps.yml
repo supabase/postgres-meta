@@ -8,7 +8,7 @@ jobs:
     # Must match glibc verison in node:16-bullseye
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: 'pyramation/libpg-query-node'
           ref: 'v13'
