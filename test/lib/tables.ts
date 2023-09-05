@@ -401,8 +401,10 @@ test("allow ' in comments", async () => {
 
 test('primary keys', async () => {
   let res = await pgMeta.tables.create({ name: 't' })
-  await pgMeta.columns.create({ table_id: res.data!.id, name: 'c', type: 'int8' })
-  await pgMeta.columns.create({ table_id: res.data!.id, name: 'cc', type: 'text' })
+  await pgMeta.columns.create([
+    { table_id: res.data!.id, name: 'c', type: 'int8' },
+    { table_id: res.data!.id, name: 'cc', type: 'text' },
+  ])
   res = await pgMeta.tables.update(res.data!.id, {
     primary_keys: [{ name: 'c' }, { name: 'cc' }],
   })
