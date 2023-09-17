@@ -33,7 +33,7 @@
     "test:update": "run-s db:clean db:run && node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --updateSnapshot && run-s db:clean"
   },
   "engines": {
-    "node": ">=16",
+    "node": ">=18",
     "npm": ">=8"
   },
   "jest": {
@@ -75,7 +75,7 @@
   "devDependencies": {
     "@types/crypto-js": "^4.1.1",
     "@types/jest": "^29.2.4",
-    "@types/node": "^16.18.3",
+    "@types/node": "^18.17.17",
     "@types/pg": "^8.6.5",
     "@types/pg-format": "^1.0.1",
     "@types/prettier": "^2.7.3",

@@ -5,8 +5,8 @@ on:
 
 jobs:
   publish:
-    # Must match glibc verison in node:16-bullseye
-    runs-on: ubuntu-20.04
+    # Must match glibc verison in node:18
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
         with:
@@ -15,7 +15,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '18'
 
       - run: npm i
       - run: npm run binary:build
