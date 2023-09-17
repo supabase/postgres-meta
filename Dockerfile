@@ -1,4 +1,4 @@
-FROM node:16-bullseye as build
+FROM node:18 as build
 WORKDIR /usr/src/app
 # Do `npm ci` separately so we can cache `node_modules`
 # https://nodejs.org/en/docs/guides/nodejs-docker-webapp/
@@ -7,7 +7,7 @@ RUN npm clean-install
 COPY . .
 RUN npm run build && npm prune --omit=dev
 
-FROM node:16-bullseye-slim
+FROM node:18-slim
 WORKDIR /usr/src/app
 COPY --from=build /usr/src/app/node_modules node_modules
 COPY --from=build /usr/src/app/dist dist
