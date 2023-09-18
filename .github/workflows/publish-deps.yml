@@ -6,12 +6,14 @@ on:
 jobs:
   publish:
     # Must match glibc verison in node:18
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
         with:
           repository: 'pyramation/libpg-query-node'
           ref: 'v13'
+
+      - run: ldd --version && exit 1
 
       - uses: actions/setup-node@v3
         with:
