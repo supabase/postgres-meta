@@ -387,7 +387,7 @@ export interface Database {
                               type.name,
                               types,
                               schemas
-                            )}`
+                            )} | null`
                           }
                           return `${JSON.stringify(name)}: unknown`
                         })}
