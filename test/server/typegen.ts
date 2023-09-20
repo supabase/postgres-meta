@@ -19,14 +19,17 @@ test('typegen', async () => {
         Tables: {
           category: {
             Row: {
+              composite: Database["public"]["CompositeTypes"]["composite_t"] | null
               id: number
               name: string
             }
             Insert: {
+              composite?: Database["public"]["CompositeTypes"]["composite_t"] | null
               id?: number
               name: string
             }
             Update: {
+              composite?: Database["public"]["CompositeTypes"]["composite_t"] | null
               id?: number
               name?: string
             }
@@ -264,7 +267,9 @@ test('typegen', async () => {
           user_status: "ACTIVE" | "INACTIVE"
         }
         CompositeTypes: {
-          [_ in never]: never
+          composite_t: {
+            attr: number | null
+          }
         }
       }
     }

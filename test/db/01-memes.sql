@@ -1,8 +1,10 @@
 
+CREATE TYPE public.composite_t AS (attr int);
 
 CREATE TABLE public.category (
 	id serial NOT NULL PRIMARY KEY,
-	name text NOT NULL
+	name text NOT NULL,
+        composite composite_t
 );
 
 -- Fake policies
