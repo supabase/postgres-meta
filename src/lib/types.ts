@@ -1,4 +1,5 @@
 import { Static, Type } from '@sinclair/typebox'
+import { DatabaseError } from 'pg-protocol'
 import { Options as PrettierOptions } from 'prettier'
 
 export interface FormatterOptions extends PrettierOptions {}
@@ -10,9 +11,7 @@ export interface PostgresMetaOk<T> {
 
 export interface PostgresMetaErr {
   data: null
-  error: {
-    message: string
-  }
+  error: Partial<DatabaseError> & { message: string; formattedError?: string }
 }
 
 export type PostgresMetaResult<T> = PostgresMetaOk<T> | PostgresMetaErr
