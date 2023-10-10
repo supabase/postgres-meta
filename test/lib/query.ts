@@ -27,7 +27,27 @@ test('error', async () => {
     {
       "data": null,
       "error": {
+        "code": "42P01",
+        "column": undefined,
+        "constraint": undefined,
+        "dataType": undefined,
+        "detail": undefined,
+        "file": "tablecmds.c",
+        "formattedError": "ERROR:  42P01: table "missing_table" does not exist
+    ",
+        "hint": undefined,
+        "internalPosition": undefined,
+        "internalQuery": undefined,
+        "length": 108,
+        "line": "1259",
         "message": "table "missing_table" does not exist",
+        "name": "error",
+        "position": undefined,
+        "routine": "DropErrorMsgNonExistent",
+        "schema": undefined,
+        "severity": "ERROR",
+        "table": undefined,
+        "where": undefined,
       },
     }
   `)
