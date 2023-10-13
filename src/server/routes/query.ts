@@ -26,7 +26,7 @@ export default async (fastify: FastifyInstance) => {
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(translateErrorToResponseCode(error))
-      return { error: error.message }
+      return { error: error.formattedError ?? error.message, ...error }
     }
 
     return data || []
