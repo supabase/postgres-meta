@@ -61,6 +61,21 @@ $$
 select substring($1.details, 1, 3);
 $$ language sql stable;
 
+create function public.blurb_varchar(public.todos) returns character varying as
+$$
+select substring($1.details, 1, 3);
+$$ language sql stable;
+
+create function public.details_length(public.todos) returns integer as
+$$
+select length($1.details);
+$$ language sql stable;
+
+create function public.details_is_long(public.todos) returns boolean as
+$$
+select $1.details_length > 20;
+$$ language sql stable;
+
 create extension postgres_fdw;
 create server foreign_server foreign data wrapper postgres_fdw options (host 'localhost', port '5432', dbname 'postgres');
 create user mapping for postgres server foreign_server options (user 'postgres', password 'postgres');
