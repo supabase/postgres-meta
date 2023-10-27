@@ -44,7 +44,7 @@ if (EXPORT_DOCS) {
     { data: columns, error: columnsError },
     { data: relationships, error: relationshipsError },
     { data: functions, error: functionsError },
-    { data: types, error: typesError }
+    { data: types, error: typesError },
   ] = await Promise.all([
     pgMeta.schemas.list(),
     pgMeta.tables.list({
@@ -74,8 +74,8 @@ if (EXPORT_DOCS) {
     pgMeta.types.list({
       includeArrayTypes: true,
       includeSystemSchemas: true,
-    })
-  ]);
+    }),
+  ])
   await pgMeta.end()
 
   if (schemasError) {
