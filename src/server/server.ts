@@ -36,36 +36,46 @@ if (EXPORT_DOCS) {
     ...DEFAULT_POOL_CONFIG,
     connectionString: PG_CONNECTION,
   })
-  const { data: schemas, error: schemasError } = await pgMeta.schemas.list()
-  const { data: tables, error: tablesError } = await pgMeta.tables.list({
-    includedSchemas:
-      GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
-    includeColumns: false,
-  })
-  const { data: views, error: viewsError } = await pgMeta.views.list({
-    includedSchemas:
-      GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
-    includeColumns: false,
-  })
-  const { data: materializedViews, error: materializedViewsError } =
-    await pgMeta.materializedViews.list({
+  const [
+    { data: schemas, error: schemasError },
+    { data: tables, error: tablesError },
+    { data: views, error: viewsError },
+    { data: materializedViews, error: materializedViewsError },
+    { data: columns, error: columnsError },
+    { data: relationships, error: relationshipsError },
+    { data: functions, error: functionsError },
+    { data: types, error: typesError }
+  ] = await Promise.all([
+    pgMeta.schemas.list(),
+    pgMeta.tables.list({
       includedSchemas:
         GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
       includeColumns: false,
+    }),
+    pgMeta.views.list({
+      includedSchemas:
+        GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
+      includeColumns: false,
+    }),
+    pgMeta.materializedViews.list({
+      includedSchemas:
+        GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
+      includeColumns: false,
+    }),
+    pgMeta.columns.list({
+      includedSchemas:
+        GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
+    }),
+    pgMeta.relationships.list(),
+    pgMeta.functions.list({
+      includedSchemas:
+        GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
+    }),
+    pgMeta.types.list({
+      includeArrayTypes: true,
+      includeSystemSchemas: true,
     })
-  const { data: columns, error: columnsError } = await pgMeta.columns.list({
-    includedSchemas:
-      GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
-  })
-  const { data: relationships, error: relationshipsError } = await pgMeta.relationships.list()
-  const { data: functions, error: functionsError } = await pgMeta.functions.list({
-    includedSchemas:
-      GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
-  })
-  const { data: types, error: typesError } = await pgMeta.types.list({
-    includeArrayTypes: true,
-    includeSystemSchemas: true,
-  })
+  ]);
   await pgMeta.end()
 
   if (schemasError) {
