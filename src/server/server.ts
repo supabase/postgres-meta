@@ -105,21 +105,21 @@ if (EXPORT_DOCS) {
 
   console.log(
     applyTypescriptTemplate({
-      schemas: schemas.filter(
+      schemas: schemas!.filter(
         ({ name }) =>
           GENERATE_TYPES_INCLUDED_SCHEMAS.length === 0 ||
           GENERATE_TYPES_INCLUDED_SCHEMAS.includes(name)
       ),
-      tables,
-      views,
-      materializedViews,
-      columns,
-      relationships,
-      functions: functions.filter(
+      tables: tables!,
+      views: views!,
+      materializedViews: materializedViews!,
+      columns: columns!,
+      relationships: relationships!,
+      functions: functions!.filter(
         ({ return_type }) => !['trigger', 'event_trigger'].includes(return_type)
       ),
-      types: types.filter(({ name }) => name[0] !== '_'),
-      arrayTypes: types.filter(({ name }) => name[0] === '_'),
+      types: types!.filter(({ name }) => name[0] !== '_'),
+      arrayTypes: types!.filter(({ name }) => name[0] === '_'),
     })
   )
 } else {
