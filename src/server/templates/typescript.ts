@@ -160,8 +160,10 @@ export interface Database {
                           relationship.schema === table.schema &&
                           relationship.relation === table.name
                       )
-                      .sort(({ foreign_key_name: a }, { foreign_key_name: b }) =>
-                        a.localeCompare(b)
+                      .sort(
+                        (a, b) =>
+                          a.foreign_key_name.localeCompare(b.foreign_key_name) ||
+                          a.referenced_relation.localeCompare(b.referenced_relation)
                       )
                       .map(
                         (relationship) => `{
