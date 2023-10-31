@@ -61,6 +61,7 @@ test('typegen', async () => {
               {
                 foreignKeyName: "memes_category_fkey"
                 columns: ["category"]
+                isOneToOne: false
                 referencedRelation: "category"
                 referencedColumns: ["id"]
               }
@@ -87,12 +88,44 @@ test('typegen', async () => {
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
+                isOneToOne: false
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view"
+                referencedColumns: ["id"]
+              }
+            ]
+          }
+          user_details: {
+            Row: {
+              details: string | null
+              user_id: number
+            }
+            Insert: {
+              details?: string | null
+              user_id: number
+            }
+            Update: {
+              details?: string | null
+              user_id?: number
+            }
+            Relationships: [
+              {
+                foreignKeyName: "user_details_user_id_fkey"
+                columns: ["user_id"]
+                isOneToOne: true
+                referencedRelation: "users"
+                referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "user_details_user_id_fkey"
+                columns: ["user_id"]
+                isOneToOne: true
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
               }
@@ -149,12 +182,14 @@ test('typegen', async () => {
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
+                isOneToOne: false
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
+                isOneToOne: false
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
               }
@@ -180,12 +215,14 @@ test('typegen', async () => {
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
+                isOneToOne: false
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
+                isOneToOne: false
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
               }
