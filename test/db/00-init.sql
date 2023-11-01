@@ -101,3 +101,5 @@ create table user_details (
   user_id int8 references users(id) primary key,
   details text
 );
+
+create view a_view as select id from users;

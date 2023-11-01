@@ -89,6 +89,13 @@ test('typegen', async () => {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
+                referencedRelation: "a_view"
+                referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
@@ -115,6 +122,13 @@ test('typegen', async () => {
               user_id?: number
             }
             Relationships: [
+              {
+                foreignKeyName: "user_details_user_id_fkey"
+                columns: ["user_id"]
+                isOneToOne: true
+                referencedRelation: "a_view"
+                referencedColumns: ["id"]
+              },
               {
                 foreignKeyName: "user_details_user_id_fkey"
                 columns: ["user_id"]
@@ -172,6 +186,18 @@ test('typegen', async () => {
           }
         }
         Views: {
+          a_view: {
+            Row: {
+              id: number | null
+            }
+            Insert: {
+              id?: number | null
+            }
+            Update: {
+              id?: number | null
+            }
+            Relationships: []
+          }
           todos_matview: {
             Row: {
               details: string | null
@@ -184,6 +210,13 @@ test('typegen', async () => {
                 columns: ["user-id"]
                 isOneToOne: false
                 referencedRelation: "users"
+                referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "a_view"
                 referencedColumns: ["id"]
               },
               {
@@ -217,6 +250,13 @@ test('typegen', async () => {
                 columns: ["user-id"]
                 isOneToOne: false
                 referencedRelation: "users"
+                referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "a_view"
                 referencedColumns: ["id"]
               },
               {
