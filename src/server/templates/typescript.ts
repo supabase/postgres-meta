@@ -357,6 +357,8 @@ export interface Database {
                   })()})${is_set_returning_function ? '[]' : ''}
                 }`
                     )
+                    // We only sorted by name on schemaFunctions - here we sort by arg names, arg types, and return type.
+                    .sort()
                     .join('|')}`
               )
             })()}

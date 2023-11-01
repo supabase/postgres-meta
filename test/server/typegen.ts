@@ -240,6 +240,19 @@ test('typegen', async () => {
               name: string
             }[]
           }
+          polymorphic_function:
+            | {
+                Args: {
+                  "": boolean
+                }
+                Returns: undefined
+              }
+            | {
+                Args: {
+                  "": string
+                }
+                Returns: undefined
+              }
           postgres_fdw_disconnect: {
             Args: {
               "": string
