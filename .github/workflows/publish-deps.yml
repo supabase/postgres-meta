@@ -13,14 +13,14 @@ jobs:
           repository: 'pyramation/libpg-query-node'
           ref: 'v13'
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: '18'
 
       - run: npm i
       - run: npm run binary:build
 
-      - uses: aws-actions/configure-aws-credentials@v2
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.PROD_AWS_ROLE }}
           aws-region: us-east-1
