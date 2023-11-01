@@ -82,7 +82,7 @@ jobs:
           tags: |
             type=raw,value=v${{ needs.semantic-release.outputs.new-release-version }}
 
-      - uses: docker/setup-qemu-action@v2
+      - uses: docker/setup-qemu-action@v3
         with:
           platforms: amd64,arm64
       - uses: docker/setup-buildx-action@v3
