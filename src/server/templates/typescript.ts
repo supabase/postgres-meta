@@ -167,6 +167,7 @@ export interface Database {
                         (relationship) => `{
                         foreignKeyName: ${JSON.stringify(relationship.foreign_key_name)}
                         columns: ${JSON.stringify(relationship.columns)}
+                        isOneToOne: ${relationship.is_one_to_one}
                         referencedRelation: ${JSON.stringify(relationship.referenced_relation)}
                         referencedColumns: ${JSON.stringify(relationship.referenced_columns)}
                       }`
@@ -235,6 +236,7 @@ export interface Database {
                         (relationship) => `{
                         foreignKeyName: ${JSON.stringify(relationship.foreign_key_name)}
                         columns: ${JSON.stringify(relationship.columns)}
+                        isOneToOne: ${relationship.is_one_to_one}
                         referencedRelation: ${JSON.stringify(relationship.referenced_relation)}
                         referencedColumns: ${JSON.stringify(relationship.referenced_columns)}
                       }`
