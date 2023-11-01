@@ -160,13 +160,16 @@ export interface Database {
                           relationship.schema === table.schema &&
                           relationship.relation === table.name
                       )
-                      .sort(({ foreign_key_name: a }, { foreign_key_name: b }) =>
-                        a.localeCompare(b)
+                      .sort(
+                        (a, b) =>
+                          a.foreign_key_name.localeCompare(b.foreign_key_name) ||
+                          a.referenced_relation.localeCompare(b.referenced_relation)
                       )
                       .map(
                         (relationship) => `{
                         foreignKeyName: ${JSON.stringify(relationship.foreign_key_name)}
                         columns: ${JSON.stringify(relationship.columns)}
+                        isOneToOne: ${relationship.is_one_to_one}
                         referencedRelation: ${JSON.stringify(relationship.referenced_relation)}
                         referencedColumns: ${JSON.stringify(relationship.referenced_columns)}
                       }`
@@ -235,6 +238,7 @@ export interface Database {
                         (relationship) => `{
                         foreignKeyName: ${JSON.stringify(relationship.foreign_key_name)}
                         columns: ${JSON.stringify(relationship.columns)}
+                        isOneToOne: ${relationship.is_one_to_one}
                         referencedRelation: ${JSON.stringify(relationship.referenced_relation)}
                         referencedColumns: ${JSON.stringify(relationship.referenced_columns)}
                       }`
@@ -357,6 +361,8 @@ export interface Database {
                   })()})${is_set_returning_function ? '[]' : ''}
                 }`
                     )
+                    // We only sorted by name on schemaFunctions - here we sort by arg names, arg types, and return type.
+                    .sort()
                     .join('|')}`
               )
             })()}

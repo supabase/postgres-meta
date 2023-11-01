@@ -108,3 +108,13 @@ stable
 as $$
   select id, name from public.users;
 $$;
+
+create or replace function public.polymorphic_function(text) returns void language sql as '';
+create or replace function public.polymorphic_function(bool) returns void language sql as '';
+
+create table user_details (
+  user_id int8 references users(id) primary key,
+  details text
+);
+
+create view a_view as select id from users;

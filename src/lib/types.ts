@@ -239,6 +239,7 @@ export const postgresRelationshipSchema = Type.Object({
   schema: Type.String(),
   relation: Type.String(),
   columns: Type.Array(Type.String()),
+  is_one_to_one: Type.Boolean(),
   referenced_schema: Type.String(),
   referenced_relation: Type.String(),
   referenced_columns: Type.Array(Type.String()),
