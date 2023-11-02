@@ -20,6 +20,7 @@ export const apply = ({
   functions,
   types,
   arrayTypes,
+  detectOneToOneRelationships,
 }: {
   schemas: PostgresSchema[]
   tables: Omit<PostgresTable, 'columns'>[]
@@ -30,6 +31,7 @@ export const apply = ({
   functions: PostgresFunction[]
   types: PostgresType[]
   arrayTypes: PostgresType[]
+  detectOneToOneRelationships: boolean
 }): string => {
   const columnsByTableId = columns
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
@@ -169,8 +171,11 @@ export interface Database {
                         (relationship) => `{
                         foreignKeyName: ${JSON.stringify(relationship.foreign_key_name)}
                         columns: ${JSON.stringify(relationship.columns)}
-                        isOneToOne: ${relationship.is_one_to_one}
-                        referencedRelation: ${JSON.stringify(relationship.referenced_relation)}
+                        ${
+                          detectOneToOneRelationships
+                            ? `isOneToOne: ${relationship.is_one_to_one};`
+                            : ''
+                        }referencedRelation: ${JSON.stringify(relationship.referenced_relation)}
                         referencedColumns: ${JSON.stringify(relationship.referenced_columns)}
                       }`
                       )}
@@ -238,8 +243,11 @@ export interface Database {
                         (relationship) => `{
                         foreignKeyName: ${JSON.stringify(relationship.foreign_key_name)}
                         columns: ${JSON.stringify(relationship.columns)}
-                        isOneToOne: ${relationship.is_one_to_one}
-                        referencedRelation: ${JSON.stringify(relationship.referenced_relation)}
+                        ${
+                          detectOneToOneRelationships
+                            ? `isOneToOne: ${relationship.is_one_to_one};`
+                            : ''
+                        }referencedRelation: ${JSON.stringify(relationship.referenced_relation)}
                         referencedColumns: ${JSON.stringify(relationship.referenced_columns)}
                       }`
                       )}
