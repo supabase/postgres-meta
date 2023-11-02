@@ -6,6 +6,7 @@ import {
   DEFAULT_POOL_CONFIG,
   EXPORT_DOCS,
   GENERATE_TYPES,
+  GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS,
   GENERATE_TYPES_INCLUDED_SCHEMAS,
   PG_CONNECTION,
   PG_META_HOST,
@@ -110,6 +111,7 @@ if (EXPORT_DOCS) {
       ),
       types: types.filter(({ name }) => name[0] !== '_'),
       arrayTypes: types.filter(({ name }) => name[0] === '_'),
+      detectOneToOneRelationships: GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS,
     })
   )
 } else {
