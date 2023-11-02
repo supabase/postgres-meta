@@ -2,9 +2,6 @@ import { app } from './utils'
 
 test('typegen', async () => {
   const { body } = await app.inject({ method: 'GET', path: '/generators/typescript' })
-  // This is expected to be very brittle, as generated types can change a lot
-  // without being breaking changes. Use `npm run test:update` to make life
-  // easier.
   expect(body).toMatchInlineSnapshot(`
     "export type Json =
       | string
@@ -355,9 +352,6 @@ test('typegen w/ one-to-one relationships', async () => {
     path: '/generators/typescript',
     query: { detect_one_to_one_relationships: 'true' },
   })
-  // This is expected to be very brittle, as generated types can change a lot
-  // without being breaking changes. Use `npm run test:update` to make life
-  // easier.
   expect(body).toMatchInlineSnapshot(`
     "export type Json =
       | string
