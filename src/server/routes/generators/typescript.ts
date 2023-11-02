@@ -10,6 +10,7 @@ export default async (fastify: FastifyInstance) => {
     Querystring: {
       excluded_schemas?: string
       included_schemas?: string
+      detect_one_to_one_relationships?: string
     }
   }>('/', async (request, reply) => {
     const connectionString = request.headers.pg
@@ -17,6 +18,7 @@ export default async (fastify: FastifyInstance) => {
       request.query.excluded_schemas?.split(',').map((schema) => schema.trim()) ?? []
     const includedSchemas =
       request.query.included_schemas?.split(',').map((schema) => schema.trim()) ?? []
+    const detectOneToOneRelationships = request.query.detect_one_to_one_relationships === 'true'
 
     const pgMeta: PostgresMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
     const { data: schemas, error: schemasError } = await pgMeta.schemas.list()
@@ -111,6 +113,7 @@ export default async (fastify: FastifyInstance) => {
       ),
       types: types.filter(({ name }) => name[0] !== '_'),
       arrayTypes: types.filter(({ name }) => name[0] === '_'),
+      detectOneToOneRelationships,
     })
   })
 }
