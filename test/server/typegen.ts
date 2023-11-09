@@ -69,6 +69,9 @@ test('typegen', async () => {
               id: number
               "user-id": number
               blurb: string | null
+              blurb_varchar: string | null
+              details_is_long: boolean | null
+              details_length: number | null
             }
             Insert: {
               details?: string | null
@@ -277,6 +280,24 @@ test('typegen', async () => {
               "": unknown
             }
             Returns: string
+          }
+          blurb_varchar: {
+            Args: {
+              "": unknown
+            }
+            Returns: string
+          }
+          details_is_long: {
+            Args: {
+              "": unknown
+            }
+            Returns: boolean
+          }
+          details_length: {
+            Args: {
+              "": unknown
+            }
+            Returns: number
           }
           function_returning_row: {
             Args: Record<PropertyKey, never>
@@ -420,6 +441,9 @@ test('typegen w/ one-to-one relationships', async () => {
               id: number
               "user-id": number
               blurb: string | null
+              blurb_varchar: string | null
+              details_is_long: boolean | null
+              details_length: number | null
             }
             Insert: {
               details?: string | null
@@ -640,6 +664,24 @@ test('typegen w/ one-to-one relationships', async () => {
               "": unknown
             }
             Returns: string
+          }
+          blurb_varchar: {
+            Args: {
+              "": unknown
+            }
+            Returns: string
+          }
+          details_is_long: {
+            Args: {
+              "": unknown
+            }
+            Returns: boolean
+          }
+          details_length: {
+            Args: {
+              "": unknown
+            }
+            Returns: number
           }
           function_returning_row: {
             Args: Record<PropertyKey, never>
