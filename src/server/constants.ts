@@ -33,11 +33,13 @@ if (PG_META_DB_SSL_ROOT_CERT) {
   new crypto.X509Certificate(PG_META_DB_SSL_ROOT_CERT)
 }
 
-export const EXPORT_DOCS = process.argv[2] === 'docs' && process.argv[3] === 'export'
-export const GENERATE_TYPES =
-  process.argv[2] === 'gen' && process.argv[3] === 'types' ? process.argv[4] : undefined
-export const GENERATE_TYPES_INCLUDED_SCHEMAS =
-  GENERATE_TYPES && process.argv[5] === '--include-schemas' ? process.argv[6]?.split(',') ?? [] : []
+export const EXPORT_DOCS = process.env.PG_META_EXPORT_DOCS === 'true'
+export const GENERATE_TYPES = process.env.PG_META_GENERATE_TYPES
+export const GENERATE_TYPES_INCLUDED_SCHEMAS = GENERATE_TYPES
+  ? process.env.PG_META_GENERATE_TYPES_INCLUDED_SCHEMAS?.split(',') ?? []
+  : []
+export const GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS =
+  process.env.PG_META_GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS === 'true'
 
 export const DEFAULT_POOL_CONFIG: PoolConfig = {
   max: 1,

@@ -61,6 +61,21 @@ $$
 select substring($1.details, 1, 3);
 $$ language sql stable;
 
+create function public.blurb_varchar(public.todos) returns character varying as
+$$
+select substring($1.details, 1, 3);
+$$ language sql stable;
+
+create function public.details_length(public.todos) returns integer as
+$$
+select length($1.details);
+$$ language sql stable;
+
+create function public.details_is_long(public.todos) returns boolean as
+$$
+select $1.details_length > 20;
+$$ language sql stable;
+
 create extension postgres_fdw;
 create server foreign_server foreign data wrapper postgres_fdw options (host 'localhost', port '5432', dbname 'postgres');
 create user mapping for postgres server foreign_server options (user 'postgres', password 'postgres');
@@ -93,3 +108,13 @@ stable
 as $$
   select id, name from public.users;
 $$;
+
+create or replace function public.polymorphic_function(text) returns void language sql as '';
+create or replace function public.polymorphic_function(bool) returns void language sql as '';
+
+create table user_details (
+  user_id int8 references users(id) primary key,
+  details text
+);
+
+create view a_view as select id from users;

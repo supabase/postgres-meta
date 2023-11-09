@@ -20,6 +20,7 @@ export const apply = ({
   functions,
   types,
   arrayTypes,
+  detectOneToOneRelationships,
 }: {
   schemas: PostgresSchema[]
   tables: Omit<PostgresTable, 'columns'>[]
@@ -30,6 +31,7 @@ export const apply = ({
   functions: PostgresFunction[]
   types: PostgresType[]
   arrayTypes: PostgresType[]
+  detectOneToOneRelationships: boolean
 }): string => {
   const columnsByTableId = columns
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
@@ -99,14 +101,14 @@ export interface Database {
                       ),
                       ...schemaFunctions
                         .filter((fn) => fn.argument_types === table.name)
-                        .map(
-                          (fn) =>
-                            `${JSON.stringify(fn.name)}: ${pgTypeToTsType(
-                              fn.return_type,
-                              types,
-                              schemas
-                            )} | null`
-                        ),
+                        .map((fn) => {
+                          const type = types.find(({ id }) => id === fn.return_type_id)
+                          let tsType = 'unknown'
+                          if (type) {
+                            tsType = pgTypeToTsType(type.name, types, schemas)
+                          }
+                          return `${JSON.stringify(fn.name)}: ${tsType} | null`
+                        }),
                     ]}
                   }
                   Insert: {
@@ -160,14 +162,20 @@ export interface Database {
                           relationship.schema === table.schema &&
                           relationship.relation === table.name
                       )
-                      .sort(({ foreign_key_name: a }, { foreign_key_name: b }) =>
-                        a.localeCompare(b)
+                      .sort(
+                        (a, b) =>
+                          a.foreign_key_name.localeCompare(b.foreign_key_name) ||
+                          a.referenced_relation.localeCompare(b.referenced_relation)
                       )
                       .map(
                         (relationship) => `{
                         foreignKeyName: ${JSON.stringify(relationship.foreign_key_name)}
                         columns: ${JSON.stringify(relationship.columns)}
-                        referencedRelation: ${JSON.stringify(relationship.referenced_relation)}
+                        ${
+                          detectOneToOneRelationships
+                            ? `isOneToOne: ${relationship.is_one_to_one};`
+                            : ''
+                        }referencedRelation: ${JSON.stringify(relationship.referenced_relation)}
                         referencedColumns: ${JSON.stringify(relationship.referenced_columns)}
                       }`
                       )}
@@ -235,7 +243,11 @@ export interface Database {
                         (relationship) => `{
                         foreignKeyName: ${JSON.stringify(relationship.foreign_key_name)}
                         columns: ${JSON.stringify(relationship.columns)}
-                        referencedRelation: ${JSON.stringify(relationship.referenced_relation)}
+                        ${
+                          detectOneToOneRelationships
+                            ? `isOneToOne: ${relationship.is_one_to_one};`
+                            : ''
+                        }referencedRelation: ${JSON.stringify(relationship.referenced_relation)}
                         referencedColumns: ${JSON.stringify(relationship.referenced_columns)}
                       }`
                       )}
@@ -357,6 +369,8 @@ export interface Database {
                   })()})${is_set_returning_function ? '[]' : ''}
                 }`
                     )
+                    // We only sorted by name on schemaFunctions - here we sort by arg names, arg types, and return type.
+                    .sort()
                     .join('|')}`
               )
             })()}
