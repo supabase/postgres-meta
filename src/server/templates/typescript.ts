@@ -101,14 +101,14 @@ export interface Database {
                       ),
                       ...schemaFunctions
                         .filter((fn) => fn.argument_types === table.name)
-                        .map(
-                          (fn) =>
-                            `${JSON.stringify(fn.name)}: ${pgTypeToTsType(
-                              fn.return_type,
-                              types,
-                              schemas
-                            )} | null`
-                        ),
+                        .map((fn) => {
+                          const type = types.find(({ id }) => id === fn.return_type_id)
+                          let tsType = 'unknown'
+                          if (type) {
+                            tsType = pgTypeToTsType(type.name, types, schemas)
+                          }
+                          return `${JSON.stringify(fn.name)}: ${tsType} | null`
+                        }),
                     ]}
                   }
                   Insert: {
@@ -428,7 +428,7 @@ const pgTypeToTsType = (
 ): string => {
   if (pgType === 'bool') {
     return 'boolean'
-  } else if (['int2', 'int4', 'int8', 'float4', 'float8', 'numeric', 'integer'].includes(pgType)) {
+  } else if (['int2', 'int4', 'int8', 'float4', 'float8', 'numeric'].includes(pgType)) {
     return 'number'
   } else if (
     [
