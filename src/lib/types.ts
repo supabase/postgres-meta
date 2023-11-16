@@ -20,7 +20,7 @@ export const postgresColumnSchema = Type.Object({
   table_id: Type.Integer(),
   schema: Type.String(),
   table: Type.String(),
-  id: Type.RegEx(/^(\d+)\.(\d+)$/),
+  id: Type.RegExp(/^(\d+)\.(\d+)$/),
   ordinal_position: Type.Integer(),
   name: Type.String(),
   default_value: Type.Unknown(),
@@ -508,7 +508,7 @@ export const postgresTablePrivilegesRevokeSchema = Type.Object({
 export type PostgresTablePrivilegesRevoke = Static<typeof postgresTablePrivilegesRevokeSchema>
 
 export const postgresColumnPrivilegesSchema = Type.Object({
-  column_id: Type.RegEx(/^(\d+)\.(\d+)$/),
+  column_id: Type.RegExp(/^(\d+)\.(\d+)$/),
   relation_schema: Type.String(),
   relation_name: Type.String(),
   column_name: Type.String(),
@@ -529,7 +529,7 @@ export const postgresColumnPrivilegesSchema = Type.Object({
 export type PostgresColumnPrivileges = Static<typeof postgresColumnPrivilegesSchema>
 
 export const postgresColumnPrivilegesGrantSchema = Type.Object({
-  column_id: Type.RegEx(/^(\d+)\.(\d+)$/),
+  column_id: Type.RegExp(/^(\d+)\.(\d+)$/),
   grantee: Type.String(),
   privilege_type: Type.Union([
     Type.Literal('ALL'),
@@ -543,7 +543,7 @@ export const postgresColumnPrivilegesGrantSchema = Type.Object({
 export type PostgresColumnPrivilegesGrant = Static<typeof postgresColumnPrivilegesGrantSchema>
 
 export const postgresColumnPrivilegesRevokeSchema = Type.Object({
-  column_id: Type.RegEx(/^(\d+)\.(\d+)$/),
+  column_id: Type.RegExp(/^(\d+)\.(\d+)$/),
   grantee: Type.String(),
   privilege_type: Type.Union([
     Type.Literal('ALL'),
