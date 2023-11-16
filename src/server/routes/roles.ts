@@ -74,7 +74,7 @@ export default async (fastify: FastifyInstance) => {
           pg: Type.String(),
         }),
         params: Type.Object({
-          id: Type.RegEx(/\d+/),
+          id: Type.RegExp(/\d+/),
         }),
         response: {
           200: postgresRoleSchema,
@@ -150,7 +150,7 @@ export default async (fastify: FastifyInstance) => {
           pg: Type.String(),
         }),
         params: Type.Object({
-          id: Type.RegEx(/\d+/),
+          id: Type.RegExp(/\d+/),
         }),
         body: postgresRoleUpdateSchema,
         response: {
@@ -195,7 +195,7 @@ export default async (fastify: FastifyInstance) => {
           pg: Type.String(),
         }),
         params: Type.Object({
-          id: Type.RegEx(/\d+/),
+          id: Type.RegExp(/\d+/),
         }),
         querystring: Type.Object({
           cascade: Type.Optional(Type.String()),
