@@ -87,13 +87,20 @@ export async function getGeneratorMetadata(pgMeta: PostgresMeta, filters: { incl
 
   return {
     data: {
-      schemas,
+      schemas: schemas.filter(
+        ({ name }) =>
+          !excludedSchemas.includes(name) &&
+          (includedSchemas.length === 0 || includedSchemas.includes(name)
+          )
+      ),
       tables,
       views,
       materializedViews,
       columns,
       relationships,
-      functions,
+      functions: functions.filter(
+        ({ return_type }) => !['trigger', 'event_trigger'].includes(return_type)
+      ),
       types: nonArrayTypes,
       arrayTypes,
     },
