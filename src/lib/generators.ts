@@ -2,11 +2,11 @@ import PostgresMeta from "./PostgresMeta.js";
 import { PostgresColumn, PostgresFunction, PostgresMaterializedView, PostgresRelationship, PostgresSchema, PostgresTable, PostgresType, PostgresView } from "./types.js";
 import { PostgresMetaResult } from "./types.js";
 
-type GeneratorMetadata = {
+export type GeneratorMetadata = {
   schemas: PostgresSchema[];
-  tables: PostgresTable[];
-  views: PostgresView[];
-  materializedViews: PostgresMaterializedView[];
+  tables: Omit<PostgresTable, 'columns'>[];
+  views: Omit<PostgresView, 'columns'>[];
+  materializedViews: Omit<PostgresMaterializedView, 'columns'>[];
   columns: PostgresColumn[];
   relationships: PostgresRelationship[];
   functions: PostgresFunction[];
