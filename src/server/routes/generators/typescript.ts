@@ -22,13 +22,10 @@ export default async (fastify: FastifyInstance) => {
     const detectOneToOneRelationships = request.query.detect_one_to_one_relationships === 'true'
 
     const pgMeta: PostgresMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
-    const { data: generatorMeta, error: generatorMetaError } = await getGeneratorMetadata(
-      pgMeta,
-      {
-        includedSchemas,
-        excludedSchemas
-      },
-    )
+    const { data: generatorMeta, error: generatorMetaError } = await getGeneratorMetadata(pgMeta, {
+      includedSchemas,
+      excludedSchemas,
+    })
     if (generatorMetaError) {
       request.log.error({ error: generatorMetaError, request: extractRequestForLogging(request) })
       reply.code(500)

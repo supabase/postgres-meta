@@ -1,20 +1,35 @@
-import PostgresMeta from "./PostgresMeta.js";
-import { PostgresColumn, PostgresFunction, PostgresMaterializedView, PostgresRelationship, PostgresSchema, PostgresTable, PostgresType, PostgresView } from "./types.js";
-import { PostgresMetaResult } from "./types.js";
+import PostgresMeta from './PostgresMeta.js'
+import {
+  PostgresColumn,
+  PostgresFunction,
+  PostgresMaterializedView,
+  PostgresRelationship,
+  PostgresSchema,
+  PostgresTable,
+  PostgresType,
+  PostgresView,
+} from './types.js'
+import { PostgresMetaResult } from './types.js'
 
 export type GeneratorMetadata = {
-  schemas: PostgresSchema[];
-  tables: Omit<PostgresTable, 'columns'>[];
-  views: Omit<PostgresView, 'columns'>[];
-  materializedViews: Omit<PostgresMaterializedView, 'columns'>[];
-  columns: PostgresColumn[];
-  relationships: PostgresRelationship[];
-  functions: PostgresFunction[];
-  types: PostgresType[];
-  arrayTypes: PostgresType[];
+  schemas: PostgresSchema[]
+  tables: Omit<PostgresTable, 'columns'>[]
+  views: Omit<PostgresView, 'columns'>[]
+  materializedViews: Omit<PostgresMaterializedView, 'columns'>[]
+  columns: PostgresColumn[]
+  relationships: PostgresRelationship[]
+  functions: PostgresFunction[]
+  types: PostgresType[]
+  arrayTypes: PostgresType[]
 }
 
-export async function getGeneratorMetadata(pgMeta: PostgresMeta, filters: { includedSchemas?: string[]; excludedSchemas?: string[] } = { includedSchemas: [], excludedSchemas: [] }): Promise<PostgresMetaResult<GeneratorMetadata>> {
+export async function getGeneratorMetadata(
+  pgMeta: PostgresMeta,
+  filters: { includedSchemas?: string[]; excludedSchemas?: string[] } = {
+    includedSchemas: [],
+    excludedSchemas: [],
+  }
+): Promise<PostgresMetaResult<GeneratorMetadata>> {
   const includedSchemas = filters.includedSchemas ?? []
   const excludedSchemas = filters.excludedSchemas ?? []
 
@@ -90,8 +105,7 @@ export async function getGeneratorMetadata(pgMeta: PostgresMeta, filters: { incl
       schemas: schemas.filter(
         ({ name }) =>
           !excludedSchemas.includes(name) &&
-          (includedSchemas.length === 0 || includedSchemas.includes(name)
-          )
+          (includedSchemas.length === 0 || includedSchemas.includes(name))
       ),
       tables,
       views,
