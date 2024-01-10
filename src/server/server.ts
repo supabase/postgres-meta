@@ -14,6 +14,8 @@ import {
   PG_META_PORT,
 } from './constants.js'
 import { apply as applyTypescriptTemplate } from './templates/typescript.js'
+import { apply as applyGoTemplate } from './templates/go.js'
+import { getGeneratorMetadata } from '../lib/generators.js'
 
 const logger = pino({
   formatters: {
@@ -26,6 +28,37 @@ const logger = pino({
 
 const app = buildApp({ logger })
 const adminApp = buildAdminApp({ logger })
+
+async function getTypeOutput(): Promise<string | null> {
+  const pgMeta: PostgresMeta = new PostgresMeta({
+    ...DEFAULT_POOL_CONFIG,
+    connectionString: PG_CONNECTION,
+  })
+  const { data: generatorMetadata, error: generatorMetadataError } = await getGeneratorMetadata(
+    pgMeta,
+    {
+      includedSchemas: GENERATE_TYPES_INCLUDED_SCHEMAS,
+    }
+  )
+  if (generatorMetadataError) {
+    throw new Error(generatorMetadataError.message)
+  }
+
+  let output: string | null = null
+  switch (GENERATE_TYPES) {
+    case 'typescript':
+      output = await applyTypescriptTemplate({
+        ...generatorMetadata,
+        detectOneToOneRelationships: GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS,
+      })
+      break
+    case 'go':
+      output = applyGoTemplate(generatorMetadata)
+      break
+  }
+
+  return output
+}
 
 if (EXPORT_DOCS) {
   // TODO: Move to a separate script.
@@ -154,3 +187,8 @@ if (EXPORT_DOCS) {
     adminApp.listen({ port: adminPort, host: PG_META_HOST })
   })
 }
+
+app.listen({ port: PG_META_PORT, host: PG_META_HOST }, () => {
+  const adminPort = PG_META_PORT + 1
+  adminApp.listen({ port: adminPort, host: PG_META_HOST })
+})
