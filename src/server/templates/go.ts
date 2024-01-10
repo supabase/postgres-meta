@@ -34,6 +34,10 @@ export const apply = ({
 package database
 
 ${tables.map((table) => generateTableStruct(schemas.find((schema) => schema.name === table.schema)!, table, columnsByTableId[table.id], types)).join('\n\n')}
+
+${views.map((view) => generateTableStruct(schemas.find((schema) => schema.name === view.schema)!, view, columnsByTableId[view.id], types)).join('\n\n')}
+
+${materializedViews.map((materializedView) => generateTableStruct(schemas.find((schema) => schema.name === materializedView.schema)!, materializedView, columnsByTableId[materializedView.id], types)).join('\n\n')}
 `
 
   return output
@@ -57,7 +61,7 @@ function formatForGoTypeName(name: string): string {
     .join('')
 }
 
-function generateTableStruct(schema: PostgresSchema, table: PostgresTable, columns: PostgresColumn[], types: PostgresType[]): string {
+function generateTableStruct(schema: PostgresSchema, table: PostgresTable | PostgresView | PostgresMaterializedView, columns: PostgresColumn[], types: PostgresType[]): string {
   // Storing columns as a tuple of [formattedName, type, name] rather than creating the string
   // representation of the line allows us to pre-format the entries. Go formats
   // struct fields to be aligned, e.g.:
