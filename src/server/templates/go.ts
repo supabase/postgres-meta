@@ -162,6 +162,20 @@ const GO_TYPE_MAP: Record<string, string> = {
   json: 'interface{}',
   jsonb: 'interface{}',
 
+  // Range
+  int4range: 'string',
+  int4multirange: 'string',
+  int8range: 'string',
+  int8multirange: 'string',
+  numrange: 'string',
+  nummultirange: 'string',
+  tsrange: 'string',
+  tsmultirange: 'string',
+  tstzrange: 'string',
+  tstzmultirange: 'string',
+  daterange: 'string',
+  datemultirange: 'string',
+
   // Misc
   void: 'interface{}',
   record: 'map[string]interface{}',
