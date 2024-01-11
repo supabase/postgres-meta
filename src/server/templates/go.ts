@@ -17,10 +17,7 @@ export const apply = ({
   views,
   materializedViews,
   columns,
-  relationships,
-  functions,
   types,
-  arrayTypes,
 }: GeneratorMetadata): string => {
   const columnsByTableId = columns
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
@@ -30,6 +27,8 @@ export const apply = ({
       return acc
     }, {} as Record<string, PostgresColumn[]>)
 
+  const compositeTypes = types.filter((type) => type.attributes.length > 0)
+
   let output = `
 package database
 
@@ -38,7 +37,9 @@ ${tables.map((table) => generateTableStruct(schemas.find((schema) => schema.name
 ${views.map((view) => generateTableStruct(schemas.find((schema) => schema.name === view.schema)!, view, columnsByTableId[view.id], types)).join('\n\n')}
 
 ${materializedViews.map((materializedView) => generateTableStruct(schemas.find((schema) => schema.name === materializedView.schema)!, materializedView, columnsByTableId[materializedView.id], types)).join('\n\n')}
-`
+
+${compositeTypes.map((compositeType) => generateCompositeTypeStruct(schemas.find((schema) => schema.name === compositeType.schema)!, compositeType, types)).join('\n\n')}
+`.trim()
 
   return output
 }
@@ -94,7 +95,42 @@ ${formattedColumnEntries.join('\n')}
 `.trim()
 }
 
-// Note: the type map uses `interface{}`, not `any`, to remain compatible with
+function generateCompositeTypeStruct(schema: PostgresSchema, type: PostgresType, types: PostgresType[]): string {
+  // Use the type_id of the attributes to find the types of the attributes
+  const typeWithRetrievedAttributes = {
+    ...type,
+    attributes: type.attributes.map((attribute) => {
+      const type = types.find((type) => type.id === attribute.type_id)
+      return {
+        ...attribute,
+        type,
+      }
+    })
+  }
+  const attributeEntries: [string, string, string][] = typeWithRetrievedAttributes.attributes.map((attribute) => [
+    formatForGoTypeName(attribute.name),
+    pgTypeToGoType(attribute.type!.format),
+    attribute.name,
+  ])
+
+  const [maxFormattedNameLength, maxTypeLength] = attributeEntries.reduce(([maxFormattedName, maxType], [formattedName, type]) => {
+    return [Math.max(maxFormattedName, formattedName.length), Math.max(maxType, type.length)]
+  }, [0, 0])
+
+  // Pad the formatted name and type to align the struct fields, then join
+  // create the final string representation of the struct fields.
+  const formattedAttributeEntries = attributeEntries.map(([formattedName, type, name]) => {
+    return `  ${formattedName.padEnd(maxFormattedNameLength)} ${type.padEnd(maxTypeLength)} \`json:"${name}"\``
+  })
+
+  return `
+type ${formatForGoTypeName(schema.name)}${formatForGoTypeName(type.name)} struct {
+${formattedAttributeEntries.join('\n')}
+}
+`.trim()
+}
+
+// Note: the type map uses `interface{ } `, not `any`, to remain compatible with
 // older versions of Go.
 const GO_TYPE_MAP: Record<string, string> = {
   // Bool
@@ -140,7 +176,7 @@ function pgTypeToGoType(pgType: string, types: PostgresType[] = []): string {
   // Arrays
   if (pgType.startsWith('_')) {
     const innerType = pgTypeToGoType(pgType.slice(1))
-    return `[]${innerType}`
+    return `[]${innerType} `
   }
 
   // Enums
