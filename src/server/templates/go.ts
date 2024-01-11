@@ -32,13 +32,48 @@ export const apply = ({
   let output = `
 package database
 
-${tables.map((table) => generateTableStruct(schemas.find((schema) => schema.name === table.schema)!, table, columnsByTableId[table.id], types)).join('\n\n')}
+${tables
+  .map((table) =>
+    generateTableStruct(
+      schemas.find((schema) => schema.name === table.schema)!,
+      table,
+      columnsByTableId[table.id],
+      types
+    )
+  )
+  .join('\n\n')}
 
-${views.map((view) => generateTableStruct(schemas.find((schema) => schema.name === view.schema)!, view, columnsByTableId[view.id], types)).join('\n\n')}
+${views
+  .map((view) =>
+    generateTableStruct(
+      schemas.find((schema) => schema.name === view.schema)!,
+      view,
+      columnsByTableId[view.id],
+      types
+    )
+  )
+  .join('\n\n')}
 
-${materializedViews.map((materializedView) => generateTableStruct(schemas.find((schema) => schema.name === materializedView.schema)!, materializedView, columnsByTableId[materializedView.id], types)).join('\n\n')}
+${materializedViews
+  .map((materializedView) =>
+    generateTableStruct(
+      schemas.find((schema) => schema.name === materializedView.schema)!,
+      materializedView,
+      columnsByTableId[materializedView.id],
+      types
+    )
+  )
+  .join('\n\n')}
 
-${compositeTypes.map((compositeType) => generateCompositeTypeStruct(schemas.find((schema) => schema.name === compositeType.schema)!, compositeType, types)).join('\n\n')}
+${compositeTypes
+  .map((compositeType) =>
+    generateCompositeTypeStruct(
+      schemas.find((schema) => schema.name === compositeType.schema)!,
+      compositeType,
+      types
+    )
+  )
+  .join('\n\n')}
 `.trim()
 
   return output
@@ -62,7 +97,12 @@ function formatForGoTypeName(name: string): string {
     .join('')
 }
 
-function generateTableStruct(schema: PostgresSchema, table: PostgresTable | PostgresView | PostgresMaterializedView, columns: PostgresColumn[], types: PostgresType[]): string {
+function generateTableStruct(
+  schema: PostgresSchema,
+  table: PostgresTable | PostgresView | PostgresMaterializedView,
+  columns: PostgresColumn[],
+  types: PostgresType[]
+): string {
   // Storing columns as a tuple of [formattedName, type, name] rather than creating the string
   // representation of the line allows us to pre-format the entries. Go formats
   // struct fields to be aligned, e.g.:
@@ -77,16 +117,20 @@ function generateTableStruct(schema: PostgresSchema, table: PostgresTable | Post
     column.name,
   ])
 
-  const [maxFormattedNameLength, maxTypeLength] = columnEntries.reduce(([maxFormattedName, maxType], [formattedName, type]) => {
-    return [Math.max(maxFormattedName, formattedName.length), Math.max(maxType, type.length)]
-  }, [0, 0])
+  const [maxFormattedNameLength, maxTypeLength] = columnEntries.reduce(
+    ([maxFormattedName, maxType], [formattedName, type]) => {
+      return [Math.max(maxFormattedName, formattedName.length), Math.max(maxType, type.length)]
+    },
+    [0, 0]
+  )
 
   // Pad the formatted name and type to align the struct fields, then join
   // create the final string representation of the struct fields.
   const formattedColumnEntries = columnEntries.map(([formattedName, type, name]) => {
-    return `  ${formattedName.padEnd(maxFormattedNameLength)} ${type.padEnd(maxTypeLength)} \`json:"${name}"\``
+    return `  ${formattedName.padEnd(maxFormattedNameLength)} ${type.padEnd(
+      maxTypeLength
+    )} \`json:"${name}"\``
   })
-
 
   return `
 type ${formatForGoTypeName(schema.name)}${formatForGoTypeName(table.name)} struct {
@@ -95,7 +139,11 @@ ${formattedColumnEntries.join('\n')}
 `.trim()
 }
 
-function generateCompositeTypeStruct(schema: PostgresSchema, type: PostgresType, types: PostgresType[]): string {
+function generateCompositeTypeStruct(
+  schema: PostgresSchema,
+  type: PostgresType,
+  types: PostgresType[]
+): string {
   // Use the type_id of the attributes to find the types of the attributes
   const typeWithRetrievedAttributes = {
     ...type,
@@ -105,22 +153,29 @@ function generateCompositeTypeStruct(schema: PostgresSchema, type: PostgresType,
         ...attribute,
         type,
       }
-    })
+    }),
   }
-  const attributeEntries: [string, string, string][] = typeWithRetrievedAttributes.attributes.map((attribute) => [
-    formatForGoTypeName(attribute.name),
-    pgTypeToGoType(attribute.type!.format),
-    attribute.name,
-  ])
+  const attributeEntries: [string, string, string][] = typeWithRetrievedAttributes.attributes.map(
+    (attribute) => [
+      formatForGoTypeName(attribute.name),
+      pgTypeToGoType(attribute.type!.format),
+      attribute.name,
+    ]
+  )
 
-  const [maxFormattedNameLength, maxTypeLength] = attributeEntries.reduce(([maxFormattedName, maxType], [formattedName, type]) => {
-    return [Math.max(maxFormattedName, formattedName.length), Math.max(maxType, type.length)]
-  }, [0, 0])
+  const [maxFormattedNameLength, maxTypeLength] = attributeEntries.reduce(
+    ([maxFormattedName, maxType], [formattedName, type]) => {
+      return [Math.max(maxFormattedName, formattedName.length), Math.max(maxType, type.length)]
+    },
+    [0, 0]
+  )
 
   // Pad the formatted name and type to align the struct fields, then join
   // create the final string representation of the struct fields.
   const formattedAttributeEntries = attributeEntries.map(([formattedName, type, name]) => {
-    return `  ${formattedName.padEnd(maxFormattedNameLength)} ${type.padEnd(maxTypeLength)} \`json:"${name}"\``
+    return `  ${formattedName.padEnd(maxFormattedNameLength)} ${type.padEnd(
+      maxTypeLength
+    )} \`json:"${name}"\``
   })
 
   return `
