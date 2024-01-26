@@ -6,7 +6,6 @@ import PostgresMetaConfig from './PostgresMetaConfig.js'
 import PostgresMetaExtensions from './PostgresMetaExtensions.js'
 import PostgresMetaForeignTables from './PostgresMetaForeignTables.js'
 import PostgresMetaFunctions from './PostgresMetaFunctions.js'
-import PostgresMetaIndexes from './PostgresMetaIndexes.js'
 import PostgresMetaMaterializedViews from './PostgresMetaMaterializedViews.js'
 import PostgresMetaPolicies from './PostgresMetaPolicies.js'
 import PostgresMetaPublications from './PostgresMetaPublications.js'
@@ -31,7 +30,6 @@ export default class PostgresMeta {
   extensions: PostgresMetaExtensions
   foreignTables: PostgresMetaForeignTables
   functions: PostgresMetaFunctions
-  indexes: PostgresMetaIndexes
   materializedViews: PostgresMetaMaterializedViews
   policies: PostgresMetaPolicies
   publications: PostgresMetaPublications
@@ -59,7 +57,6 @@ export default class PostgresMeta {
     this.extensions = new PostgresMetaExtensions(this.query)
     this.foreignTables = new PostgresMetaForeignTables(this.query)
     this.functions = new PostgresMetaFunctions(this.query)
-    this.indexes = new PostgresMetaIndexes(this.query)
     this.materializedViews = new PostgresMetaMaterializedViews(this.query)
     this.policies = new PostgresMetaPolicies(this.query)
     this.publications = new PostgresMetaPublications(this.query)
