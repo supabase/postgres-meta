@@ -56,7 +56,7 @@
     ]
   },
   "dependencies": {
-    "@fastify/cors": "^8.2.0",
+    "@fastify/cors": "^9.0.0",
     "@fastify/swagger": "^8.2.1",
     "@fastify/type-provider-typebox": "^3.5.0",
     "@sinclair/typebox": "^0.31.25",
