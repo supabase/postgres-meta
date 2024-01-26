@@ -175,6 +175,40 @@ export const postgresFunctionCreateFunction = Type.Object({
 })
 export type PostgresFunctionCreate = Static<typeof postgresFunctionCreateFunction>
 
+const postgresIndexSchema = Type.Object({
+  id: Type.Integer(),
+  table_id: Type.Integer(),
+  schema: Type.String(),
+  number_of_attributes: Type.Integer(),
+  number_of_key_attributes: Type.Integer(),
+  is_unique: Type.Boolean(),
+  is_primary: Type.Boolean(),
+  is_exclusion: Type.Boolean(),
+  is_immediate: Type.Boolean(),
+  is_clustered: Type.Boolean(),
+  is_valid: Type.Boolean(),
+  check_xmin: Type.Boolean(),
+  is_ready: Type.Boolean(),
+  is_live: Type.Boolean(),
+  is_replica_identity: Type.Boolean(),
+  key_attributes: Type.Array(Type.Number()),
+  collation: Type.Array(Type.Number()),
+  class: Type.Array(Type.Number()),
+  options: Type.Array(Type.Number()),
+  index_predicate: Type.Union([Type.String(), Type.Null()]),
+  comment: Type.Union([Type.String(), Type.Null()]),
+  index_definition: Type.String(),
+  access_method: Type.String(),
+  index_attributes: Type.Array(
+    Type.Object({
+      attribute_number: Type.Number(),
+      attribute_name: Type.String(),
+      data_type: Type.String(),
+    })
+  ),
+})
+export type PostgresIndex = Static<typeof postgresIndexSchema>
+
 export const postgresPolicySchema = Type.Object({
   id: Type.Integer(),
   schema: Type.String(),
