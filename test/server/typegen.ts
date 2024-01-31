@@ -11,7 +11,7 @@ test('typegen', async () => {
       | { [key: string]: Json | undefined }
       | Json[]
 
-    export interface Database {
+    export type Database = {
       public: {
         Tables: {
           category: {
@@ -462,7 +462,7 @@ test('typegen w/ one-to-one relationships', async () => {
       | { [key: string]: Json | undefined }
       | Json[]
 
-    export interface Database {
+    export type Database = {
       public: {
         Tables: {
           category: {
