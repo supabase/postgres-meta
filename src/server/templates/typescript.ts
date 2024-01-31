@@ -44,7 +44,7 @@ export const apply = ({
   let output = `
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
-export interface Database {
+export type Database = {
   ${schemas
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
     .map((schema) => {
