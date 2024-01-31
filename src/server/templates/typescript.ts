@@ -19,7 +19,6 @@ export const apply = async ({
   relationships,
   functions,
   types,
-  arrayTypes,
   detectOneToOneRelationships,
 }: {
   schemas: PostgresSchema[]
@@ -30,7 +29,6 @@ export const apply = async ({
   relationships: PostgresRelationship[]
   functions: PostgresFunction[]
   types: PostgresType[]
-  arrayTypes: PostgresType[]
   detectOneToOneRelationships: boolean
 }): Promise<string> => {
   const columnsByTableId = Object.fromEntries<PostgresColumn[]>(
@@ -102,12 +100,9 @@ export type Database = {
                       ...schemaFunctions
                         .filter((fn) => fn.argument_types === table.name)
                         .map((fn) => {
-                          const type = types.find(({ id }) => id === fn.return_type_id)
-                          let tsType = 'unknown'
-                          if (type) {
-                            tsType = pgTypeToTsType(type.name, types, schemas)
-                          }
-                          return `${JSON.stringify(fn.name)}: ${tsType} | null`
+                          const pgType = types.find(({ id }) => id === fn.return_type_id)
+                          const type = pgTypeToTsType(pgType?.name, types, schemas)
+                          return `${JSON.stringify(fn.name)}: ${type} | null`
                         }),
                     ]}
                   }
@@ -289,25 +284,9 @@ export type Database = {
                     }
 
                     const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
-                      let type = arrayTypes.find(({ id }) => id === type_id)
-                      if (type) {
-                        // If it's an array type, the name looks like `_int8`.
-                        const elementTypeName = type.name.substring(1)
-                        return {
-                          name,
-                          type: `(${pgTypeToTsType(elementTypeName, types, schemas)})[]`,
-                          has_default,
-                        }
-                      }
-                      type = types.find(({ id }) => id === type_id)
-                      if (type) {
-                        return {
-                          name,
-                          type: pgTypeToTsType(type.name, types, schemas),
-                          has_default,
-                        }
-                      }
-                      return { name, type: 'unknown', has_default }
+                      const pgType = types.find(({ id }) => id === type_id)
+                      const type = pgTypeToTsType(pgType?.name, types, schemas)
+                      return { name, type, has_default }
                     })
 
                     return `{
@@ -322,20 +301,9 @@ export type Database = {
                     const tableArgs = args.filter(({ mode }) => mode === 'table')
                     if (tableArgs.length > 0) {
                       const argsNameAndType = tableArgs.map(({ name, type_id }) => {
-                        let type = arrayTypes.find(({ id }) => id === type_id)
-                        if (type) {
-                          // If it's an array type, the name looks like `_int8`.
-                          const elementTypeName = type.name.substring(1)
-                          return {
-                            name,
-                            type: `(${pgTypeToTsType(elementTypeName, types, schemas)})[]`,
-                          }
-                        }
-                        type = types.find(({ id }) => id === type_id)
-                        if (type) {
-                          return { name, type: pgTypeToTsType(type.name, types, schemas) }
-                        }
-                        return { name, type: 'unknown' }
+                        const pgType = types.find(({ id }) => id === type_id)
+                        const type = pgTypeToTsType(pgType?.name, types, schemas)
+                        return { name, type }
                       })
 
                       return `{
@@ -364,11 +332,7 @@ export type Database = {
 
                     // Case 3: returns base/composite/enum type.
                     const type = types.find(({ id }) => id === return_type_id)
-                    if (type) {
-                      return pgTypeToTsType(type.name, types, schemas)
-                    }
-
-                    return 'unknown'
+                    return pgTypeToTsType(type?.name, types, schemas)
                   })()})${is_set_returning_function ? '[]' : ''}
                 }`
                     )
@@ -398,15 +362,9 @@ export type Database = {
                     ({ name, attributes }) =>
                       `${JSON.stringify(name)}: {
                         ${attributes.map(({ name, type_id }) => {
-                          const type = types.find(({ id }) => id === type_id)
-                          if (type) {
-                            return `${JSON.stringify(name)}: ${pgTypeToTsType(
-                              type.name,
-                              types,
-                              schemas
-                            )}`
-                          }
-                          return `${JSON.stringify(name)}: unknown`
+                          const pgType = types.find(({ id }) => id === type_id)
+                          const type = pgTypeToTsType(pgType?.name, types, schemas)
+                          return `${JSON.stringify(name)}: ${type}`
                         })}
                       }`
                   )
@@ -506,11 +464,13 @@ export type Enums<
 
 // TODO: Make this more robust. Currently doesn't handle range types - returns them as unknown.
 const pgTypeToTsType = (
-  pgType: string,
+  pgType: string | undefined,
   types: PostgresType[],
   schemas: PostgresSchema[]
 ): string => {
-  if (pgType === 'bool') {
+  if (pgType === undefined) {
+    return 'unknown'
+  } else if (pgType === 'bool') {
     return 'boolean'
   } else if (['int2', 'int4', 'int8', 'float4', 'float8', 'numeric'].includes(pgType)) {
     return 'number'

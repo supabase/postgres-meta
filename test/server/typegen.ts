@@ -79,6 +79,7 @@ test('typegen', async () => {
               blurb_varchar: string | null
               details_is_long: boolean | null
               details_length: number | null
+              details_words: string[] | null
             }
             Insert: {
               details?: string | null
@@ -306,6 +307,12 @@ test('typegen', async () => {
             }
             Returns: number
           }
+          details_words: {
+            Args: {
+              "": unknown
+            }
+            Returns: string[]
+          }
           function_returning_row: {
             Args: Record<PropertyKey, never>
             Returns: {
@@ -366,7 +373,9 @@ test('typegen', async () => {
           user_status: "ACTIVE" | "INACTIVE"
         }
         CompositeTypes: {
-          [_ in never]: never
+          array_type: {
+            my_text_array: string[]
+          }
         }
       }
     }
@@ -539,6 +548,7 @@ test('typegen w/ one-to-one relationships', async () => {
               blurb_varchar: string | null
               details_is_long: boolean | null
               details_length: number | null
+              details_words: string[] | null
             }
             Insert: {
               details?: string | null
@@ -778,6 +788,12 @@ test('typegen w/ one-to-one relationships', async () => {
             }
             Returns: number
           }
+          details_words: {
+            Args: {
+              "": unknown
+            }
+            Returns: string[]
+          }
           function_returning_row: {
             Args: Record<PropertyKey, never>
             Returns: {
@@ -838,7 +854,9 @@ test('typegen w/ one-to-one relationships', async () => {
           user_status: "ACTIVE" | "INACTIVE"
         }
         CompositeTypes: {
-          [_ in never]: never
+          array_type: {
+            my_text_array: string[]
+          }
         }
       }
     }
