@@ -1,9 +1,10 @@
-import { readFile } from 'fs/promises'
+import { readFile } from 'node:fs/promises'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { getSecret } from '../../src/lib/secrets'
 
-vi.mock('fs/promises', async (): Promise<typeof import('fs/promises')> => {
-  const originalModule = await vi.importActual<typeof import('fs/promises')>('fs/promises')
+vi.mock('node:fs/promises', async (): Promise<typeof import('node:fs/promises')> => {
+  const originalModule =
+    await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises')
   const readFile = vi.fn()
   return {
     ...originalModule,

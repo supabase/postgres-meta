@@ -1,6 +1,6 @@
-import { readFile } from 'fs/promises'
-import { dirname, join } from 'path'
-import { fileURLToPath } from 'url'
+import { readFile } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 export const columnPrivilegesSql = await readFile(join(__dirname, 'column_privileges.sql'), 'utf-8')
