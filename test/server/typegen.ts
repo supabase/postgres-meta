@@ -60,7 +60,7 @@ test('typegen', async () => {
                 columns: ["category"]
                 referencedRelation: "category"
                 referencedColumns: ["id"]
-              }
+              },
             ]
           }
           todos: {
@@ -101,7 +101,7 @@ test('typegen', async () => {
                 columns: ["user-id"]
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
-              }
+              },
             ]
           }
           user_details: {
@@ -135,7 +135,7 @@ test('typegen', async () => {
                 columns: ["user_id"]
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
-              }
+              },
             ]
           }
           users: {
@@ -215,7 +215,7 @@ test('typegen', async () => {
                 columns: ["user-id"]
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
-              }
+              },
             ]
           }
           todos_view: {
@@ -252,7 +252,7 @@ test('typegen', async () => {
                 columns: ["user-id"]
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
-              }
+              },
             ]
           }
           users_view: {
@@ -371,7 +371,7 @@ test('typegen', async () => {
       TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
         ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
             Database[PublicTableNameOrOptions["schema"]]["Views"])
-        : never = never
+        : never = never,
     > = PublicTableNameOrOptions extends { schema: keyof Database }
       ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
           Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
@@ -380,14 +380,14 @@ test('typegen', async () => {
         ? R
         : never
       : PublicTableNameOrOptions extends keyof (Database["public"]["Tables"] &
-          Database["public"]["Views"])
-      ? (Database["public"]["Tables"] &
-          Database["public"]["Views"])[PublicTableNameOrOptions] extends {
-          Row: infer R
-        }
-        ? R
+            Database["public"]["Views"])
+        ? (Database["public"]["Tables"] &
+            Database["public"]["Views"])[PublicTableNameOrOptions] extends {
+            Row: infer R
+          }
+          ? R
+          : never
         : never
-      : never
 
     export type TablesInsert<
       PublicTableNameOrOptions extends
@@ -395,7 +395,7 @@ test('typegen', async () => {
         | { schema: keyof Database },
       TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
         ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-        : never = never
+        : never = never,
     > = PublicTableNameOrOptions extends { schema: keyof Database }
       ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
           Insert: infer I
@@ -403,12 +403,12 @@ test('typegen', async () => {
         ? I
         : never
       : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-      ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-          Insert: infer I
-        }
-        ? I
+        ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
+            Insert: infer I
+          }
+          ? I
+          : never
         : never
-      : never
 
     export type TablesUpdate<
       PublicTableNameOrOptions extends
@@ -416,7 +416,7 @@ test('typegen', async () => {
         | { schema: keyof Database },
       TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
         ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-        : never = never
+        : never = never,
     > = PublicTableNameOrOptions extends { schema: keyof Database }
       ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
           Update: infer U
@@ -424,12 +424,12 @@ test('typegen', async () => {
         ? U
         : never
       : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-      ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-          Update: infer U
-        }
-        ? U
+        ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
+            Update: infer U
+          }
+          ? U
+          : never
         : never
-      : never
 
     export type Enums<
       PublicEnumNameOrOptions extends
@@ -437,12 +437,12 @@ test('typegen', async () => {
         | { schema: keyof Database },
       EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
         ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-        : never = never
+        : never = never,
     > = PublicEnumNameOrOptions extends { schema: keyof Database }
       ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
       : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
-      ? Database["public"]["Enums"][PublicEnumNameOrOptions]
-      : never
+        ? Database["public"]["Enums"][PublicEnumNameOrOptions]
+        : never
     "
   `)
 })
@@ -512,7 +512,7 @@ test('typegen w/ one-to-one relationships', async () => {
                 isOneToOne: false
                 referencedRelation: "category"
                 referencedColumns: ["id"]
-              }
+              },
             ]
           }
           todos: {
@@ -556,7 +556,7 @@ test('typegen w/ one-to-one relationships', async () => {
                 isOneToOne: false
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
-              }
+              },
             ]
           }
           user_details: {
@@ -593,7 +593,7 @@ test('typegen w/ one-to-one relationships', async () => {
                 isOneToOne: true
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
-              }
+              },
             ]
           }
           users: {
@@ -676,7 +676,7 @@ test('typegen w/ one-to-one relationships', async () => {
                 isOneToOne: false
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
-              }
+              },
             ]
           }
           todos_view: {
@@ -716,7 +716,7 @@ test('typegen w/ one-to-one relationships', async () => {
                 isOneToOne: false
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
-              }
+              },
             ]
           }
           users_view: {
@@ -835,7 +835,7 @@ test('typegen w/ one-to-one relationships', async () => {
       TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
         ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
             Database[PublicTableNameOrOptions["schema"]]["Views"])
-        : never = never
+        : never = never,
     > = PublicTableNameOrOptions extends { schema: keyof Database }
       ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
           Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
@@ -844,14 +844,14 @@ test('typegen w/ one-to-one relationships', async () => {
         ? R
         : never
       : PublicTableNameOrOptions extends keyof (Database["public"]["Tables"] &
-          Database["public"]["Views"])
-      ? (Database["public"]["Tables"] &
-          Database["public"]["Views"])[PublicTableNameOrOptions] extends {
-          Row: infer R
-        }
-        ? R
+            Database["public"]["Views"])
+        ? (Database["public"]["Tables"] &
+            Database["public"]["Views"])[PublicTableNameOrOptions] extends {
+            Row: infer R
+          }
+          ? R
+          : never
         : never
-      : never
 
     export type TablesInsert<
       PublicTableNameOrOptions extends
@@ -859,7 +859,7 @@ test('typegen w/ one-to-one relationships', async () => {
         | { schema: keyof Database },
       TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
         ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-        : never = never
+        : never = never,
     > = PublicTableNameOrOptions extends { schema: keyof Database }
       ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
           Insert: infer I
@@ -867,12 +867,12 @@ test('typegen w/ one-to-one relationships', async () => {
         ? I
         : never
       : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-      ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-          Insert: infer I
-        }
-        ? I
+        ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
+            Insert: infer I
+          }
+          ? I
+          : never
         : never
-      : never
 
     export type TablesUpdate<
       PublicTableNameOrOptions extends
@@ -880,7 +880,7 @@ test('typegen w/ one-to-one relationships', async () => {
         | { schema: keyof Database },
       TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
         ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-        : never = never
+        : never = never,
     > = PublicTableNameOrOptions extends { schema: keyof Database }
       ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
           Update: infer U
@@ -888,12 +888,12 @@ test('typegen w/ one-to-one relationships', async () => {
         ? U
         : never
       : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-      ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-          Update: infer U
-        }
-        ? U
+        ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
+            Update: infer U
+          }
+          ? U
+          : never
         : never
-      : never
 
     export type Enums<
       PublicEnumNameOrOptions extends
@@ -901,12 +901,12 @@ test('typegen w/ one-to-one relationships', async () => {
         | { schema: keyof Database },
       EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
         ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-        : never = never
+        : never = never,
     > = PublicEnumNameOrOptions extends { schema: keyof Database }
       ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
       : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
-      ? Database["public"]["Enums"][PublicEnumNameOrOptions]
-      : never
+        ? Database["public"]["Enums"][PublicEnumNameOrOptions]
+        : never
     "
   `)
 })

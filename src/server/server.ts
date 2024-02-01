@@ -105,7 +105,7 @@ if (EXPORT_DOCS) {
   }
 
   console.log(
-    applyTypescriptTemplate({
+    await applyTypescriptTemplate({
       schemas: schemas!.filter(
         ({ name }) =>
           GENERATE_TYPES_INCLUDED_SCHEMAS.length === 0 ||
