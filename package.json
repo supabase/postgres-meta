@@ -19,7 +19,7 @@
   "scripts": {
     "check": "tsc -p tsconfig.json --noEmit",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
-    "format": "prettier --write \"{src,test}/**/*.ts\"",
+    "format": "prettier --write '{src,test}/**/*.ts' '*.ts'",
     "build": "tsc -p tsconfig.json && cpy 'src/lib/sql/*.sql' dist/lib/sql",
     "docs:export": "PG_META_EXPORT_DOCS=true node --loader ts-node/esm src/server/server.ts > openapi.json",
     "gen:types:typescript": "PG_META_GENERATE_TYPES=typescript node --loader ts-node/esm src/server/server.ts",
