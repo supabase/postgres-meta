@@ -10,11 +10,7 @@ on:
 jobs:
   test:
     name: Test
-    env:
-      # Default is 2 GB, increase to have less frequent OOM errors
-      NODE_OPTIONS: '--max_old_space_size=3072'
-    # Uses larger hosted runner as it significantly decreases build times
-    runs-on: [larger-runner-4cpu]
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
 
