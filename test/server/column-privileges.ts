@@ -1,3 +1,4 @@
+import { expect, test } from 'vitest'
 import { PostgresColumnPrivileges } from '../../src/lib/types'
 import { app } from './utils'
 
