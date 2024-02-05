@@ -1,3 +1,4 @@
+import { expect, test } from 'vitest'
 import { PostgresIndex } from '../../src/lib/types'
 import { app } from './utils'
 

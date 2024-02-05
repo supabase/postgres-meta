@@ -1,3 +1,4 @@
+import { afterAll } from 'vitest'
 import { PostgresMeta } from '../../src/lib'
 
 export const pgMeta = new PostgresMeta({
