@@ -2,6 +2,7 @@ import CryptoJS from 'crypto-js'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { expect, test } from 'vitest'
 import { app } from './utils'
 import { CRYPTO_KEY, DEFAULT_POOL_CONFIG } from '../../src/server/constants'
 

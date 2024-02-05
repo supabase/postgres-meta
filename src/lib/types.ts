@@ -1,6 +1,6 @@
 import { Static, Type } from '@sinclair/typebox'
 import { DatabaseError } from 'pg-protocol'
-import { Options as PrettierOptions } from 'prettier'
+import type { Options as PrettierOptions } from 'prettier'
 
 export interface FormatterOptions extends PrettierOptions {}
 
