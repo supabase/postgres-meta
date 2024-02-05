@@ -51,7 +51,7 @@
     "pgsql-parser": "^13.3.0",
     "pino": "^8.6.1",
     "postgres-array": "^3.0.1",
-    "prettier": "^3.2.4",
+    "prettier": "^3.2.5",
     "prettier-plugin-sql": "0.17.0"
   },
   "devDependencies": {
