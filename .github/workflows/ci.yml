@@ -7,6 +7,11 @@ on:
       - master
   workflow_dispatch:
 
+# Cancel old builds on new commit for same workflow + branch/PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: Test
@@ -29,7 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actionsx/prettier@v2
+      - uses: actionsx/prettier@v3
         with:
           args: --check "{src,test}/**/*.ts"
   

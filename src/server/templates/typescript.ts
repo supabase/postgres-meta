@@ -10,7 +10,7 @@ import type {
   PostgresView,
 } from '../../lib/index.js'
 
-export const apply = ({
+export const apply = async ({
   schemas,
   tables,
   views,
@@ -32,14 +32,17 @@ export const apply = ({
   types: PostgresType[]
   arrayTypes: PostgresType[]
   detectOneToOneRelationships: boolean
-}): string => {
+}): Promise<string> => {
   const columnsByTableId = columns
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-    .reduce((acc, curr) => {
-      acc[curr.table_id] ??= []
-      acc[curr.table_id].push(curr)
-      return acc
-    }, {} as Record<string, PostgresColumn[]>)
+    .reduce(
+      (acc, curr) => {
+        acc[curr.table_id] ??= []
+        acc[curr.table_id].push(curr)
+        return acc
+      },
+      {} as Record<string, PostgresColumn[]>
+    )
 
   let output = `
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
@@ -262,11 +265,14 @@ export type Database = {
                 return '[_ in never]: never'
               }
 
-              const schemaFunctionsGroupedByName = schemaFunctions.reduce((acc, curr) => {
-                acc[curr.name] ??= []
-                acc[curr.name].push(curr)
-                return acc
-              }, {} as Record<string, PostgresFunction[]>)
+              const schemaFunctionsGroupedByName = schemaFunctions.reduce(
+                (acc, curr) => {
+                  acc[curr.name] ??= []
+                  acc[curr.name].push(curr)
+                  return acc
+                },
+                {} as Record<string, PostgresFunction[]>
+              )
 
               return Object.entries(schemaFunctionsGroupedByName).map(
                 ([fnName, fns]) =>
@@ -494,7 +500,7 @@ export type Enums<
   : never
 `
 
-  output = prettier.format(output, {
+  output = await prettier.format(output, {
     parser: 'typescript',
     semi: false,
   })
