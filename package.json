@@ -52,7 +52,7 @@
     "pino": "^8.6.1",
     "postgres-array": "^3.0.1",
     "prettier": "^3.2.5",
-    "prettier-plugin-sql": "0.17.0"
+    "prettier-plugin-sql": "0.18.0"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.1.1",
