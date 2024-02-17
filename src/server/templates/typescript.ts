@@ -419,85 +419,98 @@ export type Database = {
     })}
 }
 
-export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (Database[keyof Database]["Tables"] & Database[keyof Database]["Views"])
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
-    }
-    ? R
-    : never
-  : PublicTableNameOrOptions extends keyof (Database[keyof Database]["Tables"] &
-      Database[keyof Database]["Views"])
-  ? (Database[keyof Database]["Tables"] &
-      Database[keyof Database]["Views"])[PublicTableNameOrOptions] extends {
-      Row: infer R
-    }
-    ? R
-    : never
-  : never
+${schemas
+  .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+  .map((schema) => {
 
-export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof Database[keyof Database]["Tables"]
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
-  : PublicTableNameOrOptions extends keyof Database[keyof Database]["Tables"]
-  ? Database[keyof Database]["Tables"][PublicTableNameOrOptions] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
-  : never
+    const schemaName = schema.name;
+    const schemaNameWithQuotes = `"${schemaName}"`
+    const pascalCaseSchemaName = schemaName.replace(/^./, (match) => match.toUpperCase());
 
-export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof Database[keyof Database]["Tables"]
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
-  : PublicTableNameOrOptions extends keyof Database[keyof Database]["Tables"]
-  ? Database[keyof Database]["Tables"][PublicTableNameOrOptions] extends {
-      Update: infer U
-    }
-    ? U
-    : never
-  : never
+    return `
 
-export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof Database[keyof Database]["Enums"]
-    | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-    : never = never
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof Database[keyof Database]["Enums"]
-  ? Database[keyof Database]["Enums"][PublicEnumNameOrOptions]
-  : never
+  export type ${pascalCaseSchemaName}Tables<
+    ${pascalCaseSchemaName}TableNameOrOptions extends
+      | keyof (Database[${schemaNameWithQuotes}]["Tables"] & Database[${schemaNameWithQuotes}]["Views"])
+      | { schema: keyof Database },
+    TableName extends ${pascalCaseSchemaName}TableNameOrOptions extends { schema: keyof Database }
+      ? keyof (Database[${pascalCaseSchemaName}TableNameOrOptions["schema"]]["Tables"] &
+          Database[${pascalCaseSchemaName}TableNameOrOptions["schema"]]["Views"])
+      : never = never,
+  > = ${pascalCaseSchemaName}TableNameOrOptions extends { schema: keyof Database }
+    ? (Database[${pascalCaseSchemaName}TableNameOrOptions["schema"]]["Tables"] &
+        Database[${pascalCaseSchemaName}TableNameOrOptions["schema"]]["Views"])[TableName] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : ${pascalCaseSchemaName}TableNameOrOptions extends keyof (Database[${schemaNameWithQuotes}]["Tables"] &
+          Database[${schemaNameWithQuotes}]["Views"])
+      ? (Database[${schemaNameWithQuotes}]["Tables"] &
+          Database[${schemaNameWithQuotes}]["Views"])[${pascalCaseSchemaName}TableNameOrOptions] extends {
+          Row: infer R
+        }
+        ? R
+        : never
+      : never
+
+  export type ${pascalCaseSchemaName}TablesInsert<
+    ${pascalCaseSchemaName}TableNameOrOptions extends
+      | keyof Database[${schemaNameWithQuotes}]["Tables"]
+      | { schema: keyof Database },
+    TableName extends ${pascalCaseSchemaName}TableNameOrOptions extends { schema: keyof Database }
+      ? keyof Database[${pascalCaseSchemaName}TableNameOrOptions["schema"]]["Tables"]
+      : never = never,
+  > = ${pascalCaseSchemaName}TableNameOrOptions extends { schema: keyof Database }
+    ? Database[${pascalCaseSchemaName}TableNameOrOptions["schema"]]["Tables"][TableName] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : ${pascalCaseSchemaName}TableNameOrOptions extends keyof Database[${schemaNameWithQuotes}]["Tables"]
+      ? Database[${schemaNameWithQuotes}]["Tables"][${pascalCaseSchemaName}TableNameOrOptions] extends {
+          Insert: infer I
+        }
+        ? I
+        : never
+      : never
+
+  export type ${pascalCaseSchemaName}TablesUpdate<
+    ${pascalCaseSchemaName}TableNameOrOptions extends
+      | keyof Database[${schemaNameWithQuotes}]["Tables"]
+      | { schema: keyof Database },
+    TableName extends ${pascalCaseSchemaName}TableNameOrOptions extends { schema: keyof Database }
+      ? keyof Database[${pascalCaseSchemaName}TableNameOrOptions["schema"]]["Tables"]
+      : never = never,
+  > = ${pascalCaseSchemaName}TableNameOrOptions extends { schema: keyof Database }
+    ? Database[${pascalCaseSchemaName}TableNameOrOptions["schema"]]["Tables"][TableName] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : ${pascalCaseSchemaName}TableNameOrOptions extends keyof Database[${schemaNameWithQuotes}]["Tables"]
+      ? Database[${schemaNameWithQuotes}]["Tables"][${pascalCaseSchemaName}TableNameOrOptions] extends {
+          Update: infer U
+        }
+        ? U
+        : never
+      : never
+
+  export type ${pascalCaseSchemaName}Enums<
+    ${pascalCaseSchemaName}EnumNameOrOptions extends
+      | keyof Database[${schemaNameWithQuotes}]["Enums"]
+      | { schema: keyof Database },
+    EnumName extends ${pascalCaseSchemaName}EnumNameOrOptions extends { schema: keyof Database }
+      ? keyof Database[${pascalCaseSchemaName}EnumNameOrOptions["schema"]]["Enums"]
+      : never = never,
+  > = ${pascalCaseSchemaName}EnumNameOrOptions extends { schema: keyof Database }
+    ? Database[${pascalCaseSchemaName}EnumNameOrOptions["schema"]]["Enums"][EnumName]
+    : ${pascalCaseSchemaName}EnumNameOrOptions extends keyof Database[${schemaNameWithQuotes}]["Enums"]
+      ? Database[${schemaNameWithQuotes}]["Enums"][${pascalCaseSchemaName}EnumNameOrOptions]
+      : never
+
+
+    `})}
 `
 
   output = await prettier.format(output, {
