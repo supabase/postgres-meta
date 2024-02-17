@@ -365,10 +365,9 @@ test('typegen', async () => {
       }
     }
 
-    export type Tables<
+    export type PublicTables<
       PublicTableNameOrOptions extends
-        | keyof (Database[keyof Database]["Tables"] &
-            Database[keyof Database]["Views"])
+        | keyof (Database["public"]["Tables"] & Database["public"]["Views"])
         | { schema: keyof Database },
       TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
         ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
@@ -381,19 +380,19 @@ test('typegen', async () => {
         }
         ? R
         : never
-      : PublicTableNameOrOptions extends keyof (Database[keyof Database]["Tables"] &
-            Database[keyof Database]["Views"])
-        ? (Database[keyof Database]["Tables"] &
-            Database[keyof Database]["Views"])[PublicTableNameOrOptions] extends {
+      : PublicTableNameOrOptions extends keyof (Database["public"]["Tables"] &
+            Database["public"]["Views"])
+        ? (Database["public"]["Tables"] &
+            Database["public"]["Views"])[PublicTableNameOrOptions] extends {
             Row: infer R
           }
           ? R
           : never
         : never
 
-    export type TablesInsert<
+    export type PublicTablesInsert<
       PublicTableNameOrOptions extends
-        | keyof Database[keyof Database]["Tables"]
+        | keyof Database["public"]["Tables"]
         | { schema: keyof Database },
       TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
         ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
@@ -404,17 +403,17 @@ test('typegen', async () => {
         }
         ? I
         : never
-      : PublicTableNameOrOptions extends keyof Database[keyof Database]["Tables"]
-        ? Database[keyof Database]["Tables"][PublicTableNameOrOptions] extends {
+      : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
+        ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
             Insert: infer I
           }
           ? I
           : never
         : never
 
-    export type TablesUpdate<
+    export type PublicTablesUpdate<
       PublicTableNameOrOptions extends
-        | keyof Database[keyof Database]["Tables"]
+        | keyof Database["public"]["Tables"]
         | { schema: keyof Database },
       TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
         ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
@@ -425,25 +424,25 @@ test('typegen', async () => {
         }
         ? U
         : never
-      : PublicTableNameOrOptions extends keyof Database[keyof Database]["Tables"]
-        ? Database[keyof Database]["Tables"][PublicTableNameOrOptions] extends {
+      : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
+        ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
             Update: infer U
           }
           ? U
           : never
         : never
 
-    export type Enums<
+    export type PublicEnums<
       PublicEnumNameOrOptions extends
-        | keyof Database[keyof Database]["Enums"]
+        | keyof Database["public"]["Enums"]
         | { schema: keyof Database },
       EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
         ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
         : never = never,
     > = PublicEnumNameOrOptions extends { schema: keyof Database }
       ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-      : PublicEnumNameOrOptions extends keyof Database[keyof Database]["Enums"]
-        ? Database[keyof Database]["Enums"][PublicEnumNameOrOptions]
+      : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
+        ? Database["public"]["Enums"][PublicEnumNameOrOptions]
         : never
     "
   `)
@@ -830,10 +829,9 @@ test('typegen w/ one-to-one relationships', async () => {
       }
     }
 
-    export type Tables<
+    export type PublicTables<
       PublicTableNameOrOptions extends
-        | keyof (Database[keyof Database]["Tables"] &
-            Database[keyof Database]["Views"])
+        | keyof (Database["public"]["Tables"] & Database["public"]["Views"])
         | { schema: keyof Database },
       TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
         ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
@@ -846,19 +844,19 @@ test('typegen w/ one-to-one relationships', async () => {
         }
         ? R
         : never
-      : PublicTableNameOrOptions extends keyof (Database[keyof Database]["Tables"] &
-            Database[keyof Database]["Views"])
-        ? (Database[keyof Database]["Tables"] &
-            Database[keyof Database]["Views"])[PublicTableNameOrOptions] extends {
+      : PublicTableNameOrOptions extends keyof (Database["public"]["Tables"] &
+            Database["public"]["Views"])
+        ? (Database["public"]["Tables"] &
+            Database["public"]["Views"])[PublicTableNameOrOptions] extends {
             Row: infer R
           }
           ? R
           : never
         : never
 
-    export type TablesInsert<
+    export type PublicTablesInsert<
       PublicTableNameOrOptions extends
-        | keyof Database[keyof Database]["Tables"]
+        | keyof Database["public"]["Tables"]
         | { schema: keyof Database },
       TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
         ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
@@ -869,17 +867,17 @@ test('typegen w/ one-to-one relationships', async () => {
         }
         ? I
         : never
-      : PublicTableNameOrOptions extends keyof Database[keyof Database]["Tables"]
-        ? Database[keyof Database]["Tables"][PublicTableNameOrOptions] extends {
+      : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
+        ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
             Insert: infer I
           }
           ? I
           : never
         : never
 
-    export type TablesUpdate<
+    export type PublicTablesUpdate<
       PublicTableNameOrOptions extends
-        | keyof Database[keyof Database]["Tables"]
+        | keyof Database["public"]["Tables"]
         | { schema: keyof Database },
       TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
         ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
@@ -890,25 +888,25 @@ test('typegen w/ one-to-one relationships', async () => {
         }
         ? U
         : never
-      : PublicTableNameOrOptions extends keyof Database[keyof Database]["Tables"]
-        ? Database[keyof Database]["Tables"][PublicTableNameOrOptions] extends {
+      : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
+        ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
             Update: infer U
           }
           ? U
           : never
         : never
 
-    export type Enums<
+    export type PublicEnums<
       PublicEnumNameOrOptions extends
-        | keyof Database[keyof Database]["Enums"]
+        | keyof Database["public"]["Enums"]
         | { schema: keyof Database },
       EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
         ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
         : never = never,
     > = PublicEnumNameOrOptions extends { schema: keyof Database }
       ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-      : PublicEnumNameOrOptions extends keyof Database[keyof Database]["Enums"]
-        ? Database[keyof Database]["Enums"][PublicEnumNameOrOptions]
+      : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
+        ? Database["public"]["Enums"][PublicEnumNameOrOptions]
         : never
     "
   `)
