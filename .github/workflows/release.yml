@@ -32,35 +32,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  upload:
-    name: Upload assets to GitHub Releases
-    needs:
-      - semantic-release
-    if: needs.semantic-release.outputs.new-release-published == 'true'
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-
-      - name: Prepare release
-        run: |
-          npm clean-install
-          npm run pkg
-          mv bin/postgres-meta-linux postgres-meta
-          tar -czvf postgres-meta-${{ needs.semantic-release.outputs.new-release-version }}-x86_64-linux-gnu.tar.gz postgres-meta
-          mv bin/postgres-meta-macos postgres-meta
-          tar -czvf postgres-meta-${{ needs.semantic-release.outputs.new-release-version }}-x86_64-apple-darwin.tar.gz postgres-meta
-          mv bin/postgres-meta-win.exe postgres-meta.exe
-          tar -czvf postgres-meta-${{ needs.semantic-release.outputs.new-release-version }}-x86_64-pc-windows.tar.gz postgres-meta.exe
-
-      - uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ needs.semantic-release.outputs.new-release-version }}
-          files: postgres-meta-*.tar.gz
-
   docker-hub:
     name: Release on Docker Hub
     needs:
