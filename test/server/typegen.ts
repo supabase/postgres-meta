@@ -30,6 +30,12 @@ test('typegen', async () => {
             }
             Relationships: []
           }
+          empty: {
+            Row: {}
+            Insert: {}
+            Update: {}
+            Relationships: []
+          }
           memes: {
             Row: {
               category: number | null
@@ -481,6 +487,12 @@ test('typegen w/ one-to-one relationships', async () => {
               id?: number
               name?: string
             }
+            Relationships: []
+          }
+          empty: {
+            Row: {}
+            Insert: {}
+            Update: {}
             Relationships: []
           }
           memes: {
