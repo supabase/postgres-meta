@@ -126,13 +126,13 @@ if (EXPORT_DOCS) {
     })
   )
 } else {
-  const closeListeners = closeWithGrace(async ({ signal, err, manual }) => {
+  const closeListeners = closeWithGrace(async ({ err }) => {
     if (err) {
       app.log.error(err)
     }
     await app.close()
   })
-  app.addHook('onClose', async (instance) => {
+  app.addHook('onClose', async () => {
     closeListeners.uninstall()
   })
 

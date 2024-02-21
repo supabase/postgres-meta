@@ -16,6 +16,7 @@ COPY --from=build /usr/src/app/node_modules node_modules
 COPY --from=build /usr/src/app/dist dist
 COPY package.json ./
 ENV PG_META_PORT=8080
+# `npm run start` does not forward signals to child process
 CMD ["node", "dist/server/server.js"]
 EXPOSE 8080
 # --start-period defaults to 0s, but can't be set to 0s (to be explicit) by now
