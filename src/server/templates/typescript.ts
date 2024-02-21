@@ -33,16 +33,13 @@ export const apply = async ({
   arrayTypes: PostgresType[]
   detectOneToOneRelationships: boolean
 }): Promise<string> => {
-  const columnsByTableId = columns
+  const columnsByTableId = Object.fromEntries<PostgresColumn[]>(
+    [...tables, ...views, ...materializedViews].map((t) => [t.id, []])
+  )
+  columns
+    .filter((c) => c.table_id in columnsByTableId)
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-    .reduce(
-      (acc, curr) => {
-        acc[curr.table_id] ??= []
-        acc[curr.table_id].push(curr)
-        return acc
-      },
-      {} as Record<string, PostgresColumn[]>
-    )
+    .forEach((c) => columnsByTableId[c.table_id].push(c))
 
   let output = `
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
