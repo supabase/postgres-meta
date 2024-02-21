@@ -118,3 +118,5 @@ create table user_details (
 );
 
 create view a_view as select id from users;
+
+create table empty();
