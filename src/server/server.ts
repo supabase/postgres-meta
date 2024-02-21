@@ -1,3 +1,4 @@
+import closeWithGrace from 'close-with-grace'
 import { pino } from 'pino'
 import { PostgresMeta } from '../lib/index.js'
 import { build as buildApp } from './app.js'
@@ -125,7 +126,21 @@ if (EXPORT_DOCS) {
     })
   )
 } else {
-  app.listen({ port: PG_META_PORT, host: PG_META_HOST }, () => {
+  const closeListeners = closeWithGrace(async ({ signal, err, manual }) => {
+    if (err) {
+      app.log.error(err)
+    }
+    await app.close()
+  })
+  app.addHook('onClose', async (instance) => {
+    closeListeners.uninstall()
+  })
+
+  app.listen({ port: PG_META_PORT, host: PG_META_HOST }, (err) => {
+    if (err) {
+      app.log.error(err)
+      process.exit(1)
+    }
     const adminPort = PG_META_PORT + 1
     adminApp.listen({ port: adminPort, host: PG_META_HOST })
   })
