@@ -29,7 +29,7 @@
     "db:clean": "cd test/db && docker-compose down",
     "db:run": "cd test/db && docker-compose up --detach && sleep 5",
     "test:run": "vitest run",
-    "test:update": "run-s db:clean db:run && vitest run && run-s db:clean"
+    "test:update": "run-s db:clean db:run && vitest run --update && run-s db:clean"
   },
   "engines": {
     "node": ">=20",
