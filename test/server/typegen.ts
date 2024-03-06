@@ -373,7 +373,7 @@ test('typegen', async () => {
           user_status: "ACTIVE" | "INACTIVE"
         }
         CompositeTypes: {
-          array_type: {
+          composite_type_with_array_attribute: {
             my_text_array: string[]
           }
         }
@@ -854,7 +854,7 @@ test('typegen w/ one-to-one relationships', async () => {
           user_status: "ACTIVE" | "INACTIVE"
         }
         CompositeTypes: {
-          array_type: {
+          composite_type_with_array_attribute: {
             my_text_array: string[]
           }
         }
