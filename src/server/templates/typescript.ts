@@ -100,9 +100,12 @@ export type Database = {
                       ...schemaFunctions
                         .filter((fn) => fn.argument_types === table.name)
                         .map((fn) => {
-                          const pgType = types.find(({ id }) => id === fn.return_type_id)
-                          const type = pgTypeToTsType(pgType?.name, types, schemas)
-                          return `${JSON.stringify(fn.name)}: ${type} | null`
+                          const type = types.find(({ id }) => id === fn.return_type_id)
+                          let tsType = 'unknown'
+                          if (type) {
+                            tsType = pgTypeToTsType(type.name, types, schemas)
+                          }
+                          return `${JSON.stringify(fn.name)}: ${tsType} | null`
                         }),
                     ]}
                   }
@@ -284,9 +287,12 @@ export type Database = {
                     }
 
                     const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
-                      const pgType = types.find(({ id }) => id === type_id)
-                      const type = pgTypeToTsType(pgType?.name, types, schemas)
-                      return { name, type, has_default }
+                      const type = types.find(({ id }) => id === type_id)
+                      let tsType = 'unknown'
+                      if (type) {
+                        tsType = pgTypeToTsType(type.name, types, schemas)
+                      }
+                      return { name, type: tsType, has_default }
                     })
 
                     return `{
@@ -301,9 +307,12 @@ export type Database = {
                     const tableArgs = args.filter(({ mode }) => mode === 'table')
                     if (tableArgs.length > 0) {
                       const argsNameAndType = tableArgs.map(({ name, type_id }) => {
-                        const pgType = types.find(({ id }) => id === type_id)
-                        const type = pgTypeToTsType(pgType?.name, types, schemas)
-                        return { name, type }
+                        const type = types.find(({ id }) => id === type_id)
+                        let tsType = 'unknown'
+                        if (type) {
+                          tsType = pgTypeToTsType(type.name, types, schemas)
+                        }
+                        return { name, type: tsType }
                       })
 
                       return `{
@@ -330,9 +339,13 @@ export type Database = {
                       }`
                     }
 
-                    // Case 3: returns base/composite/enum type.
+                    // Case 3: returns base/array/composite/enum type.
                     const type = types.find(({ id }) => id === return_type_id)
-                    return pgTypeToTsType(type?.name, types, schemas)
+                    if (type) {
+                      return pgTypeToTsType(type.name, types, schemas)
+                    }
+
+                    return 'unknown'
                   })()})${is_set_returning_function ? '[]' : ''}
                 }`
                     )
@@ -362,9 +375,12 @@ export type Database = {
                     ({ name, attributes }) =>
                       `${JSON.stringify(name)}: {
                         ${attributes.map(({ name, type_id }) => {
-                          const pgType = types.find(({ id }) => id === type_id)
-                          const type = pgTypeToTsType(pgType?.name, types, schemas)
-                          return `${JSON.stringify(name)}: ${type}`
+                          const type = types.find(({ id }) => id === type_id)
+                          let tsType = 'unknown'
+                          if (type) {
+                            tsType = pgTypeToTsType(type.name, types, schemas)
+                          }
+                          return `${JSON.stringify(name)}: ${tsType}`
                         })}
                       }`
                   )
@@ -464,13 +480,11 @@ export type Enums<
 
 // TODO: Make this more robust. Currently doesn't handle range types - returns them as unknown.
 const pgTypeToTsType = (
-  pgType: string | undefined,
+  pgType: string,
   types: PostgresType[],
   schemas: PostgresSchema[]
 ): string => {
-  if (pgType === undefined) {
-    return 'unknown'
-  } else if (pgType === 'bool') {
+  if (pgType === 'bool') {
     return 'boolean'
   } else if (['int2', 'int4', 'int8', 'float4', 'float8', 'numeric'].includes(pgType)) {
     return 'number'
