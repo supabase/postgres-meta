@@ -120,8 +120,7 @@ if (EXPORT_DOCS) {
       functions: functions!.filter(
         ({ return_type }) => !['trigger', 'event_trigger'].includes(return_type)
       ),
-      types: types!.filter(({ name }) => name[0] !== '_'),
-      arrayTypes: types!.filter(({ name }) => name[0] === '_'),
+      types: types!,
       detectOneToOneRelationships: GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS,
     })
   )

@@ -18,7 +18,7 @@ test('list indexes', async () => {
       "class": "3124",
       "collation": "0",
       "comment": null,
-      "id": 16396,
+      "id": 16399,
       "index_attributes": [
         {
           "attribute_name": "id",
@@ -42,14 +42,14 @@ test('list indexes', async () => {
       "number_of_key_attributes": 1,
       "options": "0",
       "schema": "public",
-      "table_id": 16390,
+      "table_id": 16393,
     }
   `
   )
 })
 
 test('retrieve index', async () => {
-  const res = await app.inject({ method: 'GET', path: '/indexes/16396' })
+  const res = await app.inject({ method: 'GET', path: '/indexes/16399' })
   const index = res.json<PostgresIndex>()
   expect(index).toMatchInlineSnapshot(
     `
@@ -59,7 +59,7 @@ test('retrieve index', async () => {
       "class": "3124",
       "collation": "0",
       "comment": null,
-      "id": 16396,
+      "id": 16399,
       "index_attributes": [
         {
           "attribute_name": "id",
@@ -83,7 +83,7 @@ test('retrieve index', async () => {
       "number_of_key_attributes": 1,
       "options": "0",
       "schema": "public",
-      "table_id": 16390,
+      "table_id": 16393,
     }
   `
   )
