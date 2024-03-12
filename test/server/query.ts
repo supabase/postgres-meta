@@ -1,3 +1,4 @@
+import { expect, test } from 'vitest'
 import { app } from './utils'
 
 test('query', async () => {

@@ -1,3 +1,4 @@
+import { expect, test } from 'vitest'
 import { pgMeta } from './utils'
 
 test('retrieve', async () => {

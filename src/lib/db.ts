@@ -48,7 +48,7 @@ export const init: (config: PoolConfig) => {
       if (typeof config.ssl !== 'object') {
         config.ssl = {}
       }
-      config.ssl.rejectUnauthorized = sslmode !== 'no-verify'
+      config.ssl.rejectUnauthorized = sslmode === 'verify-full'
     }
   }
 
