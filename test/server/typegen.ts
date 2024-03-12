@@ -374,7 +374,7 @@ test('typegen', async () => {
         }
         CompositeTypes: {
           composite_type_with_array_attribute: {
-            my_text_array: string[]
+            my_text_array: string[] | null
           }
         }
       }
@@ -855,7 +855,7 @@ test('typegen w/ one-to-one relationships', async () => {
         }
         CompositeTypes: {
           composite_type_with_array_attribute: {
-            my_text_array: string[]
+            my_text_array: string[] | null
           }
         }
       }
