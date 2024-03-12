@@ -1,18 +1,23 @@
-import { jest } from '@jest/globals'
+import { readFile } from 'node:fs/promises'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { getSecret } from '../../src/lib/secrets'
 
-// Ref: https://jestjs.io/docs/ecmascript-modules
-jest.unstable_mockModule('fs/promises', () => ({
-  readFile: jest.fn(),
-}))
-const { readFile } = await import('fs/promises')
-const { getSecret } = await import('../../src/lib/secrets')
+vi.mock('node:fs/promises', async (): Promise<typeof import('node:fs/promises')> => {
+  const originalModule =
+    await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises')
+  const readFile = vi.fn()
+  return {
+    ...originalModule,
+    readFile,
+  }
+})
 
 describe('getSecret', () => {
   const value = 'dummy'
 
   beforeEach(() => {
     // Clears env var
-    jest.resetModules()
+    vi.resetModules()
   })
 
   afterEach(() => {
@@ -20,38 +25,38 @@ describe('getSecret', () => {
     delete process.env.SECRET_FILE
   })
 
-  it('loads from env', async () => {
+  test('loads from env', async () => {
     process.env.SECRET = value
     const res = await getSecret('SECRET')
     expect(res).toBe(value)
   })
 
-  it('loads from file', async () => {
+  test('loads from file', async () => {
     process.env.SECRET_FILE = '/run/secrets/db_password'
-    jest.mocked(readFile).mockResolvedValueOnce(value)
+    vi.mocked(readFile).mockResolvedValueOnce(value)
     const res = await getSecret('SECRET')
     expect(res).toBe(value)
   })
 
-  it('defaults to empty string', async () => {
+  test('defaults to empty string', async () => {
     expect(await getSecret('')).toBe('')
     expect(await getSecret('SECRET')).toBe('')
   })
 
-  it('default on file not found', async () => {
+  test('default on file not found', async () => {
     process.env.SECRET_FILE = '/run/secrets/db_password'
     const e: NodeJS.ErrnoException = new Error('no such file or directory')
     e.code = 'ENOENT'
-    jest.mocked(readFile).mockRejectedValueOnce(e)
+    vi.mocked(readFile).mockRejectedValueOnce(e)
     const res = await getSecret('SECRET')
     expect(res).toBe('')
   })
 
-  it('throws on permission denied', async () => {
+  test('throws on permission denied', async () => {
     process.env.SECRET_FILE = '/run/secrets/db_password'
     const e: NodeJS.ErrnoException = new Error('permission denied')
     e.code = 'EACCES'
-    jest.mocked(readFile).mockRejectedValueOnce(e)
+    vi.mocked(readFile).mockRejectedValueOnce(e)
     expect(getSecret('SECRET')).rejects.toThrow()
   })
 })

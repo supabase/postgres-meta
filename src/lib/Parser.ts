@@ -50,9 +50,12 @@ interface DeparseReturnValues {
 /**
  * Formats a SQL string into a prettier-formatted SQL string.
  */
-export function Format(sql: string, options: FormatterOptions = {}): FormatReturnValues {
+export async function Format(
+  sql: string,
+  options: FormatterOptions = {}
+): Promise<FormatReturnValues> {
   try {
-    const formatted = prettier.format(sql, {
+    const formatted = await prettier.format(sql, {
       ...DEFAULT_FORMATTER_OPTIONS,
       ...options,
     })

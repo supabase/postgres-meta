@@ -1,16 +1,18 @@
+import { expect, test } from 'vitest'
 import { PostgresColumnPrivileges } from '../../src/lib/types'
 import { app } from './utils'
 
 test('list column privileges', async () => {
   const res = await app.inject({ method: 'GET', path: '/column-privileges' })
-  expect(
-    res
-      .json<PostgresColumnPrivileges[]>()
-      .find(
-        ({ relation_schema, relation_name, column_name }) =>
-          relation_schema === 'public' && relation_name === 'todos' && column_name === 'id'
-      )
-  ).toMatchInlineSnapshot(
+  const column = res
+    .json<PostgresColumnPrivileges[]>()
+    .find(
+      ({ relation_schema, relation_name, column_name }) =>
+        relation_schema === 'public' && relation_name === 'todos' && column_name === 'id'
+    )!
+  // We don't guarantee order of privileges, but we want to keep the snapshots consistent.
+  column.privileges.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)))
+  expect(column).toMatchInlineSnapshot(
     { column_id: expect.stringMatching(/^\d+\.\d+$/) },
     `
     {

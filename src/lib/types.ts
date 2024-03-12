@@ -1,5 +1,6 @@
 import { Static, Type } from '@sinclair/typebox'
-import { Options as PrettierOptions } from 'prettier'
+import { DatabaseError } from 'pg-protocol'
+import type { Options as PrettierOptions } from 'prettier'
 
 export interface FormatterOptions extends PrettierOptions {}
 
@@ -10,9 +11,7 @@ export interface PostgresMetaOk<T> {
 
 export interface PostgresMetaErr {
   data: null
-  error: {
-    message: string
-  }
+  error: Partial<DatabaseError> & { message: string; formattedError?: string }
 }
 
 export type PostgresMetaResult<T> = PostgresMetaOk<T> | PostgresMetaErr
@@ -21,7 +20,7 @@ export const postgresColumnSchema = Type.Object({
   table_id: Type.Integer(),
   schema: Type.String(),
   table: Type.String(),
-  id: Type.RegEx(/^(\d+)\.(\d+)$/),
+  id: Type.RegExp(/^(\d+)\.(\d+)$/),
   ordinal_position: Type.Integer(),
   name: Type.String(),
   default_value: Type.Unknown(),
@@ -176,6 +175,40 @@ export const postgresFunctionCreateFunction = Type.Object({
 })
 export type PostgresFunctionCreate = Static<typeof postgresFunctionCreateFunction>
 
+const postgresIndexSchema = Type.Object({
+  id: Type.Integer(),
+  table_id: Type.Integer(),
+  schema: Type.String(),
+  number_of_attributes: Type.Integer(),
+  number_of_key_attributes: Type.Integer(),
+  is_unique: Type.Boolean(),
+  is_primary: Type.Boolean(),
+  is_exclusion: Type.Boolean(),
+  is_immediate: Type.Boolean(),
+  is_clustered: Type.Boolean(),
+  is_valid: Type.Boolean(),
+  check_xmin: Type.Boolean(),
+  is_ready: Type.Boolean(),
+  is_live: Type.Boolean(),
+  is_replica_identity: Type.Boolean(),
+  key_attributes: Type.Array(Type.Number()),
+  collation: Type.Array(Type.Number()),
+  class: Type.Array(Type.Number()),
+  options: Type.Array(Type.Number()),
+  index_predicate: Type.Union([Type.String(), Type.Null()]),
+  comment: Type.Union([Type.String(), Type.Null()]),
+  index_definition: Type.String(),
+  access_method: Type.String(),
+  index_attributes: Type.Array(
+    Type.Object({
+      attribute_number: Type.Number(),
+      attribute_name: Type.String(),
+      data_type: Type.String(),
+    })
+  ),
+})
+export type PostgresIndex = Static<typeof postgresIndexSchema>
+
 export const postgresPolicySchema = Type.Object({
   id: Type.Integer(),
   schema: Type.String(),
@@ -240,6 +273,7 @@ export const postgresRelationshipSchema = Type.Object({
   schema: Type.String(),
   relation: Type.String(),
   columns: Type.Array(Type.String()),
+  is_one_to_one: Type.Boolean(),
   referenced_schema: Type.String(),
   referenced_relation: Type.String(),
   referenced_columns: Type.Array(Type.String()),
@@ -508,7 +542,7 @@ export const postgresTablePrivilegesRevokeSchema = Type.Object({
 export type PostgresTablePrivilegesRevoke = Static<typeof postgresTablePrivilegesRevokeSchema>
 
 export const postgresColumnPrivilegesSchema = Type.Object({
-  column_id: Type.RegEx(/^(\d+)\.(\d+)$/),
+  column_id: Type.RegExp(/^(\d+)\.(\d+)$/),
   relation_schema: Type.String(),
   relation_name: Type.String(),
   column_name: Type.String(),
@@ -529,7 +563,7 @@ export const postgresColumnPrivilegesSchema = Type.Object({
 export type PostgresColumnPrivileges = Static<typeof postgresColumnPrivilegesSchema>
 
 export const postgresColumnPrivilegesGrantSchema = Type.Object({
-  column_id: Type.RegEx(/^(\d+)\.(\d+)$/),
+  column_id: Type.RegExp(/^(\d+)\.(\d+)$/),
   grantee: Type.String(),
   privilege_type: Type.Union([
     Type.Literal('ALL'),
@@ -543,7 +577,7 @@ export const postgresColumnPrivilegesGrantSchema = Type.Object({
 export type PostgresColumnPrivilegesGrant = Static<typeof postgresColumnPrivilegesGrantSchema>
 
 export const postgresColumnPrivilegesRevokeSchema = Type.Object({
-  column_id: Type.RegEx(/^(\d+)\.(\d+)$/),
+  column_id: Type.RegExp(/^(\d+)\.(\d+)$/),
   grantee: Type.String(),
   privilege_type: Type.Union([
     Type.Literal('ALL'),

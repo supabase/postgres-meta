@@ -1,12 +1,15 @@
 import CryptoJS from 'crypto-js'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { expect, test } from 'vitest'
 import { app } from './utils'
-import { CRYPTO_KEY } from '../../src/server/constants'
+import { CRYPTO_KEY, DEFAULT_POOL_CONFIG } from '../../src/server/constants'
 
 // @ts-ignore: Harmless type error on import.meta.
 const cwd = path.dirname(fileURLToPath(import.meta.url))
-const SSL_ROOT_CERT_PATH = path.join(cwd, '../db/server.crt')
+const sslRootCertPath = path.join(cwd, '../db/server.crt')
+const sslRootCert = fs.readFileSync(sslRootCertPath, { encoding: 'utf8' })
 
 test('query with no ssl', async () => {
   const res = await app.inject({
@@ -45,12 +48,15 @@ test('query with ssl w/o root cert', async () => {
 })
 
 test('query with ssl with root cert', async () => {
+  const defaultSsl = DEFAULT_POOL_CONFIG.ssl
+  DEFAULT_POOL_CONFIG.ssl = { ca: sslRootCert }
+
   const res = await app.inject({
     method: 'POST',
     path: '/query',
     headers: {
       'x-connection-encrypted': CryptoJS.AES.encrypt(
-        `postgresql://postgres:postgres@localhost:5432/postgres?sslmode=verify-full&sslrootcert=${SSL_ROOT_CERT_PATH}`,
+        `postgresql://postgres:postgres@localhost:5432/postgres?sslmode=verify-full`,
         CRYPTO_KEY
       ).toString(),
     },
@@ -63,4 +69,6 @@ test('query with ssl with root cert', async () => {
       },
     ]
   `)
+
+  DEFAULT_POOL_CONFIG.ssl = defaultSsl
 })

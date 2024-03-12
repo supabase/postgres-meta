@@ -1,5 +1,5 @@
 // Use dynamic import to support module mock
-const fs = await import('fs/promises')
+const fs = await import('node:fs/promises')
 
 export const getSecret = async (key: string) => {
   if (!key) {
