@@ -367,7 +367,7 @@ export type Database = {
                           const type = types.find(({ id }) => id === type_id)
                           let tsType = 'unknown'
                           if (type) {
-                            tsType = pgTypeToTsType(type.name, types, schemas)
+                            tsType = `${pgTypeToTsType(type.name, types, schemas)} | null`
                           }
                           return `${JSON.stringify(name)}: ${tsType}`
                         })}
