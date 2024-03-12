@@ -2,16 +2,12 @@ import prettier from 'prettier'
 import type {
   PostgresColumn,
   PostgresFunction,
-  PostgresMaterializedView,
-  PostgresRelationship,
   PostgresSchema,
-  PostgresTable,
   PostgresType,
-  PostgresView,
 } from '../../lib/index.js'
 import type { GeneratorMetadata } from '../../lib/generators.js'
 
-export const apply = ({
+export const apply = async ({
   schemas,
   tables,
   views,
@@ -20,23 +16,22 @@ export const apply = ({
   relationships,
   functions,
   types,
-  arrayTypes,
   detectOneToOneRelationships,
 }: GeneratorMetadata & {
   detectOneToOneRelationships: boolean
-}): string => {
-  const columnsByTableId = columns
+}): Promise<string> => {
+  const columnsByTableId = Object.fromEntries<PostgresColumn[]>(
+    [...tables, ...views, ...materializedViews].map((t) => [t.id, []])
+  )
+  columns
+    .filter((c) => c.table_id in columnsByTableId)
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-    .reduce((acc, curr) => {
-      acc[curr.table_id] ??= []
-      acc[curr.table_id].push(curr)
-      return acc
-    }, {} as Record<string, PostgresColumn[]>)
+    .forEach((c) => columnsByTableId[c.table_id].push(c))
 
   let output = `
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
-export interface Database {
+export type Database = {
   ${schemas
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
     .map((schema) => {
@@ -254,11 +249,14 @@ export interface Database {
                 return '[_ in never]: never'
               }
 
-              const schemaFunctionsGroupedByName = schemaFunctions.reduce((acc, curr) => {
-                acc[curr.name] ??= []
-                acc[curr.name].push(curr)
-                return acc
-              }, {} as Record<string, PostgresFunction[]>)
+              const schemaFunctionsGroupedByName = schemaFunctions.reduce(
+                (acc, curr) => {
+                  acc[curr.name] ??= []
+                  acc[curr.name].push(curr)
+                  return acc
+                },
+                {} as Record<string, PostgresFunction[]>
+              )
 
               return Object.entries(schemaFunctionsGroupedByName).map(
                 ([fnName, fns]) =>
@@ -278,25 +276,12 @@ export interface Database {
                     }
 
                     const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
-                      let type = arrayTypes.find(({ id }) => id === type_id)
+                      const type = types.find(({ id }) => id === type_id)
+                      let tsType = 'unknown'
                       if (type) {
-                        // If it's an array type, the name looks like `_int8`.
-                        const elementTypeName = type.name.substring(1)
-                        return {
-                          name,
-                          type: `(${pgTypeToTsType(elementTypeName, types, schemas)})[]`,
-                          has_default,
-                        }
+                        tsType = pgTypeToTsType(type.name, types, schemas)
                       }
-                      type = types.find(({ id }) => id === type_id)
-                      if (type) {
-                        return {
-                          name,
-                          type: pgTypeToTsType(type.name, types, schemas),
-                          has_default,
-                        }
-                      }
-                      return { name, type: 'unknown', has_default }
+                      return { name, type: tsType, has_default }
                     })
 
                     return `{
@@ -311,20 +296,12 @@ export interface Database {
                     const tableArgs = args.filter(({ mode }) => mode === 'table')
                     if (tableArgs.length > 0) {
                       const argsNameAndType = tableArgs.map(({ name, type_id }) => {
-                        let type = arrayTypes.find(({ id }) => id === type_id)
+                        const type = types.find(({ id }) => id === type_id)
+                        let tsType = 'unknown'
                         if (type) {
-                          // If it's an array type, the name looks like `_int8`.
-                          const elementTypeName = type.name.substring(1)
-                          return {
-                            name,
-                            type: `(${pgTypeToTsType(elementTypeName, types, schemas)})[]`,
-                          }
+                          tsType = pgTypeToTsType(type.name, types, schemas)
                         }
-                        type = types.find(({ id }) => id === type_id)
-                        if (type) {
-                          return { name, type: pgTypeToTsType(type.name, types, schemas) }
-                        }
-                        return { name, type: 'unknown' }
+                        return { name, type: tsType }
                       })
 
                       return `{
@@ -351,7 +328,7 @@ export interface Database {
                       }`
                     }
 
-                    // Case 3: returns base/composite/enum type.
+                    // Case 3: returns base/array/composite/enum type.
                     const type = types.find(({ id }) => id === return_type_id)
                     if (type) {
                       return pgTypeToTsType(type.name, types, schemas)
@@ -388,14 +365,11 @@ export interface Database {
                       `${JSON.stringify(name)}: {
                         ${attributes.map(({ name, type_id }) => {
                           const type = types.find(({ id }) => id === type_id)
+                          let tsType = 'unknown'
                           if (type) {
-                            return `${JSON.stringify(name)}: ${pgTypeToTsType(
-                              type.name,
-                              types,
-                              schemas
-                            )}`
+                            tsType = pgTypeToTsType(type.name, types, schemas)
                           }
-                          return `${JSON.stringify(name)}: unknown`
+                          return `${JSON.stringify(name)}: ${tsType}`
                         })}
                       }`
                   )
@@ -405,9 +379,11 @@ export interface Database {
     })}
 }
 
+type PublicSchema = Database[Extract<keyof Database, "public">]
+
 export type Tables<
   PublicTableNameOrOptions extends
-    | keyof (Database["public"]["Tables"] & Database["public"]["Views"])
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
@@ -420,19 +396,17 @@ export type Tables<
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (Database["public"]["Tables"] &
-      Database["public"]["Views"])
-  ? (Database["public"]["Tables"] &
-      Database["public"]["Views"])[PublicTableNameOrOptions] extends {
-      Row: infer R
-    }
-    ? R
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    ? (PublicSchema["Tables"] & PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
     : never
-  : never
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
-    | keyof Database["public"]["Tables"]
+    | keyof PublicSchema["Tables"]
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
@@ -443,8 +417,8 @@ export type TablesInsert<
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-  ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
       Insert: infer I
     }
     ? I
@@ -453,7 +427,7 @@ export type TablesInsert<
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
-    | keyof Database["public"]["Tables"]
+    | keyof PublicSchema["Tables"]
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
@@ -464,8 +438,8 @@ export type TablesUpdate<
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-  ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
       Update: infer U
     }
     ? U
@@ -474,19 +448,19 @@ export type TablesUpdate<
 
 export type Enums<
   PublicEnumNameOrOptions extends
-    | keyof Database["public"]["Enums"]
+    | keyof PublicSchema["Enums"]
     | { schema: keyof Database },
   EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
     : never = never
 > = PublicEnumNameOrOptions extends { schema: keyof Database }
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
-  ? Database["public"]["Enums"][PublicEnumNameOrOptions]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+  ? PublicSchema["Enums"][PublicEnumNameOrOptions]
   : never
 `
 
-  output = prettier.format(output, {
+  output = await prettier.format(output, {
     parser: 'typescript',
     semi: false,
   })

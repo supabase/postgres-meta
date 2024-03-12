@@ -1,3 +1,4 @@
+import closeWithGrace from 'close-with-grace'
 import { pino } from 'pino'
 import { PostgresMeta } from '../lib/index.js'
 import { build as buildApp } from './app.js'
@@ -105,7 +106,7 @@ if (EXPORT_DOCS) {
   }
 
   console.log(
-    applyTypescriptTemplate({
+    await applyTypescriptTemplate({
       schemas: schemas!.filter(
         ({ name }) =>
           GENERATE_TYPES_INCLUDED_SCHEMAS.length === 0 ||
@@ -119,13 +120,26 @@ if (EXPORT_DOCS) {
       functions: functions!.filter(
         ({ return_type }) => !['trigger', 'event_trigger'].includes(return_type)
       ),
-      types: types!.filter(({ name }) => name[0] !== '_'),
-      arrayTypes: types!.filter(({ name }) => name[0] === '_'),
+      types: types!,
       detectOneToOneRelationships: GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS,
     })
   )
 } else {
-  app.listen({ port: PG_META_PORT, host: PG_META_HOST }, () => {
+  const closeListeners = closeWithGrace(async ({ err }) => {
+    if (err) {
+      app.log.error(err)
+    }
+    await app.close()
+  })
+  app.addHook('onClose', async () => {
+    closeListeners.uninstall()
+  })
+
+  app.listen({ port: PG_META_PORT, host: PG_META_HOST }, (err) => {
+    if (err) {
+      app.log.error(err)
+      process.exit(1)
+    }
     const adminPort = PG_META_PORT + 1
     adminApp.listen({ port: adminPort, host: PG_META_HOST })
   })

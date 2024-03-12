@@ -20,7 +20,6 @@ export type GeneratorMetadata = {
   relationships: PostgresRelationship[]
   functions: PostgresFunction[]
   types: PostgresType[]
-  arrayTypes: PostgresType[]
 }
 
 export async function getGeneratorMetadata(
@@ -95,9 +94,6 @@ export async function getGeneratorMetadata(
     return { data: null, error: typesError }
   }
 
-  const nonArrayTypes = types.filter(({ name }) => name[0] !== '_')
-  const arrayTypes = types.filter(({ name }) => name[0] === '_')
-
   await pgMeta.end()
 
   return {
@@ -115,8 +111,7 @@ export async function getGeneratorMetadata(
       functions: functions.filter(
         ({ return_type }) => !['trigger', 'event_trigger'].includes(return_type)
       ),
-      types: nonArrayTypes,
-      arrayTypes,
+      types,
     },
     error: null,
   }

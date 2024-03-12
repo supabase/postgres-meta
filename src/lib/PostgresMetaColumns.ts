@@ -349,16 +349,16 @@ BEGIN
 
   IF v_conname IS NOT NULL THEN
     EXECUTE format('ALTER TABLE ${ident(old!.schema)}.${ident(
-            old!.table
-          )} DROP CONSTRAINT %s', v_conname);
+      old!.table
+    )} DROP CONSTRAINT %s', v_conname);
   END IF;
 
   ${
     check !== null
       ? `
   ALTER TABLE ${ident(old!.schema)}.${ident(old!.table)} ADD CONSTRAINT ${ident(
-          `${old!.table}_${old!.name}_check`
-        )} CHECK (${check});
+    `${old!.table}_${old!.name}_check`
+  )} CHECK (${check});
 
   SELECT conkey into v_conkey FROM pg_constraint WHERE conname = ${literal(
     `${old!.table}_${old!.name}_check`
