@@ -70,8 +70,8 @@ where a.attrelid = ${literal(relationId)}
 into col;
 execute format(
   'grant ${privilege_type} (%I) on %s to ${
-      grantee.toLowerCase() === 'public' ? 'public' : ident(grantee)
-    } ${is_grantable ? 'with grant option' : ''}',
+    grantee.toLowerCase() === 'public' ? 'public' : ident(grantee)
+  } ${is_grantable ? 'with grant option' : ''}',
   col.attname,
   col.attrelid::regclass
 );`
@@ -114,8 +114,8 @@ where a.attrelid = ${literal(relationId)}
 into col;
 execute format(
   'revoke ${privilege_type} (%I) on %s from ${
-      grantee.toLowerCase() === 'public' ? 'public' : ident(grantee)
-    }',
+    grantee.toLowerCase() === 'public' ? 'public' : ident(grantee)
+  }',
   col.attname,
   col.attrelid::regclass
 );`

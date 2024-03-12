@@ -1,3 +1,4 @@
+import { expect, test } from 'vitest'
 import { pgMeta } from './utils'
 
 const cleanNondetFromResponse = <T>(x: T) => {

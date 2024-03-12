@@ -1,3 +1,4 @@
+import { expect, test } from 'vitest'
 import { pgMeta } from './utils'
 
 const cleanNondet = (x: any) => {
@@ -121,6 +122,15 @@ test('list', async () => {
           "target_table_name": "users",
           "target_table_schema": "public",
         },
+        {
+          "constraint_name": "user_details_user_id_fkey",
+          "source_column_name": "user_id",
+          "source_schema": "public",
+          "source_table_name": "user_details",
+          "target_column_name": "id",
+          "target_table_name": "users",
+          "target_table_schema": "public",
+        },
       ],
       "replica_identity": "DEFAULT",
       "rls_enabled": false,
@@ -172,6 +182,15 @@ test('list without columns', async () => {
           "source_column_name": "user-id",
           "source_schema": "public",
           "source_table_name": "todos",
+          "target_column_name": "id",
+          "target_table_name": "users",
+          "target_table_schema": "public",
+        },
+        {
+          "constraint_name": "user_details_user_id_fkey",
+          "source_column_name": "user_id",
+          "source_schema": "public",
+          "source_table_name": "user_details",
           "target_column_name": "id",
           "target_table_name": "users",
           "target_table_schema": "public",

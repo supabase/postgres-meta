@@ -26,7 +26,7 @@ export default async (fastify: FastifyInstance) => {
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
       reply.code(translateErrorToResponseCode(error))
-      return { error: error.message }
+      return { error: error.formattedError ?? error.message, ...error }
     }
 
     return data || []
@@ -39,7 +39,7 @@ export default async (fastify: FastifyInstance) => {
     }
   }>('/format', async (request, reply) => {
     errorOnEmptyQuery(request)
-    const { data, error } = Parser.Format(request.body.query)
+    const { data, error } = await Parser.Format(request.body.query)
 
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
