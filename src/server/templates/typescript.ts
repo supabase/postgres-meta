@@ -2,13 +2,10 @@ import prettier from 'prettier'
 import type {
   PostgresColumn,
   PostgresFunction,
-  PostgresMaterializedView,
-  PostgresRelationship,
   PostgresSchema,
-  PostgresTable,
   PostgresType,
-  PostgresView,
 } from '../../lib/index.js'
+import type { GeneratorMetadata } from '../../lib/generators.js'
 
 export const apply = async ({
   schemas,
@@ -20,15 +17,7 @@ export const apply = async ({
   functions,
   types,
   detectOneToOneRelationships,
-}: {
-  schemas: PostgresSchema[]
-  tables: Omit<PostgresTable, 'columns'>[]
-  views: Omit<PostgresView, 'columns'>[]
-  materializedViews: Omit<PostgresMaterializedView, 'columns'>[]
-  columns: PostgresColumn[]
-  relationships: PostgresRelationship[]
-  functions: PostgresFunction[]
-  types: PostgresType[]
+}: GeneratorMetadata & {
   detectOneToOneRelationships: boolean
 }): Promise<string> => {
   const columnsByTableId = Object.fromEntries<PostgresColumn[]>(
