@@ -1,3 +1,4 @@
+import closeWithGrace from 'close-with-grace'
 import { pino } from 'pino'
 import { PostgresMeta } from '../lib/index.js'
 import { build as buildApp } from './app.js'
@@ -6,6 +7,7 @@ import {
   DEFAULT_POOL_CONFIG,
   EXPORT_DOCS,
   GENERATE_TYPES,
+  GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS,
   GENERATE_TYPES_INCLUDED_SCHEMAS,
   PG_CONNECTION,
   PG_META_HOST,
@@ -36,14 +38,46 @@ if (EXPORT_DOCS) {
     ...DEFAULT_POOL_CONFIG,
     connectionString: PG_CONNECTION,
   })
-  const { data: schemas, error: schemasError } = await pgMeta.schemas.list()
-  const { data: tables, error: tablesError } = await pgMeta.tables.list()
-  const { data: views, error: viewsError } = await pgMeta.views.list()
-  const { data: functions, error: functionsError } = await pgMeta.functions.list()
-  const { data: types, error: typesError } = await pgMeta.types.list({
-    includeArrayTypes: true,
-    includeSystemSchemas: true,
-  })
+  const [
+    { data: schemas, error: schemasError },
+    { data: tables, error: tablesError },
+    { data: views, error: viewsError },
+    { data: materializedViews, error: materializedViewsError },
+    { data: columns, error: columnsError },
+    { data: relationships, error: relationshipsError },
+    { data: functions, error: functionsError },
+    { data: types, error: typesError },
+  ] = await Promise.all([
+    pgMeta.schemas.list(),
+    pgMeta.tables.list({
+      includedSchemas:
+        GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
+      includeColumns: false,
+    }),
+    pgMeta.views.list({
+      includedSchemas:
+        GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
+      includeColumns: false,
+    }),
+    pgMeta.materializedViews.list({
+      includedSchemas:
+        GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
+      includeColumns: false,
+    }),
+    pgMeta.columns.list({
+      includedSchemas:
+        GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
+    }),
+    pgMeta.relationships.list(),
+    pgMeta.functions.list({
+      includedSchemas:
+        GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
+    }),
+    pgMeta.types.list({
+      includeArrayTypes: true,
+      includeSystemSchemas: true,
+    }),
+  ])
   await pgMeta.end()
 
   if (schemasError) {
@@ -55,6 +89,15 @@ if (EXPORT_DOCS) {
   if (viewsError) {
     throw new Error(viewsError.message)
   }
+  if (materializedViewsError) {
+    throw new Error(materializedViewsError.message)
+  }
+  if (columnsError) {
+    throw new Error(columnsError.message)
+  }
+  if (relationshipsError) {
+    throw new Error(relationshipsError.message)
+  }
   if (functionsError) {
     throw new Error(functionsError.message)
   }
@@ -63,23 +106,40 @@ if (EXPORT_DOCS) {
   }
 
   console.log(
-    applyTypescriptTemplate({
-      schemas: schemas.filter(
+    await applyTypescriptTemplate({
+      schemas: schemas!.filter(
         ({ name }) =>
           GENERATE_TYPES_INCLUDED_SCHEMAS.length === 0 ||
           GENERATE_TYPES_INCLUDED_SCHEMAS.includes(name)
       ),
-      tables,
-      views,
-      functions: functions.filter(
+      tables: tables!,
+      views: views!,
+      materializedViews: materializedViews!,
+      columns: columns!,
+      relationships: relationships!,
+      functions: functions!.filter(
         ({ return_type }) => !['trigger', 'event_trigger'].includes(return_type)
       ),
-      types: types.filter(({ name }) => name[0] !== '_'),
-      arrayTypes: types.filter(({ name }) => name[0] === '_'),
+      types: types!,
+      detectOneToOneRelationships: GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS,
     })
   )
 } else {
-  app.listen({ port: PG_META_PORT, host: PG_META_HOST }, () => {
+  const closeListeners = closeWithGrace(async ({ err }) => {
+    if (err) {
+      app.log.error(err)
+    }
+    await app.close()
+  })
+  app.addHook('onClose', async () => {
+    closeListeners.uninstall()
+  })
+
+  app.listen({ port: PG_META_PORT, host: PG_META_HOST }, (err) => {
+    if (err) {
+      app.log.error(err)
+      process.exit(1)
+    }
     const adminPort = PG_META_PORT + 1
     adminApp.listen({ port: adminPort, host: PG_META_HOST })
   })

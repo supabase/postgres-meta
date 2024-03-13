@@ -40,7 +40,8 @@ select
   coalesce(f_args.args, '[]') as args,
   pg_get_function_arguments(f.oid) as argument_types,
   pg_get_function_identity_arguments(f.oid) as identity_argument_types,
-  rt.typname as return_type,
+  f.prorettype::int8 as return_type_id,
+  pg_get_function_result(f.oid) as return_type,
   nullif(rt.typrelid::int8, 0) as return_type_relation_id,
   f.proretset as is_set_returning_function,
   case

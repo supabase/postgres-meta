@@ -1,5 +1,6 @@
 import { Static, Type } from '@sinclair/typebox'
-import { Options as PrettierOptions } from 'prettier'
+import { DatabaseError } from 'pg-protocol'
+import type { Options as PrettierOptions } from 'prettier'
 
 export interface FormatterOptions extends PrettierOptions {}
 
@@ -10,9 +11,7 @@ export interface PostgresMetaOk<T> {
 
 export interface PostgresMetaErr {
   data: null
-  error: {
-    message: string
-  }
+  error: Partial<DatabaseError> & { message: string; formattedError?: string }
 }
 
 export type PostgresMetaResult<T> = PostgresMetaOk<T> | PostgresMetaErr
@@ -21,7 +20,7 @@ export const postgresColumnSchema = Type.Object({
   table_id: Type.Integer(),
   schema: Type.String(),
   table: Type.String(),
-  id: Type.RegEx(/^(\d+)\.(\d+)$/),
+  id: Type.RegExp(/^(\d+)\.(\d+)$/),
   ordinal_position: Type.Integer(),
   name: Type.String(),
   default_value: Type.Unknown(),
@@ -38,9 +37,49 @@ export const postgresColumnSchema = Type.Object({
   is_updatable: Type.Boolean(),
   is_unique: Type.Boolean(),
   enums: Type.Array(Type.String()),
+  check: Type.Union([Type.String(), Type.Null()]),
   comment: Type.Union([Type.String(), Type.Null()]),
 })
 export type PostgresColumn = Static<typeof postgresColumnSchema>
+
+export const postgresColumnCreateSchema = Type.Object({
+  table_id: Type.Integer(),
+  name: Type.String(),
+  type: Type.String(),
+  default_value: Type.Optional(Type.Unknown()),
+  default_value_format: Type.Optional(
+    Type.Union([Type.Literal('expression'), Type.Literal('literal')])
+  ),
+  is_identity: Type.Optional(Type.Boolean()),
+  identity_generation: Type.Optional(
+    Type.Union([Type.Literal('BY DEFAULT'), Type.Literal('ALWAYS')])
+  ),
+  is_nullable: Type.Optional(Type.Boolean()),
+  is_primary_key: Type.Optional(Type.Boolean()),
+  is_unique: Type.Optional(Type.Boolean()),
+  comment: Type.Optional(Type.String()),
+  check: Type.Optional(Type.String()),
+})
+export type PostgresColumnCreate = Static<typeof postgresColumnCreateSchema>
+
+export const postgresColumnUpdateSchema = Type.Object({
+  name: Type.Optional(Type.String()),
+  type: Type.Optional(Type.String()),
+  drop_default: Type.Optional(Type.Boolean()),
+  default_value: Type.Optional(Type.Unknown()),
+  default_value_format: Type.Optional(
+    Type.Union([Type.Literal('expression'), Type.Literal('literal')])
+  ),
+  is_identity: Type.Optional(Type.Boolean()),
+  identity_generation: Type.Optional(
+    Type.Union([Type.Literal('BY DEFAULT'), Type.Literal('ALWAYS')])
+  ),
+  is_nullable: Type.Optional(Type.Boolean()),
+  is_unique: Type.Optional(Type.Boolean()),
+  comment: Type.Optional(Type.String()),
+  check: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+})
+export type PostgresColumnUpdate = Static<typeof postgresColumnUpdateSchema>
 
 // TODO Rethink config.sql
 export const postgresConfigSchema = Type.Object({
@@ -107,6 +146,7 @@ const postgresFunctionSchema = Type.Object({
   ),
   argument_types: Type.String(),
   identity_argument_types: Type.String(),
+  return_type_id: Type.Integer(),
   return_type: Type.String(),
   return_type_relation_id: Type.Union([Type.Integer(), Type.Null()]),
   is_set_returning_function: Type.Boolean(),
@@ -134,6 +174,40 @@ export const postgresFunctionCreateFunction = Type.Object({
   security_definer: Type.Optional(Type.Boolean()),
 })
 export type PostgresFunctionCreate = Static<typeof postgresFunctionCreateFunction>
+
+const postgresIndexSchema = Type.Object({
+  id: Type.Integer(),
+  table_id: Type.Integer(),
+  schema: Type.String(),
+  number_of_attributes: Type.Integer(),
+  number_of_key_attributes: Type.Integer(),
+  is_unique: Type.Boolean(),
+  is_primary: Type.Boolean(),
+  is_exclusion: Type.Boolean(),
+  is_immediate: Type.Boolean(),
+  is_clustered: Type.Boolean(),
+  is_valid: Type.Boolean(),
+  check_xmin: Type.Boolean(),
+  is_ready: Type.Boolean(),
+  is_live: Type.Boolean(),
+  is_replica_identity: Type.Boolean(),
+  key_attributes: Type.Array(Type.Number()),
+  collation: Type.Array(Type.Number()),
+  class: Type.Array(Type.Number()),
+  options: Type.Array(Type.Number()),
+  index_predicate: Type.Union([Type.String(), Type.Null()]),
+  comment: Type.Union([Type.String(), Type.Null()]),
+  index_definition: Type.String(),
+  access_method: Type.String(),
+  index_attributes: Type.Array(
+    Type.Object({
+      attribute_number: Type.Number(),
+      attribute_name: Type.String(),
+      data_type: Type.String(),
+    })
+  ),
+})
+export type PostgresIndex = Static<typeof postgresIndexSchema>
 
 export const postgresPolicySchema = Type.Object({
   id: Type.Integer(),
@@ -184,7 +258,7 @@ export const postgresPublicationSchema = Type.Object({
 })
 export type PostgresPublication = Static<typeof postgresPublicationSchema>
 
-export const postgresRelationshipSchema = Type.Object({
+export const postgresRelationshipOldSchema = Type.Object({
   id: Type.Integer(),
   constraint_name: Type.String(),
   source_schema: Type.String(),
@@ -193,6 +267,16 @@ export const postgresRelationshipSchema = Type.Object({
   target_table_schema: Type.String(),
   target_table_name: Type.String(),
   target_column_name: Type.String(),
+})
+export const postgresRelationshipSchema = Type.Object({
+  foreign_key_name: Type.String(),
+  schema: Type.String(),
+  relation: Type.String(),
+  columns: Type.Array(Type.String()),
+  is_one_to_one: Type.Boolean(),
+  referenced_schema: Type.String(),
+  referenced_relation: Type.String(),
+  referenced_columns: Type.Array(Type.String()),
 })
 export type PostgresRelationship = Static<typeof postgresRelationshipSchema>
 
@@ -294,7 +378,7 @@ export const postgresTableSchema = Type.Object({
   comment: Type.Union([Type.String(), Type.Null()]),
   columns: Type.Optional(Type.Array(postgresColumnSchema)),
   primary_keys: Type.Array(postgresPrimaryKeySchema),
-  relationships: Type.Array(postgresRelationshipSchema),
+  relationships: Type.Array(postgresRelationshipOldSchema),
 })
 export type PostgresTable = Static<typeof postgresTableSchema>
 
@@ -383,3 +467,124 @@ export const postgresViewSchema = Type.Object({
   columns: Type.Optional(Type.Array(postgresColumnSchema)),
 })
 export type PostgresView = Static<typeof postgresViewSchema>
+
+export const postgresMaterializedViewSchema = Type.Object({
+  id: Type.Integer(),
+  schema: Type.String(),
+  name: Type.String(),
+  is_populated: Type.Boolean(),
+  comment: Type.Union([Type.String(), Type.Null()]),
+  columns: Type.Optional(Type.Array(postgresColumnSchema)),
+})
+export type PostgresMaterializedView = Static<typeof postgresMaterializedViewSchema>
+
+export const postgresTablePrivilegesSchema = Type.Object({
+  relation_id: Type.Integer(),
+  schema: Type.String(),
+  name: Type.String(),
+  kind: Type.Union([
+    Type.Literal('table'),
+    Type.Literal('view'),
+    Type.Literal('materialized_view'),
+    Type.Literal('foreign_table'),
+    Type.Literal('partitioned_table'),
+  ]),
+  privileges: Type.Array(
+    Type.Object({
+      grantor: Type.String(),
+      grantee: Type.String(),
+      privilege_type: Type.Union([
+        Type.Literal('SELECT'),
+        Type.Literal('INSERT'),
+        Type.Literal('UPDATE'),
+        Type.Literal('DELETE'),
+        Type.Literal('TRUNCATE'),
+        Type.Literal('REFERENCES'),
+        Type.Literal('TRIGGER'),
+      ]),
+      is_grantable: Type.Boolean(),
+    })
+  ),
+})
+export type PostgresTablePrivileges = Static<typeof postgresTablePrivilegesSchema>
+
+export const postgresTablePrivilegesGrantSchema = Type.Object({
+  relation_id: Type.Integer(),
+  grantee: Type.String(),
+  privilege_type: Type.Union([
+    Type.Literal('ALL'),
+    Type.Literal('SELECT'),
+    Type.Literal('INSERT'),
+    Type.Literal('UPDATE'),
+    Type.Literal('DELETE'),
+    Type.Literal('TRUNCATE'),
+    Type.Literal('REFERENCES'),
+    Type.Literal('TRIGGER'),
+  ]),
+  is_grantable: Type.Optional(Type.Boolean()),
+})
+export type PostgresTablePrivilegesGrant = Static<typeof postgresTablePrivilegesGrantSchema>
+
+export const postgresTablePrivilegesRevokeSchema = Type.Object({
+  relation_id: Type.Integer(),
+  grantee: Type.String(),
+  privilege_type: Type.Union([
+    Type.Literal('ALL'),
+    Type.Literal('SELECT'),
+    Type.Literal('INSERT'),
+    Type.Literal('UPDATE'),
+    Type.Literal('DELETE'),
+    Type.Literal('TRUNCATE'),
+    Type.Literal('REFERENCES'),
+    Type.Literal('TRIGGER'),
+  ]),
+})
+export type PostgresTablePrivilegesRevoke = Static<typeof postgresTablePrivilegesRevokeSchema>
+
+export const postgresColumnPrivilegesSchema = Type.Object({
+  column_id: Type.RegExp(/^(\d+)\.(\d+)$/),
+  relation_schema: Type.String(),
+  relation_name: Type.String(),
+  column_name: Type.String(),
+  privileges: Type.Array(
+    Type.Object({
+      grantor: Type.String(),
+      grantee: Type.String(),
+      privilege_type: Type.Union([
+        Type.Literal('SELECT'),
+        Type.Literal('INSERT'),
+        Type.Literal('UPDATE'),
+        Type.Literal('REFERENCES'),
+      ]),
+      is_grantable: Type.Boolean(),
+    })
+  ),
+})
+export type PostgresColumnPrivileges = Static<typeof postgresColumnPrivilegesSchema>
+
+export const postgresColumnPrivilegesGrantSchema = Type.Object({
+  column_id: Type.RegExp(/^(\d+)\.(\d+)$/),
+  grantee: Type.String(),
+  privilege_type: Type.Union([
+    Type.Literal('ALL'),
+    Type.Literal('SELECT'),
+    Type.Literal('INSERT'),
+    Type.Literal('UPDATE'),
+    Type.Literal('REFERENCES'),
+  ]),
+  is_grantable: Type.Optional(Type.Boolean()),
+})
+export type PostgresColumnPrivilegesGrant = Static<typeof postgresColumnPrivilegesGrantSchema>
+
+export const postgresColumnPrivilegesRevokeSchema = Type.Object({
+  column_id: Type.RegExp(/^(\d+)\.(\d+)$/),
+  grantee: Type.String(),
+  privilege_type: Type.Union([
+    Type.Literal('ALL'),
+    Type.Literal('SELECT'),
+    Type.Literal('INSERT'),
+    Type.Literal('UPDATE'),
+    Type.Literal('REFERENCES'),
+  ]),
+})
+export type PostgresColumnPrivilegesRevoke = Static<typeof postgresColumnPrivilegesRevokeSchema>

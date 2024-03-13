@@ -183,8 +183,8 @@ export default class PostgresMetaFunctions {
             AND f.identity_argument_types = ${literal(identityArgs)}
           ) != ${id} THEN
             RAISE EXCEPTION 'Cannot find function "${currentFunc!.schema}"."${
-      currentFunc!.name
-    }"(${identityArgs})';
+              currentFunc!.name
+            }"(${identityArgs})';
           END IF;
         END IF;
 
@@ -242,8 +242,8 @@ export default class PostgresMetaFunctions {
   ): string {
     return `
       CREATE ${replace ? 'OR REPLACE' : ''} FUNCTION ${ident(schema!)}.${ident(name!)}(${
-      args?.join(', ') || ''
-    })
+        args?.join(', ') || ''
+      })
       RETURNS ${return_type}
       AS ${literal(definition)}
       LANGUAGE ${language}

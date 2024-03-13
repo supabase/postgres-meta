@@ -1,38 +1,46 @@
 import prettier from 'prettier'
 import type {
+  PostgresColumn,
   PostgresFunction,
   PostgresSchema,
   PostgresTable,
   PostgresType,
   PostgresView,
 } from '../../lib/index.js'
+import type { GeneratorMetadata } from '../../lib/generators.js'
 
-export const apply = ({
+export const apply = async ({
   schemas,
   tables,
   views,
+  materializedViews,
+  columns,
+  relationships,
   functions,
   types,
-  arrayTypes,
-}: {
-  schemas: PostgresSchema[]
-  tables: (PostgresTable & { columns: unknown[] })[]
-  views: (PostgresView & { columns: unknown[] })[]
-  functions: PostgresFunction[]
-  types: PostgresType[]
-  arrayTypes: PostgresType[]
-}): string => {
-  let output = `
-export type Json = string | number | boolean | null | { [key: string]: Json } | Json[]
+  detectOneToOneRelationships,
+}: GeneratorMetadata & {
+  detectOneToOneRelationships: boolean
+}): Promise<string> => {
+  const columnsByTableId = Object.fromEntries<PostgresColumn[]>(
+    [...tables, ...views, ...materializedViews].map((t) => [t.id, []])
+  )
+  columns
+    .filter((c) => c.table_id in columnsByTableId)
+    .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+    .forEach((c) => columnsByTableId[c.table_id].push(c))
 
-export interface Database {
+  let output = `
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+
+export type Database = {
   ${schemas
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
     .map((schema) => {
       const schemaTables = tables
         .filter((table) => table.schema === schema.name)
         .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-      const schemaViews = views
+      const schemaViews = [...views, ...materializedViews]
         .filter((view) => view.schema === schema.name)
         .sort(({ name: a }, { name: b }) => a.localeCompare(b))
       const schemaFunctions = functions
@@ -72,78 +80,96 @@ export interface Database {
                     (table) => `${JSON.stringify(table.name)}: {
                   Row: {
                     ${[
-                      ...table.columns
-                        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-                        .map(
-                          (column) =>
-                            `${JSON.stringify(column.name)}: ${pgTypeToTsType(
-                              column.format,
-                              types,
-                              schemas,
-                              tables
-                            )} ${column.is_nullable ? '| null' : ''}`
-                        ),
+                      ...columnsByTableId[table.id].map(
+                        (column) =>
+                          `${JSON.stringify(column.name)}: ${pgTypeToTsType(column.format, {
+                            types,
+                            schemas,
+                            tables,
+                            views,
+                          })} ${column.is_nullable ? '| null' : ''}`
+                      ),
                       ...schemaFunctions
                         .filter((fn) => fn.argument_types === table.name)
-                        .map(
-                          (fn) =>
-                            `${JSON.stringify(fn.name)}: ${pgTypeToTsType(
-                              fn.return_type,
-                              types,
-                              schemas,
-                              tables
-                            )} | null`
-                        ),
+                        .map((fn) => {
+                          const type = types.find(({ id }) => id === fn.return_type_id)
+                          let tsType = 'unknown'
+                          if (type) {
+                            tsType = pgTypeToTsType(type.name, { types, schemas, tables, views })
+                          }
+                          return `${JSON.stringify(fn.name)}: ${tsType} | null`
+                        }),
                     ]}
                   }
                   Insert: {
-                    ${table.columns
-                      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-                      .map((column) => {
-                        let output = JSON.stringify(column.name)
+                    ${columnsByTableId[table.id].map((column) => {
+                      let output = JSON.stringify(column.name)
 
-                        if (column.identity_generation === 'ALWAYS') {
-                          return `${output}?: never`
-                        }
+                      if (column.identity_generation === 'ALWAYS') {
+                        return `${output}?: never`
+                      }
 
-                        if (
-                          column.is_nullable ||
-                          column.is_identity ||
-                          column.default_value !== null
-                        ) {
-                          output += '?:'
-                        } else {
-                          output += ':'
-                        }
+                      if (
+                        column.is_nullable ||
+                        column.is_identity ||
+                        column.default_value !== null
+                      ) {
+                        output += '?:'
+                      } else {
+                        output += ':'
+                      }
 
-                        output += pgTypeToTsType(column.format, types, schemas, tables)
+                      output += pgTypeToTsType(column.format, { types, schemas, tables, views })
 
-                        if (column.is_nullable) {
-                          output += '| null'
-                        }
+                      if (column.is_nullable) {
+                        output += '| null'
+                      }
 
-                        return output
-                      })}
+                      return output
+                    })}
                   }
                   Update: {
-                    ${table.columns
-                      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-                      .map((column) => {
-                        let output = JSON.stringify(column.name)
+                    ${columnsByTableId[table.id].map((column) => {
+                      let output = JSON.stringify(column.name)
 
-                        if (column.identity_generation === 'ALWAYS') {
-                          return `${output}?: never`
-                        }
+                      if (column.identity_generation === 'ALWAYS') {
+                        return `${output}?: never`
+                      }
 
-                        output += `?: ${pgTypeToTsType(column.format, types, schemas, tables)}`
+                      output += `?: ${pgTypeToTsType(column.format, { types, schemas, tables, views })}`
 
-                        if (column.is_nullable) {
-                          output += '| null'
-                        }
+                      if (column.is_nullable) {
+                        output += '| null'
+                      }
 
-                        return output
-                      })}
+                      return output
+                    })}
                   }
+                  Relationships: [
+                    ${relationships
+                      .filter(
+                        (relationship) =>
+                          relationship.schema === table.schema &&
+                          relationship.relation === table.name
+                      )
+                      .sort(
+                        (a, b) =>
+                          a.foreign_key_name.localeCompare(b.foreign_key_name) ||
+                          a.referenced_relation.localeCompare(b.referenced_relation)
+                      )
+                      .map(
+                        (relationship) => `{
+                        foreignKeyName: ${JSON.stringify(relationship.foreign_key_name)}
+                        columns: ${JSON.stringify(relationship.columns)}
+                        ${
+                          detectOneToOneRelationships
+                            ? `isOneToOne: ${relationship.is_one_to_one};`
+                            : ''
+                        }referencedRelation: ${JSON.stringify(relationship.referenced_relation)}
+                        referencedColumns: ${JSON.stringify(relationship.referenced_columns)}
+                      }`
+                      )}
+                  ]
                 }`
                   )
             }
@@ -155,66 +181,68 @@ export interface Database {
                 : schemaViews.map(
                     (view) => `${JSON.stringify(view.name)}: {
                   Row: {
-                    ${view.columns
-                      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-                      .map(
-                        (column) =>
-                          `${JSON.stringify(column.name)}: ${pgTypeToTsType(
-                            column.format,
-                            types,
-                            schemas,
-                            tables
-                          )} ${column.is_nullable ? '| null' : ''}`
-                      )}
+                    ${columnsByTableId[view.id].map(
+                      (column) =>
+                        `${JSON.stringify(column.name)}: ${pgTypeToTsType(column.format, {
+                          types,
+                          schemas,
+                          tables,
+                          views,
+                        })} ${column.is_nullable ? '| null' : ''}`
+                    )}
                   }
                   ${
-                    view.is_updatable
+                    'is_updatable' in view && view.is_updatable
                       ? `Insert: {
-                    ${view.columns
-                      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-                      .map((column) => {
-                        let output = JSON.stringify(column.name)
+                           ${columnsByTableId[view.id].map((column) => {
+                             let output = JSON.stringify(column.name)
 
-                        if (!column.is_updatable) {
-                          return `${output}?: never`
-                        }
+                             if (!column.is_updatable) {
+                               return `${output}?: never`
+                             }
 
-                        output += `?: ${pgTypeToTsType(
-                          column.format,
-                          types,
-                          schemas,
-                          tables
-                        )} | null`
+                             output += `?: ${pgTypeToTsType(column.format, { types, schemas, tables, views })} | null`
 
-                        return output
-                      })}
-                  }`
+                             return output
+                           })}
+                         }
+                         Update: {
+                           ${columnsByTableId[view.id].map((column) => {
+                             let output = JSON.stringify(column.name)
+
+                             if (!column.is_updatable) {
+                               return `${output}?: never`
+                             }
+
+                             output += `?: ${pgTypeToTsType(column.format, { types, schemas, tables, views })} | null`
+
+                             return output
+                           })}
+                         }
+                        `
                       : ''
-                  }
-                  ${
-                    view.is_updatable
-                      ? `Update: {
-                    ${view.columns
-                      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-                      .map((column) => {
-                        let output = JSON.stringify(column.name)
-
-                        if (!column.is_updatable) {
-                          return `${output}?: never`
-                        }
-
-                        output += `?: ${pgTypeToTsType(
-                          column.format,
-                          types,
-                          schemas,
-                          tables
-                        )} | null`
-
-                        return output
-                      })}
-                  }`
-                      : ''
-                  }
+                  }Relationships: [
+                    ${relationships
+                      .filter(
+                        (relationship) =>
+                          relationship.schema === view.schema && relationship.relation === view.name
+                      )
+                      .sort(({ foreign_key_name: a }, { foreign_key_name: b }) =>
+                        a.localeCompare(b)
+                      )
+                      .map(
+                        (relationship) => `{
+                        foreignKeyName: ${JSON.stringify(relationship.foreign_key_name)}
+                        columns: ${JSON.stringify(relationship.columns)}
+                        ${
+                          detectOneToOneRelationships
+                            ? `isOneToOne: ${relationship.is_one_to_one};`
+                            : ''
+                        }referencedRelation: ${JSON.stringify(relationship.referenced_relation)}
+                        referencedColumns: ${JSON.stringify(relationship.referenced_columns)}
+                      }`
+                      )}
+                  ]
                 }`
                   )
             }
@@ -225,11 +253,14 @@ export interface Database {
                 return '[_ in never]: never'
               }
 
-              const schemaFunctionsGroupedByName = schemaFunctions.reduce((acc, curr) => {
-                acc[curr.name] ??= []
-                acc[curr.name].push(curr)
-                return acc
-              }, {} as Record<string, PostgresFunction[]>)
+              const schemaFunctionsGroupedByName = schemaFunctions.reduce(
+                (acc, curr) => {
+                  acc[curr.name] ??= []
+                  acc[curr.name].push(curr)
+                  return acc
+                },
+                {} as Record<string, PostgresFunction[]>
+              )
 
               return Object.entries(schemaFunctionsGroupedByName).map(
                 ([fnName, fns]) =>
@@ -237,7 +268,7 @@ export interface Database {
                     .map(
                       ({
                         args,
-                        return_type,
+                        return_type_id,
                         return_type_relation_id,
                         is_set_returning_function,
                       }) => `{
@@ -249,25 +280,12 @@ export interface Database {
                     }
 
                     const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
-                      let type = arrayTypes.find(({ id }) => id === type_id)
+                      const type = types.find(({ id }) => id === type_id)
+                      let tsType = 'unknown'
                       if (type) {
-                        // If it's an array type, the name looks like `_int8`.
-                        const elementTypeName = type.name.substring(1)
-                        return {
-                          name,
-                          type: `(${pgTypeToTsType(elementTypeName, types, schemas, tables)})[]`,
-                          has_default,
-                        }
+                        tsType = pgTypeToTsType(type.name, { types, schemas, tables, views })
                       }
-                      type = types.find(({ id }) => id === type_id)
-                      if (type) {
-                        return {
-                          name,
-                          type: pgTypeToTsType(type.name, types, schemas, tables),
-                          has_default,
-                        }
-                      }
-                      return { name, type: 'unknown', has_default }
+                      return { name, type: tsType, has_default }
                     })
 
                     return `{
@@ -282,20 +300,12 @@ export interface Database {
                     const tableArgs = args.filter(({ mode }) => mode === 'table')
                     if (tableArgs.length > 0) {
                       const argsNameAndType = tableArgs.map(({ name, type_id }) => {
-                        let type = arrayTypes.find(({ id }) => id === type_id)
+                        const type = types.find(({ id }) => id === type_id)
+                        let tsType = 'unknown'
                         if (type) {
-                          // If it's an array type, the name looks like `_int8`.
-                          const elementTypeName = type.name.substring(1)
-                          return {
-                            name,
-                            type: `(${pgTypeToTsType(elementTypeName, types, schemas, tables)})[]`,
-                          }
+                          tsType = pgTypeToTsType(type.name, { types, schemas, tables, views })
                         }
-                        type = types.find(({ id }) => id === type_id)
-                        if (type) {
-                          return { name, type: pgTypeToTsType(type.name, types, schemas, tables) }
-                        }
-                        return { name, type: 'unknown' }
+                        return { name, type: tsType }
                       })
 
                       return `{
@@ -311,25 +321,30 @@ export interface Database {
                     )
                     if (relation) {
                       return `{
-                        ${relation.columns
-                          .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-                          .map(
-                            (column) =>
-                              `${JSON.stringify(column.name)}: ${pgTypeToTsType(
-                                column.format,
-                                types,
-                                schemas,
-                                tables
-                              )} ${column.is_nullable ? '| null' : ''}`
-                          )}
+                        ${columnsByTableId[relation.id].map(
+                          (column) =>
+                            `${JSON.stringify(column.name)}: ${pgTypeToTsType(column.format, {
+                              types,
+                              schemas,
+                              tables,
+                              views,
+                            })} ${column.is_nullable ? '| null' : ''}`
+                        )}
                       }`
                     }
 
-                    // Case 3: returns base/composite/enum type.
-                    return pgTypeToTsType(return_type, types, schemas, tables)
+                    // Case 3: returns base/array/composite/enum type.
+                    const type = types.find(({ id }) => id === return_type_id)
+                    if (type) {
+                      return pgTypeToTsType(type.name, { types, schemas, tables, views })
+                    }
+
+                    return 'unknown'
                   })()})${is_set_returning_function ? '[]' : ''}
                 }`
                     )
+                    // We only sorted by name on schemaFunctions - here we sort by arg names, arg types, and return type.
+                    .sort()
                     .join('|')}`
               )
             })()}
@@ -355,15 +370,11 @@ export interface Database {
                       `${JSON.stringify(name)}: {
                         ${attributes.map(({ name, type_id }) => {
                           const type = types.find(({ id }) => id === type_id)
+                          let tsType = 'unknown'
                           if (type) {
-                            return `${JSON.stringify(name)}: ${pgTypeToTsType(
-                              type.name,
-                              types,
-                              schemas,
-                              tables
-                            )}`
+                            tsType = `${pgTypeToTsType(type.name, { types, schemas, tables, views })} | null`
                           }
-                          return `${JSON.stringify(name)}: unknown`
+                          return `${JSON.stringify(name)}: ${tsType}`
                         })}
                       }`
                   )
@@ -371,9 +382,90 @@ export interface Database {
           }
         }`
     })}
-}`
+}
 
-  output = prettier.format(output, {
+type PublicSchema = Database[Extract<keyof Database, "public">]
+
+export type Tables<
+  PublicTableNameOrOptions extends
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])
+    : never = never
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    ? (PublicSchema["Tables"] & PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : never
+
+export type TablesUpdate<
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : never
+
+export type Enums<
+  PublicEnumNameOrOptions extends
+    | keyof PublicSchema["Enums"]
+    | { schema: keyof Database },
+  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+    : never = never
+> = PublicEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+  ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+  : never
+`
+
+  output = await prettier.format(output, {
     parser: 'typescript',
     semi: false,
   })
@@ -383,9 +475,17 @@ export interface Database {
 // TODO: Make this more robust. Currently doesn't handle range types - returns them as unknown.
 const pgTypeToTsType = (
   pgType: string,
-  types: PostgresType[],
-  schemas: PostgresSchema[],
-  tables: PostgresTable[]
+  {
+    types,
+    schemas,
+    tables,
+    views,
+  }: {
+    types: PostgresType[]
+    schemas: PostgresSchema[]
+    tables: PostgresTable[]
+    views: PostgresView[]
+  }
 ): string => {
   if (pgType === 'bool') {
     return 'boolean'
@@ -404,6 +504,7 @@ const pgTypeToTsType = (
       'timestamp',
       'timestamptz',
       'uuid',
+      'vector',
     ].includes(pgType)
   ) {
     return 'string'
@@ -414,7 +515,7 @@ const pgTypeToTsType = (
   } else if (pgType === 'record') {
     return 'Record<string, unknown>'
   } else if (pgType.startsWith('_')) {
-    return `(${pgTypeToTsType(pgType.substring(1), types, schemas, tables)})[]`
+    return `(${pgTypeToTsType(pgType.substring(1), { types, schemas, tables, views })})[]`
   } else {
     const enumType = types.find((type) => type.name === pgType && type.enums.length > 0)
     if (enumType) {
@@ -435,6 +536,7 @@ const pgTypeToTsType = (
       }
       return 'unknown'
     }
+
     const tableRowType = tables.find((table) => table.name === pgType)
     if (tableRowType) {
       if (schemas.some(({ name }) => name === tableRowType.schema)) {
@@ -444,6 +546,17 @@ const pgTypeToTsType = (
       }
       return 'unknown'
     }
+
+    const viewRowType = views.find((view) => view.name === pgType)
+    if (viewRowType) {
+      if (schemas.some(({ name }) => name === viewRowType.schema)) {
+        return `Database[${JSON.stringify(viewRowType.schema)}]['Views'][${JSON.stringify(
+          viewRowType.name
+        )}]['Row']`
+      }
+      return 'unknown'
+    }
+
     return 'unknown'
   }
 }

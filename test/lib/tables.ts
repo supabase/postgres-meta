@@ -1,3 +1,4 @@
+import { expect, test } from 'vitest'
 import { pgMeta } from './utils'
 
 const cleanNondet = (x: any) => {
@@ -42,6 +43,7 @@ test('list', async () => {
       "bytes": Any<Number>,
       "columns": [
         {
+          "check": null,
           "comment": null,
           "data_type": "bigint",
           "default_value": null,
@@ -59,6 +61,7 @@ test('list', async () => {
           "table": "users",
         },
         {
+          "check": null,
           "comment": null,
           "data_type": "text",
           "default_value": null,
@@ -76,6 +79,7 @@ test('list', async () => {
           "table": "users",
         },
         {
+          "check": null,
           "comment": null,
           "data_type": "USER-DEFINED",
           "default_value": "'ACTIVE'::user_status",
@@ -109,6 +113,15 @@ test('list', async () => {
         },
       ],
       "relationships": [
+        {
+          "constraint_name": "user_details_user_id_fkey",
+          "source_column_name": "user_id",
+          "source_schema": "public",
+          "source_table_name": "user_details",
+          "target_column_name": "id",
+          "target_table_name": "users",
+          "target_table_schema": "public",
+        },
         {
           "constraint_name": "todos_user-id_fkey",
           "source_column_name": "user-id",
@@ -164,6 +177,15 @@ test('list without columns', async () => {
         },
       ],
       "relationships": [
+        {
+          "constraint_name": "user_details_user_id_fkey",
+          "source_column_name": "user_id",
+          "source_schema": "public",
+          "source_table_name": "user_details",
+          "target_column_name": "id",
+          "target_table_name": "users",
+          "target_table_schema": "public",
+        },
         {
           "constraint_name": "todos_user-id_fkey",
           "source_column_name": "user-id",
@@ -419,6 +441,7 @@ test('primary keys', async () => {
         "bytes": Any<Number>,
         "columns": [
           {
+            "check": null,
             "comment": null,
             "data_type": "bigint",
             "default_value": null,
@@ -436,6 +459,7 @@ test('primary keys', async () => {
             "table": "t",
           },
           {
+            "check": null,
             "comment": null,
             "data_type": "text",
             "default_value": null,

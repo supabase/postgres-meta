@@ -7,16 +7,22 @@ on:
       - master
   workflow_dispatch:
 
+# Cancel old builds on new commit for same workflow + branch/PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: Test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: "16"
+          node-version-file: '.nvmrc'
+
 
       - run: |
           npm clean-install
@@ -25,25 +31,36 @@ jobs:
 
   prettier-check:
     name: Prettier check
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actionsx/prettier@v2
+      - name: Setup node
+        uses: actions/setup-node@v4
         with:
-          args: --check "{src,test}/**/*.ts"
-  
+          node-version-file: '.nvmrc'
+
+      # Installing all dependencies takes up to three minutes, hacking around to only installing prettier+deps
+      - name: Download dependencies
+        run: |
+          rm package.json
+          rm package-lock.json
+          npm i prettier@3 prettier-plugin-sql@0.17.0
+      - name: Run prettier
+        run: |-
+          npx prettier -c '{src,test}/**/*.ts'
+
   docker:
     name: Build with docker
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         name: Checkout Repo
 
-      - uses: docker/setup-buildx-action@v2
+      - uses: docker/setup-buildx-action@v3
         name: Set up Docker Buildx
       
-      - uses: docker/build-push-action@v4
+      - uses: docker/build-push-action@v5
         with:
           push: false
           tags: pg-meta:test

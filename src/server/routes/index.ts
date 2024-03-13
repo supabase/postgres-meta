@@ -1,15 +1,19 @@
 import CryptoJS from 'crypto-js'
 import { FastifyInstance } from 'fastify'
+import ColumnPrivilegesRoute from './column-privileges.js'
 import ColumnRoute from './columns.js'
 import ConfigRoute from './config.js'
 import ExtensionsRoute from './extensions.js'
 import ForeignTablesRoute from './foreign-tables.js'
 import FunctionsRoute from './functions.js'
+import IndexesRoute from './indexes.js'
+import MaterializedViewsRoute from './materialized-views.js'
 import PoliciesRoute from './policies.js'
 import PublicationsRoute from './publications.js'
 import QueryRoute from './query.js'
 import SchemasRoute from './schemas.js'
 import RolesRoute from './roles.js'
+import TablePrivilegesRoute from './table-privileges.js'
 import TablesRoute from './tables.js'
 import TriggersRoute from './triggers.js'
 import TypesRoute from './types.js'
@@ -40,16 +44,20 @@ export default async (fastify: FastifyInstance) => {
     done()
   })
 
+  fastify.register(ColumnPrivilegesRoute, { prefix: '/column-privileges' })
   fastify.register(ColumnRoute, { prefix: '/columns' })
   fastify.register(ConfigRoute, { prefix: '/config' })
   fastify.register(ExtensionsRoute, { prefix: '/extensions' })
   fastify.register(ForeignTablesRoute, { prefix: '/foreign-tables' })
   fastify.register(FunctionsRoute, { prefix: '/functions' })
+  fastify.register(IndexesRoute, { prefix: '/indexes' })
+  fastify.register(MaterializedViewsRoute, { prefix: '/materialized-views' })
   fastify.register(PoliciesRoute, { prefix: '/policies' })
   fastify.register(PublicationsRoute, { prefix: '/publications' })
   fastify.register(QueryRoute, { prefix: '/query' })
   fastify.register(SchemasRoute, { prefix: '/schemas' })
   fastify.register(RolesRoute, { prefix: '/roles' })
+  fastify.register(TablePrivilegesRoute, { prefix: '/table-privileges' })
   fastify.register(TablesRoute, { prefix: '/tables' })
   fastify.register(TriggersRoute, { prefix: '/triggers' })
   fastify.register(TypesRoute, { prefix: '/types' })

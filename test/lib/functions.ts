@@ -1,3 +1,4 @@
+import { expect, test } from 'vitest'
 import { pgMeta } from './utils'
 
 test('list', async () => {
@@ -35,7 +36,8 @@ test('list', async () => {
       "is_set_returning_function": false,
       "language": "sql",
       "name": "add",
-      "return_type": "int4",
+      "return_type": "integer",
+      "return_type_id": 23,
       "return_type_relation_id": null,
       "schema": "public",
       "security_definer": false,
@@ -134,7 +136,8 @@ test('retrieve, create, update, delete', async () => {
         "is_set_returning_function": false,
         "language": "sql",
         "name": "test_func",
-        "return_type": "int4",
+        "return_type": "integer",
+        "return_type_id": 23,
         "return_type_relation_id": null,
         "schema": "public",
         "security_definer": true,
@@ -183,7 +186,8 @@ test('retrieve, create, update, delete', async () => {
         "is_set_returning_function": false,
         "language": "sql",
         "name": "test_func",
-        "return_type": "int4",
+        "return_type": "integer",
+        "return_type_id": 23,
         "return_type_relation_id": null,
         "schema": "public",
         "security_definer": true,
@@ -236,7 +240,8 @@ test('retrieve, create, update, delete', async () => {
         "is_set_returning_function": false,
         "language": "sql",
         "name": "test_func_renamed",
-        "return_type": "int4",
+        "return_type": "integer",
+        "return_type_id": 23,
         "return_type_relation_id": null,
         "schema": "test_schema",
         "security_definer": true,
@@ -285,7 +290,8 @@ test('retrieve, create, update, delete', async () => {
         "is_set_returning_function": false,
         "language": "sql",
         "name": "test_func_renamed",
-        "return_type": "int4",
+        "return_type": "integer",
+        "return_type_id": 23,
         "return_type_relation_id": null,
         "schema": "test_schema",
         "security_definer": true,
@@ -303,4 +309,48 @@ test('retrieve, create, update, delete', async () => {
   })
 
   await pgMeta.schemas.remove(testSchemaId)
+})
+
+test('retrieve set-returning function', async () => {
+  const res = await pgMeta.functions.retrieve({
+    schema: 'public',
+    name: 'function_returning_set_of_rows',
+    args: [],
+  })
+  expect(res.data).toMatchInlineSnapshot(
+    {
+      id: expect.any(Number),
+      return_type_id: expect.any(Number),
+      return_type_relation_id: expect.any(Number),
+    },
+    `
+    {
+      "args": [],
+      "argument_types": "",
+      "behavior": "STABLE",
+      "complete_statement": "CREATE OR REPLACE FUNCTION public.function_returning_set_of_rows()
+     RETURNS SETOF users
+     LANGUAGE sql
+     STABLE
+    AS $function$
+      select * from public.users;
+    $function$
+    ",
+      "config_params": null,
+      "definition": "
+      select * from public.users;
+    ",
+      "id": Any<Number>,
+      "identity_argument_types": "",
+      "is_set_returning_function": true,
+      "language": "sql",
+      "name": "function_returning_set_of_rows",
+      "return_type": "SETOF users",
+      "return_type_id": Any<Number>,
+      "return_type_relation_id": Any<Number>,
+      "schema": "public",
+      "security_definer": false,
+    }
+  `
+  )
 })

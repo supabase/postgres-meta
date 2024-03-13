@@ -1,7 +1,7 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
 import { coalesceRowsToArray, filterByList } from './helpers.js'
-import { columnsSql, primaryKeysSql, relationshipsSql, tablesSql } from './sql/index.js'
+import { columnsSql, tablesSql } from './sql/index.js'
 import {
   PostgresMetaResult,
   PostgresTable,
@@ -250,15 +250,7 @@ COMMIT;`
 const generateEnrichedTablesSql = ({ includeColumns }: { includeColumns: boolean }) => `
 with tables as (${tablesSql})
   ${includeColumns ? `, columns as (${columnsSql})` : ''}
-  , primary_keys as (${primaryKeysSql})
-  , relationships as (${relationshipsSql})
 select
   *
   ${includeColumns ? `, ${coalesceRowsToArray('columns', 'columns.table_id = tables.id')}` : ''}
-  , ${coalesceRowsToArray('primary_keys', 'primary_keys.table_id = tables.id')}
-  , ${coalesceRowsToArray(
-    'relationships',
-    `(relationships.source_schema = tables.schema AND relationships.source_table_name = tables.name)
-       OR (relationships.target_table_schema = tables.schema AND relationships.target_table_name = tables.name)`
-  )}
 from tables`

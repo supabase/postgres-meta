@@ -98,7 +98,7 @@ None. Please don't use this as a standalone server. This should be used behind a
 
 To start developing, run `npm run dev`. It will set up the database with Docker for you. The server will restart on file change.
 
-If you are fixing a bug, you should create a new test case. To test your changes, add the `-u/--updateSnapshot` flag to `jest` on the `test:run` script, run `npm run test`, and then review the git diff of the snapshots. Depending on your change, you may see `id` fields being changed - this is expected and you are free to commit it, as long as it passes the CI. Don't forget to remove the `-u/--updateSnapshot` flag when committing.
+If you are fixing a bug, you should create a new test case. To test your changes, add the `-u` flag to `vitest` on the `test:run` script, run `npm run test`, and then review the git diff of the snapshots. Depending on your change, you may see `id` fields being changed - this is expected and you are free to commit it, as long as it passes the CI. Don't forget to remove the `-u` flag when committing.
 
 To make changes to the TypeScript type generation, run `npm run gen:types:typescript` while you have `npm run dev` running.
 To use your own database connection string instead of the provided test database, run:
@@ -113,3 +113,4 @@ Apache 2.0
 We are building the features of Firebase using enterprise-grade, open source products. We support existing communities wherever possible, and if the products don’t exist we build them and open source them ourselves.
 
 [![New Sponsor](https://user-images.githubusercontent.com/10214025/90518111-e74bbb00-e198-11ea-8f88-c9e3c1aa4b5b.png)](https://github.com/sponsors/supabase)
+

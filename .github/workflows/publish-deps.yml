@@ -5,22 +5,22 @@ on:
 
 jobs:
   publish:
-    # Must match glibc verison in node:16-bullseye
-    runs-on: ubuntu-20.04
+    # Must match glibc verison in node:20
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: 'pyramation/libpg-query-node'
-          ref: 'v13'
+          ref: 'v15'
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version-file: '.nvmrc'
 
       - run: npm i
       - run: npm run binary:build
 
-      - uses: aws-actions/configure-aws-credentials@v2
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.PROD_AWS_ROLE }}
           aws-region: us-east-1
