@@ -70,6 +70,21 @@ test('typegen', async () => {
               },
             ]
           }
+          table_with_other_tables_row_type: {
+            Row: {
+              col1: Database["public"]["Tables"]["user_details"]["Row"] | null
+              col2: Database["public"]["Views"]["a_view"]["Row"] | null
+            }
+            Insert: {
+              col1?: Database["public"]["Tables"]["user_details"]["Row"] | null
+              col2?: Database["public"]["Views"]["a_view"]["Row"] | null
+            }
+            Update: {
+              col1?: Database["public"]["Tables"]["user_details"]["Row"] | null
+              col2?: Database["public"]["Views"]["a_view"]["Row"] | null
+            }
+            Relationships: []
+          }
           todos: {
             Row: {
               details: string | null
@@ -538,6 +553,21 @@ test('typegen w/ one-to-one relationships', async () => {
                 referencedColumns: ["id"]
               },
             ]
+          }
+          table_with_other_tables_row_type: {
+            Row: {
+              col1: Database["public"]["Tables"]["user_details"]["Row"] | null
+              col2: Database["public"]["Views"]["a_view"]["Row"] | null
+            }
+            Insert: {
+              col1?: Database["public"]["Tables"]["user_details"]["Row"] | null
+              col2?: Database["public"]["Views"]["a_view"]["Row"] | null
+            }
+            Update: {
+              col1?: Database["public"]["Tables"]["user_details"]["Row"] | null
+              col2?: Database["public"]["Views"]["a_view"]["Row"] | null
+            }
+            Relationships: []
           }
           todos: {
             Row: {

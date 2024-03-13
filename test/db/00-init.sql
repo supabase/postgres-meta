@@ -127,3 +127,8 @@ create table user_details (
 create view a_view as select id from users;
 
 create table empty();
+
+create table table_with_other_tables_row_type (
+  col1 user_details,
+  col2 a_view
+);
