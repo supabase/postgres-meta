@@ -77,7 +77,12 @@ export const postgresColumnUpdateSchema = Type.Object({
   is_nullable: Type.Optional(Type.Boolean()),
   is_unique: Type.Optional(Type.Boolean()),
   comment: Type.Optional(Type.String()),
-  check: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  check: Type.Optional(
+    Type.Union(
+      // Type.Null() must go first: https://github.com/sinclairzx81/typebox/issues/546
+      [Type.Null(), Type.String()]
+    )
+  ),
 })
 export type PostgresColumnUpdate = Static<typeof postgresColumnUpdateSchema>
 

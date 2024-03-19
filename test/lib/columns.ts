@@ -933,3 +933,17 @@ test('column with multiple checks', async () => {
 
   await pgMeta.query(`drop table t`)
 })
+
+test('dropping column checks', async () => {
+  await pgMeta.query(`create table public.t(c int8 check (c != 0))`)
+
+  let res = await pgMeta.columns.retrieve({
+    schema: 'public',
+    table: 't',
+    name: 'c',
+  })
+  res = await pgMeta.columns.update(res.data!.id, { check: null })
+  expect(res?.data?.check).toMatchInlineSnapshot(`null`)
+
+  await pgMeta.query(`drop table t`)
+})
