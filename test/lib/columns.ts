@@ -947,3 +947,44 @@ test('dropping column checks', async () => {
 
   await pgMeta.query(`drop table t`)
 })
+
+test('column with fully-qualified type', async () => {
+  await pgMeta.query(`create table public.t(); create schema s; create type s.my_type as enum ();`)
+
+  const table = await pgMeta.tables.retrieve({
+    schema: 'public',
+    name: 't',
+  })
+  const column = await pgMeta.columns.create({
+    table_id: table.data!.id,
+    name: 'c',
+    type: 's.my_type',
+  })
+  expect(column).toMatchInlineSnapshot(`
+    {
+      "data": {
+        "check": null,
+        "comment": null,
+        "data_type": "USER-DEFINED",
+        "default_value": null,
+        "enums": [],
+        "format": "my_type",
+        "id": "16619.1",
+        "identity_generation": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_updatable": true,
+        "name": "c",
+        "ordinal_position": 1,
+        "schema": "public",
+        "table": "t",
+        "table_id": 16619,
+      },
+      "error": null,
+    }
+  `)
+
+  await pgMeta.query(`drop table public.t; drop schema s cascade;`)
+})
