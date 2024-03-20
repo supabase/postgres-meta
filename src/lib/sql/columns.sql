@@ -76,7 +76,7 @@ FROM
   ) ON t.typtype = 'd'
   AND t.typbasetype = bt.oid
   LEFT JOIN (
-    SELECT
+    SELECT DISTINCT ON (table_id, ordinal_position)
       conrelid AS table_id,
       conkey[1] AS ordinal_position
     FROM pg_catalog.pg_constraint

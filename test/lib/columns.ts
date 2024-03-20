@@ -934,6 +934,39 @@ test('column with multiple checks', async () => {
   await pgMeta.query(`drop table t`)
 })
 
+test('column with multiple unique constraints', async () => {
+  await pgMeta.query(`create table t(c int8 unique); alter table t add unique (c);`)
+
+  const res = await pgMeta.columns.list()
+  const columns = res.data
+    ?.filter((c) => c.schema === 'public' && c.table === 't')
+    .map(({ id, table_id, ...c }) => c)
+  expect(columns).toMatchInlineSnapshot(`
+    [
+      {
+        "check": null,
+        "comment": null,
+        "data_type": "bigint",
+        "default_value": null,
+        "enums": [],
+        "format": "int8",
+        "identity_generation": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_unique": true,
+        "is_updatable": true,
+        "name": "c",
+        "ordinal_position": 1,
+        "schema": "public",
+        "table": "t",
+      },
+    ]
+  `)
+
+  await pgMeta.query(`drop table t`)
+})
+
 test('dropping column checks', async () => {
   await pgMeta.query(`create table public.t(c int8 check (c != 0))`)
 
@@ -955,34 +988,30 @@ test('column with fully-qualified type', async () => {
     schema: 'public',
     name: 't',
   })
-  const column = await pgMeta.columns.create({
+  const { data } = await pgMeta.columns.create({
     table_id: table.data!.id,
     name: 'c',
     type: 's.my_type',
   })
+  const { id, table_id, ...column } = data!
   expect(column).toMatchInlineSnapshot(`
     {
-      "data": {
-        "check": null,
-        "comment": null,
-        "data_type": "USER-DEFINED",
-        "default_value": null,
-        "enums": [],
-        "format": "my_type",
-        "id": "16619.1",
-        "identity_generation": null,
-        "is_generated": false,
-        "is_identity": false,
-        "is_nullable": true,
-        "is_unique": false,
-        "is_updatable": true,
-        "name": "c",
-        "ordinal_position": 1,
-        "schema": "public",
-        "table": "t",
-        "table_id": 16619,
-      },
-      "error": null,
+      "check": null,
+      "comment": null,
+      "data_type": "USER-DEFINED",
+      "default_value": null,
+      "enums": [],
+      "format": "my_type",
+      "identity_generation": null,
+      "is_generated": false,
+      "is_identity": false,
+      "is_nullable": true,
+      "is_unique": false,
+      "is_updatable": true,
+      "name": "c",
+      "ordinal_position": 1,
+      "schema": "public",
+      "table": "t",
     }
   `)
 
