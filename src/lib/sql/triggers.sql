@@ -29,6 +29,7 @@ ON pg_t.tgrelid = pg_c.oid
 JOIN information_schema.triggers AS is_t
 ON is_t.trigger_name = pg_t.tgname
 AND pg_c.relname = is_t.event_object_table
+AND pg_c.relnamespace = is_t.event_object_schema::regnamespace
 JOIN pg_proc AS pg_p
 ON pg_t.tgfoid = pg_p.oid
 JOIN pg_namespace AS pg_n

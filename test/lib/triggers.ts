@@ -217,3 +217,50 @@ test('multi event', async () => {
   )
   await pgMeta.triggers.remove(res.data!.id)
 })
+
+test('triggers with the same name on different schemas', async () => {
+  await pgMeta.query(`
+create function tr_f() returns trigger language plpgsql as 'begin end';
+create schema s1; create table s1.t(); create trigger tr before insert on s1.t execute function tr_f();
+create schema s2; create table s2.t(); create trigger tr before insert on s2.t execute function tr_f();
+`)
+
+  const res = await pgMeta.triggers.list()
+  const triggers = res.data?.map(({ id, table_id, ...trigger }) => trigger)
+  expect(triggers).toMatchInlineSnapshot(`
+    [
+      {
+        "activation": "BEFORE",
+        "condition": null,
+        "enabled_mode": "ORIGIN",
+        "events": [
+          "INSERT",
+        ],
+        "function_args": [],
+        "function_name": "tr_f",
+        "function_schema": "public",
+        "name": "tr",
+        "orientation": "STATEMENT",
+        "schema": "s1",
+        "table": "t",
+      },
+      {
+        "activation": "BEFORE",
+        "condition": null,
+        "enabled_mode": "ORIGIN",
+        "events": [
+          "INSERT",
+        ],
+        "function_args": [],
+        "function_name": "tr_f",
+        "function_schema": "public",
+        "name": "tr",
+        "orientation": "STATEMENT",
+        "schema": "s2",
+        "table": "t",
+      },
+    ]
+  `)
+
+  await pgMeta.query('drop schema s1 cascade; drop schema s2 cascade;')
+})
