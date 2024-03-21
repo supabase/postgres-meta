@@ -1,9 +1,6 @@
-import prettier from 'prettier'
 import type {
   PostgresColumn,
-  PostgresFunction,
   PostgresMaterializedView,
-  PostgresRelationship,
   PostgresSchema,
   PostgresTable,
   PostgresType,
@@ -110,7 +107,7 @@ function formatForGoTypeName(name: string): string {
 function generateTableStruct(
   schema: PostgresSchema,
   table: PostgresTable | PostgresView | PostgresMaterializedView,
-  columns: PostgresColumn[],
+  columns: PostgresColumn[] | undefined,
   types: PostgresType[],
   operation: Operation
 ): string {
@@ -122,22 +119,23 @@ function generateTableStruct(
   //   id   int    `json:"id"`
   //   name string `json:"name"`
   // }
-  const columnEntries: [string, string, string][] = columns.map((column) => {
-    let nullable: boolean
-    if (operation === 'Insert') {
-      nullable =
-        column.is_nullable || column.is_identity || column.is_generated || !!column.default_value
-    } else if (operation === 'Update') {
-      nullable = true
-    } else {
-      nullable = column.is_nullable
-    }
-    return [
-      formatForGoTypeName(column.name),
-      pgTypeToGoType(column.format, nullable, types),
-      column.name,
-    ]
-  })
+  const columnEntries: [string, string, string][] =
+    columns?.map((column) => {
+      let nullable: boolean
+      if (operation === 'Insert') {
+        nullable =
+          column.is_nullable || column.is_identity || column.is_generated || !!column.default_value
+      } else if (operation === 'Update') {
+        nullable = true
+      } else {
+        nullable = column.is_nullable
+      }
+      return [
+        formatForGoTypeName(column.name),
+        pgTypeToGoType(column.format, nullable, types),
+        column.name,
+      ]
+    }) ?? []
 
   const [maxFormattedNameLength, maxTypeLength] = columnEntries.reduce(
     ([maxFormattedName, maxType], [formattedName, type]) => {
@@ -164,7 +162,7 @@ ${formattedColumnEntries.join('\n')}
 function generateTableStructsForOperations(
   schema: PostgresSchema,
   table: PostgresTable | PostgresView | PostgresMaterializedView,
-  columns: PostgresColumn[],
+  columns: PostgresColumn[] | undefined,
   types: PostgresType[],
   operations: Operation[]
 ): string[] {
