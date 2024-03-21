@@ -1481,64 +1481,142 @@ test('typegen: go', async () => {
   expect(body).toMatchInlineSnapshot(`
     "package database
 
-    type PublicUsers struct {
-      Id     int64  \`json:"id"\`
-      Name   string \`json:"name"\`
-      Status string \`json:"status"\`
-    }
+import "database/sql"
 
-    type PublicTodos struct {
-      Details string \`json:"details"\`
-      Id      int64  \`json:"id"\`
-      UserId  int64  \`json:"user-id"\`
-    }
+type PublicUsersSelect struct {
+  Id     int64          \`json:"id"\`
+  Name   sql.NullString \`json:"name"\`
+  Status sql.NullString \`json:"status"\`
+}
 
-    type PublicUsersAudit struct {
-      CreatedAt     string      \`json:"created_at"\`
-      Id            int64       \`json:"id"\`
-      PreviousValue interface{} \`json:"previous_value"\`
-      UserId        int64       \`json:"user_id"\`
-    }
+type PublicUsersInsert struct {
+  Id     sql.NullInt64  \`json:"id"\`
+  Name   sql.NullString \`json:"name"\`
+  Status sql.NullString \`json:"status"\`
+}
 
-    type PublicUserDetails struct {
-      Details string \`json:"details"\`
-      UserId  int64  \`json:"user_id"\`
-    }
+type PublicUsersUpdate struct {
+  Id     sql.NullInt64  \`json:"id"\`
+  Name   sql.NullString \`json:"name"\`
+  Status sql.NullString \`json:"status"\`
+}
 
-    type PublicCategory struct {
-      Id   int32  \`json:"id"\`
-      Name string \`json:"name"\`
-    }
+type PublicTodosSelect struct {
+  Details sql.NullString \`json:"details"\`
+  Id      int64          \`json:"id"\`
+  UserId  int64          \`json:"user-id"\`
+}
 
-    type PublicMemes struct {
-      Category  int32       \`json:"category"\`
-      CreatedAt string      \`json:"created_at"\`
-      Id        int32       \`json:"id"\`
-      Metadata  interface{} \`json:"metadata"\`
-      Name      string      \`json:"name"\`
-      Status    string      \`json:"status"\`
-    }
+type PublicTodosInsert struct {
+  Details sql.NullString \`json:"details"\`
+  Id      sql.NullInt64  \`json:"id"\`
+  UserId  int64          \`json:"user-id"\`
+}
 
-    type PublicTodosView struct {
-      Details string \`json:"details"\`
-      Id      int64  \`json:"id"\`
-      UserId  int64  \`json:"user-id"\`
-    }
+type PublicTodosUpdate struct {
+  Details sql.NullString \`json:"details"\`
+  Id      sql.NullInt64  \`json:"id"\`
+  UserId  sql.NullInt64  \`json:"user-id"\`
+}
 
-    type PublicUsersView struct {
-      Id     int64  \`json:"id"\`
-      Name   string \`json:"name"\`
-      Status string \`json:"status"\`
-    }
+type PublicUsersAuditSelect struct {
+  CreatedAt     sql.NullString \`json:"created_at"\`
+  Id            int64          \`json:"id"\`
+  PreviousValue interface{}    \`json:"previous_value"\`
+  UserId        sql.NullInt64  \`json:"user_id"\`
+}
 
-    type PublicAView struct {
-      Id int64 \`json:"id"\`
-    }
+type PublicUsersAuditInsert struct {
+  CreatedAt     sql.NullString \`json:"created_at"\`
+  Id            sql.NullInt64  \`json:"id"\`
+  PreviousValue interface{}    \`json:"previous_value"\`
+  UserId        sql.NullInt64  \`json:"user_id"\`
+}
 
-    type PublicTodosMatview struct {
-      Details string \`json:"details"\`
-      Id      int64  \`json:"id"\`
-      UserId  int64  \`json:"user-id"\`
-    }"
+type PublicUsersAuditUpdate struct {
+  CreatedAt     sql.NullString \`json:"created_at"\`
+  Id            sql.NullInt64  \`json:"id"\`
+  PreviousValue interface{}    \`json:"previous_value"\`
+  UserId        sql.NullInt64  \`json:"user_id"\`
+}
+
+type PublicUserDetailsSelect struct {
+  Details sql.NullString \`json:"details"\`
+  UserId  int64          \`json:"user_id"\`
+}
+
+type PublicUserDetailsInsert struct {
+  Details sql.NullString \`json:"details"\`
+  UserId  int64          \`json:"user_id"\`
+}
+
+type PublicUserDetailsUpdate struct {
+  Details sql.NullString \`json:"details"\`
+  UserId  sql.NullInt64  \`json:"user_id"\`
+}
+
+type PublicCategorySelect struct {
+  Id   int32  \`json:"id"\`
+  Name string \`json:"name"\`
+}
+
+type PublicCategoryInsert struct {
+  Id   sql.NullInt32 \`json:"id"\`
+  Name string        \`json:"name"\`
+}
+
+type PublicCategoryUpdate struct {
+  Id   sql.NullInt32  \`json:"id"\`
+  Name sql.NullString \`json:"name"\`
+}
+
+type PublicMemesSelect struct {
+  Category  sql.NullInt32  \`json:"category"\`
+  CreatedAt string         \`json:"created_at"\`
+  Id        int32          \`json:"id"\`
+  Metadata  interface{}    \`json:"metadata"\`
+  Name      string         \`json:"name"\`
+  Status    sql.NullString \`json:"status"\`
+}
+
+type PublicMemesInsert struct {
+  Category  sql.NullInt32  \`json:"category"\`
+  CreatedAt string         \`json:"created_at"\`
+  Id        sql.NullInt32  \`json:"id"\`
+  Metadata  interface{}    \`json:"metadata"\`
+  Name      string         \`json:"name"\`
+  Status    sql.NullString \`json:"status"\`
+}
+
+type PublicMemesUpdate struct {
+  Category  sql.NullInt32  \`json:"category"\`
+  CreatedAt sql.NullString \`json:"created_at"\`
+  Id        sql.NullInt32  \`json:"id"\`
+  Metadata  interface{}    \`json:"metadata"\`
+  Name      sql.NullString \`json:"name"\`
+  Status    sql.NullString \`json:"status"\`
+}
+
+type PublicTodosViewSelect struct {
+  Details sql.NullString \`json:"details"\`
+  Id      sql.NullInt64  \`json:"id"\`
+  UserId  sql.NullInt64  \`json:"user-id"\`
+}
+
+type PublicUsersViewSelect struct {
+  Id     sql.NullInt64  \`json:"id"\`
+  Name   sql.NullString \`json:"name"\`
+  Status sql.NullString \`json:"status"\`
+}
+
+type PublicAViewSelect struct {
+  Id sql.NullInt64 \`json:"id"\`
+}
+
+type PublicTodosMatviewSelect struct {
+  Details sql.NullString \`json:"details"\`
+  Id      sql.NullInt64  \`json:"id"\`
+  UserId  sql.NullInt64  \`json:"user-id"\`
+}"
   `)
 })
