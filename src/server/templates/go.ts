@@ -11,6 +11,8 @@ import type {
 } from '../../lib/index.js'
 import type { GeneratorMetadata } from '../../lib/generators.js'
 
+type Operation = 'Select' | 'Insert' | 'Update'
+
 export const apply = ({
   schemas,
   tables,
@@ -32,35 +34,40 @@ export const apply = ({
   let output = `
 package database
 
+import "database/sql"
+
 ${tables
-  .map((table) =>
-    generateTableStruct(
+  .flatMap((table) =>
+    generateTableStructsForOperations(
       schemas.find((schema) => schema.name === table.schema)!,
       table,
       columnsByTableId[table.id],
-      types
+      types,
+      ['Select', 'Insert', 'Update']
     )
   )
   .join('\n\n')}
 
 ${views
-  .map((view) =>
-    generateTableStruct(
+  .flatMap((view) =>
+    generateTableStructsForOperations(
       schemas.find((schema) => schema.name === view.schema)!,
       view,
       columnsByTableId[view.id],
-      types
+      types,
+      ['Select']
     )
   )
   .join('\n\n')}
 
 ${materializedViews
-  .map((materializedView) =>
-    generateTableStruct(
+  .flatMap((materializedView) =>
+    generateTableStructsForOperations(
       schemas.find((schema) => schema.name === materializedView.schema)!,
       materializedView,
       columnsByTableId[materializedView.id],
-      types
+      types,
+      ['Select']
     )
   )
   .join('\n\n')}
@@ -101,7 +108,8 @@ function generateTableStruct(
   schema: PostgresSchema,
   table: PostgresTable | PostgresView | PostgresMaterializedView,
   columns: PostgresColumn[],
-  types: PostgresType[]
+  types: PostgresType[],
+  operation: Operation
 ): string {
   // Storing columns as a tuple of [formattedName, type, name] rather than creating the string
   // representation of the line allows us to pre-format the entries. Go formats
@@ -111,11 +119,22 @@ function generateTableStruct(
   //   id   int    `json:"id"`
   //   name string `json:"name"`
   // }
-  const columnEntries: [string, string, string][] = columns.map((column) => [
-    formatForGoTypeName(column.name),
-    pgTypeToGoType(column.format, types),
-    column.name,
-  ])
+  const columnEntries: [string, string, string][] = columns.map((column) => {
+    let nullable: boolean
+    if (operation === 'Insert') {
+      nullable =
+        column.is_nullable || column.is_identity || column.is_generated || !!column.default_value
+    } else if (operation === 'Update') {
+      nullable = true
+    } else {
+      nullable = column.is_nullable
+    }
+    return [
+      formatForGoTypeName(column.name),
+      pgTypeToGoType(column.format, nullable, types),
+      column.name,
+    ]
+  })
 
   const [maxFormattedNameLength, maxTypeLength] = columnEntries.reduce(
     ([maxFormattedName, maxType], [formattedName, type]) => {
@@ -133,10 +152,22 @@ function generateTableStruct(
   })
 
   return `
-type ${formatForGoTypeName(schema.name)}${formatForGoTypeName(table.name)} struct {
+type ${formatForGoTypeName(schema.name)}${formatForGoTypeName(table.name)}${operation} struct {
 ${formattedColumnEntries.join('\n')}
 }
 `.trim()
+}
+
+function generateTableStructsForOperations(
+  schema: PostgresSchema,
+  table: PostgresTable | PostgresView | PostgresMaterializedView,
+  columns: PostgresColumn[],
+  types: PostgresType[],
+  operations: Operation[]
+): string[] {
+  return operations.map((operation) =>
+    generateTableStruct(schema, table, columns, types, operation)
+  )
 }
 
 function generateCompositeTypeStruct(
@@ -158,7 +189,7 @@ function generateCompositeTypeStruct(
   const attributeEntries: [string, string, string][] = typeWithRetrievedAttributes.attributes.map(
     (attribute) => [
       formatForGoTypeName(attribute.name),
-      pgTypeToGoType(attribute.type!.format),
+      pgTypeToGoType(attribute.type!.format, false),
       attribute.name,
     ]
   )
@@ -187,7 +218,7 @@ ${formattedAttributeEntries.join('\n')}
 
 // Note: the type map uses `interface{ } `, not `any`, to remain compatible with
 // older versions of Go.
-const GO_TYPE_MAP: Record<string, string> = {
+const GO_TYPE_MAP = {
   // Bool
   bool: 'bool',
 
@@ -234,24 +265,40 @@ const GO_TYPE_MAP: Record<string, string> = {
   // Misc
   void: 'interface{}',
   record: 'map[string]interface{}',
+} as const
+
+type GoType = (typeof GO_TYPE_MAP)[keyof typeof GO_TYPE_MAP]
+
+const GO_NULLABLE_TYPE_MAP: Record<GoType, string> = {
+  string: 'sql.NullString',
+  bool: 'sql.NullBool',
+  int16: 'sql.NullInt32',
+  int32: 'sql.NullInt32',
+  int64: 'sql.NullInt64',
+  float32: 'sql.NullFloat64',
+  float64: 'sql.NullFloat64',
+  '[]byte': '[]byte',
+  'interface{}': 'interface{}',
+  'map[string]interface{}': 'map[string]interface{}',
 }
 
-function pgTypeToGoType(pgType: string, types: PostgresType[] = []): string {
-  let goType = GO_TYPE_MAP[pgType]
-  if (goType) {
-    return goType
-  }
-
-  // Arrays
-  if (pgType.startsWith('_')) {
-    const innerType = pgTypeToGoType(pgType.slice(1))
-    return `[]${innerType} `
+function pgTypeToGoType(pgType: string, nullable: boolean, types: PostgresType[] = []): string {
+  let goType: GoType | undefined = undefined
+  if (pgType in GO_TYPE_MAP) {
+    goType = GO_TYPE_MAP[pgType as keyof typeof GO_TYPE_MAP]
   }
 
   // Enums
   const enumType = types.find((type) => type.name === pgType && type.enums.length > 0)
   if (enumType) {
-    return 'string'
+    goType = 'string'
+  }
+
+  if (goType) {
+    if (nullable) {
+      return GO_NULLABLE_TYPE_MAP[goType]
+    }
+    return goType
   }
 
   // Composite types
@@ -260,6 +307,12 @@ function pgTypeToGoType(pgType: string, types: PostgresType[] = []): string {
     // TODO: generate composite types
     // return formatForGoTypeName(pgType)
     return 'map[string]interface{}'
+  }
+
+  // Arrays
+  if (pgType.startsWith('_')) {
+    const innerType = pgTypeToGoType(pgType.slice(1), nullable)
+    return `[]${innerType} `
   }
 
   // Fallback
