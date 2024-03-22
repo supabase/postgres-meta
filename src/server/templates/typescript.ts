@@ -12,6 +12,7 @@ import type { GeneratorMetadata } from '../../lib/generators.js'
 export const apply = async ({
   schemas,
   tables,
+  foreignTables,
   views,
   materializedViews,
   columns,
@@ -23,7 +24,7 @@ export const apply = async ({
   detectOneToOneRelationships: boolean
 }): Promise<string> => {
   const columnsByTableId = Object.fromEntries<PostgresColumn[]>(
-    [...tables, ...views, ...materializedViews].map((t) => [t.id, []])
+    [...tables, ...foreignTables, ...views, ...materializedViews].map((t) => [t.id, []])
   )
   columns
     .filter((c) => c.table_id in columnsByTableId)
@@ -37,7 +38,7 @@ export type Database = {
   ${schemas
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
     .map((schema) => {
-      const schemaTables = tables
+      const schemaTables = [...tables, ...foreignTables]
         .filter((table) => table.schema === schema.name)
         .sort(({ name: a }, { name: b }) => a.localeCompare(b))
       const schemaViews = [...views, ...materializedViews]
