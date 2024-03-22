@@ -41,6 +41,7 @@ if (EXPORT_DOCS) {
   const [
     { data: schemas, error: schemasError },
     { data: tables, error: tablesError },
+    { data: foreignTables, error: foreignTablesError },
     { data: views, error: viewsError },
     { data: materializedViews, error: materializedViewsError },
     { data: columns, error: columnsError },
@@ -50,6 +51,11 @@ if (EXPORT_DOCS) {
   ] = await Promise.all([
     pgMeta.schemas.list(),
     pgMeta.tables.list({
+      includedSchemas:
+        GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
+      includeColumns: false,
+    }),
+    pgMeta.foreignTables.list({
       includedSchemas:
         GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
       includeColumns: false,
@@ -86,6 +92,9 @@ if (EXPORT_DOCS) {
   if (tablesError) {
     throw new Error(tablesError.message)
   }
+  if (foreignTablesError) {
+    throw new Error(foreignTablesError.message)
+  }
   if (viewsError) {
     throw new Error(viewsError.message)
   }
@@ -113,6 +122,7 @@ if (EXPORT_DOCS) {
           GENERATE_TYPES_INCLUDED_SCHEMAS.includes(name)
       ),
       tables: tables!,
+      foreignTables: foreignTables!,
       views: views!,
       materializedViews: materializedViews!,
       columns: columns!,
