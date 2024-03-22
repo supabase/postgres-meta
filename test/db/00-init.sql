@@ -87,7 +87,7 @@ create extension postgres_fdw;
 create server foreign_server foreign data wrapper postgres_fdw options (host 'localhost', port '5432', dbname 'postgres');
 create user mapping for postgres server foreign_server options (user 'postgres', password 'postgres');
 create foreign table foreign_table (
-  id int8,
+  id int8 not null,
   name text,
   status user_status
 ) server foreign_server options (schema_name 'public', table_name 'users');

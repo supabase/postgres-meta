@@ -1,5 +1,5 @@
 import { literal } from 'pg-format'
-import { coalesceRowsToArray } from './helpers.js'
+import { coalesceRowsToArray, filterByList } from './helpers.js'
 import { columnsSql, foreignTablesSql } from './sql/index.js'
 import { PostgresMetaResult, PostgresForeignTable } from './types.js'
 
@@ -11,25 +11,37 @@ export default class PostgresMetaForeignTables {
   }
 
   async list(options: {
+    includedSchemas?: string[]
+    excludedSchemas?: string[]
     limit?: number
     offset?: number
     includeColumns: false
   }): Promise<PostgresMetaResult<(PostgresForeignTable & { columns: never })[]>>
   async list(options?: {
+    includedSchemas?: string[]
+    excludedSchemas?: string[]
     limit?: number
     offset?: number
     includeColumns?: boolean
   }): Promise<PostgresMetaResult<(PostgresForeignTable & { columns: unknown[] })[]>>
   async list({
+    includedSchemas,
+    excludedSchemas,
     limit,
     offset,
     includeColumns = true,
   }: {
+    includedSchemas?: string[]
+    excludedSchemas?: string[]
     limit?: number
     offset?: number
     includeColumns?: boolean
   } = {}): Promise<PostgresMetaResult<PostgresForeignTable[]>> {
     let sql = generateEnrichedForeignTablesSql({ includeColumns })
+    const filter = filterByList(includedSchemas, excludedSchemas)
+    if (filter) {
+      sql += ` where schema ${filter}`
+    }
     if (limit) {
       sql += ` limit ${limit}`
     }

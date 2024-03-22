@@ -1,6 +1,7 @@
 import PostgresMeta from './PostgresMeta.js'
 import {
   PostgresColumn,
+  PostgresForeignTable,
   PostgresFunction,
   PostgresMaterializedView,
   PostgresRelationship,
@@ -14,6 +15,7 @@ import { PostgresMetaResult } from './types.js'
 export type GeneratorMetadata = {
   schemas: PostgresSchema[]
   tables: Omit<PostgresTable, 'columns'>[]
+  foreignTables: Omit<PostgresForeignTable, 'columns'>[]
   views: Omit<PostgresView, 'columns'>[]
   materializedViews: Omit<PostgresMaterializedView, 'columns'>[]
   columns: PostgresColumn[]
@@ -44,6 +46,15 @@ export async function getGeneratorMetadata(
   })
   if (tablesError) {
     return { data: null, error: tablesError }
+  }
+
+  const { data: foreignTables, error: foreignTablesError } = await pgMeta.foreignTables.list({
+    includedSchemas: includedSchemas.length > 0 ? includedSchemas : undefined,
+    excludedSchemas,
+    includeColumns: false,
+  })
+  if (foreignTablesError) {
+    return { data: null, error: foreignTablesError }
   }
 
   const { data: views, error: viewsError } = await pgMeta.views.list({
@@ -104,6 +115,7 @@ export async function getGeneratorMetadata(
           (includedSchemas.length === 0 || includedSchemas.includes(name))
       ),
       tables,
+      foreignTables,
       views,
       materializedViews,
       columns,
