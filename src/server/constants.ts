@@ -43,7 +43,7 @@ export const GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS =
 
 export const DEFAULT_POOL_CONFIG: PoolConfig = {
   max: 1,
-  connectionTimeoutMillis: PG_CONN_TIMEOUT_SECS * 1000,
+  query_timeout: PG_CONN_TIMEOUT_SECS * 1000,
   ssl: PG_META_DB_SSL_ROOT_CERT ? { ca: PG_META_DB_SSL_ROOT_CERT } : undefined,
 }
 
