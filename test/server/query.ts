@@ -1,5 +1,6 @@
 import { expect, test } from 'vitest'
 import { app } from './utils'
+import { DEFAULT_POOL_CONFIG } from '../../src/server/constants'
 
 test('query', async () => {
   const res = await app.inject({
@@ -538,4 +539,18 @@ test('very big number', async () => {
       },
     ]
   `)
+})
+
+test('query timeout', async () => {
+  const defaultTimeout = DEFAULT_POOL_CONFIG.query_timeout
+  DEFAULT_POOL_CONFIG.query_timeout = 100
+
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: { query: "select pg_sleep_for('1 minute');" },
+  })
+  expect(res.json()?.error).toMatchInlineSnapshot(`"Query read timeout"`)
+
+  DEFAULT_POOL_CONFIG.query_timeout = defaultTimeout
 })
