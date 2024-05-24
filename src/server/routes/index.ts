@@ -18,7 +18,8 @@ import TablesRoute from './tables.js'
 import TriggersRoute from './triggers.js'
 import TypesRoute from './types.js'
 import ViewsRoute from './views.js'
-import TypeGenRoute from './generators/typescript.js'
+import TypeScriptTypeGenRoute from './generators/typescript.js'
+import GoTypeGenRoute from './generators/go.js'
 import { PG_CONNECTION, CRYPTO_KEY } from '../constants.js'
 
 export default async (fastify: FastifyInstance) => {
@@ -62,5 +63,6 @@ export default async (fastify: FastifyInstance) => {
   fastify.register(TriggersRoute, { prefix: '/triggers' })
   fastify.register(TypesRoute, { prefix: '/types' })
   fastify.register(ViewsRoute, { prefix: '/views' })
-  fastify.register(TypeGenRoute, { prefix: '/generators/typescript' })
+  fastify.register(TypeScriptTypeGenRoute, { prefix: '/generators/typescript' })
+  fastify.register(GoTypeGenRoute, { prefix: '/generators/go' })
 }
