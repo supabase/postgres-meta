@@ -1051,6 +1051,24 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Update: {}
             Relationships: []
           }
+          foreign_table: {
+            Row: {
+              id: number
+              name: string | null
+              status: Database["public"]["Enums"]["user_status"] | null
+            }
+            Insert: {
+              id: number
+              name?: string | null
+              status?: Database["public"]["Enums"]["user_status"] | null
+            }
+            Update: {
+              id?: number
+              name?: string | null
+              status?: Database["public"]["Enums"]["user_status"] | null
+            }
+            Relationships: []
+          }
           memes: {
             Row: {
               category: number | null
