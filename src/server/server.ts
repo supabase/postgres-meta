@@ -187,8 +187,3 @@ if (EXPORT_DOCS) {
     adminApp.listen({ port: adminPort, host: PG_META_HOST })
   })
 }
-
-app.listen({ port: PG_META_PORT, host: PG_META_HOST }, () => {
-  const adminPort = PG_META_PORT + 1
-  adminApp.listen({ port: adminPort, host: PG_META_HOST })
-})
