@@ -2109,3 +2109,355 @@ test('typegen: swift', async () => {
     }"
   `)
 })
+
+test('typegen: swift w/ public access control', async () => {
+  const { body } = await app.inject({
+    method: 'GET',
+    path: '/generators/swift',
+    query: { access_control: 'public' },
+  })
+  expect(body).toMatchInlineSnapshot(`
+    "import Foundation
+    import Supabase
+
+    // MARK: - Enums
+    public enum MemeStatus: String, Codable, Hashable, Sendable {
+      case new = "new"
+      case old = "old"
+      case retired = "retired"
+    }
+    public enum UserStatus: String, Codable, Hashable, Sendable {
+      case active = "ACTIVE"
+      case inactive = "INACTIVE"
+    }
+
+    // MARK: - Schemas
+    public enum PublicSchema {}
+
+    // MARK: - Tables
+    extension PublicSchema {
+      public struct UsersSelect: Codable, Hashable, Sendable {
+        public let id: Int64
+        public let name: String?
+        public let status: UserStatus?
+
+        public enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case name = "name"
+          case status = "status"
+        }
+    }
+    extension PublicSchema.UsersSelect: Identifiable {
+
+    }
+    extension PublicSchema {
+      public struct UsersInsert: Codable, Hashable, Sendable {
+        public let id: Int64?
+        public let name: String?
+        public let status: UserStatus?
+
+        public enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case name = "name"
+          case status = "status"
+        }
+    }
+    extension PublicSchema {
+      public struct UsersUpdate: Codable, Hashable, Sendable {
+        public let id: Int64?
+        public let name: String?
+        public let status: UserStatus?
+
+        public enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case name = "name"
+          case status = "status"
+        }
+    }
+    extension PublicSchema {
+      public struct TodosSelect: Codable, Hashable, Sendable {
+        public let details: String?
+        public let id: Int64
+        public let userId: Int64
+
+        public enum CodingKeys: String, CodingKey {
+          case details = "details"
+          case id = "id"
+          case userId = "user-id"
+        }
+    }
+    extension PublicSchema.TodosSelect: Identifiable {
+
+    }
+    extension PublicSchema {
+      public struct TodosInsert: Codable, Hashable, Sendable {
+        public let details: String?
+        public let id: Int64?
+        public let userId: Int64
+
+        public enum CodingKeys: String, CodingKey {
+          case details = "details"
+          case id = "id"
+          case userId = "user-id"
+        }
+    }
+    extension PublicSchema {
+      public struct TodosUpdate: Codable, Hashable, Sendable {
+        public let details: String?
+        public let id: Int64?
+        public let userId: Int64?
+
+        public enum CodingKeys: String, CodingKey {
+          case details = "details"
+          case id = "id"
+          case userId = "user-id"
+        }
+    }
+    extension PublicSchema {
+      public struct UsersAuditSelect: Codable, Hashable, Sendable {
+        public let createdAt: String?
+        public let id: Int64
+        public let previousValue: AnyJSON?
+        public let userId: Int64?
+
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case id = "id"
+          case previousValue = "previous_value"
+          case userId = "user_id"
+        }
+    }
+    extension PublicSchema.UsersAuditSelect: Identifiable {
+
+    }
+    extension PublicSchema {
+      public struct UsersAuditInsert: Codable, Hashable, Sendable {
+        public let createdAt: String?
+        public let id: Int64?
+        public let previousValue: AnyJSON?
+        public let userId: Int64?
+
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case id = "id"
+          case previousValue = "previous_value"
+          case userId = "user_id"
+        }
+    }
+    extension PublicSchema {
+      public struct UsersAuditUpdate: Codable, Hashable, Sendable {
+        public let createdAt: String?
+        public let id: Int64?
+        public let previousValue: AnyJSON?
+        public let userId: Int64?
+
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case id = "id"
+          case previousValue = "previous_value"
+          case userId = "user_id"
+        }
+    }
+    extension PublicSchema {
+      public struct UserDetailsSelect: Codable, Hashable, Sendable {
+        public let details: String?
+        public let userId: Int64
+
+        public enum CodingKeys: String, CodingKey {
+          case details = "details"
+          case userId = "user_id"
+        }
+    }
+    extension PublicSchema {
+      public struct UserDetailsInsert: Codable, Hashable, Sendable {
+        public let details: String?
+        public let userId: Int64
+
+        public enum CodingKeys: String, CodingKey {
+          case details = "details"
+          case userId = "user_id"
+        }
+    }
+    extension PublicSchema {
+      public struct UserDetailsUpdate: Codable, Hashable, Sendable {
+        public let details: String?
+        public let userId: Int64?
+
+        public enum CodingKeys: String, CodingKey {
+          case details = "details"
+          case userId = "user_id"
+        }
+    }
+    extension PublicSchema {
+      public struct EmptySelect: Codable, Hashable, Sendable {
+
+
+        public enum CodingKeys: String, CodingKey {
+
+        }
+    }
+    extension PublicSchema {
+      public struct EmptyInsert: Codable, Hashable, Sendable {
+
+
+        public enum CodingKeys: String, CodingKey {
+
+        }
+    }
+    extension PublicSchema {
+      public struct EmptyUpdate: Codable, Hashable, Sendable {
+
+
+        public enum CodingKeys: String, CodingKey {
+
+        }
+    }
+    extension PublicSchema {
+      public struct TableWithOtherTablesRowTypeSelect: Codable, Hashable, Sendable {
+        public let col1: UserDetails?
+        public let col2: AView?
+
+        public enum CodingKeys: String, CodingKey {
+          case col1 = "col1"
+          case col2 = "col2"
+        }
+    }
+    extension PublicSchema {
+      public struct TableWithOtherTablesRowTypeInsert: Codable, Hashable, Sendable {
+        public let col1: UserDetails?
+        public let col2: AView?
+
+        public enum CodingKeys: String, CodingKey {
+          case col1 = "col1"
+          case col2 = "col2"
+        }
+    }
+    extension PublicSchema {
+      public struct TableWithOtherTablesRowTypeUpdate: Codable, Hashable, Sendable {
+        public let col1: UserDetails?
+        public let col2: AView?
+
+        public enum CodingKeys: String, CodingKey {
+          case col1 = "col1"
+          case col2 = "col2"
+        }
+    }
+    extension PublicSchema {
+      public struct TableWithPrimaryKeyOtherThanIdSelect: Codable, Hashable, Sendable {
+        public let name: String?
+        public let otherId: Int64
+
+        public enum CodingKeys: String, CodingKey {
+          case name = "name"
+          case otherId = "other_id"
+        }
+    }
+    extension PublicSchema.TableWithPrimaryKeyOtherThanIdSelect: Identifiable {
+        public var id: Int64 { otherId }
+    }
+    extension PublicSchema {
+      public struct TableWithPrimaryKeyOtherThanIdInsert: Codable, Hashable, Sendable {
+        public let name: String?
+        public let otherId: Int64?
+
+        public enum CodingKeys: String, CodingKey {
+          case name = "name"
+          case otherId = "other_id"
+        }
+    }
+    extension PublicSchema {
+      public struct TableWithPrimaryKeyOtherThanIdUpdate: Codable, Hashable, Sendable {
+        public let name: String?
+        public let otherId: Int64?
+
+        public enum CodingKeys: String, CodingKey {
+          case name = "name"
+          case otherId = "other_id"
+        }
+    }
+    extension PublicSchema {
+      public struct CategorySelect: Codable, Hashable, Sendable {
+        public let id: Int32
+        public let name: String
+
+        public enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case name = "name"
+        }
+    }
+    extension PublicSchema {
+      public struct CategoryInsert: Codable, Hashable, Sendable {
+        public let id: Int32?
+        public let name: String
+
+        public enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case name = "name"
+        }
+    }
+    extension PublicSchema {
+      public struct CategoryUpdate: Codable, Hashable, Sendable {
+        public let id: Int32?
+        public let name: String?
+
+        public enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case name = "name"
+        }
+    }
+    extension PublicSchema {
+      public struct MemesSelect: Codable, Hashable, Sendable {
+        public let category: Int32?
+        public let createdAt: String
+        public let id: Int32
+        public let metadata: AnyJSON?
+        public let name: String
+        public let status: MemeStatus?
+
+        public enum CodingKeys: String, CodingKey {
+          case category = "category"
+          case createdAt = "created_at"
+          case id = "id"
+          case metadata = "metadata"
+          case name = "name"
+          case status = "status"
+        }
+    }
+    extension PublicSchema {
+      public struct MemesInsert: Codable, Hashable, Sendable {
+        public let category: Int32?
+        public let createdAt: String
+        public let id: Int32?
+        public let metadata: AnyJSON?
+        public let name: String
+        public let status: MemeStatus?
+
+        public enum CodingKeys: String, CodingKey {
+          case category = "category"
+          case createdAt = "created_at"
+          case id = "id"
+          case metadata = "metadata"
+          case name = "name"
+          case status = "status"
+        }
+    }
+    extension PublicSchema {
+      public struct MemesUpdate: Codable, Hashable, Sendable {
+        public let category: Int32?
+        public let createdAt: String?
+        public let id: Int32?
+        public let metadata: AnyJSON?
+        public let name: String?
+        public let status: MemeStatus?
+
+        public enum CodingKeys: String, CodingKey {
+          case category = "category"
+          case createdAt = "created_at"
+          case id = "id"
+          case metadata = "metadata"
+          case name = "name"
+          case status = "status"
+        }
+    }"
+  `)
+})
