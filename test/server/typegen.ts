@@ -103,6 +103,21 @@ test('typegen: typescript', async () => {
             }
             Relationships: []
           }
+          table_with_primary_key_other_than_id: {
+            Row: {
+              name: string | null
+              other_id: number
+            }
+            Insert: {
+              name?: string | null
+              other_id?: number
+            }
+            Update: {
+              name?: string | null
+              other_id?: number
+            }
+            Relationships: []
+          }
           todos: {
             Row: {
               details: string | null
@@ -602,6 +617,21 @@ test('typegen w/ one-to-one relationships', async () => {
             Update: {
               col1?: Database["public"]["Tables"]["user_details"]["Row"] | null
               col2?: Database["public"]["Views"]["a_view"]["Row"] | null
+            }
+            Relationships: []
+          }
+          table_with_primary_key_other_than_id: {
+            Row: {
+              name: string | null
+              other_id: number
+            }
+            Insert: {
+              name?: string | null
+              other_id?: number
+            }
+            Update: {
+              name?: string | null
+              other_id?: number
             }
             Relationships: []
           }
@@ -1119,6 +1149,21 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             }
             Relationships: []
           }
+          table_with_primary_key_other_than_id: {
+            Row: {
+              name: string | null
+              other_id: number
+            }
+            Insert: {
+              name?: string | null
+              other_id?: number
+            }
+            Update: {
+              name?: string | null
+              other_id?: number
+            }
+            Relationships: []
+          }
           todos: {
             Row: {
               details: string | null
@@ -1531,174 +1576,189 @@ test('typegen: go', async () => {
   expect(body).toMatchInlineSnapshot(`
     "package database
 
-import "database/sql"
+    import "database/sql"
 
-type PublicUsersSelect struct {
-  Id     int64          \`json:"id"\`
-  Name   sql.NullString \`json:"name"\`
-  Status sql.NullString \`json:"status"\`
-}
+    type PublicUsersSelect struct {
+      Id     int64          \`json:"id"\`
+      Name   sql.NullString \`json:"name"\`
+      Status sql.NullString \`json:"status"\`
+    }
 
-type PublicUsersInsert struct {
-  Id     sql.NullInt64  \`json:"id"\`
-  Name   sql.NullString \`json:"name"\`
-  Status sql.NullString \`json:"status"\`
-}
+    type PublicUsersInsert struct {
+      Id     sql.NullInt64  \`json:"id"\`
+      Name   sql.NullString \`json:"name"\`
+      Status sql.NullString \`json:"status"\`
+    }
 
-type PublicUsersUpdate struct {
-  Id     sql.NullInt64  \`json:"id"\`
-  Name   sql.NullString \`json:"name"\`
-  Status sql.NullString \`json:"status"\`
-}
+    type PublicUsersUpdate struct {
+      Id     sql.NullInt64  \`json:"id"\`
+      Name   sql.NullString \`json:"name"\`
+      Status sql.NullString \`json:"status"\`
+    }
 
-type PublicTodosSelect struct {
-  Details sql.NullString \`json:"details"\`
-  Id      int64          \`json:"id"\`
-  UserId  int64          \`json:"user-id"\`
-}
+    type PublicTodosSelect struct {
+      Details sql.NullString \`json:"details"\`
+      Id      int64          \`json:"id"\`
+      UserId  int64          \`json:"user-id"\`
+    }
 
-type PublicTodosInsert struct {
-  Details sql.NullString \`json:"details"\`
-  Id      sql.NullInt64  \`json:"id"\`
-  UserId  int64          \`json:"user-id"\`
-}
+    type PublicTodosInsert struct {
+      Details sql.NullString \`json:"details"\`
+      Id      sql.NullInt64  \`json:"id"\`
+      UserId  int64          \`json:"user-id"\`
+    }
 
-type PublicTodosUpdate struct {
-  Details sql.NullString \`json:"details"\`
-  Id      sql.NullInt64  \`json:"id"\`
-  UserId  sql.NullInt64  \`json:"user-id"\`
-}
+    type PublicTodosUpdate struct {
+      Details sql.NullString \`json:"details"\`
+      Id      sql.NullInt64  \`json:"id"\`
+      UserId  sql.NullInt64  \`json:"user-id"\`
+    }
 
-type PublicUsersAuditSelect struct {
-  CreatedAt     sql.NullString \`json:"created_at"\`
-  Id            int64          \`json:"id"\`
-  PreviousValue interface{}    \`json:"previous_value"\`
-  UserId        sql.NullInt64  \`json:"user_id"\`
-}
+    type PublicUsersAuditSelect struct {
+      CreatedAt     sql.NullString \`json:"created_at"\`
+      Id            int64          \`json:"id"\`
+      PreviousValue interface{}    \`json:"previous_value"\`
+      UserId        sql.NullInt64  \`json:"user_id"\`
+    }
 
-type PublicUsersAuditInsert struct {
-  CreatedAt     sql.NullString \`json:"created_at"\`
-  Id            sql.NullInt64  \`json:"id"\`
-  PreviousValue interface{}    \`json:"previous_value"\`
-  UserId        sql.NullInt64  \`json:"user_id"\`
-}
+    type PublicUsersAuditInsert struct {
+      CreatedAt     sql.NullString \`json:"created_at"\`
+      Id            sql.NullInt64  \`json:"id"\`
+      PreviousValue interface{}    \`json:"previous_value"\`
+      UserId        sql.NullInt64  \`json:"user_id"\`
+    }
 
-type PublicUsersAuditUpdate struct {
-  CreatedAt     sql.NullString \`json:"created_at"\`
-  Id            sql.NullInt64  \`json:"id"\`
-  PreviousValue interface{}    \`json:"previous_value"\`
-  UserId        sql.NullInt64  \`json:"user_id"\`
-}
+    type PublicUsersAuditUpdate struct {
+      CreatedAt     sql.NullString \`json:"created_at"\`
+      Id            sql.NullInt64  \`json:"id"\`
+      PreviousValue interface{}    \`json:"previous_value"\`
+      UserId        sql.NullInt64  \`json:"user_id"\`
+    }
 
-type PublicUserDetailsSelect struct {
-  Details sql.NullString \`json:"details"\`
-  UserId  int64          \`json:"user_id"\`
-}
+    type PublicUserDetailsSelect struct {
+      Details sql.NullString \`json:"details"\`
+      UserId  int64          \`json:"user_id"\`
+    }
 
-type PublicUserDetailsInsert struct {
-  Details sql.NullString \`json:"details"\`
-  UserId  int64          \`json:"user_id"\`
-}
+    type PublicUserDetailsInsert struct {
+      Details sql.NullString \`json:"details"\`
+      UserId  int64          \`json:"user_id"\`
+    }
 
-type PublicUserDetailsUpdate struct {
-  Details sql.NullString \`json:"details"\`
-  UserId  sql.NullInt64  \`json:"user_id"\`
-}
+    type PublicUserDetailsUpdate struct {
+      Details sql.NullString \`json:"details"\`
+      UserId  sql.NullInt64  \`json:"user_id"\`
+    }
 
-type PublicEmptySelect struct {
+    type PublicEmptySelect struct {
 
-}
+    }
 
-type PublicEmptyInsert struct {
+    type PublicEmptyInsert struct {
 
-}
+    }
 
-type PublicEmptyUpdate struct {
+    type PublicEmptyUpdate struct {
 
-}
+    }
 
-type PublicTableWithOtherTablesRowTypeSelect struct {
-  Col1 interface{} \`json:"col1"\`
-  Col2 interface{} \`json:"col2"\`
-}
+    type PublicTableWithOtherTablesRowTypeSelect struct {
+      Col1 interface{} \`json:"col1"\`
+      Col2 interface{} \`json:"col2"\`
+    }
 
-type PublicTableWithOtherTablesRowTypeInsert struct {
-  Col1 interface{} \`json:"col1"\`
-  Col2 interface{} \`json:"col2"\`
-}
+    type PublicTableWithOtherTablesRowTypeInsert struct {
+      Col1 interface{} \`json:"col1"\`
+      Col2 interface{} \`json:"col2"\`
+    }
 
-type PublicTableWithOtherTablesRowTypeUpdate struct {
-  Col1 interface{} \`json:"col1"\`
-  Col2 interface{} \`json:"col2"\`
-}
+    type PublicTableWithOtherTablesRowTypeUpdate struct {
+      Col1 interface{} \`json:"col1"\`
+      Col2 interface{} \`json:"col2"\`
+    }
 
-type PublicCategorySelect struct {
-  Id   int32  \`json:"id"\`
-  Name string \`json:"name"\`
-}
+    type PublicTableWithPrimaryKeyOtherThanIdSelect struct {
+      Name    sql.NullString \`json:"name"\`
+      OtherId int64          \`json:"other_id"\`
+    }
 
-type PublicCategoryInsert struct {
-  Id   sql.NullInt32 \`json:"id"\`
-  Name string        \`json:"name"\`
-}
+    type PublicTableWithPrimaryKeyOtherThanIdInsert struct {
+      Name    sql.NullString \`json:"name"\`
+      OtherId sql.NullInt64  \`json:"other_id"\`
+    }
 
-type PublicCategoryUpdate struct {
-  Id   sql.NullInt32  \`json:"id"\`
-  Name sql.NullString \`json:"name"\`
-}
+    type PublicTableWithPrimaryKeyOtherThanIdUpdate struct {
+      Name    sql.NullString \`json:"name"\`
+      OtherId sql.NullInt64  \`json:"other_id"\`
+    }
 
-type PublicMemesSelect struct {
-  Category  sql.NullInt32  \`json:"category"\`
-  CreatedAt string         \`json:"created_at"\`
-  Id        int32          \`json:"id"\`
-  Metadata  interface{}    \`json:"metadata"\`
-  Name      string         \`json:"name"\`
-  Status    sql.NullString \`json:"status"\`
-}
+    type PublicCategorySelect struct {
+      Id   int32  \`json:"id"\`
+      Name string \`json:"name"\`
+    }
 
-type PublicMemesInsert struct {
-  Category  sql.NullInt32  \`json:"category"\`
-  CreatedAt string         \`json:"created_at"\`
-  Id        sql.NullInt32  \`json:"id"\`
-  Metadata  interface{}    \`json:"metadata"\`
-  Name      string         \`json:"name"\`
-  Status    sql.NullString \`json:"status"\`
-}
+    type PublicCategoryInsert struct {
+      Id   sql.NullInt32 \`json:"id"\`
+      Name string        \`json:"name"\`
+    }
 
-type PublicMemesUpdate struct {
-  Category  sql.NullInt32  \`json:"category"\`
-  CreatedAt sql.NullString \`json:"created_at"\`
-  Id        sql.NullInt32  \`json:"id"\`
-  Metadata  interface{}    \`json:"metadata"\`
-  Name      sql.NullString \`json:"name"\`
-  Status    sql.NullString \`json:"status"\`
-}
+    type PublicCategoryUpdate struct {
+      Id   sql.NullInt32  \`json:"id"\`
+      Name sql.NullString \`json:"name"\`
+    }
 
-type PublicTodosViewSelect struct {
-  Details sql.NullString \`json:"details"\`
-  Id      sql.NullInt64  \`json:"id"\`
-  UserId  sql.NullInt64  \`json:"user-id"\`
-}
+    type PublicMemesSelect struct {
+      Category  sql.NullInt32  \`json:"category"\`
+      CreatedAt string         \`json:"created_at"\`
+      Id        int32          \`json:"id"\`
+      Metadata  interface{}    \`json:"metadata"\`
+      Name      string         \`json:"name"\`
+      Status    sql.NullString \`json:"status"\`
+    }
 
-type PublicUsersViewSelect struct {
-  Id     sql.NullInt64  \`json:"id"\`
-  Name   sql.NullString \`json:"name"\`
-  Status sql.NullString \`json:"status"\`
-}
+    type PublicMemesInsert struct {
+      Category  sql.NullInt32  \`json:"category"\`
+      CreatedAt string         \`json:"created_at"\`
+      Id        sql.NullInt32  \`json:"id"\`
+      Metadata  interface{}    \`json:"metadata"\`
+      Name      string         \`json:"name"\`
+      Status    sql.NullString \`json:"status"\`
+    }
 
-type PublicAViewSelect struct {
-  Id sql.NullInt64 \`json:"id"\`
-}
+    type PublicMemesUpdate struct {
+      Category  sql.NullInt32  \`json:"category"\`
+      CreatedAt sql.NullString \`json:"created_at"\`
+      Id        sql.NullInt32  \`json:"id"\`
+      Metadata  interface{}    \`json:"metadata"\`
+      Name      sql.NullString \`json:"name"\`
+      Status    sql.NullString \`json:"status"\`
+    }
 
-type PublicTodosMatviewSelect struct {
-  Details sql.NullString \`json:"details"\`
-  Id      sql.NullInt64  \`json:"id"\`
-  UserId  sql.NullInt64  \`json:"user-id"\`
-}
+    type PublicTodosViewSelect struct {
+      Details sql.NullString \`json:"details"\`
+      Id      sql.NullInt64  \`json:"id"\`
+      UserId  sql.NullInt64  \`json:"user-id"\`
+    }
 
-type PublicCompositeTypeWithArrayAttribute struct {
-  MyTextArray interface{} \`json:"my_text_array"\`
-}"
+    type PublicUsersViewSelect struct {
+      Id     sql.NullInt64  \`json:"id"\`
+      Name   sql.NullString \`json:"name"\`
+      Status sql.NullString \`json:"status"\`
+    }
+
+    type PublicAViewSelect struct {
+      Id sql.NullInt64 \`json:"id"\`
+    }
+
+    type PublicTodosMatviewSelect struct {
+      Details sql.NullString \`json:"details"\`
+      Id      sql.NullInt64  \`json:"id"\`
+      UserId  sql.NullInt64  \`json:"user-id"\`
+    }
+
+    type PublicCompositeTypeWithArrayAttribute struct {
+      MyTextArray interface{} \`json:"my_text_array"\`
+    }"
   `)
 })
 
@@ -1928,6 +1988,39 @@ test('typegen: swift', async () => {
         internal enum CodingKeys: String, CodingKey {
           case col1 = "col1"
           case col2 = "col2"
+        }
+    }
+    extension PublicSchema {
+      internal struct TableWithPrimaryKeyOtherThanIdSelect: Codable, Hashable, Sendable {
+        internal let name: String?
+        internal let otherId: Int64
+
+        internal enum CodingKeys: String, CodingKey {
+          case name = "name"
+          case otherId = "other_id"
+        }
+    }
+    extension PublicSchema.TableWithPrimaryKeyOtherThanIdSelect: Identifiable {
+        internal var id: Int64 { otherId }
+    }
+    extension PublicSchema {
+      internal struct TableWithPrimaryKeyOtherThanIdInsert: Codable, Hashable, Sendable {
+        internal let name: String?
+        internal let otherId: Int64?
+
+        internal enum CodingKeys: String, CodingKey {
+          case name = "name"
+          case otherId = "other_id"
+        }
+    }
+    extension PublicSchema {
+      internal struct TableWithPrimaryKeyOtherThanIdUpdate: Codable, Hashable, Sendable {
+        internal let name: String?
+        internal let otherId: Int64?
+
+        internal enum CodingKeys: String, CodingKey {
+          case name = "name"
+          case otherId = "other_id"
         }
     }
     extension PublicSchema {
