@@ -1701,3 +1701,318 @@ type PublicCompositeTypeWithArrayAttribute struct {
 }"
   `)
 })
+
+test('typegen: swift', async () => {
+  const { body } = await app.inject({ method: 'GET', path: '/generators/swift' })
+  expect(body).toMatchInlineSnapshot(`
+    "import Foundation
+    import Supabase
+
+    // MARK: - Enums
+    internal enum MemeStatus: String, Codable, Hashable, Sendable {
+      case new = "new"
+      case old = "old"
+      case retired = "retired"
+    }
+    internal enum UserStatus: String, Codable, Hashable, Sendable {
+      case active = "ACTIVE"
+      case inactive = "INACTIVE"
+    }
+
+    // MARK: - Schemas
+    internal enum PublicSchema {}
+
+    // MARK: - Tables
+    extension PublicSchema {
+      internal struct UsersSelect: Codable, Hashable, Sendable {
+        internal let id: Int64
+        internal let name: String?
+        internal let status: UserStatus?
+
+        internal enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case name = "name"
+          case status = "status"
+        }
+    }
+    extension PublicSchema.UsersSelect: Identifiable {
+
+    }
+    extension PublicSchema {
+      internal struct UsersInsert: Codable, Hashable, Sendable {
+        internal let id: Int64?
+        internal let name: String?
+        internal let status: UserStatus?
+
+        internal enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case name = "name"
+          case status = "status"
+        }
+    }
+    extension PublicSchema {
+      internal struct UsersUpdate: Codable, Hashable, Sendable {
+        internal let id: Int64?
+        internal let name: String?
+        internal let status: UserStatus?
+
+        internal enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case name = "name"
+          case status = "status"
+        }
+    }
+    extension PublicSchema {
+      internal struct TodosSelect: Codable, Hashable, Sendable {
+        internal let details: String?
+        internal let id: Int64
+        internal let userId: Int64
+
+        internal enum CodingKeys: String, CodingKey {
+          case details = "details"
+          case id = "id"
+          case userId = "user-id"
+        }
+    }
+    extension PublicSchema.TodosSelect: Identifiable {
+
+    }
+    extension PublicSchema {
+      internal struct TodosInsert: Codable, Hashable, Sendable {
+        internal let details: String?
+        internal let id: Int64?
+        internal let userId: Int64
+
+        internal enum CodingKeys: String, CodingKey {
+          case details = "details"
+          case id = "id"
+          case userId = "user-id"
+        }
+    }
+    extension PublicSchema {
+      internal struct TodosUpdate: Codable, Hashable, Sendable {
+        internal let details: String?
+        internal let id: Int64?
+        internal let userId: Int64?
+
+        internal enum CodingKeys: String, CodingKey {
+          case details = "details"
+          case id = "id"
+          case userId = "user-id"
+        }
+    }
+    extension PublicSchema {
+      internal struct UsersAuditSelect: Codable, Hashable, Sendable {
+        internal let createdAt: String?
+        internal let id: Int64
+        internal let previousValue: AnyJSON?
+        internal let userId: Int64?
+
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case id = "id"
+          case previousValue = "previous_value"
+          case userId = "user_id"
+        }
+    }
+    extension PublicSchema.UsersAuditSelect: Identifiable {
+
+    }
+    extension PublicSchema {
+      internal struct UsersAuditInsert: Codable, Hashable, Sendable {
+        internal let createdAt: String?
+        internal let id: Int64?
+        internal let previousValue: AnyJSON?
+        internal let userId: Int64?
+
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case id = "id"
+          case previousValue = "previous_value"
+          case userId = "user_id"
+        }
+    }
+    extension PublicSchema {
+      internal struct UsersAuditUpdate: Codable, Hashable, Sendable {
+        internal let createdAt: String?
+        internal let id: Int64?
+        internal let previousValue: AnyJSON?
+        internal let userId: Int64?
+
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case id = "id"
+          case previousValue = "previous_value"
+          case userId = "user_id"
+        }
+    }
+    extension PublicSchema {
+      internal struct UserDetailsSelect: Codable, Hashable, Sendable {
+        internal let details: String?
+        internal let userId: Int64
+
+        internal enum CodingKeys: String, CodingKey {
+          case details = "details"
+          case userId = "user_id"
+        }
+    }
+    extension PublicSchema {
+      internal struct UserDetailsInsert: Codable, Hashable, Sendable {
+        internal let details: String?
+        internal let userId: Int64
+
+        internal enum CodingKeys: String, CodingKey {
+          case details = "details"
+          case userId = "user_id"
+        }
+    }
+    extension PublicSchema {
+      internal struct UserDetailsUpdate: Codable, Hashable, Sendable {
+        internal let details: String?
+        internal let userId: Int64?
+
+        internal enum CodingKeys: String, CodingKey {
+          case details = "details"
+          case userId = "user_id"
+        }
+    }
+    extension PublicSchema {
+      internal struct EmptySelect: Codable, Hashable, Sendable {
+
+
+        internal enum CodingKeys: String, CodingKey {
+
+        }
+    }
+    extension PublicSchema {
+      internal struct EmptyInsert: Codable, Hashable, Sendable {
+
+
+        internal enum CodingKeys: String, CodingKey {
+
+        }
+    }
+    extension PublicSchema {
+      internal struct EmptyUpdate: Codable, Hashable, Sendable {
+
+
+        internal enum CodingKeys: String, CodingKey {
+
+        }
+    }
+    extension PublicSchema {
+      internal struct TableWithOtherTablesRowTypeSelect: Codable, Hashable, Sendable {
+        internal let col1: UserDetails?
+        internal let col2: AView?
+
+        internal enum CodingKeys: String, CodingKey {
+          case col1 = "col1"
+          case col2 = "col2"
+        }
+    }
+    extension PublicSchema {
+      internal struct TableWithOtherTablesRowTypeInsert: Codable, Hashable, Sendable {
+        internal let col1: UserDetails?
+        internal let col2: AView?
+
+        internal enum CodingKeys: String, CodingKey {
+          case col1 = "col1"
+          case col2 = "col2"
+        }
+    }
+    extension PublicSchema {
+      internal struct TableWithOtherTablesRowTypeUpdate: Codable, Hashable, Sendable {
+        internal let col1: UserDetails?
+        internal let col2: AView?
+
+        internal enum CodingKeys: String, CodingKey {
+          case col1 = "col1"
+          case col2 = "col2"
+        }
+    }
+    extension PublicSchema {
+      internal struct CategorySelect: Codable, Hashable, Sendable {
+        internal let id: Int32
+        internal let name: String
+
+        internal enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case name = "name"
+        }
+    }
+    extension PublicSchema {
+      internal struct CategoryInsert: Codable, Hashable, Sendable {
+        internal let id: Int32?
+        internal let name: String
+
+        internal enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case name = "name"
+        }
+    }
+    extension PublicSchema {
+      internal struct CategoryUpdate: Codable, Hashable, Sendable {
+        internal let id: Int32?
+        internal let name: String?
+
+        internal enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case name = "name"
+        }
+    }
+    extension PublicSchema {
+      internal struct MemesSelect: Codable, Hashable, Sendable {
+        internal let category: Int32?
+        internal let createdAt: String
+        internal let id: Int32
+        internal let metadata: AnyJSON?
+        internal let name: String
+        internal let status: MemeStatus?
+
+        internal enum CodingKeys: String, CodingKey {
+          case category = "category"
+          case createdAt = "created_at"
+          case id = "id"
+          case metadata = "metadata"
+          case name = "name"
+          case status = "status"
+        }
+    }
+    extension PublicSchema {
+      internal struct MemesInsert: Codable, Hashable, Sendable {
+        internal let category: Int32?
+        internal let createdAt: String
+        internal let id: Int32?
+        internal let metadata: AnyJSON?
+        internal let name: String
+        internal let status: MemeStatus?
+
+        internal enum CodingKeys: String, CodingKey {
+          case category = "category"
+          case createdAt = "created_at"
+          case id = "id"
+          case metadata = "metadata"
+          case name = "name"
+          case status = "status"
+        }
+    }
+    extension PublicSchema {
+      internal struct MemesUpdate: Codable, Hashable, Sendable {
+        internal let category: Int32?
+        internal let createdAt: String?
+        internal let id: Int32?
+        internal let metadata: AnyJSON?
+        internal let name: String?
+        internal let status: MemeStatus?
+
+        internal enum CodingKeys: String, CodingKey {
+          case category = "category"
+          case createdAt = "created_at"
+          case id = "id"
+          case metadata = "metadata"
+          case name = "name"
+          case status = "status"
+        }
+    }"
+  `)
+})

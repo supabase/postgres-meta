@@ -9,12 +9,14 @@ import {
   GENERATE_TYPES,
   GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS,
   GENERATE_TYPES_INCLUDED_SCHEMAS,
+  GENERATE_TYPES_SWIFT_ACCESS_CONTROL,
   PG_CONNECTION,
   PG_META_HOST,
   PG_META_PORT,
 } from './constants.js'
 import { apply as applyTypescriptTemplate } from './templates/typescript.js'
 import { apply as applyGoTemplate } from './templates/go.js'
+import { apply as applySwiftTemplate } from './templates/swift.js'
 import { getGeneratorMetadata } from '../lib/generators.js'
 
 const logger = pino({
@@ -52,6 +54,11 @@ async function getTypeOutput(): Promise<string | null> {
         detectOneToOneRelationships: GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS,
       })
       break
+    case 'swift':
+      output = await applySwiftTemplate({
+        ...generatorMetadata,
+        accessControl: GENERATE_TYPES_SWIFT_ACCESS_CONTROL,
+      })
     case 'go':
       output = applyGoTemplate(generatorMetadata)
       break
