@@ -1774,6 +1774,7 @@ test('typegen: swift', async () => {
       case old = "old"
       case retired = "retired"
     }
+
     internal enum UserStatus: String, Codable, Hashable, Sendable {
       case active = "ACTIVE"
       case inactive = "INACTIVE"
@@ -1787,7 +1788,7 @@ test('typegen: swift', async () => {
       internal struct UsersSelect: Codable, Hashable, Sendable {
         internal let id: Int64
         internal let name: String?
-        internal let status: UserStatus?
+        internal let status: PublicSchema.UserStatus?
 
         internal enum CodingKeys: String, CodingKey {
           case id = "id"
@@ -1798,11 +1799,12 @@ test('typegen: swift', async () => {
     extension PublicSchema.UsersSelect: Identifiable {
 
     }
+
     extension PublicSchema {
       internal struct UsersInsert: Codable, Hashable, Sendable {
         internal let id: Int64?
         internal let name: String?
-        internal let status: UserStatus?
+        internal let status: PublicSchema.UserStatus?
 
         internal enum CodingKeys: String, CodingKey {
           case id = "id"
@@ -1810,11 +1812,12 @@ test('typegen: swift', async () => {
           case status = "status"
         }
     }
+
     extension PublicSchema {
       internal struct UsersUpdate: Codable, Hashable, Sendable {
         internal let id: Int64?
         internal let name: String?
-        internal let status: UserStatus?
+        internal let status: PublicSchema.UserStatus?
 
         internal enum CodingKeys: String, CodingKey {
           case id = "id"
@@ -1822,6 +1825,7 @@ test('typegen: swift', async () => {
           case status = "status"
         }
     }
+
     extension PublicSchema {
       internal struct TodosSelect: Codable, Hashable, Sendable {
         internal let details: String?
@@ -1837,6 +1841,7 @@ test('typegen: swift', async () => {
     extension PublicSchema.TodosSelect: Identifiable {
 
     }
+
     extension PublicSchema {
       internal struct TodosInsert: Codable, Hashable, Sendable {
         internal let details: String?
@@ -1849,6 +1854,7 @@ test('typegen: swift', async () => {
           case userId = "user-id"
         }
     }
+
     extension PublicSchema {
       internal struct TodosUpdate: Codable, Hashable, Sendable {
         internal let details: String?
@@ -1861,6 +1867,7 @@ test('typegen: swift', async () => {
           case userId = "user-id"
         }
     }
+
     extension PublicSchema {
       internal struct UsersAuditSelect: Codable, Hashable, Sendable {
         internal let createdAt: String?
@@ -1878,6 +1885,7 @@ test('typegen: swift', async () => {
     extension PublicSchema.UsersAuditSelect: Identifiable {
 
     }
+
     extension PublicSchema {
       internal struct UsersAuditInsert: Codable, Hashable, Sendable {
         internal let createdAt: String?
@@ -1892,6 +1900,7 @@ test('typegen: swift', async () => {
           case userId = "user_id"
         }
     }
+
     extension PublicSchema {
       internal struct UsersAuditUpdate: Codable, Hashable, Sendable {
         internal let createdAt: String?
@@ -1906,6 +1915,7 @@ test('typegen: swift', async () => {
           case userId = "user_id"
         }
     }
+
     extension PublicSchema {
       internal struct UserDetailsSelect: Codable, Hashable, Sendable {
         internal let details: String?
@@ -1916,6 +1926,7 @@ test('typegen: swift', async () => {
           case userId = "user_id"
         }
     }
+
     extension PublicSchema {
       internal struct UserDetailsInsert: Codable, Hashable, Sendable {
         internal let details: String?
@@ -1926,6 +1937,7 @@ test('typegen: swift', async () => {
           case userId = "user_id"
         }
     }
+
     extension PublicSchema {
       internal struct UserDetailsUpdate: Codable, Hashable, Sendable {
         internal let details: String?
@@ -1936,6 +1948,7 @@ test('typegen: swift', async () => {
           case userId = "user_id"
         }
     }
+
     extension PublicSchema {
       internal struct EmptySelect: Codable, Hashable, Sendable {
 
@@ -1944,6 +1957,7 @@ test('typegen: swift', async () => {
 
         }
     }
+
     extension PublicSchema {
       internal struct EmptyInsert: Codable, Hashable, Sendable {
 
@@ -1952,6 +1966,7 @@ test('typegen: swift', async () => {
 
         }
     }
+
     extension PublicSchema {
       internal struct EmptyUpdate: Codable, Hashable, Sendable {
 
@@ -1960,36 +1975,40 @@ test('typegen: swift', async () => {
 
         }
     }
+
     extension PublicSchema {
       internal struct TableWithOtherTablesRowTypeSelect: Codable, Hashable, Sendable {
-        internal let col1: UserDetails?
-        internal let col2: AView?
+        internal let col1: PublicSchema.UserDetails?
+        internal let col2: PublicSchema.AView?
 
         internal enum CodingKeys: String, CodingKey {
           case col1 = "col1"
           case col2 = "col2"
         }
     }
+
     extension PublicSchema {
       internal struct TableWithOtherTablesRowTypeInsert: Codable, Hashable, Sendable {
-        internal let col1: UserDetails?
-        internal let col2: AView?
+        internal let col1: PublicSchema.UserDetails?
+        internal let col2: PublicSchema.AView?
 
         internal enum CodingKeys: String, CodingKey {
           case col1 = "col1"
           case col2 = "col2"
         }
     }
+
     extension PublicSchema {
       internal struct TableWithOtherTablesRowTypeUpdate: Codable, Hashable, Sendable {
-        internal let col1: UserDetails?
-        internal let col2: AView?
+        internal let col1: PublicSchema.UserDetails?
+        internal let col2: PublicSchema.AView?
 
         internal enum CodingKeys: String, CodingKey {
           case col1 = "col1"
           case col2 = "col2"
         }
     }
+
     extension PublicSchema {
       internal struct TableWithPrimaryKeyOtherThanIdSelect: Codable, Hashable, Sendable {
         internal let name: String?
@@ -2003,6 +2022,7 @@ test('typegen: swift', async () => {
     extension PublicSchema.TableWithPrimaryKeyOtherThanIdSelect: Identifiable {
         internal var id: Int64 { otherId }
     }
+
     extension PublicSchema {
       internal struct TableWithPrimaryKeyOtherThanIdInsert: Codable, Hashable, Sendable {
         internal let name: String?
@@ -2013,6 +2033,7 @@ test('typegen: swift', async () => {
           case otherId = "other_id"
         }
     }
+
     extension PublicSchema {
       internal struct TableWithPrimaryKeyOtherThanIdUpdate: Codable, Hashable, Sendable {
         internal let name: String?
@@ -2023,6 +2044,7 @@ test('typegen: swift', async () => {
           case otherId = "other_id"
         }
     }
+
     extension PublicSchema {
       internal struct CategorySelect: Codable, Hashable, Sendable {
         internal let id: Int32
@@ -2033,6 +2055,7 @@ test('typegen: swift', async () => {
           case name = "name"
         }
     }
+
     extension PublicSchema {
       internal struct CategoryInsert: Codable, Hashable, Sendable {
         internal let id: Int32?
@@ -2043,6 +2066,7 @@ test('typegen: swift', async () => {
           case name = "name"
         }
     }
+
     extension PublicSchema {
       internal struct CategoryUpdate: Codable, Hashable, Sendable {
         internal let id: Int32?
@@ -2053,6 +2077,7 @@ test('typegen: swift', async () => {
           case name = "name"
         }
     }
+
     extension PublicSchema {
       internal struct MemesSelect: Codable, Hashable, Sendable {
         internal let category: Int32?
@@ -2060,7 +2085,7 @@ test('typegen: swift', async () => {
         internal let id: Int32
         internal let metadata: AnyJSON?
         internal let name: String
-        internal let status: MemeStatus?
+        internal let status: PublicSchema.MemeStatus?
 
         internal enum CodingKeys: String, CodingKey {
           case category = "category"
@@ -2071,6 +2096,7 @@ test('typegen: swift', async () => {
           case status = "status"
         }
     }
+
     extension PublicSchema {
       internal struct MemesInsert: Codable, Hashable, Sendable {
         internal let category: Int32?
@@ -2078,7 +2104,7 @@ test('typegen: swift', async () => {
         internal let id: Int32?
         internal let metadata: AnyJSON?
         internal let name: String
-        internal let status: MemeStatus?
+        internal let status: PublicSchema.MemeStatus?
 
         internal enum CodingKeys: String, CodingKey {
           case category = "category"
@@ -2089,6 +2115,7 @@ test('typegen: swift', async () => {
           case status = "status"
         }
     }
+
     extension PublicSchema {
       internal struct MemesUpdate: Codable, Hashable, Sendable {
         internal let category: Int32?
@@ -2096,7 +2123,7 @@ test('typegen: swift', async () => {
         internal let id: Int32?
         internal let metadata: AnyJSON?
         internal let name: String?
-        internal let status: MemeStatus?
+        internal let status: PublicSchema.MemeStatus?
 
         internal enum CodingKeys: String, CodingKey {
           case category = "category"
@@ -2106,6 +2133,39 @@ test('typegen: swift', async () => {
           case name = "name"
           case status = "status"
         }
+    }
+
+    // MARK: - Views
+
+
+
+
+
+
+    // MARK: - Materialized Views
+    extension PublicSchema {
+      internal struct TodosMatviewSelect: Codable, Hashable, Sendable {
+        internal let details: String?
+        internal let id: Int64?
+        internal let userId: Int64?
+
+        internal enum CodingKeys: String, CodingKey {
+          case details = "details"
+          case id = "id"
+          case userId = "user-id"
+        }
+    }
+
+    // MARK: - Composite Types
+    extension PublicSchema {
+      internal struct CompositeTypeWithArrayAttribute: Codable, Hashable, Sendable {
+        internal let MyTextArray: AnyJSON
+
+        internal enum CodingKeys: String, CodingKey {
+          case MyTextArray = "my_text_array"
+        }
+      }
+    }
     }"
   `)
 })
@@ -2126,6 +2186,7 @@ test('typegen: swift w/ public access control', async () => {
       case old = "old"
       case retired = "retired"
     }
+
     public enum UserStatus: String, Codable, Hashable, Sendable {
       case active = "ACTIVE"
       case inactive = "INACTIVE"
@@ -2139,7 +2200,7 @@ test('typegen: swift w/ public access control', async () => {
       public struct UsersSelect: Codable, Hashable, Sendable {
         public let id: Int64
         public let name: String?
-        public let status: UserStatus?
+        public let status: PublicSchema.UserStatus?
 
         public enum CodingKeys: String, CodingKey {
           case id = "id"
@@ -2150,11 +2211,12 @@ test('typegen: swift w/ public access control', async () => {
     extension PublicSchema.UsersSelect: Identifiable {
 
     }
+
     extension PublicSchema {
       public struct UsersInsert: Codable, Hashable, Sendable {
         public let id: Int64?
         public let name: String?
-        public let status: UserStatus?
+        public let status: PublicSchema.UserStatus?
 
         public enum CodingKeys: String, CodingKey {
           case id = "id"
@@ -2162,11 +2224,12 @@ test('typegen: swift w/ public access control', async () => {
           case status = "status"
         }
     }
+
     extension PublicSchema {
       public struct UsersUpdate: Codable, Hashable, Sendable {
         public let id: Int64?
         public let name: String?
-        public let status: UserStatus?
+        public let status: PublicSchema.UserStatus?
 
         public enum CodingKeys: String, CodingKey {
           case id = "id"
@@ -2174,6 +2237,7 @@ test('typegen: swift w/ public access control', async () => {
           case status = "status"
         }
     }
+
     extension PublicSchema {
       public struct TodosSelect: Codable, Hashable, Sendable {
         public let details: String?
@@ -2189,6 +2253,7 @@ test('typegen: swift w/ public access control', async () => {
     extension PublicSchema.TodosSelect: Identifiable {
 
     }
+
     extension PublicSchema {
       public struct TodosInsert: Codable, Hashable, Sendable {
         public let details: String?
@@ -2201,6 +2266,7 @@ test('typegen: swift w/ public access control', async () => {
           case userId = "user-id"
         }
     }
+
     extension PublicSchema {
       public struct TodosUpdate: Codable, Hashable, Sendable {
         public let details: String?
@@ -2213,6 +2279,7 @@ test('typegen: swift w/ public access control', async () => {
           case userId = "user-id"
         }
     }
+
     extension PublicSchema {
       public struct UsersAuditSelect: Codable, Hashable, Sendable {
         public let createdAt: String?
@@ -2230,6 +2297,7 @@ test('typegen: swift w/ public access control', async () => {
     extension PublicSchema.UsersAuditSelect: Identifiable {
 
     }
+
     extension PublicSchema {
       public struct UsersAuditInsert: Codable, Hashable, Sendable {
         public let createdAt: String?
@@ -2244,6 +2312,7 @@ test('typegen: swift w/ public access control', async () => {
           case userId = "user_id"
         }
     }
+
     extension PublicSchema {
       public struct UsersAuditUpdate: Codable, Hashable, Sendable {
         public let createdAt: String?
@@ -2258,6 +2327,7 @@ test('typegen: swift w/ public access control', async () => {
           case userId = "user_id"
         }
     }
+
     extension PublicSchema {
       public struct UserDetailsSelect: Codable, Hashable, Sendable {
         public let details: String?
@@ -2268,6 +2338,7 @@ test('typegen: swift w/ public access control', async () => {
           case userId = "user_id"
         }
     }
+
     extension PublicSchema {
       public struct UserDetailsInsert: Codable, Hashable, Sendable {
         public let details: String?
@@ -2278,6 +2349,7 @@ test('typegen: swift w/ public access control', async () => {
           case userId = "user_id"
         }
     }
+
     extension PublicSchema {
       public struct UserDetailsUpdate: Codable, Hashable, Sendable {
         public let details: String?
@@ -2288,6 +2360,7 @@ test('typegen: swift w/ public access control', async () => {
           case userId = "user_id"
         }
     }
+
     extension PublicSchema {
       public struct EmptySelect: Codable, Hashable, Sendable {
 
@@ -2296,6 +2369,7 @@ test('typegen: swift w/ public access control', async () => {
 
         }
     }
+
     extension PublicSchema {
       public struct EmptyInsert: Codable, Hashable, Sendable {
 
@@ -2304,6 +2378,7 @@ test('typegen: swift w/ public access control', async () => {
 
         }
     }
+
     extension PublicSchema {
       public struct EmptyUpdate: Codable, Hashable, Sendable {
 
@@ -2312,36 +2387,40 @@ test('typegen: swift w/ public access control', async () => {
 
         }
     }
+
     extension PublicSchema {
       public struct TableWithOtherTablesRowTypeSelect: Codable, Hashable, Sendable {
-        public let col1: UserDetails?
-        public let col2: AView?
+        public let col1: PublicSchema.UserDetails?
+        public let col2: PublicSchema.AView?
 
         public enum CodingKeys: String, CodingKey {
           case col1 = "col1"
           case col2 = "col2"
         }
     }
+
     extension PublicSchema {
       public struct TableWithOtherTablesRowTypeInsert: Codable, Hashable, Sendable {
-        public let col1: UserDetails?
-        public let col2: AView?
+        public let col1: PublicSchema.UserDetails?
+        public let col2: PublicSchema.AView?
 
         public enum CodingKeys: String, CodingKey {
           case col1 = "col1"
           case col2 = "col2"
         }
     }
+
     extension PublicSchema {
       public struct TableWithOtherTablesRowTypeUpdate: Codable, Hashable, Sendable {
-        public let col1: UserDetails?
-        public let col2: AView?
+        public let col1: PublicSchema.UserDetails?
+        public let col2: PublicSchema.AView?
 
         public enum CodingKeys: String, CodingKey {
           case col1 = "col1"
           case col2 = "col2"
         }
     }
+
     extension PublicSchema {
       public struct TableWithPrimaryKeyOtherThanIdSelect: Codable, Hashable, Sendable {
         public let name: String?
@@ -2355,6 +2434,7 @@ test('typegen: swift w/ public access control', async () => {
     extension PublicSchema.TableWithPrimaryKeyOtherThanIdSelect: Identifiable {
         public var id: Int64 { otherId }
     }
+
     extension PublicSchema {
       public struct TableWithPrimaryKeyOtherThanIdInsert: Codable, Hashable, Sendable {
         public let name: String?
@@ -2365,6 +2445,7 @@ test('typegen: swift w/ public access control', async () => {
           case otherId = "other_id"
         }
     }
+
     extension PublicSchema {
       public struct TableWithPrimaryKeyOtherThanIdUpdate: Codable, Hashable, Sendable {
         public let name: String?
@@ -2375,6 +2456,7 @@ test('typegen: swift w/ public access control', async () => {
           case otherId = "other_id"
         }
     }
+
     extension PublicSchema {
       public struct CategorySelect: Codable, Hashable, Sendable {
         public let id: Int32
@@ -2385,6 +2467,7 @@ test('typegen: swift w/ public access control', async () => {
           case name = "name"
         }
     }
+
     extension PublicSchema {
       public struct CategoryInsert: Codable, Hashable, Sendable {
         public let id: Int32?
@@ -2395,6 +2478,7 @@ test('typegen: swift w/ public access control', async () => {
           case name = "name"
         }
     }
+
     extension PublicSchema {
       public struct CategoryUpdate: Codable, Hashable, Sendable {
         public let id: Int32?
@@ -2405,6 +2489,7 @@ test('typegen: swift w/ public access control', async () => {
           case name = "name"
         }
     }
+
     extension PublicSchema {
       public struct MemesSelect: Codable, Hashable, Sendable {
         public let category: Int32?
@@ -2412,7 +2497,7 @@ test('typegen: swift w/ public access control', async () => {
         public let id: Int32
         public let metadata: AnyJSON?
         public let name: String
-        public let status: MemeStatus?
+        public let status: PublicSchema.MemeStatus?
 
         public enum CodingKeys: String, CodingKey {
           case category = "category"
@@ -2423,6 +2508,7 @@ test('typegen: swift w/ public access control', async () => {
           case status = "status"
         }
     }
+
     extension PublicSchema {
       public struct MemesInsert: Codable, Hashable, Sendable {
         public let category: Int32?
@@ -2430,7 +2516,7 @@ test('typegen: swift w/ public access control', async () => {
         public let id: Int32?
         public let metadata: AnyJSON?
         public let name: String
-        public let status: MemeStatus?
+        public let status: PublicSchema.MemeStatus?
 
         public enum CodingKeys: String, CodingKey {
           case category = "category"
@@ -2441,6 +2527,7 @@ test('typegen: swift w/ public access control', async () => {
           case status = "status"
         }
     }
+
     extension PublicSchema {
       public struct MemesUpdate: Codable, Hashable, Sendable {
         public let category: Int32?
@@ -2448,7 +2535,7 @@ test('typegen: swift w/ public access control', async () => {
         public let id: Int32?
         public let metadata: AnyJSON?
         public let name: String?
-        public let status: MemeStatus?
+        public let status: PublicSchema.MemeStatus?
 
         public enum CodingKeys: String, CodingKey {
           case category = "category"
@@ -2458,6 +2545,39 @@ test('typegen: swift w/ public access control', async () => {
           case name = "name"
           case status = "status"
         }
+    }
+
+    // MARK: - Views
+
+
+
+
+
+
+    // MARK: - Materialized Views
+    extension PublicSchema {
+      public struct TodosMatviewSelect: Codable, Hashable, Sendable {
+        public let details: String?
+        public let id: Int64?
+        public let userId: Int64?
+
+        public enum CodingKeys: String, CodingKey {
+          case details = "details"
+          case id = "id"
+          case userId = "user-id"
+        }
+    }
+
+    // MARK: - Composite Types
+    extension PublicSchema {
+      public struct CompositeTypeWithArrayAttribute: Codable, Hashable, Sendable {
+        public let MyTextArray: AnyJSON
+
+        public enum CodingKeys: String, CodingKey {
+          case MyTextArray = "my_text_array"
+        }
+      }
+    }
     }"
   `)
 })

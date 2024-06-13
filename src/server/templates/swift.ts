@@ -19,44 +19,45 @@ type SwiftGeneratorOptions = {
 
 function generateEnum(enum_: PostgresType, options: SwiftGeneratorOptions): string {
   return `
-${options.accessControl} enum ${toUpperCamelCase(enum_.name)}: String, Codable, Hashable, Sendable {
-${enum_.enums.map((case_) => `${ident(1)}case ${toLowerCamelCase(case_)} = "${case_}"`).join('\n')}
+${options.accessControl} enum ${formatForSwiftTypeName(enum_.name)}: String, Codable, Hashable, Sendable {
+${enum_.enums.map((case_) => `${ident(1)}case ${formatForSwiftPropertyName(case_)} = "${case_}"`).join('\n')}
 }
 `.trim()
 }
 
 function generateTableStructsForOperations(
   schema: PostgresSchema,
-  schemas: PostgresSchema[],
   table: PostgresTable | PostgresView | PostgresMaterializedView,
-  tables: PostgresTable[],
-  views: PostgresView[],
   columns: PostgresColumn[] | undefined,
-  types: PostgresType[],
   operations: Operation[],
-  options: SwiftGeneratorOptions
+  options: SwiftGeneratorOptions,
+  {
+    types,
+    views,
+    tables,
+  }: { types: PostgresType[]; views: PostgresView[]; tables: PostgresTable[] }
 ): string[] {
   return operations.map((operation) =>
-    generateTableStruct(schema, schemas, table, tables, views, columns, types, operation, options)
+    generateTableStruct(schema, table, columns, operation, options, { types, views, tables })
   )
 }
 
 function generateTableStruct(
   schema: PostgresSchema,
-  schemas: PostgresSchema[],
   table: PostgresTable | PostgresView | PostgresMaterializedView,
-  tables: PostgresTable[],
-  views: PostgresView[],
   columns: PostgresColumn[] | undefined,
-  types: PostgresType[],
   operation: Operation,
-  options: SwiftGeneratorOptions
+  options: SwiftGeneratorOptions,
+  {
+    types,
+    views,
+    tables,
+  }: { types: PostgresType[]; views: PostgresView[]; tables: PostgresTable[] }
 ): string {
   const columnEntries: {
     raw_name: string
     formatted_name: string
     type: string
-    nullable: boolean
   }[] =
     columns?.map((column) => {
       let nullable: boolean
@@ -72,19 +73,18 @@ function generateTableStruct(
 
       return {
         raw_name: column.name,
-        formatted_name: toLowerCamelCase(column.name),
-        type: pgTypeToSwiftType(column.format, { types, schemas, tables, views }),
-        nullable,
+        formatted_name: formatForSwiftPropertyName(column.name),
+        type: pgTypeToSwiftType(column.format, nullable, { types, views, tables }),
       }
     }) ?? []
 
   const identity = columns?.find((column) => column.is_identity)
-  const structName = `${toUpperCamelCase(table.name)}${operation}`
+  const structName = `${formatForSwiftTypeName(table.name)}${operation}`
 
   let output = `
-extension ${toUpperCamelCase(schema.name)}Schema {
+extension ${formatForSwiftTypeName(schema.name)}Schema {
 ${ident(1)}${options.accessControl} struct ${structName}: Codable, Hashable, Sendable {
-${columnEntries.map(({ formatted_name, type, nullable }) => `${ident(2)}${options.accessControl} let ${formatted_name}: ${type}${nullable ? '?' : ''}`).join('\n')}
+${columnEntries.map(({ formatted_name, type }) => `${ident(2)}${options.accessControl} let ${formatted_name}: ${type}`).join('\n')}
 
 ${ident(2)}${options.accessControl} enum CodingKeys: String, CodingKey {
 ${columnEntries.map(({ raw_name, formatted_name }) => `${ident(3)}case ${formatted_name} = "${raw_name}"`).join('\n')}
@@ -95,7 +95,7 @@ ${ident(2)}}
   if (operation === 'Select' && identity) {
     const identityEntry = columnEntries.find((entry) => entry.raw_name === identity.name)
     if (identityEntry) {
-      output += `extension ${toUpperCamelCase(schema.name)}Schema.${structName}: Identifiable {
+      output += `extension ${formatForSwiftTypeName(schema.name)}Schema.${structName}: Identifiable {
 ${identityEntry.formatted_name !== 'id' ? `${ident(2)}${options.accessControl} var id: ${identityEntry.type} { ${identityEntry.formatted_name} }` : ''}
 }
   `
@@ -105,10 +105,62 @@ ${identityEntry.formatted_name !== 'id' ? `${ident(2)}${options.accessControl} v
   return output.trim()
 }
 
+function gnerateCompositeTypeStruct(
+  schema: PostgresSchema,
+  type: PostgresType,
+  options: SwiftGeneratorOptions,
+  {
+    types,
+    views,
+    tables,
+  }: { types: PostgresType[]; views: PostgresView[]; tables: PostgresTable[] }
+): string {
+  const typeWithRetrievedAttributes = {
+    ...type,
+    attributes: type.attributes.map((attribute) => {
+      const type = types.find((type) => type.id === attribute.type_id)
+      return {
+        ...attribute,
+        type,
+      }
+    }),
+  }
+
+  const attributeEntries: {
+    formatted_name: string
+    type: string
+    raw_name: string
+  }[] = typeWithRetrievedAttributes.attributes.map((attribute) => {
+    return {
+      formatted_name: formatForSwiftTypeName(attribute.name),
+      type: pgTypeToSwiftType(attribute.type!.format, false, { types, views, tables }),
+      raw_name: attribute.name,
+    }
+  })
+
+  let output = `extension ${formatForSwiftTypeName(schema.name)}Schema {
+${ident(1)}${options.accessControl} struct ${formatForSwiftTypeName(type.name)}: Codable, Hashable, Sendable {
+${attributeEntries
+  .map((entry) => `${ident(2)}${options.accessControl} let ${entry.formatted_name}: ${entry.type}`)
+  .join('\n')}
+
+${ident(2)}${options.accessControl} enum CodingKeys: String, CodingKey {
+${attributeEntries
+  .map((entry) => `${ident(3)}case ${entry.formatted_name} = "${entry.raw_name}"`)
+  .join('\n')}
+${ident(2)}}
+${ident(1)}}
+}
+}`
+
+  return output.trim()
+}
+
 export const apply = async ({
   schemas,
   tables,
   views,
+  materializedViews,
   columns,
   types,
   accessControl,
@@ -134,61 +186,95 @@ import Foundation
 import Supabase
 
 // MARK: - Enums
-${enums.map((enum_) => generateEnum(enum_, { accessControl })).join('\n')}
+${enums.map((enum_) => generateEnum(enum_, { accessControl })).join('\n\n')}
 
 // MARK: - Schemas
-${schemas.map((schema) => `${accessControl} enum ${toUpperCamelCase(schema.name)}Schema {}`).join('\n')}
+${schemas.map((schema) => `${accessControl} enum ${formatForSwiftTypeName(schema.name)}Schema {}`).join('\n\n')}
 
 // MARK: - Tables
 ${tables
   .flatMap((table) =>
     generateTableStructsForOperations(
       schemas.find((schema) => schema.name === table.schema)!,
-      schemas,
       table,
-      tables,
-      views,
       columnsByTableId[table.id],
-      types,
       ['Select', 'Insert', 'Update'],
-      { accessControl }
+      { accessControl },
+      { types, views, tables }
     )
   )
-  .join('\n')}
+  .join('\n\n')}
+
+// MARK: - Views
+${views
+  .flatMap((view) => {
+    generateTableStructsForOperations(
+      schemas.find((schema) => schema.name === view.schema)!,
+      view,
+      columnsByTableId[view.id],
+      ['Select'],
+      { accessControl },
+      { types, views, tables }
+    )
+  })
+  .join('\n\n')}
+
+// MARK: - Materialized Views
+${materializedViews
+  .flatMap((materializedView) =>
+    generateTableStructsForOperations(
+      schemas.find((schema) => schema.name === materializedView.schema)!,
+      materializedView,
+      columnsByTableId[materializedView.id],
+      ['Select'],
+      { accessControl },
+      { types, views, tables }
+    )
+  )
+  .join('\n\n')}
+
+// MARK: - Composite Types
+${compositeTypes
+  .map((compositeType) =>
+    gnerateCompositeTypeStruct(
+      schemas.find((schema) => schema.name === compositeType.schema)!,
+      compositeType,
+      { accessControl },
+      { types, views, tables }
+    )
+  )
+  .join('\n\n')}
 `.trim()
 
   return output
 }
 
-// TODO: Make this more robust. Currently doesn't handle range types - returns them as unknown.
+// TODO: Make this more robust. Currently doesn't handle range types - returns them as string.
 const pgTypeToSwiftType = (
   pgType: string,
+  nullable: boolean,
   {
     types,
-    schemas,
-    tables,
     views,
-  }: {
-    types: PostgresType[]
-    schemas: PostgresSchema[]
-    tables: PostgresTable[]
-    views: PostgresView[]
-  }
+    tables,
+  }: { types: PostgresType[]; views: PostgresView[]; tables: PostgresTable[] }
 ): string => {
+  let swiftType: string
+
   if (pgType === 'bool') {
-    return 'Bool'
+    swiftType = 'Bool'
   } else if (pgType === 'int2') {
-    return 'Int16'
+    swiftType = 'Int16'
   } else if (pgType === 'int4') {
-    return 'Int32'
+    swiftType = 'Int32'
   } else if (pgType === 'int8') {
-    return 'Int64'
+    swiftType = 'Int64'
   } else if (pgType === 'float4') {
-    return 'Float'
+    swiftType = 'Float'
   } else if (pgType === 'float8') {
-    return 'Double'
+    swiftType = 'Double'
   } else if (pgType === 'uuid') {
-    return 'UUID'
+    swiftType = 'UUID'
   } else if (
     [
       'bytea',
@@ -204,80 +290,68 @@ const pgTypeToSwiftType = (
       'vector',
     ].includes(pgType)
   ) {
-    return 'String'
+    swiftType = 'String'
   } else if (['json', 'jsonb'].includes(pgType)) {
-    return 'AnyJSON'
+    swiftType = 'AnyJSON'
   } else if (pgType === 'void') {
-    return 'Void'
+    swiftType = 'Void'
   } else if (pgType === 'record') {
-    return 'JSONObject'
+    swiftType = 'JSONObject'
   } else if (pgType.startsWith('_')) {
-    return `[${pgTypeToSwiftType(pgType.substring(1), { types, schemas, tables, views })}]`
+    swiftType = `[${pgTypeToSwiftType(pgType.substring(1), false, { types, views, tables })}]`
   } else {
-    const enumType = types.find((type) => type.name === pgType && type.enums.length > 0)
+    const allTypes: { name: string; schema: string }[] = [...types, ...views, ...tables]
+    const type = allTypes.find((type) => type.name === pgType)
 
-    if (enumType) {
-      return `${toUpperCamelCase(enumType.name)}`
+    if (type) {
+      swiftType = `${formatForSwiftTypeName(type.schema)}Schema.${formatForSwiftTypeName(type.name)}`
+    } else {
+      swiftType = 'AnyJSON'
     }
-
-    const compositeType = types.find((type) => type.name === pgType && type.attributes.length > 0)
-    if (compositeType) {
-      return `${toUpperCamelCase(compositeType.name)}`
-    }
-
-    const tableRowType = tables.find((table) => table.name === pgType)
-    if (tableRowType) {
-      return `${toUpperCamelCase(tableRowType.name)}`
-    }
-
-    const viewRowType = views.find((view) => view.name === pgType)
-    if (viewRowType) {
-      return `${toUpperCamelCase(viewRowType.name)}`
-    }
-
-    return 'unknown'
   }
+
+  return `${swiftType}${nullable ? '?' : ''}`
 }
 
 function ident(level: number, options: { width: number } = { width: 2 }): string {
   return ' '.repeat(level * options.width)
 }
 
-function toLowerCamelCase(input: string): string {
-  // Split the input string by spaces and non-alphanumeric characters
-  const words = input.split(/[\s\-_]+/)
-
-  // Map over the words array to transform each word
-  const camelCaseWords = words.map((word, index) => {
-    // Lowercase the entire word
-    const lowerCasedWord = word.toLowerCase()
-
-    // Capitalize the first letter if it's not the first word
-    if (index !== 0) {
-      return lowerCasedWord.charAt(0).toUpperCase() + lowerCasedWord.slice(1)
-    }
-
-    // Return the word as-is if it's the first word
-    return lowerCasedWord
-  })
-
-  // Join the words back together
-  return camelCaseWords.join('')
+/**
+ * Converts a Postgres name to PascalCase.
+ *
+ * @example
+ * ```ts
+ * formatForSwiftTypeName('pokedex') // Pokedex
+ * formatForSwiftTypeName('pokemon_center') // PokemonCenter
+ * formatForSwiftTypeName('victory-road') // VictoryRoad
+ * formatForSwiftTypeName('pokemon league') // PokemonLeague
+ * ```
+ */
+function formatForSwiftTypeName(name: string): string {
+  return name
+    .split(/[^a-zA-Z0-9]/)
+    .map((word) => `${word[0].toUpperCase()}${word.slice(1)}`)
+    .join('')
 }
 
-function toUpperCamelCase(input: string): string {
-  // Split the input string by spaces and non-alphanumeric characters
-  const words = input.split(/[\s\-_]+/)
-
-  // Map over the words array to transform each word
-  const camelCaseWords = words.map((word) => {
-    // Lowercase the entire word
-    const lowerCasedWord = word.toLowerCase()
-
-    // Capitalize the first letter of each word
-    return lowerCasedWord.charAt(0).toUpperCase() + lowerCasedWord.slice(1)
-  })
-
-  // Join the words back together
-  return camelCaseWords.join('')
+/**
+ * Converts a Postgres name to pascalCase.
+ *
+ * @example
+ * ```ts
+ * formatForSwiftTypeName('pokedex') // pokedex
+ * formatForSwiftTypeName('pokemon_center') // pokemonCenter
+ * formatForSwiftTypeName('victory-road') // victoryRoad
+ * formatForSwiftTypeName('pokemon league') // pokemonLeague
+ * ```
+ */
+function formatForSwiftPropertyName(name: string): string {
+  return name
+    .split(/[^a-zA-Z0-9]/)
+    .map((word, index) => {
+      const lowerWord = word.toLowerCase()
+      return index !== 0 ? lowerWord.charAt(0).toUpperCase() + lowerWord.slice(1) : lowerWord
+    })
+    .join('')
 }
