@@ -17,48 +17,56 @@ type SwiftGeneratorOptions = {
   accessControl: AccessControl
 }
 
-function generateEnum(enum_: PostgresType, options: SwiftGeneratorOptions): string {
-  return `
-${options.accessControl} enum ${formatForSwiftTypeName(enum_.name)}: String, Codable, Hashable, Sendable {
-${enum_.enums.map((case_) => `${ident(1)}case ${formatForSwiftPropertyName(case_)} = "${case_}"`).join('\n')}
-}
-`.trim()
+type SwiftEnumCase = {
+  formattedName: string
+  rawValue: string
 }
 
-function generateTableStructsForOperations(
-  schema: PostgresSchema,
-  table: PostgresTable | PostgresView | PostgresMaterializedView,
-  columns: PostgresColumn[] | undefined,
-  operations: Operation[],
-  options: SwiftGeneratorOptions,
-  {
-    types,
-    views,
-    tables,
-  }: { types: PostgresType[]; views: PostgresView[]; tables: PostgresTable[] }
-): string[] {
-  return operations.map((operation) =>
-    generateTableStruct(schema, table, columns, operation, options, { types, views, tables })
-  )
+type SwiftEnum = {
+  formattedEnumName: string
+  protocolConformances: string[]
+  cases: SwiftEnumCase[]
 }
 
-function generateTableStruct(
-  schema: PostgresSchema,
+type SwiftAttribute = {
+  formattedAttributeName: string
+  formattedType: string
+  rawName: string
+  isIdentity: boolean
+}
+
+type SwiftStruct = {
+  formattedStructName: string
+  protocolConformances: string[]
+  attributes: SwiftAttribute[]
+  codingKeysEnum: SwiftEnum | undefined
+}
+
+function formatForSwiftSchemaName(schema: string): string {
+  return `${formatForSwiftTypeName(schema)}Schema`
+}
+
+function pgEnumToSwiftEnum(pgEnum: PostgresType): SwiftEnum {
+  return {
+    formattedEnumName: formatForSwiftTypeName(pgEnum.name),
+    protocolConformances: ['String', 'Codable', 'Hashable', 'Sendable'],
+    cases: pgEnum.enums.map((case_) => {
+      return { formattedName: formatForSwiftPropertyName(case_), rawValue: case_ }
+    }),
+  }
+}
+
+function pgTypeToSwiftStruct(
   table: PostgresTable | PostgresView | PostgresMaterializedView,
   columns: PostgresColumn[] | undefined,
   operation: Operation,
-  options: SwiftGeneratorOptions,
   {
     types,
     views,
     tables,
   }: { types: PostgresType[]; views: PostgresView[]; tables: PostgresTable[] }
-): string {
-  const columnEntries: {
-    raw_name: string
-    formatted_name: string
-    type: string
-  }[] =
+): SwiftStruct {
+  const columnEntries: SwiftAttribute[] =
     columns?.map((column) => {
       let nullable: boolean
 
@@ -72,49 +80,44 @@ function generateTableStruct(
       }
 
       return {
-        raw_name: column.name,
-        formatted_name: formatForSwiftPropertyName(column.name),
-        type: pgTypeToSwiftType(column.format, nullable, { types, views, tables }),
+        rawName: column.name,
+        formattedAttributeName: formatForSwiftPropertyName(column.name),
+        formattedType: pgTypeToSwiftType(column.format, nullable, { types, views, tables }),
+        isIdentity: column.is_identity,
       }
     }) ?? []
 
-  const identity = columns?.find((column) => column.is_identity)
-  const structName = `${formatForSwiftTypeName(table.name)}${operation}`
-
-  let output = `
-extension ${formatForSwiftTypeName(schema.name)}Schema {
-${ident(1)}${options.accessControl} struct ${structName}: Codable, Hashable, Sendable {
-${columnEntries.map(({ formatted_name, type }) => `${ident(2)}${options.accessControl} let ${formatted_name}: ${type}`).join('\n')}
-
-${ident(2)}${options.accessControl} enum CodingKeys: String, CodingKey {
-${columnEntries.map(({ raw_name, formatted_name }) => `${ident(3)}case ${formatted_name} = "${raw_name}"`).join('\n')}
-${ident(2)}}
-}
-`
-
-  if (operation === 'Select' && identity) {
-    const identityEntry = columnEntries.find((entry) => entry.raw_name === identity.name)
-    if (identityEntry) {
-      output += `extension ${formatForSwiftTypeName(schema.name)}Schema.${structName}: Identifiable {
-${identityEntry.formatted_name !== 'id' ? `${ident(2)}${options.accessControl} var id: ${identityEntry.type} { ${identityEntry.formatted_name} }` : ''}
-}
-  `
-    }
+  return {
+    formattedStructName: `${formatForSwiftTypeName(table.name)}${operation}`,
+    attributes: columnEntries,
+    protocolConformances: ['Codable', 'Hashable', 'Sendable'],
+    codingKeysEnum: generateCodingKeysEnumFromAttributes(columnEntries),
   }
-
-  return output.trim()
 }
 
-function gnerateCompositeTypeStruct(
-  schema: PostgresSchema,
+function generateCodingKeysEnumFromAttributes(attributes: SwiftAttribute[]): SwiftEnum | undefined {
+  return attributes.length > 0
+    ? {
+        formattedEnumName: 'CodingKeys',
+        protocolConformances: ['String', 'CodingKey'],
+        cases: attributes.map((attribute) => {
+          return {
+            formattedName: attribute.formattedAttributeName,
+            rawValue: attribute.rawName,
+          }
+        }),
+      }
+    : undefined
+}
+
+function pgCompositeTypeToSwiftStruct(
   type: PostgresType,
-  options: SwiftGeneratorOptions,
   {
     types,
     views,
     tables,
   }: { types: PostgresType[]; views: PostgresView[]; tables: PostgresTable[] }
-): string {
+): SwiftStruct {
   const typeWithRetrievedAttributes = {
     ...type,
     attributes: type.attributes.map((attribute) => {
@@ -126,34 +129,77 @@ function gnerateCompositeTypeStruct(
     }),
   }
 
-  const attributeEntries: {
-    formatted_name: string
-    type: string
-    raw_name: string
-  }[] = typeWithRetrievedAttributes.attributes.map((attribute) => {
-    return {
-      formatted_name: formatForSwiftTypeName(attribute.name),
-      type: pgTypeToSwiftType(attribute.type!.format, false, { types, views, tables }),
-      raw_name: attribute.name,
+  const attributeEntries: SwiftAttribute[] = typeWithRetrievedAttributes.attributes.map(
+    (attribute) => {
+      return {
+        formattedAttributeName: formatForSwiftTypeName(attribute.name),
+        formattedType: pgTypeToSwiftType(attribute.type!.format, false, { types, views, tables }),
+        rawName: attribute.name,
+        isIdentity: false,
+      }
     }
-  })
+  )
 
-  let output = `extension ${formatForSwiftTypeName(schema.name)}Schema {
-${ident(1)}${options.accessControl} struct ${formatForSwiftTypeName(type.name)}: Codable, Hashable, Sendable {
-${attributeEntries
-  .map((entry) => `${ident(2)}${options.accessControl} let ${entry.formatted_name}: ${entry.type}`)
-  .join('\n')}
-
-${ident(2)}${options.accessControl} enum CodingKeys: String, CodingKey {
-${attributeEntries
-  .map((entry) => `${ident(3)}case ${entry.formatted_name} = "${entry.raw_name}"`)
-  .join('\n')}
-${ident(2)}}
-${ident(1)}}
+  return {
+    formattedStructName: formatForSwiftTypeName(type.name),
+    attributes: attributeEntries,
+    protocolConformances: ['Codable', 'Hashable', 'Sendable'],
+    codingKeysEnum: generateCodingKeysEnumFromAttributes(attributeEntries),
+  }
 }
-}`
 
-  return output.trim()
+function generateProtocolConformances(protocols: string[]): string {
+  return protocols.length === 0 ? '' : `: ${protocols.join(', ')}`
+}
+
+function generateEnum(
+  enum_: SwiftEnum,
+  { accessControl, level }: SwiftGeneratorOptions & { level: number }
+): string[] {
+  return [
+    `${ident(level)}${accessControl} enum ${enum_.formattedEnumName}${generateProtocolConformances(enum_.protocolConformances)} {`,
+    ...enum_.cases.map(
+      (case_) => `${ident(level + 1)}case ${case_.formattedName} = "${case_.rawValue}"`
+    ),
+    `${ident(level)}}`,
+  ]
+}
+
+function generateStruct(
+  struct: SwiftStruct,
+  { accessControl, level }: SwiftGeneratorOptions & { level: number }
+): string[] {
+  const identity = struct.attributes.find((column) => column.isIdentity)
+
+  let protocolConformances = struct.protocolConformances
+  if (identity) {
+    protocolConformances.push('Identifiable')
+  }
+
+  let output = [
+    `${ident(level)}${accessControl} struct ${struct.formattedStructName}${generateProtocolConformances(struct.protocolConformances)} {`,
+  ]
+
+  if (identity && identity.formattedAttributeName !== 'id') {
+    output.push(
+      `${ident(level + 1)}${accessControl} var id: ${identity.formattedType} { ${identity.formattedAttributeName} }`
+    )
+  }
+
+  output.push(
+    ...struct.attributes.map(
+      (attribute) =>
+        `${ident(level + 1)}${accessControl} let ${attribute.formattedAttributeName}: ${attribute.formattedType}`
+    )
+  )
+
+  if (struct.codingKeysEnum) {
+    output.push(...generateEnum(struct.codingKeysEnum, { accessControl, level: level + 1 }))
+  }
+
+  output.push(`${ident(level)}}`)
+
+  return output
 }
 
 export const apply = async ({
@@ -181,72 +227,56 @@ export const apply = async ({
     .filter((type) => type.enums.length > 0)
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
 
-  let output = `
-import Foundation
-import Supabase
-
-// MARK: - Enums
-${enums.map((enum_) => generateEnum(enum_, { accessControl })).join('\n\n')}
-
-// MARK: - Schemas
-${schemas.map((schema) => `${accessControl} enum ${formatForSwiftTypeName(schema.name)}Schema {}`).join('\n\n')}
-
-// MARK: - Tables
-${tables
-  .flatMap((table) =>
-    generateTableStructsForOperations(
-      schemas.find((schema) => schema.name === table.schema)!,
-      table,
-      columnsByTableId[table.id],
-      ['Select', 'Insert', 'Update'],
-      { accessControl },
-      { types, views, tables }
-    )
-  )
-  .join('\n\n')}
-
-// MARK: - Views
-${views
-  .flatMap((view) => {
-    generateTableStructsForOperations(
-      schemas.find((schema) => schema.name === view.schema)!,
-      view,
-      columnsByTableId[view.id],
-      ['Select'],
-      { accessControl },
-      { types, views, tables }
-    )
+  const swiftEnums = enums.map((enum_) => {
+    return { schema: enum_.schema, enum_: pgEnumToSwiftEnum(enum_) }
   })
-  .join('\n\n')}
 
-// MARK: - Materialized Views
-${materializedViews
-  .flatMap((materializedView) =>
-    generateTableStructsForOperations(
-      schemas.find((schema) => schema.name === materializedView.schema)!,
-      materializedView,
-      columnsByTableId[materializedView.id],
-      ['Select'],
-      { accessControl },
-      { types, views, tables }
+  const swiftStructForTables = tables.flatMap((table) =>
+    (['Select', 'Insert', 'Update'] as Operation[]).map((operation) =>
+      pgTypeToSwiftStruct(table, columnsByTableId[table.id], operation, { types, views, tables })
     )
   )
-  .join('\n\n')}
 
-// MARK: - Composite Types
-${compositeTypes
-  .map((compositeType) =>
-    gnerateCompositeTypeStruct(
-      schemas.find((schema) => schema.name === compositeType.schema)!,
-      compositeType,
-      { accessControl },
-      { types, views, tables }
-    )
+  const swiftStructForViews = views.map((view) =>
+    pgTypeToSwiftStruct(view, columnsByTableId[view.id], 'Select', { types, views, tables })
   )
-  .join('\n\n')}
-`.trim()
 
-  return output
+  const swiftStructForMaterializedViews = materializedViews.map((materializedView) =>
+    pgTypeToSwiftStruct(materializedView, columnsByTableId[materializedView.id], 'Select', {
+      types,
+      views,
+      tables,
+    })
+  )
+
+  const swiftStructForCompositeTypes = compositeTypes.map((type) =>
+    pgCompositeTypeToSwiftStruct(type, { types, views, tables })
+  )
+
+  let output = [
+    'import Foundation',
+    'import Supabase',
+    '',
+    ...schemas.flatMap((schema) => [
+      `${accessControl} enum ${formatForSwiftSchemaName(schema.name)} {`,
+      ...swiftEnums.flatMap(({ enum_ }) => generateEnum(enum_, { accessControl, level: 1 })),
+      ...swiftStructForTables.flatMap((struct) =>
+        generateStruct(struct, { accessControl, level: 1 })
+      ),
+      ...swiftStructForViews.flatMap((struct) =>
+        generateStruct(struct, { accessControl, level: 1 })
+      ),
+      ...swiftStructForMaterializedViews.flatMap((struct) =>
+        generateStruct(struct, { accessControl, level: 1 })
+      ),
+      ...swiftStructForCompositeTypes.flatMap((struct) =>
+        generateStruct(struct, { accessControl, level: 1 })
+      ),
+      '}',
+    ]),
+  ]
+
+  return output.join('\n')
 }
 
 // TODO: Make this more robust. Currently doesn't handle range types - returns them as string.
@@ -300,11 +330,15 @@ const pgTypeToSwiftType = (
   } else if (pgType.startsWith('_')) {
     swiftType = `[${pgTypeToSwiftType(pgType.substring(1), false, { types, views, tables })}]`
   } else {
-    const allTypes: { name: string; schema: string }[] = [...types, ...views, ...tables]
-    const type = allTypes.find((type) => type.name === pgType)
+    const enumType = types.find((type) => type.name === pgType && type.enums.length > 0)
 
-    if (type) {
-      swiftType = `${formatForSwiftTypeName(type.schema)}Schema.${formatForSwiftTypeName(type.name)}`
+    const compositeTypes = [...types, ...views, ...tables].find((type) => type.name === pgType)
+
+    if (enumType) {
+      swiftType = `${formatForSwiftTypeName(enumType.name)}`
+    } else if (compositeTypes) {
+      // Append a `Select` to the composite type, as that is how is named in the generated struct.
+      swiftType = `${formatForSwiftTypeName(compositeTypes.name)}Select`
     } else {
       swiftType = 'AnyJSON'
     }
