@@ -1,7 +1,7 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
 import { filterByList } from './helpers.js'
-import { policiesSql } from './sql/index.js'
+import policiesSql from './sql/policies.sql'
 import { PostgresMetaResult, PostgresPolicy } from './types.js'
 
 export default class PostgresMetaPolicies {

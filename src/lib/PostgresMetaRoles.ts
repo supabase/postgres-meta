@@ -1,5 +1,5 @@
 import { ident, literal } from 'pg-format'
-import { rolesSql } from './sql/index.js'
+import rolesSql from './sql/roles.sql'
 import {
   PostgresMetaResult,
   PostgresRole,
