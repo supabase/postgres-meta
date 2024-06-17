@@ -1,4 +1,3 @@
-import * as Parser from './Parser.js'
 import PostgresMetaColumnPrivileges from './PostgresMetaColumnPrivileges.js'
 import PostgresMetaColumns from './PostgresMetaColumns.js'
 import PostgresMetaConfig from './PostgresMetaConfig.js'
@@ -48,10 +47,6 @@ export default class PostgresMetaBase {
   types: PostgresMetaTypes
   version: PostgresMetaVersion
   views: PostgresMetaViews
-
-  parse = Parser.Parse
-  deparse = Parser.Deparse
-  format = Parser.Format
 
   constructor(options: PostgresMetaBaseOptions) {
     this.query = options.query
