@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 import { PoolConfig } from 'pg'
 import { getSecret } from '../lib/secrets.js'
+import { AccessControl } from './templates/swift.js'
 
 export const PG_META_HOST = process.env.PG_META_HOST || '0.0.0.0'
 export const PG_META_PORT = Number(process.env.PG_META_PORT || 1337)
@@ -40,7 +41,8 @@ export const GENERATE_TYPES_INCLUDED_SCHEMAS = GENERATE_TYPES
   : []
 export const GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS =
   process.env.PG_META_GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS === 'true'
-
+export const GENERATE_TYPES_SWIFT_ACCESS_CONTROL =
+  (process.env.PG_META_GENERATE_TYPES_SWIFT_ACCESS_CONTROL as AccessControl) || 'internal'
 export const DEFAULT_POOL_CONFIG: PoolConfig = {
   max: 1,
   connectionTimeoutMillis: PG_CONN_TIMEOUT_SECS * 1000,

@@ -24,6 +24,7 @@
     "docs:export": "PG_META_EXPORT_DOCS=true node --loader ts-node/esm src/server/server.ts > openapi.json",
     "gen:types:typescript": "PG_META_GENERATE_TYPES=typescript node --loader ts-node/esm src/server/server.ts",
     "gen:types:go": "PG_META_GENERATE_TYPES=go node --loader ts-node/esm src/server/server.ts",
+    "gen:types:swift": "PG_META_GENERATE_TYPES=swift node --loader ts-node/esm src/server/server.ts",
     "start": "node dist/server/server.js",
     "dev": "trap 'npm run db:clean' INT && run-s db:clean db:run && nodemon --exec node --loader ts-node/esm src/server/server.ts | pino-pretty --colorize",
     "test": "run-s db:clean db:run test:run db:clean",
