@@ -67,6 +67,7 @@ Helpers:
 - [ ] `/generators`
   - [ ] GET `/openapi`: Generate Open API 
   - [ ] GET `/typescript`: Generate Typescript types
+  - [ ] GET `/swift`: Generate Swift types (beta)
 
 ## Quickstart
 
@@ -105,6 +106,7 @@ where `<lang>` is one of:
 
 - `typescript`
 - `go`
+- `swift` (beta)
 
 To use your own database connection string instead of the provided test database, run:
 `PG_META_DB_URL=postgresql://postgres:postgres@localhost:5432/postgres npm run gen:types:<lang>`
