@@ -37,6 +37,7 @@ package database
 import "database/sql"
 
 ${tables
+  .filter((table) => schemas.some((schema) => schema.name === table.schema))
   .flatMap((table) =>
     generateTableStructsForOperations(
       schemas.find((schema) => schema.name === table.schema)!,
@@ -49,6 +50,7 @@ ${tables
   .join('\n\n')}
 
 ${views
+  .filter((view) => schemas.some((schema) => schema.name === view.schema))
   .flatMap((view) =>
     generateTableStructsForOperations(
       schemas.find((schema) => schema.name === view.schema)!,
@@ -61,6 +63,7 @@ ${views
   .join('\n\n')}
 
 ${materializedViews
+  .filter((materializedView) => schemas.some((schema) => schema.name === materializedView.schema))
   .flatMap((materializedView) =>
     generateTableStructsForOperations(
       schemas.find((schema) => schema.name === materializedView.schema)!,
@@ -73,6 +76,7 @@ ${materializedViews
   .join('\n\n')}
 
 ${compositeTypes
+  .filter((compositeType) => schemas.some((schema) => schema.name === compositeType.schema))
   .map((compositeType) =>
     generateCompositeTypeStruct(
       schemas.find((schema) => schema.name === compositeType.schema)!,
