@@ -9,6 +9,7 @@ import type {
   PostgresView,
 } from '../../lib/index.js'
 import type { GeneratorMetadata } from '../../lib/generators.js'
+import { PostgresForeignTable } from '../../lib/types.js'
 
 type Operation = 'Select' | 'Insert' | 'Update'
 export type AccessControl = 'internal' | 'public' | 'private' | 'package'
@@ -57,7 +58,7 @@ function pgEnumToSwiftEnum(pgEnum: PostgresType): SwiftEnum {
 }
 
 function pgTypeToSwiftStruct(
-  table: PostgresTable | PostgresView | PostgresMaterializedView,
+  table: PostgresTable | PostgresForeignTable | PostgresView | PostgresMaterializedView,
   columns: PostgresColumn[] | undefined,
   operation: Operation,
   {
@@ -205,75 +206,80 @@ function generateStruct(
 export const apply = async ({
   schemas,
   tables,
+  foreignTables,
   views,
   materializedViews,
   columns,
   types,
   accessControl,
 }: GeneratorMetadata & SwiftGeneratorOptions): Promise<string> => {
-  const columnsByTableId = columns
+  const columnsByTableId = Object.fromEntries<PostgresColumn[]>(
+    [...tables, ...foreignTables, ...views, ...materializedViews].map((t) => [t.id, []])
+  )
+
+  columns
+    .filter((c) => c.table_id in columnsByTableId)
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-    .reduce(
-      (acc, curr) => {
-        acc[curr.table_id] ??= []
-        acc[curr.table_id].push(curr)
-        return acc
-      },
-      {} as Record<string, PostgresColumn[]>
-    )
-
-  const compositeTypes = types.filter((type) => type.attributes.length > 0)
-  const enums = types
-    .filter((type) => type.enums.length > 0)
-    .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-
-  const swiftEnums = enums.map((enum_) => {
-    return { schema: enum_.schema, enum_: pgEnumToSwiftEnum(enum_) }
-  })
-
-  const swiftStructForTables = tables.flatMap((table) =>
-    (['Select', 'Insert', 'Update'] as Operation[]).map((operation) =>
-      pgTypeToSwiftStruct(table, columnsByTableId[table.id], operation, { types, views, tables })
-    )
-  )
-
-  const swiftStructForViews = views.map((view) =>
-    pgTypeToSwiftStruct(view, columnsByTableId[view.id], 'Select', { types, views, tables })
-  )
-
-  const swiftStructForMaterializedViews = materializedViews.map((materializedView) =>
-    pgTypeToSwiftStruct(materializedView, columnsByTableId[materializedView.id], 'Select', {
-      types,
-      views,
-      tables,
-    })
-  )
-
-  const swiftStructForCompositeTypes = compositeTypes.map((type) =>
-    pgCompositeTypeToSwiftStruct(type, { types, views, tables })
-  )
+    .forEach((c) => columnsByTableId[c.table_id].push(c))
 
   let output = [
     'import Foundation',
     'import Supabase',
     '',
-    ...schemas.flatMap((schema) => [
-      `${accessControl} enum ${formatForSwiftSchemaName(schema.name)} {`,
-      ...swiftEnums.flatMap(({ enum_ }) => generateEnum(enum_, { accessControl, level: 1 })),
-      ...swiftStructForTables.flatMap((struct) =>
-        generateStruct(struct, { accessControl, level: 1 })
-      ),
-      ...swiftStructForViews.flatMap((struct) =>
-        generateStruct(struct, { accessControl, level: 1 })
-      ),
-      ...swiftStructForMaterializedViews.flatMap((struct) =>
-        generateStruct(struct, { accessControl, level: 1 })
-      ),
-      ...swiftStructForCompositeTypes.flatMap((struct) =>
-        generateStruct(struct, { accessControl, level: 1 })
-      ),
-      '}',
-    ]),
+    ...schemas
+      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+      .flatMap((schema) => {
+        const schemaTables = [...tables, ...foreignTables]
+          .filter((table) => table.schema === schema.name)
+          .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+
+        const schemaViews = [...views, ...materializedViews]
+          .filter((table) => table.schema === schema.name)
+          .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+
+        const schemaEnums = types
+          .filter((type) => type.schema === schema.name && type.enums.length > 0)
+          .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+
+        const schemaCompositeTypes = types
+          .filter((type) => type.schema === schema.name && type.attributes.length > 0)
+          .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+
+        return [
+          `${accessControl} enum ${formatForSwiftSchemaName(schema.name)} {`,
+          ...schemaEnums.flatMap((enum_) =>
+            generateEnum(pgEnumToSwiftEnum(enum_), { accessControl, level: 1 })
+          ),
+          ...schemaTables.flatMap((table) =>
+            (['Select', 'Insert', 'Update'] as Operation[])
+              .map((operation) =>
+                pgTypeToSwiftStruct(table, columnsByTableId[table.id], operation, {
+                  types,
+                  views,
+                  tables,
+                })
+              )
+              .flatMap((struct) => generateStruct(struct, { accessControl, level: 1 }))
+          ),
+          ...schemaViews.flatMap((view) =>
+            generateStruct(
+              pgTypeToSwiftStruct(view, columnsByTableId[view.id], 'Select', {
+                types,
+                views,
+                tables,
+              }),
+              { accessControl, level: 1 }
+            )
+          ),
+          ...schemaCompositeTypes.flatMap((type) =>
+            generateStruct(pgCompositeTypeToSwiftStruct(type, { types, views, tables }), {
+              accessControl,
+              level: 1,
+            })
+          ),
+          '}',
+        ]
+      }),
   ]
 
   return output.join('\n')
@@ -360,14 +366,33 @@ function ident(level: number, options: { width: number } = { width: 2 }): string
  * formatForSwiftTypeName('pokemon_center') // PokemonCenter
  * formatForSwiftTypeName('victory-road') // VictoryRoad
  * formatForSwiftTypeName('pokemon league') // PokemonLeague
+ * formatForSwiftTypeName('_key_id_context') // _KeyIdContext
  * ```
  */
 function formatForSwiftTypeName(name: string): string {
-  return name
-    .split(/[^a-zA-Z0-9]/)
-    .map((word) => `${word[0].toUpperCase()}${word.slice(1)}`)
-    .join('')
+  // Preserve the initial underscore if it exists
+  let prefix = ''
+  if (name.startsWith('_')) {
+    prefix = '_'
+    name = name.slice(1) // Remove the initial underscore for processing
+  }
+
+  return (
+    prefix +
+    name
+      .split(/[^a-zA-Z0-9]+/)
+      .map((word) => {
+        if (word) {
+          return `${word[0].toUpperCase()}${word.slice(1)}`
+        } else {
+          return ''
+        }
+      })
+      .join('')
+  )
 }
+
+const SWIFT_KEYWORDS = ['in', 'default']
 
 /**
  * Converts a Postgres name to pascalCase.
@@ -381,11 +406,13 @@ function formatForSwiftTypeName(name: string): string {
  * ```
  */
 function formatForSwiftPropertyName(name: string): string {
-  return name
+  const propertyName = name
     .split(/[^a-zA-Z0-9]/)
     .map((word, index) => {
       const lowerWord = word.toLowerCase()
       return index !== 0 ? lowerWord.charAt(0).toUpperCase() + lowerWord.slice(1) : lowerWord
     })
     .join('')
+
+  return SWIFT_KEYWORDS.includes(propertyName) ? `\`${propertyName}\`` : propertyName
 }
