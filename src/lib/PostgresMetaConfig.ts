@@ -1,4 +1,4 @@
-import { configSql } from './sql/index.js'
+import configSql from './sql/config.sql'
 import { PostgresMetaResult, PostgresConfig } from './types.js'
 
 export default class PostgresMetaConfig {

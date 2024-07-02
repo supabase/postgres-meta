@@ -1,6 +1,7 @@
 import { literal } from 'pg-format'
 import { coalesceRowsToArray, filterByList } from './helpers.js'
-import { columnsSql, foreignTablesSql } from './sql/index.js'
+import columnsSql from './sql/columns.sql'
+import foreignTablesSql from './sql/foreign_tables.sql'
 import { PostgresMetaResult, PostgresForeignTable } from './types.js'
 
 export default class PostgresMetaForeignTables {

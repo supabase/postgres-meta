@@ -1,7 +1,7 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
 import { filterByList } from './helpers.js'
-import { columnPrivilegesSql } from './sql/index.js'
+import columnPrivilegesSql from './sql/column_privileges.sql'
 import {
   PostgresMetaResult,
   PostgresColumnPrivileges,
