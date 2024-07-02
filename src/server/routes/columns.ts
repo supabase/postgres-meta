@@ -140,9 +140,9 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
         headers: Type.Object({
           pg: Type.String(),
         }),
-        body: postgresColumnCreateSchema,
+        body: Type.Union([postgresColumnCreateSchema, Type.Array(postgresColumnCreateSchema)]),
         response: {
-          200: postgresColumnSchema,
+          200: Type.Union([postgresColumnSchema, Type.Array(postgresColumnSchema)]),
           400: Type.Object({
             error: Type.String(),
           }),
@@ -153,7 +153,8 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       const connectionString = request.headers.pg
 
       const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
-      const { data, error } = await pgMeta.columns.create(request.body)
+      const colMutations = Array.isArray(request.body) ? request.body : [request.body]
+      const { data, error } = await pgMeta.columns.create(colMutations)
       await pgMeta.end()
       if (error) {
         request.log.error({ error, request: extractRequestForLogging(request) })
@@ -162,7 +163,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
         return { error: error.message }
       }
 
-      return data
+      return Array.isArray(request.body) ? data : data[0]
     }
   )
 
