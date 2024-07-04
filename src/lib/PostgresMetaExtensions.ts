@@ -1,5 +1,5 @@
 import { ident, literal } from 'pg-format'
-import { extensionsSql } from './sql/index.js'
+import extensionsSql from './sql/extensions.sql'
 import { PostgresMetaResult, PostgresExtension } from './types.js'
 
 export default class PostgresMetaExtensions {
