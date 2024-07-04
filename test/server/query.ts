@@ -539,3 +539,21 @@ test('very big number', async () => {
     ]
   `)
 })
+
+// issue: https://github.com/supabase/supabase/issues/27626
+test('return interval as string', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `SELECT '1 day 1 hour 45 minutes'::interval`,
+    },
+  })
+  expect(res.json()).toMatchInlineSnapshot(`
+    [
+      {
+        "interval": "1 day 01:45:00",
+      },
+    ]
+  `)
+})
