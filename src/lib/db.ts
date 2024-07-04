@@ -12,6 +12,7 @@ pg.types.setTypeParser(pg.types.builtins.INT8, (x) => {
   }
 })
 pg.types.setTypeParser(pg.types.builtins.DATE, (x) => x)
+pg.types.setTypeParser(pg.types.builtins.INTERVAL, (x) => x)
 pg.types.setTypeParser(pg.types.builtins.TIMESTAMP, (x) => x)
 pg.types.setTypeParser(pg.types.builtins.TIMESTAMPTZ, (x) => x)
 pg.types.setTypeParser(1115, parseArray) // _timestamp
