@@ -28,8 +28,8 @@
     "start": "node dist/server/server.js",
     "dev": "trap 'npm run db:clean' INT && run-s db:clean db:run && nodemon --exec node --loader ts-node/esm src/server/server.ts | pino-pretty --colorize",
     "test": "run-s db:clean db:run test:run db:clean",
-    "db:clean": "cd test/db && docker-compose down",
-    "db:run": "cd test/db && docker-compose up --detach && sleep 5",
+    "db:clean": "cd test/db && docker compose down",
+    "db:run": "cd test/db && docker compose up --detach && sleep 5",
     "test:run": "vitest run",
     "test:update": "run-s db:clean db:run && vitest run --update && run-s db:clean"
   },
