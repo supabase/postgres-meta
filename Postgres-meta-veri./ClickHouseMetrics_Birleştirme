@@ -1,0 +1,701 @@
+02c210a97c742a9e0dc48b8d28142f6c4c06bfdb Pazartesi Eylül 17 00:00:00 2001
+Gönderen: Sarsılmazxx02 <Recocankaya@gmail.com>
+Tarih: 16 Eylül 2024 Pazartesi 13:29:42 +0300
+Konu: [PATCH] README.md'yi güncelle
+MIME-Sürüm: 1.0
+İçerik Türü: text/plain; karakter kümesi=UTF-8
+İçerik Aktarım Kodlaması: 8bit
+
+# Python bilgilerini kontrol edin:
+$ python -V
+Python 3.11.2
+
+# Projeyi şu isimli klasörde toplayacağız ch-python:
+$ mkdir ch-python
+$ cd ch-python
+
+# Şu isimle birleşimleri birleştirme gereksinimleri.txt:
+clickhouse-connect==0.5.23
+
+# Şu isimde bir python kaynak dosyası oluşturmak main.py:
+clickhouse_connect'i içe aktar
+sys'yi içe aktar
+json'u içe aktar
+
+CLICKHOUSE_CLOUD_HOSTNAME = 'ANA BİLGİSAYARADI.clickhouse.cloud'
+CLICKHOUSE_CLOUD_USER = 'varsayılan'
+CLICKHOUSE_CLOUD_ŞİFRE = 'GİZLİ_ŞİFRE'
+
+istemci = clickhouse_connect.get_client(
+    ana bilgisayar=CLICKHOUSE_CLOUD_HOSTNAME, bağlantı noktası=8443, kullanıcı adı=CLICKHOUSE_CLOUD_USER, şifre=CLICKHOUSE_CLOUD_PASSWORD)
+
+print("bağlandı " + CLICKHOUSE_CLOUD_HOSTNAME + "\n")
+istemci.komut(
+    'TABLO OLUŞTUR EĞER MEVCUT DEĞİLSE new_table (anahtar UInt32, değer String, metrik Float64) MOTOR MergeTree SIRALA anahtar')
+
+print("tablo yeni_tablo oluşturuldu veya zaten mevcut!\n")
+
+satır1 = [1000, 'Dize Değeri 1000', 5.233]
+satır2 = [2000, 'Dize Değeri 2000', -107.04]
+veri = [satır1, satır2]
+istemci.insert('yeni_tablo', veri, sütun_adları=['anahtar', 'değer', 'ölçüm'])
+
+print("yeni_tabloya 2 satır yazıldı\n")
+
+SORGU = "SELECT max(anahtar), ort(metrik) yeni_tablodan"
+
+sonuç = istemci.sorgu(SORGU)
+
+sys.stdout.write("sorgu: ["+QUERY + "] şunu döndürür:\n\n")
+print(sonuç.sonuç_satırları)
+
+# Sanal çevre
+chpython$ python -m venv venv
+
+# Sanal çevre yükleyin:
+chpython$ kaynak venv/bin/activate
+
+# Yüklendikten sonra terminal isteminize (venv) eklenmeli ve bağımlılıklar yüklenmelidir:
+
+(venv) ➜ chpython$ pip install -r requirements.txt
+Sertifika toplama
+  Önbelleğe alınmış certifi-2023.5.7-py3-none-any.whl (156 kB) kullanılıyor
+urllib3>=1.26 toplanıyor
+  Önbelleğe alınmış urllib3-2.0.2-py3-none-any.whl (123 kB) kullanılıyor
+Pytz toplamak
+  Önbelleğe alınmış pytz-2023.3-py2.py3-none-any.whl (502 kB) kullanılıyor
+Zstandard'ı toplamak
+  Önbelleğe alınmış zstandard-0.21.0-cp311-cp311-macosx_11_0_arm64.whl (364 kB) kullanılıyor
+lz4 toplanıyor
+  Önbelleğe alınmış lz4-4.3.2-cp311-cp311-macosx_11_0_arm64.whl (212 kB) kullanılıyor
+Toplanan paketlerin kurulumu: pytz, zstandard, urllib3, lz4, certifi, clickhouse-connect
+certifi-2024.5.7 clickhouse-connect-0.5.23 lz4-4.3.2 pytz-2024.3 urllib3-2.0.2 zstandard-0.21.0 başarıyla yüklendi
+
+#Kodubaşlat!
+(venv) chpython$ venv/bin/python main.py
+
+HOSTNAME.clickhouse.cloud'a bağlandı
+
+tablo new_table oluşturuldu veya zaten mevcut!
+
+new_table tablosuna 2 satır yazıldı
+
+sorgu: [SELECT max(anahtar), avg(metrik) FROM new_table] şunu döndürür:
+
+[(2000, -50.9035)]
+
+# Dilediğiniz yerde bir dizin oluşturun:
+mkdir testi
+➜ şifreyi test et
+/Kullanıcılar/jaijhala/Masaüstü/terraform/test
+
+# dosya oluşturulur: main.tfvesecret.tfvarsAşağıdakileri kopyalayın:main.tfdosya şu şekilde yapılır:
+yeryüzünü biçimlendirmek {
+ gerekli_sağlayıcılar {
+   tıklama evi = {
+     kaynak = "ClickHouse/clickhouse"
+     sürüm = "0.0.2"
+   }
+ }
+}
+
+değişken "kuruluş_kimliği" {
+  tür = dize
+}
+
+değişken "token_key" {
+  tür = dize
+}
+
+değişken "token_secret" {
+  tür = dize
+}
+
+sağlayıcı clickhouse {
+  çevre = "üretim"
+  kuruluş_kimliği = var.kuruluş_kimliği
+  belirteç_anahtarı = var.belirteç_anahtarı
+  token_secret = var.token_secret
+}
+
+
+değişken "hizmet_şifresi" {
+  tür = dize
+  hassas = doğru
+}
+
+kaynak "clickhouse_service" "service123" {
+  isim = "jai-terraform"
+  bulut_sağlayıcısı = "aws"
+  bölge = "abd-doğu-2"
+  katman = "geliştirme"
+  boşta_ölçekleme = true
+  şifre = var.service_password
+  ip_erişimi = [
+    {
+        kaynak = "0.0.0.0/0"
+        açıklama = "Herhangi bir yer"
+    }
+  ]
+}
+
+çıktı "CLICKHOUSE_HOST" {
+  değer = clickhouse_service.service123.endpoints.0.host
+}
+
+yukarıdaki kaynaklar bölümünden servis adı, bölge vb. gibi kendi üyenizi değiştirebilirsiniz.
+
+secret.tfvarsdaha önce indirdiğiniz tüm API Anahtarı ile ilgili bilgileri koyacağınız yere. Bu dosyanın fikirleri, gizli tüm kimlik bilgilerinizin ana ayrıntılarının içeriğinden gizlenecek.
+
+(Bu para birimi belirtilir) şu şekilde bir şey yapılır:Yukarıdaki kaynaklar bölümünün servis adı, bölge vb. gibi kendi üyenizi değiştirebilirsiniz.
+
+secret.tfvarsdaha önce indirdiğiniz tüm API Anahtarı ile ilgili bilgileri koyacağınız yere. Bu dosyanın fikirleri, gizli tüm kimlik bilgilerinizin ana ayrıntılarının içeriğinden gizlenecek.
+
+(Bu şifrelenmiştir) şu şekilde bir şey yapılır:
+
+`kuruluş_kimliği = "e957a5f7-4qe3-4b05-ad5a-d02b2dcd0593"
+belirteç_anahtarı = "QWhhkMeytqQruTeKg"
+token_secret = "4b1dNmjWdLUno9lXxmKvSUcPP62jvn7irkuZPbY"
+servis_şifresi = "şifre123!"`
+
+# terraform initBu dizinden çalıştırıldı,Beklenen çıktı:
+```
+Arka uç başlatılıyor...
+Sağlayıcı eklentileri başlatılıyor...
+- "0.0.2" ile eşleşen clickhouse/clickhouse sürümleri bulunuyor...
+- clickhouse/clickhouse v0.0.2 kuruluyor...
+- clickhouse/clickhouse v0.0.2 (kendi kendine imzalı, anahtar kimliği D7089EE5C6A92ED1) yüklendi
+
+Ortak ve topluluk sağlayıcıları geliştiricileri tarafından imzalanır.
+Sağlayıcı imzalama hakkında daha fazla bilgi edinmek isterseniz, buradan okuyabilirsiniz:
+https://www.terraform.io/docs/cli/plugins/signing.html
+
+Terraform, sağlayıcıyı kaydetmek için .terraform.lock.hcl adlı bir kilit dosyası oluşturdu
+yukarıda yaptığı seçimler. Bu dosyayı sürüm kontrol deponuza ekleyin
+böylece Terraform varsayılan olarak aynı seçimleri yapmayı garanti edebilir
+gelecekte "terraform init" komutunu çalıştırırsınız.
+
+Terraform başarıyla başlatıldı!
+
+Artık Terraform ile çalışmaya başlayabilirsiniz. "Terraform plan"ı çalıştırmayı deneyin ve görün
+altyapınız için gereken tüm değişiklikler. Tüm Terraform komutları
+artık çalışması lazım.
+
+Terraform için modülleri veya arka uç yapılandırmasını ayarlarsanız veya değiştirirseniz,
+çalışma dizininizi yeniden başlatmak için bu komutu yeniden çalıştırın. Unutursanız, diğer
+komutları bunu algılayacak ve gerekirse bunu yapmanızı hatırlatacaktır.
+
+```
+
+# terraform apply -var-file=secret.tfvarsKomutu
+```
+➜ terraform'u test et apply -var-file=secret.tfvars
+
+Terraform, aşağıdaki yürütme planını oluşturmak için seçili sağlayıcıları kullandı. Kaynak eylemleri ile gösterilir
+Aşağıdaki semboller:
+  + oluştur
+
+Terraform aşağıdaki eylemleri gerçekleştirecektir:
+
+  # clickhouse_service.service123 oluşturulacak
+  + kaynak "clickhouse_service" "service123" {
+      + bulut_sağlayıcısı = "aws"
+      + uç noktalar = (uygulamadan sonra bilinir)
+      + id = (uyguladıktan sonra bilinir)
+      + boşta_ölçekleme = true
+      + ip_erişimi = [
+          + {
+              + açıklama = "Herhangi bir yer"
+              + kaynak = "0.0.0.0/0"
+            },
+        ]
+      + last_updated = (başvurduktan sonra bilinir)
+      + name = "jai-terraform"
+      + şifre = (hassas değer)
+      + bölge = "abd-doğu-2"
+      + katman = "geliştirme"
+    }
+
+Plan: 1 eklemek, 0 değiştirmek, 0 yıkmak.
+
+Çıktılarda Yapılan Değişiklikler:
+  + CLICKHOUSE_HOST = (uyguladıktan sonra bilinir)
+
+Bu işlemleri yapmak istiyor musunuz?
+  Terraform yukarıda anlatılan işlemleri gerçekleştirecektir.
+  Onay için sadece 'evet' kabul edilecektir.
+
+  Bir değer girin: evet
+  ```
+
+## Yazın yesve enter'a basın
+
+Yan not: Yukarıda yazmaya dikkat edin şifre = (hassas değer). Bunun nedeni hassas = trueşifreyi main.tf dosyasında ayarlamamızdır.
+
+7). Hizmet oluşturmak birkaç dakika sürecektir ancak sonunda aşağıdaki gibi bir sonuç elde edilir:
+
+```
+  Bir değer girin: evet
+
+clickhouse_service.service123: Oluşturuluyor...
+clickhouse_service.service123: Hala oluşturuluyor... [10 saniye geçti]
+clickhouse_service.service123: Hala oluşturuluyor... [20 saniye geçti]
+clickhouse_service.service123: Hala oluşturuluyor... [30 saniye geçti]
+clickhouse_service.service123: Hala oluşturuluyor... [40 saniye geçti]
+clickhouse_service.service123: Hala oluşturuluyor... [50 saniye geçti]
+clickhouse_service.service123: Hala oluşturuluyor... [1m0s geçti]
+clickhouse_service.service123: Hala oluşturuluyor... [1m10sn geçti]
+clickhouse_service.service123: Hala oluşturuluyor... [1m20sn geçti]
+clickhouse_service.service123: Hala oluşturuluyor... [1m30sn geçti]
+clickhouse_service.service123: Hala oluşturuluyor... [1m40sn geçti]
+clickhouse_service.service123: Oluşturma 1m41sn sonra tamamlandı [id=aa8d8d63-1878-4600-8470-630715af38ed]
+
+Başvuru tamamlandı! Kaynaklar: 1 eklendi, 0 değiştirildi, 0 yok edildi.
+
+Çıktılar:
+
+CLICKHOUSE_HOST = "h3ljlaqez6.us-east-2.aws.clickhouse.cloud"
+➜ test
+```
+
+### Cloud Console'u kontrol edin, çalışma hizmetini görebilirsiniz.
+
+9). Hizmeti tekrar temizlemek/yok etmek için şunu çalıştırın:terraform destroy -var-file=secret.tfvars
+
+```
+Terraform, aşağıdaki yürütme planını oluşturmak için seçili sağlayıcıları kullandı. Kaynak eylemleri ile gösterilir
+Aşağıdaki semboller:
+  - tahrip etmek
+
+Terraform aşağıdaki eylemleri gerçekleştirecektir:
+
+  # clickhouse_service.service123 yok edilecek
+  - kaynak "clickhouse_service" "service123" {
+      - cloud_provider = "aws" -> null
+      - ............
+
+Plan: 0 eklemek, 0 değiştirmek, 1 yok etmek.
+
+Çıktılarda Yapılan Değişiklikler:
+  - CLICKHOUSE_HOST = "h3ljlaqez6.us-east-2.aws.clickhouse.cloud" -> boş
+
+Gerçekten tüm kaynakları yok etmek mi istiyorsunuz?
+  Terraform yukarıda gösterildiği gibi tüm yönetilen altyapınızı yok edecektir.
+  Geri alma yok. Onaylamak için sadece 'evet' kabul edilecektir.
+
+  Bir değer girin:
+```
+
+## Evet yazın ve enter'a basın
+
+```
+clickhouse_service.service123: Yok ediliyor... [id=aa8d8d63-1878-4600-8470-630715af38ed]
+clickhouse_service.service123: Hala yok ediliyor... [id=aa8d8d63-1878-4600-8470-630715af38ed, 10sn geçti]
+clickhouse_service.service123: Hala yok ediliyor... [id=aa8d8d63-1878-4600-8470-630715af38ed, 20sn geçti]
+clickhouse_service.service123: Yıkım 27 saniye sonra tamamlandı
+
+Yok etme tamamlandı! Kaynaklar: 1 yok edildi.
+```
+---
+ README.md | 375 +++++++++++++++++++++++++++++++++++++++++++++ -----
+ 1 dosya değiştirildi, 271 ekleme(+), 104 silme(-)
+
+diff --git a/README.md b/README.md
+dizin f81f4673..ec0450f2 100644
+--- a/README.md
++++ b/README.md
+@@ -1.123 +1.290 @@
+-# `postgres-meta`
+-
+- Postgres'inizi yönetmek için bir RESTful API. Tabloları getirin, roller ekleyin ve sorguları çalıştırın (ve daha fazlası).
+-
+-## Belgeler
+-
+-https://supabase.github.io/postgres-meta/
+-
+-## İlerlemek
+-
+-Şema:
+-
+-- [X] `POST /query` (SQL sorgusunu yürüt)
+- - [x] `POST /format` (SQL sorgusunu biçimlendir)
+- - [x] `POST /parse` (SQL sorgusunu AST'ye ayrıştır)
+- - [ ] `POST /explain` (SQL sorgusunu açıkla)
+-- [X] `/sütunlar`
+- - [X] GET (Liste)
+- - [X] POST (`tabloyu değiştir sütun ekle`)
+- - [X] PATCH (`tabloyu değiştir/sütun adını değiştir`)
+- - [X] DELETE (`tablo bırakma sütununu değiştir`)
+-- [X] `/uzantılar`
+- - [X] GET (Liste)
+- - [X] POST (`uzantı oluştur`)
+- - [X] PATCH (`uzantıyı değiştir`)
+- - [X] DELETE (`uzantıyı bırak`)
+-- [X] `/fonksiyonlar`
+- - [X] GET (Liste)
+- - [X] POST (`fonksiyon oluştur`)
+- - [X] PATCH (`değiştirme işlevi`)
+- - [X] SİL (`bırakma fonksiyonu`)
+-- [X] `/yayınlar`
+- - [X] GET (Liste)
+- - [X] POST (`yayın oluştur`)
+- - [X] PATCH (`yayını değiştir`)
+- - [X] SİL (`yayını bırak`)
+-- [X] `/roller`
+- - [X] GET (Liste)
+- - [X] POST (`rol oluştur`)
+- - [X] PATCH (`rol değiştir`)
+- - [X] DELETE (`rol bırak`)
+-- [X] `/şemalar`
+- - [X] GET (Liste)
+- - [X] POST (`şema oluştur`)
+- - [X] PATCH (`şemayı değiştir`)
+- - [X] DELETE (`şemayı bırak`)
+-- [X] `/tablolar`
+- - [X] GET (Liste)
+- - [X] POST (`tablo oluştur`)
+- - [X] PATCH (`tabloyu değiştir`)
+- - [X] DELETE (`tabloyu bırak`)
+-- [X] `/tetikleyiciler`
+- - [X] GET (Liste)
+- - [X] POST (`tetikleyici oluştur`)
+- - [X] PATCH (`tetiği değiştir`)
+- - [X] SİL (`tetiği bırak`)
+-- [ ] `/türler`
+- - [X] GET (Liste)
+- - [ ] POST (`tür oluştur`)
+- - [ ] PATCH (`türünü değiştir`)
+- - [ ] DELETE (`bırakma türü`)
+-
+-Yardımcılar:
+-
+-- [ ] `/yapılandırma`
+- - [ ] GET `/version`: Postgres sürümü
+-- [ ] `/jeneratörler`
+- - [ ] GET `/openapi`: Açık API Oluştur
+- - [ ] GET `/typescript`: Typescript türlerini üret
+- - [ ] GET `/swift`: Swift türlerini üret (beta)
+-
+-## Hızlı Başlangıç
+-
+-Aşağıdaki ENV VARS'ı ayarlayın:
+-
+-```vur
+-PG_META_HOST="0.0.0.0"
+-PG_META_PORT=8080
+-PG_META_DB_HOST="postgres"
+-PG_META_DB_NAME="postgres"
+-PG_META_DB_USER="postgres"
+-PG_META_VT_BAĞLANTI NOKTASI=5432
+-PG_META_DB_PASSWORD="postgres"
++# Python sonuçlarını kontrol edin:
++$ python -V
++Python 3.11.2
++
++# Projeyi şu isimli klasörde toplayacağız ch-python:
++$ mkdir ch-python
++$ cd ch-python
++
++# Şu isimle bir eklentileri birleştirir gereksinimleri.txt:
++clickhouse-connect==0.5.23
++
++# Şu isimde bir python kaynak içeriğini oluşturmak main.py:
++clickhouse_connect'i içe aktar
++sistemi içe aktar
++json'u içe aktar
++
++CLICKHOUSE_CLOUD_HOSTNAME = 'ANA BİLGİSAYARADI.clickhouse.cloud'
++CLICKHOUSE_CLOUD_USER = 'varsayılan'
++CLICKHOUSE_CLOUD_PASSWORD = 'GİZLİ_PAROLANIZ'
++
++istemci = clickhouse_connect.istemciyi_al(
++ host=CLICKHOUSE_CLOUD_HOSTNAME, port=8443, kullanıcı adı=CLICKHOUSE_CLOUD_USER, şifre=CLICKHOUSE_CLOUD_PASSWORD)
++
++print("bağlandı " + CLICKHOUSE_CLOUD_HOSTNAME + "\n")
++istemci.komutu(
++ 'TABLO OLUŞTUR EĞER MEVCUT DEĞİLSE new_table (anahtar UInt32, değer String, metrik Float64) ENGINE MergeTree SIRALA anahtar')
++
++print("tablo yeni_tablo oluşturuldu veya zaten mevcut!\n")
++
++satır1 = [1000, 'Dize Değeri 1000', 5.233]
++satır2 = [2000, 'Dize Değeri 2000', -107.04]
++veri = [satır1, satır2]
++client.insert('new_table', data, column_names=['anahtar', 'değer', 'ölçüm'])
++
++print("new_table\n tablosuna 2 satır yazıldı")
++
++QUERY = "SELECT max(anahtar), ort(metrik) yeni_tablodan"
++
++sonuç = client.query(SORGU)
++
++sys.stdout.write("sorgu: ["+QUERY + "] şunu döndürür:\n\n")
++print(sonuç.sonuç_satırları)
++
++# Sanal ortam
++chpython$ python -m venv venv
++
++# Sanal ortamı yükleyin:
++chpython$ kaynak venv/bin/activate
++
++# Yüklendikten sonra terminal isteminize (venv) eklenmeli ve bağımlılıklar yüklenmelidir:
++
++(venv) ➜ chpython$ pip install -r gereksinimler.txt
++Sertifika toplama
++ Önbelleğe alınmış certifi-2023.5.7-py3-none-any.whl (156 kB) kullanılıyor
++urllib3>=1.26 toplanıyor
++ Önbelleğe alınmış urllib3-2.0.2-py3-none-any.whl (123 kB) kullanılıyor
++Pytz toplanıyor
++ Önbelleğe alınmış pytz-2023.3-py2.py3-none-any.whl (502 kB) kullanılıyor
++zstandard'ı toplamak
++ Önbelleğe alınmış zstandard-0.21.0-cp311-cp311-macosx_11_0_arm64.whl (364 kB) kullanılıyor
++lz4 toplanıyor
++ Önbelleğe alınmış lz4-4.3.2-cp311-cp311-macosx_11_0_arm64.whl (212 kB) kullanılıyor
++Toplanan paketler yükleniyor: pytz, zstandard, urllib3, lz4, certifi, clickhouse-connect
++Certifi-2024.5.7 clickhouse-connect-0.5.23 lz4-4.3.2 pytz-2024.3 urllib3-2.0.2 zstandard-0.21.0 başarıyla yüklendi
++
++# Kodu başlat!
++(venv) chpython$ venv/bin/python main.py
++
++HOSTNAME.clickhouse.cloud'a bağlandı
++
++table new_table oluşturuldu veya zaten mevcut!
++
++yeni_tablo tablosuna 2 satır yazıldı
++
++sorgu: [SELECT max(anahtar), avg(metrik) FROM new_table] şunu döndürür:
++
++[(2000, -50.9035)]
++
++# Dilediğiniz yerde bir dizin oluşturun:
++mkdir testi
++➜ şifreyi test et
++/Kullanıcılar/jaijhala/Masaüstü/terraform/test
++
++# dosya oluşturulur: main.tfvesecret.tfvarsAşağıdakileri kopyalayın:main.tfdosya şu şekilde yapılır:
++araziyi biçimlendir {
++ gerekli_sağlayıcılar {
++ tıklama evi = {
++ kaynak = "ClickHouse/clickhouse"
++ sürüm = "0.0.2"
++ }
++ }
++}
++
++değişken "kuruluş_kimliği" {
++ tür = dize
++}
++
++değişken "token_anahtarı" {
++ tür = dize
++}
++
++değişken "token_secret" {
++ tür = dize
++}
++
++sağlayıcı clickhouse {
++ çevre = "üretim"
++ kuruluş_kimliği = var.kuruluş_kimliği
++ belirteç_anahtarı = var.belirteç_anahtarı
++ token_secret = var.token_secret
++}
++
++
++değişken "hizmet_şifresi" {
++ tür = dize
++ hassas = doğru
++}
++
++kaynak "clickhouse_service" "service123" {
++ name = "jai-terraform"
++ bulut_sağlayıcısı = "aws"
++ bölge = "abd-doğu-2"
++ katman = "geliştirme"
++ boşta_ölçekleme = true
++ şifre = var.service_password
++ ip_erişimi = [
++ {
++ kaynak = "0.0.0.0/0"
++ açıklama = "Herhangi bir yer"
++ }
++ ]
++}
++
++çıktı "CLICKHOUSE_HOST" {
++ değer = clickhouse_service.service123.endpoints.0.host
++}
++
++Yukarıdaki kaynaklar bölümünden servis adı, bölge vb. gibi kendi üyenizi değiştirebilirsiniz.
++
++secret.tfvarsdaha önce indirdiğiniz tüm API Anahtarı ile ilgili bilgileri koyacağınız yere. Bu dosyanın fikirleri, gizli tüm kimlik bilgilerinizin ana ayrıntılarının içeriğinden gizlenecek.
++
++(Bu şifre verilir) şu şekilde bir şey yapılır:Yukarıdaki kaynaklar bölümünün servis adı, bölge vb. gibi kendi üyenizi değiştirebilirsiniz.
++
++secret.tfvarsdaha önce indirdiğiniz tüm API Anahtarı ile ilgili bilgileri koyacağınız yere. Bu dosyanın fikirleri, gizli tüm kimlik bilgilerinizin ana ayrıntılarının içeriğinden gizlenecek.
++
++(Bu şifrelenmiştir) şu şekilde bir şey yapılır:
++
++`kuruluş_kimliği = "e957a5f7-4qe3-4b05-ad5a-d02b2dcd0593"
++token_anahtarı = "QWhhkMeytqQruTeKg"
++token_secret = "4b1dNmjWdLUno9lXxmKvSUcPP62jvn7irkuZPbY"
++hizmet_şifresi = "şifre123!"`
++
++# terraform initBu dizinden çalıştırıldı,Beklenen çıktı:
+ ```
++Arka uç başlatılıyor...
++Sağlayıcı eklentileri başlatılıyor...
++- "0.0.2" ile eşleşen clickhouse/clickhouse sürümleri bulunuyor...
++- clickhouse/clickhouse v0.0.2 kuruluyor...
++- clickhouse/clickhouse v0.0.2 yüklendi (kendi kendine imzalı, anahtar kimliği D7089EE5C6A92ED1)
++
++Ortak ve topluluk sağlayıcıları geliştiricileri tarafından imzalanır.
++Sağlayıcı imzalama hakkında daha fazla bilgi edinmek isterseniz, buradan okuyabilirsiniz:
++https://www.terraform.io/docs/cli/plugins/signing.html
+ 
+-Daha sonra sürümlerdeki herhangi bir ikili dosyayı çalıştırın.
++Terraform, sağlayıcıyı kaydetmek için .terraform.lock.hcl adlı bir kilit dosyası oluşturdu
++yukarıda yaptığı seçimler. Bu dosyayı sürüm kontrol deponuza ekleyin
++Böylece Terraform varsayılan olarak aynı seçimleri yapmayı garanti edebilir
++gelecekte "terraform init" çalıştırırsınız.
+ 
+-## SSS
++Terraform başarıyla başlatıldı!
+ 
+-**Neden?**
++Artık Terraform ile çalışmaya başlayabilirsiniz. "Terraform plan"ı çalıştırmayı deneyin ve görün
++Altyapınız için gereken tüm değişiklikler. Tüm Terraform komutları
++şimdi çalışması lazım.
+ 
+-Bu, hafif bir bağlantı havuzu görevi görür. Ayrıca Postgres sistem kataloğunu daha okunabilir bir biçime normalleştirir. Şu anda çok fazla yeniden icat olsa da, bu sunucu sonunda yardımcılar (örneğin tür oluşturucular) sağlayacaktır. Sunucu çok kiracılıdır, bu nedenle tek bir sunucudan birden fazla Postgres veritabanını destekleyebilir.
++Terraform için modülleri veya arka uç yapılandırmasını ayarlarsanız veya değiştirirseniz,
++çalışma dizininizi yeniden başlatmak için bu komutu yeniden çalıştırın. Unutursanız, diğer
++komutları bunu algılayacak ve gerekirse bunu yapmanızı hatırlatacaktır.
+ 
+-**Bu hangi güvenliği kullanıyor?**
++```
++
++# terraform apply -var-file=secret.tfvarsKomutu
++```
++➜ terraform'u test et -var-file=secret.tfvars
++
++Terraform, aşağıdaki yürütme planını oluşturmak için seçili sağlayıcıları kullandı. Kaynak eylemleri ile gösterilir
++aşağıdaki semboller:
++ + oluştur
+ 
+-Hiçbiri. Lütfen bunu bağımsız bir sunucu olarak kullanmayın. Bu, güvenilir bir ortamda, yerel makinenizde bir proxy arkasında veya dış dünyaya erişimi olmayan dahili olarak kullanılmalıdır.
++Terraform aşağıdaki eylemleri gerçekleştirecektir:
+ 
+-## Geliştiriciler
++ # clickhouse_service.service123 oluşturulacak
+++ kaynak "clickhouse_service" "service123" {
+++ bulut_sağlayıcısı = "aws"
+++ uç noktalar = (uygulandıktan sonra bilinir)
+++ id = (uyguladıktan sonra bilinir)
+++ boşta_ölçekleme = true
+++ ip_erişimi = [
++ + {
+++ açıklama = "Herhangi bir yer"
+++ kaynak = "0.0.0.0/0"
++ },
++ ]
+++ son_güncelleme = (uyguladıktan sonra bilinir)
+++ adı = "jai-terraform"
+++ şifre = (hassas değer)
+++ bölge = "abd-doğu-2"
+++ katman = "geliştirme"
++ }
+ 
+-Geliştirmeye başlamak için `npm run dev` çalıştırın. Sizin için veritabanını Docker ile kuracaktır. Dosya değişikliğinde sunucu yeniden başlatılacaktır.
++Plan: 1 eklemek, 0 değiştirmek, 0 yok etmek.
+ 
+-Bir hatayı düzeltiyorsanız, yeni bir test vakası oluşturmalısınız. Değişikliklerinizi test etmek için, `test:run` betiğinde `vitest`'e `-u` bayrağını ekleyin, `npm run test` çalıştırın ve ardından anlık görüntülerin git diff'ini inceleyin. Değişikliğinize bağlı olarak, `id` alanlarının değiştiğini görebilirsiniz - bu beklenen bir durumdur ve CI'ı geçtiği sürece bunu işlemekte özgürsünüz. İşleme koyarken `-u` bayrağını kaldırmayı unutmayın.
++Çıktılarda Yapılan Değişiklikler:
+++ CLICKHOUSE_HOST = (uyguladıktan sonra bilinir)
+ 
+-Tip oluşturmada değişiklik yapmak için, `npm run dev` çalışırken `npm run gen:types:<lang>` komutunu çalıştırın,
+-`<lang>` şunlardan biridir:
++Bu eylemleri gerçekleştirmek istiyor musunuz?
++ Terraform yukarıda anlatılan işlemleri gerçekleştirecektir.
++ Onay için sadece 'evet' kabul edilecektir.
+ 
+-- `daktilo`
+-- `git`
+-- `hızlı` (beta)
++ Bir değer girin: evet
++ ```
+ 
+-Sağlanan test veritabanı yerine kendi veritabanı bağlantı dizenizi kullanmak için şunu çalıştırın:
+-`PG_META_DB_URL=postgresql://postgres:postgres@localhost:5432/postgres npm run gen:types:<lang>`
++## Yazın yesve enter'a basın
+ 
+-## Lisans
++Yan not: Yukarıda yazdığınıza dikkat edin şifre = (hassas değer). Bunun nedeni hassas = trueşifreyi main.tf dosyasında ayarlamamızdır.
+ 
+-Apache 2.0
++7). Hizmet oluşturmak birkaç dakika sürecektir ancak sonunda aşağıdaki gibi bir sonuç elde edilir:
+ 
+-## Sponsorlar
++```
++ Bir değer girin: evet
++
++clickhouse_service.service123: Oluşturuluyor...
++clickhouse_service.service123: Hala oluşturuluyor... [10 saniye geçti]
++clickhouse_service.service123: Hala oluşturuluyor... [20 saniye geçti]
++clickhouse_service.service123: Hala oluşturuluyor... [30 saniye geçti]
++clickhouse_service.service123: Hala oluşturuluyor... [40 saniye geçti]
++clickhouse_service.service123: Hala oluşturuluyor... [50 saniye geçti]
++clickhouse_service.service123: Hala oluşturuluyor... [1m0sn geçti]
++clickhouse_service.service123: Hala oluşturuluyor... [1m10sn geçti]
++clickhouse_service.service123: Hala oluşturuluyor... [1m20sn geçti]
++clickhouse_service.service123: Hala oluşturuluyor... [1m30sn geçti]
++clickhouse_service.service123: Hala oluşturuluyor... [1m40sn geçti]
++clickhouse_service.service123: Oluşturma 1m41sn sonra tamamlandı [id=aa8d8d63-1878-4600-8470-630715af38ed]
+ 
+-Firebase'in özelliklerini kurumsal düzeyde, açık kaynaklı ürünler kullanarak oluşturuyoruz. Mümkün olan her yerde mevcut toplulukları destekliyoruz ve ürünler mevcut değilse bunları kendimiz oluşturuyor ve açık kaynaklı hale getiriyoruz.
++Başvuru tamamlandı! Kaynaklar: 1 eklendi, 0 değiştirildi, 0 yok edildi.
+ 
+-[![Yeni Sponsor](https://user-images.githubusercontent.com/10214025/90518111-e74bbb00-e198-11ea-8f88-c9e3c1aa4b5b.png)](https://github.com/sponsors/supabase)
++Çıktılar:
++
++CLICKHOUSE_HOST = "h3ljlaqez6.us-east-2.aws.clickhouse.cloud"
++➜ testi
++```
+ 
++### Cloud Console'u kontrol edin, çalışma hizmetini görebilirsiniz.
++
++9). Hizmeti tekrar temizlemek/yok etmek için şunu çalıştırın:terraform destroy -var-file=secret.tfvars
++
++```
++Terraform, aşağıdaki yürütme planını oluşturmak için seçili sağlayıcıları kullandı. Kaynak eylemleri ile gösterilir
++aşağıdaki semboller:
++ - yok etmek
++
++Terraform aşağıdaki eylemleri gerçekleştirecektir:
++
++ # clickhouse_service.service123 yok edilecek
++ - kaynak "clickhouse_service" "service123" {
++ - bulut_sağlayıcısı = "aws" -> null
++ - ............
++
++Plan: 0 eklemek, 0 değiştirmek, 1 yok etmek.
++
++Çıktılarda Yapılan Değişiklikler:
++ - CLICKHOUSE_HOST = "h3ljlaqez6.us-east-2.aws.clickhouse.cloud" -> boş
++
++Gerçekten tüm kaynakları yok etmek istiyor musun?
++ Terraform yukarıda gösterildiği gibi tüm yönetilen altyapınızı yok edecektir.
++ Geri alma yok. Onaylamak için sadece 'evet' kabul edilecektir.
++
++ Bir değer girin:
++```
++
++## Evet yazın ve enter'a basın
++
++```
++clickhouse_service.service123: Yok ediliyor... [id=aa8d8d63-1878-4600-8470-630715af38ed]
++clickhouse_service.service123: Hala yok ediliyor... [id=aa8d8d63-1878-4600-8470-630715af38ed, 10sn geçti]
++clickhouse_service.service123: Hala yok ediliyor... [id=aa8d8d63-1878-4600-8470-630715af38ed, 20sn geçti]
++clickhouse_service.service123: Yıkım 27 saniye sonra tamamlandı
++
++Yok etme tamamlandı! Kaynaklar: 1 yok edildi.
++```
