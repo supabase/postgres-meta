@@ -1,7 +1,7 @@
 import { ident, literal } from 'pg-format'
 import PostgresMetaTables from './PostgresMetaTables.js'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
-import { columnsSql } from './sql/index.js'
+import columnsSql from './sql/columns.sql'
 import { PostgresMetaResult, PostgresColumn } from './types.js'
 import { filterByList } from './helpers.js'
 

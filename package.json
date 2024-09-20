@@ -15,12 +15,24 @@
   "imports": {
     "#package.json": "./package.json"
   },
+  "exports": {
+    ".": {
+      "types": "./dist/lib/index.d.ts",
+      "require": "./dist/lib/index.cjs",
+      "import": "./dist/lib/index.js"
+    },
+    "./base": {
+      "types": "./dist/lib/base.d.ts",
+      "require": "./dist/lib/base.cjs",
+      "import": "./dist/lib/base.js"
+    }
+  },
   "repository": "supabase/postgres-meta",
   "scripts": {
     "check": "tsc -p tsconfig.json --noEmit",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "format": "prettier --write '{src,test}/**/*.ts' '*.ts'",
-    "build": "tsc -p tsconfig.json && cpy 'src/lib/sql/*.sql' dist/lib/sql",
+    "build": "tsup",
     "docs:export": "PG_META_EXPORT_DOCS=true node --loader ts-node/esm src/server/server.ts > openapi.json",
     "gen:types:typescript": "PG_META_GENERATE_TYPES=typescript node --loader ts-node/esm src/server/server.ts",
     "gen:types:go": "PG_META_GENERATE_TYPES=go node --loader ts-node/esm src/server/server.ts",
@@ -67,7 +79,9 @@
     "pino-pretty": "^10.2.3",
     "rimraf": "^5.0.5",
     "ts-node": "^10.9.1",
+    "tsup": "^8.1.0",
     "typescript": "^5.2.2",
+    "vite": "^5.3.1",
     "vitest": "^1.2.2"
   }
 }

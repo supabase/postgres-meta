@@ -1,7 +1,8 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
 import { coalesceRowsToArray, filterByList } from './helpers.js'
-import { columnsSql, tablesSql } from './sql/index.js'
+import columnsSql from './sql/columns.sql'
+import tablesSql from './sql/tables.sql'
 import {
   PostgresMetaResult,
   PostgresTable,
