@@ -2492,3 +2492,189 @@ test('typegen: swift w/ public access control', async () => {
     }"
   `)
 })
+
+test('typegen: python', async () => {
+  const { body } = await app.inject({ method: 'GET', path: '/generators/python' })
+  expect(body).toMatchInlineSnapshot(`
+"from pydantic import BaseModel, Json
+from typing import Any
+
+
+class PublicUsersSelect(BaseModel):
+  id: int = Field(alias="id")
+  name: str | None = Field(alias="name")
+  status: str | None = Field(alias="status")
+
+
+class PublicUsersInsert(BaseModel):
+  id: int | None = Field(alias="id")
+  name: str | None = Field(alias="name")
+  status: str | None = Field(alias="status")
+
+
+class PublicUsersUpdate(BaseModel):
+  id: int | None = Field(alias="id")
+  name: str | None = Field(alias="name")
+  status: str | None = Field(alias="status")
+
+
+class PublicTodosSelect(BaseModel):
+  details: str | None = Field(alias="details")
+  id: int = Field(alias="id")
+  user_id: int = Field(alias="user-id")
+
+
+class PublicTodosInsert(BaseModel):
+  details: str | None = Field(alias="details")
+  id: int | None = Field(alias="id")
+  user_id: int = Field(alias="user-id")
+
+
+class PublicTodosUpdate(BaseModel):
+  details: str | None = Field(alias="details")
+  id: int | None = Field(alias="id")
+  user_id: int | None = Field(alias="user-id")
+
+
+class PublicUsersAuditSelect(BaseModel):
+  created_at: str | None = Field(alias="created_at")
+  id: int = Field(alias="id")
+  previous_value: Any = Field(alias="previous_value")
+  user_id: int | None = Field(alias="user_id")
+
+
+class PublicUsersAuditInsert(BaseModel):
+  created_at: str | None = Field(alias="created_at")
+  id: int | None = Field(alias="id")
+  previous_value: Any = Field(alias="previous_value")
+  user_id: int | None = Field(alias="user_id")
+
+
+class PublicUsersAuditUpdate(BaseModel):
+  created_at: str | None = Field(alias="created_at")
+  id: int | None = Field(alias="id")
+  previous_value: Any = Field(alias="previous_value")
+  user_id: int | None = Field(alias="user_id")
+
+
+class PublicUserDetailsSelect(BaseModel):
+  details: str | None = Field(alias="details")
+  user_id: int = Field(alias="user_id")
+
+
+class PublicUserDetailsInsert(BaseModel):
+  details: str | None = Field(alias="details")
+  user_id: int = Field(alias="user_id")
+
+
+class PublicUserDetailsUpdate(BaseModel):
+  details: str | None = Field(alias="details")
+  user_id: int | None = Field(alias="user_id")
+
+
+class PublicEmptySelect(BaseModel):
+  pass
+
+
+class PublicEmptyInsert(BaseModel):
+  pass
+
+
+class PublicEmptyUpdate(BaseModel):
+  pass
+
+
+class PublicTableWithOtherTablesRowTypeSelect(BaseModel):
+  col1: Json[Any] = Field(alias="col1")
+  col2: Json[Any] = Field(alias="col2")
+
+
+class PublicTableWithOtherTablesRowTypeInsert(BaseModel):
+  col1: Json[Any] = Field(alias="col1")
+  col2: Json[Any] = Field(alias="col2")
+
+
+class PublicTableWithOtherTablesRowTypeUpdate(BaseModel):
+  col1: Json[Any] = Field(alias="col1")
+  col2: Json[Any] = Field(alias="col2")
+
+
+class PublicTableWithPrimaryKeyOtherThanIdSelect(BaseModel):
+  name: str | None = Field(alias="name")
+  other_id: int = Field(alias="other_id")
+
+
+class PublicTableWithPrimaryKeyOtherThanIdInsert(BaseModel):
+  name: str | None = Field(alias="name")
+  other_id: int | None = Field(alias="other_id")
+
+
+class PublicTableWithPrimaryKeyOtherThanIdUpdate(BaseModel):
+  name: str | None = Field(alias="name")
+  other_id: int | None = Field(alias="other_id")
+
+
+class PublicCategorySelect(BaseModel):
+  id: int = Field(alias="id")
+  name: string = Field(alias="name")
+
+
+class PublicCategoryInsert(BaseModel):
+  id: int | None = Field(alias="id")
+  name: string = Field(alias="name")
+
+
+class PublicCategoryUpdate(BaseModel):
+  id: int | None = Field(alias="id")
+  name: str | None = Field(alias="name")
+
+
+class PublicMemesSelect(BaseModel):
+  category: int | None = Field(alias="category")
+  created_at: string = Field(alias="created_at")
+  id: int = Field(alias="id")
+  metadata: Json[Any] = Field(alias="metadata")
+  name: string = Field(alias="name")
+  status: str | None = Field(alias="status")
+
+
+class PublicMemesInsert(BaseModel):
+  category: int | None = Field(alias="category")
+  created_at: string = Field(alias="created_at")
+  id: int | None = Field(alias="id")
+  metadata: Json[Any] = Field(alias="metadata")
+  name: string = Field(alias="name")
+  status: str | None = Field(alias="status")
+
+
+class PublicMemesUpdate(BaseModel):
+  category: int | None = Field(alias="category")
+  created_at: str | None = Field(alias="created_at")
+  id: int | None = Field(alias="id")
+  metadata: Json[Any] = Field(alias="metadata")
+  name: str | None = Field(alias="name")
+  status: str | None = Field(alias="status")
+
+
+class PublicTodosViewSelect(BaseModel):
+  details: str | None = Field(alias="details")
+  id: int | None = Field(alias="id")
+  user_id: int | None = Field(alias="user-id")
+
+
+class PublicUsersViewSelect(BaseModel):
+  id: int | None = Field(alias="id")
+  name: str | None = Field(alias="name")
+  status: str | None = Field(alias="status")
+
+
+class PublicAViewSelect(BaseModel):
+  id: int | None = Field(alias="id")
+
+
+class PublicTodosMatviewSelect(BaseModel):
+  details: str | None = Field(alias="details")
+  id: int | None = Field(alias="id")
+  user_id: int | None = Field(alias="user-id")
+"`)
+})
