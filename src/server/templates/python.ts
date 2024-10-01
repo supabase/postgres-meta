@@ -258,41 +258,41 @@ const PY_TYPE_MAP = {
   // Miscellaneous types
   void: 'None',
   record: 'dict[str, Any]',
-} as const;
+} as const
 
-type PythonType = (typeof PY_TYPE_MAP)[keyof typeof PY_TYPE_MAP];
+type PythonType = (typeof PY_TYPE_MAP)[keyof typeof PY_TYPE_MAP]
 
 function pgTypeToPythonType(pgType: string, nullable: boolean, types: PostgresType[] = []): string {
-  let pythonType: PythonType | undefined = undefined;
+  let pythonType: PythonType | undefined = undefined
 
   if (pgType in PY_TYPE_MAP) {
-    pythonType = PY_TYPE_MAP[pgType as keyof typeof PY_TYPE_MAP];
+    pythonType = PY_TYPE_MAP[pgType as keyof typeof PY_TYPE_MAP]
   }
 
   // Enums
-  const enumType = types.find((type) => type.name === pgType && type.enums.length > 0);
+  const enumType = types.find((type) => type.name === pgType && type.enums.length > 0)
   if (enumType) {
-    pythonType = 'str'; // Enums typically map to strings in Python
+    pythonType = 'str' // Enums typically map to strings in Python
   }
 
   if (pythonType) {
     // If the type is nullable, append "| None" to the type
-    return nullable ? `${pythonType} | None` : pythonType;
+    return nullable ? `${pythonType} | None` : pythonType
   }
 
   // Composite types
-  const compositeType = types.find((type) => type.name === pgType && type.attributes.length > 0);
+  const compositeType = types.find((type) => type.name === pgType && type.attributes.length > 0)
   if (compositeType) {
     // In Python, we can map composite types to dictionaries
-    return nullable ? 'dict[str, Any] | None' : 'dict[str, Any]';
+    return nullable ? 'dict[str, Any] | None' : 'dict[str, Any]'
   }
 
   // Arrays
   if (pgType.startsWith('_')) {
-    const innerType = pgTypeToPythonType(pgType.slice(1), nullable, types);
-    return `list[${innerType}]`;
+    const innerType = pgTypeToPythonType(pgType.slice(1), nullable, types)
+    return `list[${innerType}]`
   }
 
   // Fallback
-  return nullable ? 'Any | None' : 'Any';
+  return nullable ? 'Any | None' : 'Any'
 }
