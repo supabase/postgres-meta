@@ -33,7 +33,7 @@ export const apply = ({
 
   let output = `
 from pydantic import BaseModel, Json
-from typing import Any
+from typing import Any, Annotated
 import datetime
 
 ${tables
@@ -163,7 +163,7 @@ function generateTableStruct(
   // Pad the formatted name and type to align the struct fields, then join
   // create the final string representation of the struct fields.
   const formattedColumnEntries = columnEntries.map(([formattedName, type, name]) => {
-    return `  ${formattedName}: ${type} = Field(alias="${name}")`
+    return `  ${formattedName}: Annotated[${type}, Field(alias="${name}")]`
   })
 
   return `
