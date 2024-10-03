@@ -2494,28 +2494,37 @@ test('typegen: swift w/ public access control', async () => {
 })
 
 test('typegen: python', async () => {
-  const { body } = await app.inject({ method: 'GET', path: '/generators/python' })
+  const { body } = await app.inject({
+    method: 'GET',
+    path: '/generators/python',
+    query: { access_control: 'public' },
+  })
   expect(body).toMatchInlineSnapshot(`
 "from pydantic import BaseModel, Json
 from typing import Any
 
+import datetime
+
+class UserStatus(Enum):
+
+class MemeStatus(Enum):
 
 class PublicUsersSelect(BaseModel):
   id: int = Field(alias="id")
   name: str | None = Field(alias="name")
-  status: str | None = Field(alias="status")
+  status: UserStatus | None = Field(alias="status")
 
 
 class PublicUsersInsert(BaseModel):
   id: int | None = Field(alias="id")
   name: str | None = Field(alias="name")
-  status: str | None = Field(alias="status")
+  status: UserStatus | None = Field(alias="status")
 
 
 class PublicUsersUpdate(BaseModel):
   id: int | None = Field(alias="id")
   name: str | None = Field(alias="name")
-  status: str | None = Field(alias="status")
+  status: UserStatus | None = Field(alias="status")
 
 
 class PublicTodosSelect(BaseModel):
@@ -2537,23 +2546,23 @@ class PublicTodosUpdate(BaseModel):
 
 
 class PublicUsersAuditSelect(BaseModel):
-  created_at: str | None = Field(alias="created_at")
+  created_at: datetime.datetime | None = Field(alias="created_at")
   id: int = Field(alias="id")
-  previous_value: Any = Field(alias="previous_value")
+  previous_value: Json[Any] | None = Field(alias="previous_value")
   user_id: int | None = Field(alias="user_id")
 
 
 class PublicUsersAuditInsert(BaseModel):
-  created_at: str | None = Field(alias="created_at")
+  created_at: datetime.datetime | None = Field(alias="created_at")
   id: int | None = Field(alias="id")
-  previous_value: Any = Field(alias="previous_value")
+  previous_value: Json[Any] | None = Field(alias="previous_value")
   user_id: int | None = Field(alias="user_id")
 
 
 class PublicUsersAuditUpdate(BaseModel):
-  created_at: str | None = Field(alias="created_at")
+  created_at: datetime.datetime | None = Field(alias="created_at")
   id: int | None = Field(alias="id")
-  previous_value: Any = Field(alias="previous_value")
+  previous_value: Json[Any] | None = Field(alias="previous_value")
   user_id: int | None = Field(alias="user_id")
 
 
@@ -2585,18 +2594,18 @@ class PublicEmptyUpdate(BaseModel):
 
 
 class PublicTableWithOtherTablesRowTypeSelect(BaseModel):
-  col1: Json[Any] = Field(alias="col1")
-  col2: Json[Any] = Field(alias="col2")
+  col1: PublicUserDetailsSelect = Field(alias="col1")
+  col2: PublicAViewSelect = Field(alias="col2")
 
 
 class PublicTableWithOtherTablesRowTypeInsert(BaseModel):
-  col1: Json[Any] = Field(alias="col1")
-  col2: Json[Any] = Field(alias="col2")
+  col1: PublicUserDetailsSelect = Field(alias="col1")
+  col2: PublicAViewSelect = Field(alias="col2")
 
 
 class PublicTableWithOtherTablesRowTypeUpdate(BaseModel):
-  col1: Json[Any] = Field(alias="col1")
-  col2: Json[Any] = Field(alias="col2")
+  col1: PublicUserDetailsSelect = Field(alias="col1")
+  col2: PublicAViewSelect = Field(alias="col2")
 
 
 class PublicTableWithPrimaryKeyOtherThanIdSelect(BaseModel):
@@ -2616,12 +2625,12 @@ class PublicTableWithPrimaryKeyOtherThanIdUpdate(BaseModel):
 
 class PublicCategorySelect(BaseModel):
   id: int = Field(alias="id")
-  name: string = Field(alias="name")
+  name: str = Field(alias="name")
 
 
 class PublicCategoryInsert(BaseModel):
   id: int | None = Field(alias="id")
-  name: string = Field(alias="name")
+  name: str = Field(alias="name")
 
 
 class PublicCategoryUpdate(BaseModel):
@@ -2631,29 +2640,29 @@ class PublicCategoryUpdate(BaseModel):
 
 class PublicMemesSelect(BaseModel):
   category: int | None = Field(alias="category")
-  created_at: string = Field(alias="created_at")
+  created_at: datetime.datetime = Field(alias="created_at")
   id: int = Field(alias="id")
-  metadata: Json[Any] = Field(alias="metadata")
-  name: string = Field(alias="name")
-  status: str | None = Field(alias="status")
+  metadata: Json[Any] | None = Field(alias="metadata")
+  name: str = Field(alias="name")
+  status: MemeStatus | None = Field(alias="status")
 
 
 class PublicMemesInsert(BaseModel):
   category: int | None = Field(alias="category")
-  created_at: string = Field(alias="created_at")
+  created_at: datetime.datetime = Field(alias="created_at")
   id: int | None = Field(alias="id")
-  metadata: Json[Any] = Field(alias="metadata")
-  name: string = Field(alias="name")
-  status: str | None = Field(alias="status")
+  metadata: Json[Any] | None = Field(alias="metadata")
+  name: str = Field(alias="name")
+  status: MemeStatus | None = Field(alias="status")
 
 
 class PublicMemesUpdate(BaseModel):
   category: int | None = Field(alias="category")
-  created_at: str | None = Field(alias="created_at")
+  created_at: datetime.datetime | None = Field(alias="created_at")
   id: int | None = Field(alias="id")
-  metadata: Json[Any] = Field(alias="metadata")
+  metadata: Json[Any] | None = Field(alias="metadata")
   name: str | None = Field(alias="name")
-  status: str | None = Field(alias="status")
+  status: MemeStatus | None = Field(alias="status")
 
 
 class PublicTodosViewSelect(BaseModel):
@@ -2665,7 +2674,7 @@ class PublicTodosViewSelect(BaseModel):
 class PublicUsersViewSelect(BaseModel):
   id: int | None = Field(alias="id")
   name: str | None = Field(alias="name")
-  status: str | None = Field(alias="status")
+  status: UserStatus | None = Field(alias="status")
 
 
 class PublicAViewSelect(BaseModel):

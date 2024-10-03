@@ -101,12 +101,31 @@ ${compositeTypes
  * formatForPyTypeName('pokemon league') // PokemonLeague
  * ```
  */
-function formatForPyTypeName(name: string): string {
+function formatForPyClassName(name: string): string {
   return name
     .split(/[^a-zA-Z0-9]/)
     .map((word) => `${word[0].toUpperCase()}${word.slice(1)}`)
     .join('')
 }
+
+/**
+ * Converts a Postgres name to snake_case.
+ *
+ * @example
+ * ```ts
+ * formatForPyTypeName('Pokedex') // pokedex
+ * formatForPyTypeName('PokemonCenter') // pokemon_enter
+ * formatForPyTypeName('victory-road') // victory_road
+ * formatForPyTypeName('pokemon league') // pokemon_league
+ * ```
+ */
+function formatForPyAttributeName(name: string): string {
+  return name
+    .split(/[^a-zA-Z0-9]+/) // Split on non-alphanumeric characters (like spaces, dashes, etc.)
+    .map(word => word.toLowerCase()) // Convert each word to lowercase
+    .join('_'); // Join with underscores
+}
+
 
 function generateTableStruct(
   schema: PostgresSchema,
@@ -135,7 +154,7 @@ function generateTableStruct(
         nullable = column.is_nullable
       }
       return [
-        formatForPyTypeName(column.name),
+        formatForPyAttributeName(column.name),
         pgTypeToPythonType(column.format, nullable, types),
         column.name,
       ]
@@ -148,7 +167,7 @@ function generateTableStruct(
   })
 
   return `
-class ${formatForPyTypeName(schema.name)}${formatForPyTypeName(table.name)}${operation}(BaseModel):
+class ${formatForPyClassName(schema.name)}${formatForPyClassName(table.name)}${operation}(BaseModel):
 ${formattedColumnEntries.join('\n')}
 `.trim()
 }
@@ -183,7 +202,7 @@ function generateCompositeTypeStruct(
   }
   const attributeEntries: [string, string, string][] = typeWithRetrievedAttributes.attributes.map(
     (attribute) => [
-      formatForPyTypeName(attribute.name),
+      formatForPyAttributeName(attribute.name),
       pgTypeToPythonType(attribute.type!.format, false),
       attribute.name,
     ]
@@ -205,9 +224,8 @@ function generateCompositeTypeStruct(
   })
 
   return `
-type ${formatForPyTypeName(schema.name)}${formatForPyTypeName(type.name)} struct {
+class ${formatForPyClassName(schema.name)}${formatForPyClassName(type.name)}(BaseModel):
 ${formattedAttributeEntries.join('\n')}
-}
 `.trim()
 }
 
@@ -227,13 +245,14 @@ const PY_TYPE_MAP = {
   bytea: 'bytes',
   bpchar: 'str',
   varchar: 'str',
+  string: 'str',
   date: 'datetime.date',
   text: 'str',
   citext: 'str',
   time: 'datetime.time',
-  timetz: 'datetime.timezone',
+  timetz: 'datetime.time',
   timestamp: 'datetime.datetime',
-  timestamptz: 'datetime.timezone',
+  timestamptz: 'datetime.datetime',
   uuid: 'uuid.UUID',
   vector: 'list[Any]',
 
@@ -263,7 +282,7 @@ const PY_TYPE_MAP = {
 type PythonType = (typeof PY_TYPE_MAP)[keyof typeof PY_TYPE_MAP]
 
 function pgTypeToPythonType(pgType: string, nullable: boolean, types: PostgresType[] = []): string {
-  let pythonType: PythonType | undefined = undefined
+  let pythonType: PythonType | string | undefined = undefined
 
   if (pgType in PY_TYPE_MAP) {
     pythonType = PY_TYPE_MAP[pgType as keyof typeof PY_TYPE_MAP]
@@ -272,7 +291,7 @@ function pgTypeToPythonType(pgType: string, nullable: boolean, types: PostgresTy
   // Enums
   const enumType = types.find((type) => type.name === pgType && type.enums.length > 0)
   if (enumType) {
-    pythonType = 'str' // Enums typically map to strings in Python
+    pythonType = formatForPyClassName(String(pgType))
   }
 
   if (pythonType) {
@@ -280,19 +299,6 @@ function pgTypeToPythonType(pgType: string, nullable: boolean, types: PostgresTy
     return nullable ? `${pythonType} | None` : pythonType
   }
 
-  // Composite types
-  const compositeType = types.find((type) => type.name === pgType && type.attributes.length > 0)
-  if (compositeType) {
-    // In Python, we can map composite types to dictionaries
-    return nullable ? 'dict[str, Any] | None' : 'dict[str, Any]'
-  }
-
-  // Arrays
-  if (pgType.startsWith('_')) {
-    const innerType = pgTypeToPythonType(pgType.slice(1), nullable, types)
-    return `list[${innerType}]`
-  }
-
   // Fallback
-  return nullable ? 'Any | None' : 'Any'
+  return nullable ? String(pgType)+' | None' : String(pgType)
 }
