@@ -151,6 +151,7 @@ export type Database = {
                       .filter(
                         (relationship) =>
                           relationship.schema === table.schema &&
+                          relationship.referenced_schema === table.schema &&
                           relationship.relation === table.name
                       )
                       .sort(
@@ -226,7 +227,9 @@ export type Database = {
                     ${relationships
                       .filter(
                         (relationship) =>
-                          relationship.schema === view.schema && relationship.relation === view.name
+                          relationship.schema === view.schema &&
+                          relationship.referenced_schema === view.schema &&
+                          relationship.relation === view.name
                       )
                       .sort(({ foreign_key_name: a }, { foreign_key_name: b }) =>
                         a.localeCompare(b)
