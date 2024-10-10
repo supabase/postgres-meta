@@ -2492,3 +2492,198 @@ test('typegen: swift w/ public access control', async () => {
     }"
   `)
 })
+
+test('typegen: python', async () => {
+  const { body } = await app.inject({
+    method: 'GET',
+    path: '/generators/python',
+    query: { access_control: 'public' },
+  })
+  expect(body).toMatchInlineSnapshot(`
+"from pydantic import BaseModel, Json
+from typing import Any, Annotated
+
+import datetime
+
+class UserStatus(Enum):
+
+class MemeStatus(Enum):
+
+class PublicUsersSelect(BaseModel):
+  id: Annotated[int, Field(alias="id")]
+  name: Annotated[str | None, Field(alias="name")]
+  status: Annotated[UserStatus | None, Field(alias="status")]
+
+
+class PublicUsersInsert(BaseModel):
+  id: Annotated[int | None, Field(alias="id")]
+  name: Annotated[str | None, Field(alias="name")]
+  status: Annotated[UserStatus | None, Field(alias="status")]
+
+
+class PublicUsersUpdate(BaseModel):
+  id: Annotated[int | None, Field(alias="id")]
+  name: Annotated[str | None, Field(alias="name")]
+  status: Annotated[UserStatus | None, Field(alias="status")]
+
+
+class PublicTodosSelect(BaseModel):
+  details: Annotated[str | None, Field(alias="details")]
+  id: Annotated[int, Field(alias="id")]
+  user_id: Annotated[int, Field(alias="user-id")]
+
+
+class PublicTodosInsert(BaseModel):
+  details: Annotated[str | None, Field(alias="details")]
+  id: Annotated[int | None, Field(alias="id")]
+  user_id: Annotated[int, Field(alias="user-id")]
+
+
+class PublicTodosUpdate(BaseModel):
+  details: Annotated[str | None, Field(alias="details")]
+  id: Annotated[int | None, Field(alias="id")]
+  user_id: Annotated[int | None, Field(alias="user-id")]
+
+
+class PublicUsersAuditSelect(BaseModel):
+  created_at: Annotated[datetime.datetime | None, Field(alias="created_at")]
+  id: Annotated[int, Field(alias="id")]
+  previous_value: Annotated[Json[Any] | None, Field(alias="previous_value")]
+  user_id: Annotated[int | None, Field(alias="user_id")]
+
+
+class PublicUsersAuditInsert(BaseModel):
+  created_at: Annotated[datetime.datetime | None, Field(alias="created_at")]
+  id: Annotated[int | None, Field(alias="id")]
+  previous_value: Annotated[Json[Any] | None, Field(alias="previous_value")]
+  user_id: Annotated[int | None, Field(alias="user_id")]
+
+
+class PublicUsersAuditUpdate(BaseModel):
+  created_at: Annotated[datetime.datetime | None, Field(alias="created_at")]
+  id: Annotated[int | None, Field(alias="id")]
+  previous_value: Annotated[Json[Any] | None, Field(alias="previous_value")]
+  user_id: Annotated[int | None, Field(alias="user_id")]
+
+
+class PublicUserDetailsSelect(BaseModel):
+  details: Annotated[str | None, Field(alias="details")]
+  user_id: Annotated[int, Field(alias="user_id")]
+
+
+class PublicUserDetailsInsert(BaseModel):
+  details: Annotated[str | None, Field(alias="details")]
+  user_id: Annotated[int, Field(alias="user_id")]
+
+
+class PublicUserDetailsUpdate(BaseModel):
+  details: Annotated[str | None, Field(alias="details")]
+  user_id: Annotated[int | None, Field(alias="user_id")]
+
+
+class PublicEmptySelect(BaseModel):
+  pass
+
+
+class PublicEmptyInsert(BaseModel):
+  pass
+
+
+class PublicEmptyUpdate(BaseModel):
+  pass
+
+
+class PublicTableWithOtherTablesRowTypeSelect(BaseModel):
+  col1: Annotated[PublicUserDetailsSelect, Field(alias="col1")]
+  col2: Annotated[PublicAViewSelect, Field(alias="col2")]
+
+
+class PublicTableWithOtherTablesRowTypeInsert(BaseModel):
+  col1: Annotated[PublicUserDetailsSelect, Field(alias="col1")]
+  col2: Annotated[PublicAViewSelect, Field(alias="col2")]
+
+
+class PublicTableWithOtherTablesRowTypeUpdate(BaseModel):
+  col1: Annotated[PublicUserDetailsSelect, Field(alias="col1")]
+  col2: Annotated[PublicAViewSelect, Field(alias="col2")]
+
+
+class PublicTableWithPrimaryKeyOtherThanIdSelect(BaseModel):
+  name: Annotated[str | None, Field(alias="name")]
+  other_id: Annotated[int, Field(alias="other_id")]
+
+
+class PublicTableWithPrimaryKeyOtherThanIdInsert(BaseModel):
+  name: Annotated[str | None, Field(alias="name")]
+  other_id: Annotated[int | None, Field(alias="other_id")]
+
+
+class PublicTableWithPrimaryKeyOtherThanIdUpdate(BaseModel):
+  name: Annotated[str | None, Field(alias="name")]
+  other_id: Annotated[int | None, Field(alias="other_id")]
+
+
+class PublicCategorySelect(BaseModel):
+  id: Annotated[int, Field(alias="id")]
+  name: Annotated[str, Field(alias="name")]
+
+
+class PublicCategoryInsert(BaseModel):
+  id: Annotated[int | None, Field(alias="id")]
+  name: Annotated[str, Field(alias="name")]
+
+
+class PublicCategoryUpdate(BaseModel):
+  id: Annotated[int | None, Field(alias="id")]
+  name: Annotated[str | None, Field(alias="name")]
+
+
+class PublicMemesSelect(BaseModel):
+  category: Annotated[int | None, Field(alias="category")]
+  created_at: Annotated[datetime.datetime, Field(alias="created_at")]
+  id: Annotated[int, Field(alias="id")]
+  metadata: Annotated[Json[Any] | None, Field(alias="metadata")]
+  name: Annotated[str, Field(alias="name")]
+  status: Annotated[MemeStatus | None, Field(alias="status")]
+
+
+class PublicMemesInsert(BaseModel):
+  category: Annotated[int | None, Field(alias="category")]
+  created_at: Annotated[datetime.datetime, Field(alias="created_at")]
+  id: Annotated[int | None, Field(alias="id")]
+  metadata: Annotated[Json[Any] | None, Field(alias="metadata")]
+  name: Annotated[str, Field(alias="name")]
+  status: Annotated[MemeStatus | None, Field(alias="status")]
+
+
+class PublicMemesUpdate(BaseModel):
+  category: Annotated[int | None, Field(alias="category")]
+  created_at: Annotated[datetime.datetime | None, Field(alias="created_at")]
+  id: Annotated[int | None, Field(alias="id")]
+  metadata: Annotated[Json[Any] | None, Field(alias="metadata")]
+  name: Annotated[str | None, Field(alias="name")]
+  status: Annotated[MemeStatus | None, Field(alias="status")]
+
+
+class PublicTodosViewSelect(BaseModel):
+  details: Annotated[str | None, Field(alias="details")]
+  id: Annotated[int | None, Field(alias="id")]
+  user_id: Annotated[int | None, Field(alias="user-id")]
+
+
+class PublicUsersViewSelect(BaseModel):
+  id: Annotated[int | None, Field(alias="id")]
+  name: Annotated[str | None, Field(alias="name")]
+  status: Annotated[UserStatus | None, Field(alias="status")]
+
+
+class PublicAViewSelect(BaseModel):
+  id: Annotated[int | None, Field(alias="id")]
+
+
+class PublicTodosMatviewSelect(BaseModel):
+  details: Annotated[str | None, Field(alias="details")]
+  id: Annotated[int | None, Field(alias="id")]
+  user_id: Annotated[int | None, Field(alias="user-id")]
+"`)
+})
