@@ -1,6 +1,7 @@
 import { literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
-import { tableRelationshipsSql, viewsKeyDependenciesSql } from './sql/index.js'
+import tableRelationshipsSql from './sql/table_relationships.sql'
+import viewsKeyDependenciesSql from './sql/views_key_dependencies.sql'
 import { PostgresMetaResult, PostgresRelationship } from './types.js'
 
 /*

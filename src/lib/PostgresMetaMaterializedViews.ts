@@ -1,6 +1,7 @@
 import { literal } from 'pg-format'
 import { coalesceRowsToArray, filterByList } from './helpers.js'
-import { columnsSql, materializedViewsSql } from './sql/index.js'
+import columnsSql from './sql/columns.sql'
+import materializedViewsSql from './sql/materialized_views.sql'
 import { PostgresMetaResult, PostgresMaterializedView } from './types.js'
 
 export default class PostgresMetaMaterializedViews {
