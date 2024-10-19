@@ -257,13 +257,13 @@ test('typegen: typescript', async () => {
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
-                referencedRelation: "users"
+                referencedRelation: "a_view"
                 referencedColumns: ["id"]
               },
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
-                referencedRelation: "a_view"
+                referencedRelation: "users"
                 referencedColumns: ["id"]
               },
               {
@@ -294,13 +294,13 @@ test('typegen: typescript', async () => {
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
-                referencedRelation: "users"
+                referencedRelation: "a_view"
                 referencedColumns: ["id"]
               },
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
-                referencedRelation: "a_view"
+                referencedRelation: "users"
                 referencedColumns: ["id"]
               },
               {
@@ -796,14 +796,14 @@ test('typegen w/ one-to-one relationships', async () => {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
-                referencedRelation: "users"
+                referencedRelation: "a_view"
                 referencedColumns: ["id"]
               },
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
-                referencedRelation: "a_view"
+                referencedRelation: "users"
                 referencedColumns: ["id"]
               },
               {
@@ -836,14 +836,14 @@ test('typegen w/ one-to-one relationships', async () => {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
-                referencedRelation: "users"
+                referencedRelation: "a_view"
                 referencedColumns: ["id"]
               },
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
-                referencedRelation: "a_view"
+                referencedRelation: "users"
                 referencedColumns: ["id"]
               },
               {
@@ -1340,14 +1340,14 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
-                referencedRelation: "users"
+                referencedRelation: "a_view"
                 referencedColumns: ["id"]
               },
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
-                referencedRelation: "a_view"
+                referencedRelation: "users"
                 referencedColumns: ["id"]
               },
               {
@@ -1380,14 +1380,14 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
-                referencedRelation: "users"
+                referencedRelation: "a_view"
                 referencedColumns: ["id"]
               },
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
-                referencedRelation: "a_view"
+                referencedRelation: "users"
                 referencedColumns: ["id"]
               },
               {
