@@ -21,6 +21,7 @@ import ViewsRoute from './views.js'
 import TypeScriptTypeGenRoute from './generators/typescript.js'
 import GoTypeGenRoute from './generators/go.js'
 import SwiftTypeGenRoute from './generators/swift.js'
+import PythonTypeGenRoute from './generators/python.js'
 import { PG_CONNECTION, CRYPTO_KEY } from '../constants.js'
 
 export default async (fastify: FastifyInstance) => {
@@ -67,4 +68,5 @@ export default async (fastify: FastifyInstance) => {
   fastify.register(TypeScriptTypeGenRoute, { prefix: '/generators/typescript' })
   fastify.register(GoTypeGenRoute, { prefix: '/generators/go' })
   fastify.register(SwiftTypeGenRoute, { prefix: '/generators/swift' })
+  fastify.register(PythonTypeGenRoute, { prefix: '/generators/python' })
 }
