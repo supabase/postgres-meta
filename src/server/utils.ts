@@ -35,23 +35,17 @@ export function translateErrorToResponseCode(
 }
 
 export async function generateTypeFromCheckConstraint(
-  check: string | object | null
+  checkConstraints: string | null
 ): Promise<string> {
-  if (!check) {
+  if (!checkConstraints) {
     throw new Error('check constraint is empty')
   }
 
-  let inputStr
-
-  if (typeof check === 'string') {
-    inputStr = check
-  } else if (typeof check === 'object') {
-    inputStr = JSON.stringify(check)
-  } else {
+  if (typeof checkConstraints !== 'string') {
     throw new Error('invalid input type')
   }
 
-  const match = /[jsonb?_matches_schema\(]?\'?(\{.*\})\'?.*/gms.exec(inputStr)
+  const match = /jsonb?_matches_schema\(\'([\{|\[].*[\}|\]])/gms.exec(checkConstraints)
   const extractedJsonStr = match ? match[1] : null
   const jsonSchema = JSON.parse(extractedJsonStr ?? '{}')
   const tsType = await compile(jsonSchema, 'Type', {
