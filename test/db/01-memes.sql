@@ -27,6 +27,7 @@ CREATE TABLE public.memes (
 	name text NOT NULL,
 	category INTEGER REFERENCES category(id),
 	metadata jsonb,
+	other_check_metadata jsonb,
 	json_metadata json,
 	free_metadata jsonb,
 	created_at TIMESTAMP NOT NULL,
@@ -82,6 +83,11 @@ CHECK (
       "popoularity_score"
     ]
   }', metadata))
+);
+
+ALTER TABLE public.memes ADD CONSTRAINT other_check_metadata_schema_check 
+CHECK (
+  (other_check_metadata <> '{}'::jsonb)
 );
 
 INSERT INTO public.memes (name, category, created_at) VALUES

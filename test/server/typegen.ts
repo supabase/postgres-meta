@@ -61,6 +61,7 @@ test('typegen: typescript', async () => {
               free_metadata: Json | null
               id: number
               name: string
+              other_check_metadata: Json | null
               status: Database["public"]["Enums"]["meme_status"] | null
               json_metadata:
                 | Database["public"]["SchemaTypes"]["memes"]["json_metadata"]
@@ -75,6 +76,7 @@ test('typegen: typescript', async () => {
               free_metadata?: Json | null
               id?: number
               name: string
+              other_check_metadata?: Json | null
               status?: Database["public"]["Enums"]["meme_status"] | null
               json_metadata?:
                 | Database["public"]["SchemaTypes"]["memes"]["json_metadata"]
@@ -89,6 +91,7 @@ test('typegen: typescript', async () => {
               free_metadata?: Json | null
               id?: number
               name?: string
+              other_check_metadata?: Json | null
               status?: Database["public"]["Enums"]["meme_status"] | null
               json_metadata?:
                 | Database["public"]["SchemaTypes"]["memes"]["json_metadata"]
@@ -642,6 +645,7 @@ test('typegen w/ one-to-one relationships', async () => {
               free_metadata: Json | null
               id: number
               name: string
+              other_check_metadata: Json | null
               status: Database["public"]["Enums"]["meme_status"] | null
               json_metadata:
                 | Database["public"]["SchemaTypes"]["memes"]["json_metadata"]
@@ -656,6 +660,7 @@ test('typegen w/ one-to-one relationships', async () => {
               free_metadata?: Json | null
               id?: number
               name: string
+              other_check_metadata?: Json | null
               status?: Database["public"]["Enums"]["meme_status"] | null
               json_metadata?:
                 | Database["public"]["SchemaTypes"]["memes"]["json_metadata"]
@@ -670,6 +675,7 @@ test('typegen w/ one-to-one relationships', async () => {
               free_metadata?: Json | null
               id?: number
               name?: string
+              other_check_metadata?: Json | null
               status?: Database["public"]["Enums"]["meme_status"] | null
               json_metadata?:
                 | Database["public"]["SchemaTypes"]["memes"]["json_metadata"]
@@ -1236,6 +1242,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               free_metadata: Json | null
               id: number
               name: string
+              other_check_metadata: Json | null
               status: Database["public"]["Enums"]["meme_status"] | null
               json_metadata:
                 | Database["public"]["SchemaTypes"]["memes"]["json_metadata"]
@@ -1250,6 +1257,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               free_metadata?: Json | null
               id?: number
               name: string
+              other_check_metadata?: Json | null
               status?: Database["public"]["Enums"]["meme_status"] | null
               json_metadata?:
                 | Database["public"]["SchemaTypes"]["memes"]["json_metadata"]
@@ -1264,6 +1272,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               free_metadata?: Json | null
               id?: number
               name?: string
+              other_check_metadata?: Json | null
               status?: Database["public"]["Enums"]["meme_status"] | null
               json_metadata?:
                 | Database["public"]["SchemaTypes"]["memes"]["json_metadata"]
@@ -1903,36 +1912,39 @@ test('typegen: go', async () => {
     }
 
     type PublicMemesSelect struct {
-      Category     sql.NullInt32  \`json:"category"\`
-      CreatedAt    string         \`json:"created_at"\`
-      FreeMetadata interface{}    \`json:"free_metadata"\`
-      Id           int32          \`json:"id"\`
-      JsonMetadata interface{}    \`json:"json_metadata"\`
-      Metadata     interface{}    \`json:"metadata"\`
-      Name         string         \`json:"name"\`
-      Status       sql.NullString \`json:"status"\`
+      Category           sql.NullInt32  \`json:"category"\`
+      CreatedAt          string         \`json:"created_at"\`
+      FreeMetadata       interface{}    \`json:"free_metadata"\`
+      Id                 int32          \`json:"id"\`
+      JsonMetadata       interface{}    \`json:"json_metadata"\`
+      Metadata           interface{}    \`json:"metadata"\`
+      Name               string         \`json:"name"\`
+      OtherCheckMetadata interface{}    \`json:"other_check_metadata"\`
+      Status             sql.NullString \`json:"status"\`
     }
 
     type PublicMemesInsert struct {
-      Category     sql.NullInt32  \`json:"category"\`
-      CreatedAt    string         \`json:"created_at"\`
-      FreeMetadata interface{}    \`json:"free_metadata"\`
-      Id           sql.NullInt32  \`json:"id"\`
-      JsonMetadata interface{}    \`json:"json_metadata"\`
-      Metadata     interface{}    \`json:"metadata"\`
-      Name         string         \`json:"name"\`
-      Status       sql.NullString \`json:"status"\`
+      Category           sql.NullInt32  \`json:"category"\`
+      CreatedAt          string         \`json:"created_at"\`
+      FreeMetadata       interface{}    \`json:"free_metadata"\`
+      Id                 sql.NullInt32  \`json:"id"\`
+      JsonMetadata       interface{}    \`json:"json_metadata"\`
+      Metadata           interface{}    \`json:"metadata"\`
+      Name               string         \`json:"name"\`
+      OtherCheckMetadata interface{}    \`json:"other_check_metadata"\`
+      Status             sql.NullString \`json:"status"\`
     }
 
     type PublicMemesUpdate struct {
-      Category     sql.NullInt32  \`json:"category"\`
-      CreatedAt    sql.NullString \`json:"created_at"\`
-      FreeMetadata interface{}    \`json:"free_metadata"\`
-      Id           sql.NullInt32  \`json:"id"\`
-      JsonMetadata interface{}    \`json:"json_metadata"\`
-      Metadata     interface{}    \`json:"metadata"\`
-      Name         sql.NullString \`json:"name"\`
-      Status       sql.NullString \`json:"status"\`
+      Category           sql.NullInt32  \`json:"category"\`
+      CreatedAt          sql.NullString \`json:"created_at"\`
+      FreeMetadata       interface{}    \`json:"free_metadata"\`
+      Id                 sql.NullInt32  \`json:"id"\`
+      JsonMetadata       interface{}    \`json:"json_metadata"\`
+      Metadata           interface{}    \`json:"metadata"\`
+      Name               sql.NullString \`json:"name"\`
+      OtherCheckMetadata interface{}    \`json:"other_check_metadata"\`
+      Status             sql.NullString \`json:"status"\`
     }
 
     type PublicTodosViewSelect struct {
@@ -2047,6 +2059,7 @@ test('typegen: swift', async () => {
         internal let jsonMetadata: AnyJSON?
         internal let metadata: AnyJSON?
         internal let name: String
+        internal let otherCheckMetadata: AnyJSON?
         internal let status: MemeStatus?
         internal enum CodingKeys: String, CodingKey {
           case category = "category"
@@ -2056,6 +2069,7 @@ test('typegen: swift', async () => {
           case jsonMetadata = "json_metadata"
           case metadata = "metadata"
           case name = "name"
+          case otherCheckMetadata = "other_check_metadata"
           case status = "status"
         }
       }
@@ -2067,6 +2081,7 @@ test('typegen: swift', async () => {
         internal let jsonMetadata: AnyJSON?
         internal let metadata: AnyJSON?
         internal let name: String
+        internal let otherCheckMetadata: AnyJSON?
         internal let status: MemeStatus?
         internal enum CodingKeys: String, CodingKey {
           case category = "category"
@@ -2076,6 +2091,7 @@ test('typegen: swift', async () => {
           case jsonMetadata = "json_metadata"
           case metadata = "metadata"
           case name = "name"
+          case otherCheckMetadata = "other_check_metadata"
           case status = "status"
         }
       }
@@ -2087,6 +2103,7 @@ test('typegen: swift', async () => {
         internal let jsonMetadata: AnyJSON?
         internal let metadata: AnyJSON?
         internal let name: String?
+        internal let otherCheckMetadata: AnyJSON?
         internal let status: MemeStatus?
         internal enum CodingKeys: String, CodingKey {
           case category = "category"
@@ -2096,6 +2113,7 @@ test('typegen: swift', async () => {
           case jsonMetadata = "json_metadata"
           case metadata = "metadata"
           case name = "name"
+          case otherCheckMetadata = "other_check_metadata"
           case status = "status"
         }
       }
@@ -2404,6 +2422,7 @@ test('typegen: swift w/ public access control', async () => {
         public let jsonMetadata: AnyJSON?
         public let metadata: AnyJSON?
         public let name: String
+        public let otherCheckMetadata: AnyJSON?
         public let status: MemeStatus?
         public enum CodingKeys: String, CodingKey {
           case category = "category"
@@ -2413,6 +2432,7 @@ test('typegen: swift w/ public access control', async () => {
           case jsonMetadata = "json_metadata"
           case metadata = "metadata"
           case name = "name"
+          case otherCheckMetadata = "other_check_metadata"
           case status = "status"
         }
       }
@@ -2424,6 +2444,7 @@ test('typegen: swift w/ public access control', async () => {
         public let jsonMetadata: AnyJSON?
         public let metadata: AnyJSON?
         public let name: String
+        public let otherCheckMetadata: AnyJSON?
         public let status: MemeStatus?
         public enum CodingKeys: String, CodingKey {
           case category = "category"
@@ -2433,6 +2454,7 @@ test('typegen: swift w/ public access control', async () => {
           case jsonMetadata = "json_metadata"
           case metadata = "metadata"
           case name = "name"
+          case otherCheckMetadata = "other_check_metadata"
           case status = "status"
         }
       }
@@ -2444,6 +2466,7 @@ test('typegen: swift w/ public access control', async () => {
         public let jsonMetadata: AnyJSON?
         public let metadata: AnyJSON?
         public let name: String?
+        public let otherCheckMetadata: AnyJSON?
         public let status: MemeStatus?
         public enum CodingKeys: String, CodingKey {
           case category = "category"
@@ -2453,6 +2476,7 @@ test('typegen: swift w/ public access control', async () => {
           case jsonMetadata = "json_metadata"
           case metadata = "metadata"
           case name = "name"
+          case otherCheckMetadata = "other_check_metadata"
           case status = "status"
         }
       }
