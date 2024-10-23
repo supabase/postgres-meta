@@ -58,26 +58,44 @@ test('typegen: typescript', async () => {
             Row: {
               category: number | null
               created_at: string
+              free_metadata: Json | null
               id: number
-              metadata: Json | null
               name: string
               status: Database["public"]["Enums"]["meme_status"] | null
+              json_metadata:
+                | Database["public"]["SchemaTypes"]["memes"]["json_metadata"]
+                | null
+              metadata:
+                | Database["public"]["SchemaTypes"]["memes"]["metadata"]
+                | null
             }
             Insert: {
               category?: number | null
               created_at: string
+              free_metadata?: Json | null
               id?: number
-              metadata?: Json | null
               name: string
               status?: Database["public"]["Enums"]["meme_status"] | null
+              json_metadata?:
+                | Database["public"]["SchemaTypes"]["memes"]["json_metadata"]
+                | null
+              metadata?:
+                | Database["public"]["SchemaTypes"]["memes"]["metadata"]
+                | null
             }
             Update: {
               category?: number | null
               created_at?: string
+              free_metadata?: Json | null
               id?: number
-              metadata?: Json | null
               name?: string
               status?: Database["public"]["Enums"]["meme_status"] | null
+              json_metadata?:
+                | Database["public"]["SchemaTypes"]["memes"]["json_metadata"]
+                | null
+              metadata?:
+                | Database["public"]["SchemaTypes"]["memes"]["metadata"]
+                | null
             }
             Relationships: [
               {
@@ -384,6 +402,20 @@ test('typegen: typescript', async () => {
               name: string
             }[]
           }
+          json_matches_schema: {
+            Args: {
+              schema: Json
+              instance: Json
+            }
+            Returns: boolean
+          }
+          jsonb_matches_schema: {
+            Args: {
+              schema: Json
+              instance: Json
+            }
+            Returns: boolean
+          }
           polymorphic_function:
             | {
                 Args: {
@@ -419,6 +451,24 @@ test('typegen: typescript', async () => {
         Enums: {
           meme_status: "new" | "old" | "retired"
           user_status: "ACTIVE" | "INACTIVE"
+        }
+        SchemaTypes: {
+          memes: {
+            json_metadata: {
+              popularity_score?: number
+              name?: string
+            }
+            metadata: {
+              popularity_score?: number
+              name?: string
+              address?: {
+                city: string
+                street: string
+                [k: string]: unknown
+              }
+              [k: string]: unknown
+            }
+          }
         }
         CompositeTypes: {
           composite_type_with_array_attribute: {
@@ -589,26 +639,44 @@ test('typegen w/ one-to-one relationships', async () => {
             Row: {
               category: number | null
               created_at: string
+              free_metadata: Json | null
               id: number
-              metadata: Json | null
               name: string
               status: Database["public"]["Enums"]["meme_status"] | null
+              json_metadata:
+                | Database["public"]["SchemaTypes"]["memes"]["json_metadata"]
+                | null
+              metadata:
+                | Database["public"]["SchemaTypes"]["memes"]["metadata"]
+                | null
             }
             Insert: {
               category?: number | null
               created_at: string
+              free_metadata?: Json | null
               id?: number
-              metadata?: Json | null
               name: string
               status?: Database["public"]["Enums"]["meme_status"] | null
+              json_metadata?:
+                | Database["public"]["SchemaTypes"]["memes"]["json_metadata"]
+                | null
+              metadata?:
+                | Database["public"]["SchemaTypes"]["memes"]["metadata"]
+                | null
             }
             Update: {
               category?: number | null
               created_at?: string
+              free_metadata?: Json | null
               id?: number
-              metadata?: Json | null
               name?: string
               status?: Database["public"]["Enums"]["meme_status"] | null
+              json_metadata?:
+                | Database["public"]["SchemaTypes"]["memes"]["json_metadata"]
+                | null
+              metadata?:
+                | Database["public"]["SchemaTypes"]["memes"]["metadata"]
+                | null
             }
             Relationships: [
               {
@@ -928,6 +996,20 @@ test('typegen w/ one-to-one relationships', async () => {
               name: string
             }[]
           }
+          json_matches_schema: {
+            Args: {
+              schema: Json
+              instance: Json
+            }
+            Returns: boolean
+          }
+          jsonb_matches_schema: {
+            Args: {
+              schema: Json
+              instance: Json
+            }
+            Returns: boolean
+          }
           polymorphic_function:
             | {
                 Args: {
@@ -963,6 +1045,24 @@ test('typegen w/ one-to-one relationships', async () => {
         Enums: {
           meme_status: "new" | "old" | "retired"
           user_status: "ACTIVE" | "INACTIVE"
+        }
+        SchemaTypes: {
+          memes: {
+            json_metadata: {
+              popularity_score?: number
+              name?: string
+            }
+            metadata: {
+              popularity_score?: number
+              name?: string
+              address?: {
+                city: string
+                street: string
+                [k: string]: unknown
+              }
+              [k: string]: unknown
+            }
+          }
         }
         CompositeTypes: {
           composite_type_with_array_attribute: {
@@ -1133,26 +1233,44 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Row: {
               category: number | null
               created_at: string
+              free_metadata: Json | null
               id: number
-              metadata: Json | null
               name: string
               status: Database["public"]["Enums"]["meme_status"] | null
+              json_metadata:
+                | Database["public"]["SchemaTypes"]["memes"]["json_metadata"]
+                | null
+              metadata:
+                | Database["public"]["SchemaTypes"]["memes"]["metadata"]
+                | null
             }
             Insert: {
               category?: number | null
               created_at: string
+              free_metadata?: Json | null
               id?: number
-              metadata?: Json | null
               name: string
               status?: Database["public"]["Enums"]["meme_status"] | null
+              json_metadata?:
+                | Database["public"]["SchemaTypes"]["memes"]["json_metadata"]
+                | null
+              metadata?:
+                | Database["public"]["SchemaTypes"]["memes"]["metadata"]
+                | null
             }
             Update: {
               category?: number | null
               created_at?: string
+              free_metadata?: Json | null
               id?: number
-              metadata?: Json | null
               name?: string
               status?: Database["public"]["Enums"]["meme_status"] | null
+              json_metadata?:
+                | Database["public"]["SchemaTypes"]["memes"]["json_metadata"]
+                | null
+              metadata?:
+                | Database["public"]["SchemaTypes"]["memes"]["metadata"]
+                | null
             }
             Relationships: [
               {
@@ -1472,6 +1590,20 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               name: string
             }[]
           }
+          json_matches_schema: {
+            Args: {
+              schema: Json
+              instance: Json
+            }
+            Returns: boolean
+          }
+          jsonb_matches_schema: {
+            Args: {
+              schema: Json
+              instance: Json
+            }
+            Returns: boolean
+          }
           polymorphic_function:
             | {
                 Args: {
@@ -1507,6 +1639,24 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
         Enums: {
           meme_status: "new" | "old" | "retired"
           user_status: "ACTIVE" | "INACTIVE"
+        }
+        SchemaTypes: {
+          memes: {
+            json_metadata: {
+              popularity_score?: number
+              name?: string
+            }
+            metadata: {
+              popularity_score?: number
+              name?: string
+              address?: {
+                city: string
+                street: string
+                [k: string]: unknown
+              }
+              [k: string]: unknown
+            }
+          }
         }
         CompositeTypes: {
           composite_type_with_array_attribute: {
@@ -1753,30 +1903,36 @@ test('typegen: go', async () => {
     }
 
     type PublicMemesSelect struct {
-      Category  sql.NullInt32  \`json:"category"\`
-      CreatedAt string         \`json:"created_at"\`
-      Id        int32          \`json:"id"\`
-      Metadata  interface{}    \`json:"metadata"\`
-      Name      string         \`json:"name"\`
-      Status    sql.NullString \`json:"status"\`
+      Category     sql.NullInt32  \`json:"category"\`
+      CreatedAt    string         \`json:"created_at"\`
+      FreeMetadata interface{}    \`json:"free_metadata"\`
+      Id           int32          \`json:"id"\`
+      JsonMetadata interface{}    \`json:"json_metadata"\`
+      Metadata     interface{}    \`json:"metadata"\`
+      Name         string         \`json:"name"\`
+      Status       sql.NullString \`json:"status"\`
     }
 
     type PublicMemesInsert struct {
-      Category  sql.NullInt32  \`json:"category"\`
-      CreatedAt string         \`json:"created_at"\`
-      Id        sql.NullInt32  \`json:"id"\`
-      Metadata  interface{}    \`json:"metadata"\`
-      Name      string         \`json:"name"\`
-      Status    sql.NullString \`json:"status"\`
+      Category     sql.NullInt32  \`json:"category"\`
+      CreatedAt    string         \`json:"created_at"\`
+      FreeMetadata interface{}    \`json:"free_metadata"\`
+      Id           sql.NullInt32  \`json:"id"\`
+      JsonMetadata interface{}    \`json:"json_metadata"\`
+      Metadata     interface{}    \`json:"metadata"\`
+      Name         string         \`json:"name"\`
+      Status       sql.NullString \`json:"status"\`
     }
 
     type PublicMemesUpdate struct {
-      Category  sql.NullInt32  \`json:"category"\`
-      CreatedAt sql.NullString \`json:"created_at"\`
-      Id        sql.NullInt32  \`json:"id"\`
-      Metadata  interface{}    \`json:"metadata"\`
-      Name      sql.NullString \`json:"name"\`
-      Status    sql.NullString \`json:"status"\`
+      Category     sql.NullInt32  \`json:"category"\`
+      CreatedAt    sql.NullString \`json:"created_at"\`
+      FreeMetadata interface{}    \`json:"free_metadata"\`
+      Id           sql.NullInt32  \`json:"id"\`
+      JsonMetadata interface{}    \`json:"json_metadata"\`
+      Metadata     interface{}    \`json:"metadata"\`
+      Name         sql.NullString \`json:"name"\`
+      Status       sql.NullString \`json:"status"\`
     }
 
     type PublicTodosViewSelect struct {
@@ -1886,14 +2042,18 @@ test('typegen: swift', async () => {
       internal struct MemesSelect: Codable, Hashable, Sendable {
         internal let category: Int32?
         internal let createdAt: String
+        internal let freeMetadata: AnyJSON?
         internal let id: Int32
+        internal let jsonMetadata: AnyJSON?
         internal let metadata: AnyJSON?
         internal let name: String
         internal let status: MemeStatus?
         internal enum CodingKeys: String, CodingKey {
           case category = "category"
           case createdAt = "created_at"
+          case freeMetadata = "free_metadata"
           case id = "id"
+          case jsonMetadata = "json_metadata"
           case metadata = "metadata"
           case name = "name"
           case status = "status"
@@ -1902,14 +2062,18 @@ test('typegen: swift', async () => {
       internal struct MemesInsert: Codable, Hashable, Sendable {
         internal let category: Int32?
         internal let createdAt: String
+        internal let freeMetadata: AnyJSON?
         internal let id: Int32?
+        internal let jsonMetadata: AnyJSON?
         internal let metadata: AnyJSON?
         internal let name: String
         internal let status: MemeStatus?
         internal enum CodingKeys: String, CodingKey {
           case category = "category"
           case createdAt = "created_at"
+          case freeMetadata = "free_metadata"
           case id = "id"
+          case jsonMetadata = "json_metadata"
           case metadata = "metadata"
           case name = "name"
           case status = "status"
@@ -1918,14 +2082,18 @@ test('typegen: swift', async () => {
       internal struct MemesUpdate: Codable, Hashable, Sendable {
         internal let category: Int32?
         internal let createdAt: String?
+        internal let freeMetadata: AnyJSON?
         internal let id: Int32?
+        internal let jsonMetadata: AnyJSON?
         internal let metadata: AnyJSON?
         internal let name: String?
         internal let status: MemeStatus?
         internal enum CodingKeys: String, CodingKey {
           case category = "category"
           case createdAt = "created_at"
+          case freeMetadata = "free_metadata"
           case id = "id"
+          case jsonMetadata = "json_metadata"
           case metadata = "metadata"
           case name = "name"
           case status = "status"
@@ -2231,14 +2399,18 @@ test('typegen: swift w/ public access control', async () => {
       public struct MemesSelect: Codable, Hashable, Sendable {
         public let category: Int32?
         public let createdAt: String
+        public let freeMetadata: AnyJSON?
         public let id: Int32
+        public let jsonMetadata: AnyJSON?
         public let metadata: AnyJSON?
         public let name: String
         public let status: MemeStatus?
         public enum CodingKeys: String, CodingKey {
           case category = "category"
           case createdAt = "created_at"
+          case freeMetadata = "free_metadata"
           case id = "id"
+          case jsonMetadata = "json_metadata"
           case metadata = "metadata"
           case name = "name"
           case status = "status"
@@ -2247,14 +2419,18 @@ test('typegen: swift w/ public access control', async () => {
       public struct MemesInsert: Codable, Hashable, Sendable {
         public let category: Int32?
         public let createdAt: String
+        public let freeMetadata: AnyJSON?
         public let id: Int32?
+        public let jsonMetadata: AnyJSON?
         public let metadata: AnyJSON?
         public let name: String
         public let status: MemeStatus?
         public enum CodingKeys: String, CodingKey {
           case category = "category"
           case createdAt = "created_at"
+          case freeMetadata = "free_metadata"
           case id = "id"
+          case jsonMetadata = "json_metadata"
           case metadata = "metadata"
           case name = "name"
           case status = "status"
@@ -2263,14 +2439,18 @@ test('typegen: swift w/ public access control', async () => {
       public struct MemesUpdate: Codable, Hashable, Sendable {
         public let category: Int32?
         public let createdAt: String?
+        public let freeMetadata: AnyJSON?
         public let id: Int32?
+        public let jsonMetadata: AnyJSON?
         public let metadata: AnyJSON?
         public let name: String?
         public let status: MemeStatus?
         public enum CodingKeys: String, CodingKey {
           case category = "category"
           case createdAt = "created_at"
+          case freeMetadata = "free_metadata"
           case id = "id"
+          case jsonMetadata = "json_metadata"
           case metadata = "metadata"
           case name = "name"
           case status = "status"

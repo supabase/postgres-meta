@@ -8,6 +8,7 @@ import type {
   PostgresView,
 } from '../../lib/index.js'
 import type { GeneratorMetadata } from '../../lib/generators.js'
+import { generateTypeFromCheckConstraint } from '../utils.js'
 
 export const apply = async ({
   schemas,
@@ -26,10 +27,37 @@ export const apply = async ({
   const columnsByTableId = Object.fromEntries<PostgresColumn[]>(
     [...tables, ...foreignTables, ...views, ...materializedViews].map((t) => [t.id, []])
   )
-  columns
-    .filter((c) => c.table_id in columnsByTableId)
-    .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-    .forEach((c) => columnsByTableId[c.table_id].push(c))
+
+  const jsonSchemaTs: Record<string, any> = {}
+
+  await Promise.all(
+    columns
+      .filter((c) => c.table_id in columnsByTableId)
+      .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+      .map(async (c) => {
+        // If the column is of type json/jsonb and has a check constraint that matches a JSON schema, we'll generate a type for it.
+        if (
+          ['json', 'jsonb'].includes(c.format.toLowerCase()) &&
+          /json_matches_schema|jsonb_matches_schema/gi.test(c.check ?? '')
+        ) {
+          const ts = await generateTypeFromCheckConstraint(c.check)
+          // The only mutation required on the column is to reference the correct type
+          c.format = `json_schema_Database['${c.schema}']['SchemaTypes']['${c.table}']['${c.name}']`
+
+          if (!jsonSchemaTs[c.schema]) {
+            jsonSchemaTs[c.schema] = {}
+          }
+
+          if (!jsonSchemaTs[c.schema][c.table]) {
+            jsonSchemaTs[c.schema][c.table] = {}
+          }
+
+          jsonSchemaTs[c.schema][c.table][c.name] = ts
+        }
+
+        columnsByTableId[c.table_id].push(c)
+      })
+  )
 
   let output = `
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
@@ -367,6 +395,19 @@ export type Database = {
                   )
             }
           }
+          SchemaTypes: {
+            ${schemaTables
+              .filter((table) => jsonSchemaTs[schema.name][table.name])
+              .map(
+                (table) => `
+                  ${table.name}: {
+                    ${Object.entries(jsonSchemaTs[schema.name][table.name] ?? {}).map(
+                      ([columnName, ts]) => `${JSON.stringify(columnName)}: ${ts}`
+                    )}
+                  }
+                `
+              )}
+          }
           CompositeTypes: {
             ${
               schemaCompositeTypes.length === 0
@@ -529,6 +570,8 @@ const pgTypeToTsType = (
     return 'string'
   } else if (['json', 'jsonb'].includes(pgType)) {
     return 'Json'
+  } else if (/^json_schema_/gi.test(pgType)) {
+    return pgType.replace(/json_schema_/, '')
   } else if (pgType === 'void') {
     return 'undefined'
   } else if (pgType === 'record') {

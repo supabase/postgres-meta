@@ -1,5 +1,6 @@
 import pgcs from 'pg-connection-string'
 import { FastifyRequest } from 'fastify'
+import { compile } from 'json-schema-to-typescript'
 
 export const extractRequestForLogging = (request: FastifyRequest) => {
   let pg: string = 'unknown'
@@ -31,4 +32,35 @@ export function translateErrorToResponseCode(
     return 503
   }
   return defaultResponseCode
+}
+
+export async function generateTypeFromCheckConstraint(
+  check: string | object | null
+): Promise<string> {
+  if (!check) {
+    throw new Error('check constraint is empty')
+  }
+
+  let inputStr
+
+  if (typeof check === 'string') {
+    inputStr = check
+  } else if (typeof check === 'object') {
+    inputStr = JSON.stringify(check)
+  } else {
+    throw new Error('invalid input type')
+  }
+
+  const match = /[jsonb?_matches_schema\(]?\'?(\{.*\})\'?.*/gms.exec(inputStr)
+  const extractedJsonStr = match ? match[1] : null
+  const jsonSchema = JSON.parse(extractedJsonStr ?? '{}')
+  const tsType = await compile(jsonSchema, 'Type', {
+    bannerComment: '',
+    style: {
+      singleQuote: true,
+      semi: false,
+    },
+  })
+
+  return tsType.replaceAll('export interface Type ', '')
 }

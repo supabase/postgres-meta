@@ -83,6 +83,7 @@ $$
 select string_to_array($1.details, ' ');
 $$ language sql stable;
 
+create extension pg_jsonschema;
 create extension postgres_fdw;
 create server foreign_server foreign data wrapper postgres_fdw options (host 'localhost', port '5432', dbname 'postgres');
 create user mapping for postgres server foreign_server options (user 'postgres', password 'postgres');
