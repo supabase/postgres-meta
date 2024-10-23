@@ -40,14 +40,14 @@ test('generate type string from json_matches check constraint', async () => {
 
   await expect(generateTypeFromCheckConstraint(checkConstraintStr)).resolves.toMatchInlineSnapshot(`
       "{
-        popularity_score?: number
-        name?: string
-        address?: {
-          city: string
-          street: string
-          [k: string]: unknown
-        }
-        [k: string]: unknown
+      popularity_score?: number
+      name?: string
+      address?: {
+      city: string
+      street: string
+      [k: string]: unknown
+      }
+      [k: string]: unknown
       }
       "
   `)

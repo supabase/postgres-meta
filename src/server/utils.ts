@@ -54,6 +54,7 @@ export async function generateTypeFromCheckConstraint(
       singleQuote: true,
       semi: false,
     },
+    format: false
   })
 
   return tsType.replaceAll('export interface Type ', '')
