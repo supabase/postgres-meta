@@ -16,6 +16,9 @@ export interface PostgresMetaErr {
 
 export type PostgresMetaResult<T> = PostgresMetaOk<T> | PostgresMetaErr
 
+export type QueryFn = <T>(sql: string) => Promise<PostgresMetaResult<T[]>>
+export type EndFn = () => Promise<void>
+
 export const postgresColumnSchema = Type.Object({
   table_id: Type.Integer(),
   schema: Type.String(),

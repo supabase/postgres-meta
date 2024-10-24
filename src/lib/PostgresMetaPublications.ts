@@ -1,5 +1,5 @@
 import { ident, literal } from 'pg-format'
-import { publicationsSql } from './sql/index.js'
+import publicationsSql from './sql/publications.sql'
 import { PostgresMetaResult, PostgresPublication, PostgresTable } from './types.js'
 
 export default class PostgresMetaPublications {

@@ -1,6 +1,6 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
-import { schemasSql } from './sql/index.js'
+import schemasSql from './sql/schemas.sql'
 import {
   PostgresMetaResult,
   PostgresSchema,
