@@ -1,7 +1,5 @@
 import prettier from 'prettier/standalone.js'
 import SqlFormatter from 'prettier-plugin-sql'
-// @ts-ignore library does not export types yet
-// Related: https://github.com/pyramation/pgsql-parser/issues/22
 import { parse, deparse } from 'pgsql-parser'
 import { FormatterOptions } from './types.js'
 
@@ -35,6 +33,7 @@ interface ParseReturnValues {
  */
 export function Deparse(parsedSql: object): DeparseReturnValues {
   try {
+    // @ts-ignore - Type definition defines non-optional any, though the argument is not required
     const data = deparse(parsedSql)
 
     return { data, error: null }
