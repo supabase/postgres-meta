@@ -1,5 +1,3 @@
-
-
 CREATE TABLE public.category (
 	id serial NOT NULL PRIMARY KEY,
 	name text NOT NULL
@@ -29,8 +27,67 @@ CREATE TABLE public.memes (
 	name text NOT NULL,
 	category INTEGER REFERENCES category(id),
 	metadata jsonb,
+	other_check_metadata jsonb,
+	json_metadata json,
+	free_metadata jsonb,
 	created_at TIMESTAMP NOT NULL,
 	status meme_status DEFAULT 'old'
+);
+
+ALTER TABLE public.memes ADD CONSTRAINT json_metadata_schema_check 
+CHECK (
+  (json_matches_schema('{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "popularity_score": {
+        "type": "integer"
+      },
+      "name": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": false
+  }', json_metadata))
+);
+
+ALTER TABLE public.memes ADD CONSTRAINT metadata_schema_check 
+CHECK (
+  (jsonb_matches_schema('{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+      "popularity_score": {
+        "type": "integer"
+      },
+      "name": {
+        "type": "string"
+      },
+      "address": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "street": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city",
+          "street"
+        ]
+      }
+    },
+    "required": [
+      "popoularity_score"
+    ]
+  }', metadata))
+);
+
+ALTER TABLE public.memes ADD CONSTRAINT other_check_metadata_schema_check 
+CHECK (
+  (other_check_metadata <> '{}'::jsonb)
 );
 
 INSERT INTO public.memes (name, category, created_at) VALUES
