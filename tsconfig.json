@@ -15,7 +15,7 @@
     "esModuleInterop": true,
     "moduleResolution": "NodeNext",
     "resolveJsonModule": true,
-
+    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "stripInternal": true
   }

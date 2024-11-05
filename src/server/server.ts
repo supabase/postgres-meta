@@ -27,8 +27,8 @@ const logger = pino({
   timestamp: pino.stdTimeFunctions.isoTime,
 })
 
-const app = buildApp({ logger })
-const adminApp = buildAdminApp({ logger })
+const app = buildApp({ loggerInstance: logger })
+const adminApp = buildAdminApp({ loggerInstance: logger })
 
 async function getTypeOutput(): Promise<string | null> {
   const pgMeta: PostgresMeta = new PostgresMeta({
