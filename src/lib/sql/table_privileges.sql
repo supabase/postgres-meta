@@ -64,7 +64,7 @@ where c.relkind in ('r', 'v', 'm', 'f', 'p')
     pg_has_role(c.relowner, 'USAGE')
     or has_table_privilege(
       c.oid,
-      'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER'
+      'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER, MAINTAIN'
     )
     or has_any_column_privilege(c.oid, 'SELECT, INSERT, UPDATE, REFERENCES')
   )

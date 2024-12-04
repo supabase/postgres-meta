@@ -506,6 +506,7 @@ export const postgresTablePrivilegesSchema = Type.Object({
         Type.Literal('TRUNCATE'),
         Type.Literal('REFERENCES'),
         Type.Literal('TRIGGER'),
+        Type.Literal('MAINTAIN'),
       ]),
       is_grantable: Type.Boolean(),
     })
@@ -525,6 +526,7 @@ export const postgresTablePrivilegesGrantSchema = Type.Object({
     Type.Literal('TRUNCATE'),
     Type.Literal('REFERENCES'),
     Type.Literal('TRIGGER'),
+    Type.Literal('MAINTAIN'),
   ]),
   is_grantable: Type.Optional(Type.Boolean()),
 })
@@ -542,6 +544,7 @@ export const postgresTablePrivilegesRevokeSchema = Type.Object({
     Type.Literal('TRUNCATE'),
     Type.Literal('REFERENCES'),
     Type.Literal('TRIGGER'),
+    Type.Literal('MAINTAIN'),
   ]),
 })
 export type PostgresTablePrivilegesRevoke = Static<typeof postgresTablePrivilegesRevokeSchema>
