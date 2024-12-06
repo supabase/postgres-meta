@@ -38,7 +38,7 @@
     "npm": ">=9"
   },
   "dependencies": {
-    "@sinclair/typebox": "^0.31.25",
+    "@sinclair/typebox": "^0.34.11",
     "@fastify/cors": "^10.0.1",
     "@fastify/swagger": "^9.2.0",
     "@fastify/type-provider-typebox": "^5.0.1",
