@@ -264,3 +264,51 @@ create schema s2; create table s2.t(); create trigger tr before insert on s2.t e
 
   await pgMeta.query('drop schema s1 cascade; drop schema s2 cascade;')
 })
+
+test('triggers on capitalized schema and table names', async () => {
+  await pgMeta.query(`
+CREATE SCHEMA "MySchema";
+CREATE TABLE "MySchema"."MyTable" (
+   id SERIAL PRIMARY KEY,
+   name TEXT NOT NULL,
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   updated_at TIMESTAMP
+);
+CREATE OR REPLACE FUNCTION "MySchema"."my_trigger_function"()
+RETURNS TRIGGER AS $$
+BEGIN
+   NEW.updated_at := CURRENT_TIMESTAMP;
+   RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER "my_trigger"
+BEFORE INSERT ON "MySchema"."MyTable"
+FOR EACH ROW
+EXECUTE FUNCTION "MySchema"."my_trigger_function"();
+`)
+
+  const res = await pgMeta.triggers.list()
+  const triggers = res.data?.map(({ id, table_id, ...trigger }) => trigger)
+  expect(triggers).toMatchInlineSnapshot(`
+    [
+      {
+        "activation": "BEFORE",
+        "condition": null,
+        "enabled_mode": "ORIGIN",
+        "events": [
+          "INSERT",
+        ],
+        "function_args": [],
+        "function_name": "my_trigger_function",
+        "function_schema": "MySchema",
+        "name": "my_trigger",
+        "orientation": "ROW",
+        "schema": "MySchema",
+        "table": "MyTable",
+      },
+    ]
+  `)
+
+  await pgMeta.query('drop schema "MySchema" cascade;')
+})
