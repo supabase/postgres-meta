@@ -158,9 +158,15 @@ if (EXPORT_DOCS) {
       app.log.error(err)
     }
     await app.close()
+    await adminApp.close()
   })
   app.addHook('onClose', async () => {
     closeListeners.uninstall()
+    await adminApp.close()
+  })
+  adminApp.addHook('onClose', async () => {
+    closeListeners.uninstall()
+    await app.close()
   })
 
   app.listen({ port: PG_META_PORT, host: PG_META_HOST }, (err) => {
