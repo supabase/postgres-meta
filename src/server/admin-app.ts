@@ -1,11 +1,9 @@
 import { fastify, FastifyInstance, FastifyServerOptions } from 'fastify'
-
-import FastifyMetrics from 'fastify-metrics'
+import fastifyMetrics from 'fastify-metrics'
 
 export function build(opts: FastifyServerOptions = {}): FastifyInstance {
   const app = fastify(opts)
-  // @ts-ignore fastify-metrics doesn't work with NodeNext resolution
-  app.register(FastifyMetrics, {
+  app.register(fastifyMetrics.default, {
     endpoint: '/metrics',
     routeMetrics: { enabled: false },
   })
