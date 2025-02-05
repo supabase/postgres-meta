@@ -23,11 +23,15 @@ jobs:
         with:
           node-version-file: '.nvmrc'
 
-
       - run: |
           npm clean-install
           npm run check
           npm run test
+
+      - uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: coverage/lcov.info
 
   prettier-check:
     name: Prettier check
