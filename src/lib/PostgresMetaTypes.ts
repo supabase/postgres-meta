@@ -11,6 +11,7 @@ export default class PostgresMetaTypes {
   }
 
   async list({
+    includeTableTypes = false,
     includeArrayTypes = false,
     includeSystemSchemas = false,
     includedSchemas,
@@ -18,6 +19,7 @@ export default class PostgresMetaTypes {
     limit,
     offset,
   }: {
+    includeTableTypes?: boolean
     includeArrayTypes?: boolean
     includeSystemSchemas?: boolean
     includedSchemas?: string[]
@@ -25,7 +27,20 @@ export default class PostgresMetaTypes {
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresType[]>> {
-    let sql = typesSql
+    let sql = `${typesSql}
+    where
+      (
+        t.typrelid = 0
+        or (
+          select
+            c.relkind ${includeTableTypes ? `in ('c', 'r')` : `= 'c'`}
+          from
+            pg_class c
+          where
+            c.oid = t.typrelid
+        )
+      )
+    `
     if (!includeArrayTypes) {
       sql += ` and not exists (
                  select

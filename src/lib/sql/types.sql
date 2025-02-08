@@ -33,15 +33,3 @@ from
     group by
       c.oid
   ) as t_attributes on t_attributes.oid = t.typrelid
-where
-  (
-    t.typrelid = 0
-    or (
-      select
-        c.relkind = 'c'
-      from
-        pg_class c
-      where
-        c.oid = t.typrelid
-    )
-  )
