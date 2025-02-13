@@ -4,13 +4,13 @@ import {
   PostgresForeignTable,
   PostgresFunction,
   PostgresMaterializedView,
+  PostgresMetaResult,
   PostgresRelationship,
   PostgresSchema,
   PostgresTable,
   PostgresType,
   PostgresView,
 } from './types.js'
-import { PostgresMetaResult } from './types.js'
 
 export type GeneratorMetadata = {
   schemas: PostgresSchema[]
@@ -98,6 +98,7 @@ export async function getGeneratorMetadata(
   }
 
   const { data: types, error: typesError } = await pgMeta.types.list({
+    includeTableTypes: true,
     includeArrayTypes: true,
     includeSystemSchemas: true,
   })
