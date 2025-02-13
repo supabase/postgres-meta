@@ -333,31 +333,31 @@ test('typegen: typescript', async () => {
         Functions: {
           blurb: {
             Args: {
-              "": unknown
+              "": Database["public"]["Tables"]["todos"]["Row"]
             }
             Returns: string
           }
           blurb_varchar: {
             Args: {
-              "": unknown
+              "": Database["public"]["Tables"]["todos"]["Row"]
             }
             Returns: string
           }
           details_is_long: {
             Args: {
-              "": unknown
+              "": Database["public"]["Tables"]["todos"]["Row"]
             }
             Returns: boolean
           }
           details_length: {
             Args: {
-              "": unknown
+              "": Database["public"]["Tables"]["todos"]["Row"]
             }
             Returns: number
           }
           details_words: {
             Args: {
-              "": unknown
+              "": Database["public"]["Tables"]["todos"]["Row"]
             }
             Returns: string[]
           }
@@ -423,6 +423,9 @@ test('typegen: typescript', async () => {
         CompositeTypes: {
           composite_type_with_array_attribute: {
             my_text_array: string[] | null
+          }
+          composite_type_with_record_attribute: {
+            todo: Database["public"]["Tables"]["todos"]["Row"] | null
           }
         }
       }
@@ -877,31 +880,31 @@ test('typegen w/ one-to-one relationships', async () => {
         Functions: {
           blurb: {
             Args: {
-              "": unknown
+              "": Database["public"]["Tables"]["todos"]["Row"]
             }
             Returns: string
           }
           blurb_varchar: {
             Args: {
-              "": unknown
+              "": Database["public"]["Tables"]["todos"]["Row"]
             }
             Returns: string
           }
           details_is_long: {
             Args: {
-              "": unknown
+              "": Database["public"]["Tables"]["todos"]["Row"]
             }
             Returns: boolean
           }
           details_length: {
             Args: {
-              "": unknown
+              "": Database["public"]["Tables"]["todos"]["Row"]
             }
             Returns: number
           }
           details_words: {
             Args: {
-              "": unknown
+              "": Database["public"]["Tables"]["todos"]["Row"]
             }
             Returns: string[]
           }
@@ -967,6 +970,9 @@ test('typegen w/ one-to-one relationships', async () => {
         CompositeTypes: {
           composite_type_with_array_attribute: {
             my_text_array: string[] | null
+          }
+          composite_type_with_record_attribute: {
+            todo: Database["public"]["Tables"]["todos"]["Row"] | null
           }
         }
       }
@@ -1421,31 +1427,31 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
         Functions: {
           blurb: {
             Args: {
-              "": unknown
+              "": Database["public"]["Tables"]["todos"]["Row"]
             }
             Returns: string
           }
           blurb_varchar: {
             Args: {
-              "": unknown
+              "": Database["public"]["Tables"]["todos"]["Row"]
             }
             Returns: string
           }
           details_is_long: {
             Args: {
-              "": unknown
+              "": Database["public"]["Tables"]["todos"]["Row"]
             }
             Returns: boolean
           }
           details_length: {
             Args: {
-              "": unknown
+              "": Database["public"]["Tables"]["todos"]["Row"]
             }
             Returns: number
           }
           details_words: {
             Args: {
-              "": unknown
+              "": Database["public"]["Tables"]["todos"]["Row"]
             }
             Returns: string[]
           }
@@ -1511,6 +1517,9 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
         CompositeTypes: {
           composite_type_with_array_attribute: {
             my_text_array: string[] | null
+          }
+          composite_type_with_record_attribute: {
+            todo: Database["public"]["Tables"]["todos"]["Row"] | null
           }
         }
       }
@@ -1803,6 +1812,10 @@ test('typegen: go', async () => {
 
     type PublicCompositeTypeWithArrayAttribute struct {
       MyTextArray interface{} \`json:"my_text_array"\`
+    }
+
+    type PublicCompositeTypeWithRecordAttribute struct {
+      Todo interface{} \`json:"todo"\`
     }"
   `)
 })
@@ -2142,6 +2155,12 @@ test('typegen: swift', async () => {
         internal let MyTextArray: AnyJSON
         internal enum CodingKeys: String, CodingKey {
           case MyTextArray = "my_text_array"
+        }
+      }
+      internal struct CompositeTypeWithRecordAttribute: Codable, Hashable, Sendable {
+        internal let Todo: TodosSelect
+        internal enum CodingKeys: String, CodingKey {
+          case Todo = "todo"
         }
       }
     }"
@@ -2487,6 +2506,12 @@ test('typegen: swift w/ public access control', async () => {
         public let MyTextArray: AnyJSON
         public enum CodingKeys: String, CodingKey {
           case MyTextArray = "my_text_array"
+        }
+      }
+      public struct CompositeTypeWithRecordAttribute: Codable, Hashable, Sendable {
+        public let Todo: TodosSelect
+        public enum CodingKeys: String, CodingKey {
+          case Todo = "todo"
         }
       }
     }"
