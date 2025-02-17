@@ -57,6 +57,37 @@ test('list types with excluded schemas and include System Schemas', async () => 
   })
 })
 
+test('list types with include Table Types', async () => {
+  const res = await pgMeta.types.list({
+    includeTableTypes: true,
+  })
+
+  expect(res.data?.find(({ name }) => name === 'todos')).toMatchInlineSnapshot(
+    { id: expect.any(Number) },
+    `
+    {
+      "attributes": [],
+      "comment": null,
+      "enums": [],
+      "format": "todos",
+      "id": Any<Number>,
+      "name": "todos",
+      "schema": "public",
+    }
+  `
+  )
+})
+
+test('list types without Table Types', async () => {
+  const res = await pgMeta.types.list({
+    includeTableTypes: false,
+  })
+
+  res.data?.forEach((type) => {
+    expect(type.name).not.toBe('todos')
+  })
+})
+
 test('composite type attributes', async () => {
   await pgMeta.query(`create type test_composite as (id int8, data text);`)
 
