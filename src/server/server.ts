@@ -77,6 +77,7 @@ async function getTypeOutput(): Promise<string | null> {
         GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
     }),
     pgMeta.types.list({
+      includeTableTypes: true,
       includeArrayTypes: true,
       includeSystemSchemas: true,
     }),
