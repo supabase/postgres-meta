@@ -34,8 +34,6 @@ export const apply = ({
   let output = `
 package database
 
-import "database/sql"
-
 ${tables
   .filter((table) => schemas.some((schema) => schema.name === table.schema))
   .flatMap((table) =>
@@ -275,13 +273,13 @@ const GO_TYPE_MAP = {
 type GoType = (typeof GO_TYPE_MAP)[keyof typeof GO_TYPE_MAP]
 
 const GO_NULLABLE_TYPE_MAP: Record<GoType, string> = {
-  string: 'sql.NullString',
-  bool: 'sql.NullBool',
-  int16: 'sql.NullInt32',
-  int32: 'sql.NullInt32',
-  int64: 'sql.NullInt64',
-  float32: 'sql.NullFloat64',
-  float64: 'sql.NullFloat64',
+  string: '*string',
+  bool: '*bool',
+  int16: '*int16',
+  int32: '*int32',
+  int64: '*int64',
+  float32: '*float32',
+  float64: '*float64',
   '[]byte': '[]byte',
   'interface{}': 'interface{}',
   'map[string]interface{}': 'map[string]interface{}',
