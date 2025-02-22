@@ -34,8 +34,6 @@ export const apply = ({
   let output = `
 package database
 
-import "database/sql"
-
 ${tables
   .filter((table) => schemas.some((schema) => schema.name === table.schema))
   .flatMap((table) =>
