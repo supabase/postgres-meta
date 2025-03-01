@@ -431,6 +431,15 @@ test('typegen: typescript', async () => {
       }
     }
 
+    export const Constants = {
+      public: {
+        Enums: {
+          meme_status: ["new", "old", "retired"],
+          user_status: ["ACTIVE", "INACTIVE"],
+        },
+      },
+    } as const
+
     type PublicSchema = Database[Extract<keyof Database, "public">]
 
     export type Tables<
@@ -978,6 +987,15 @@ test('typegen w/ one-to-one relationships', async () => {
       }
     }
 
+    export const Constants = {
+      public: {
+        Enums: {
+          meme_status: ["new", "old", "retired"],
+          user_status: ["ACTIVE", "INACTIVE"],
+        },
+      },
+    } as const
+
     type PublicSchema = Database[Extract<keyof Database, "public">]
 
     export type Tables<
@@ -1524,6 +1542,15 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
         }
       }
     }
+
+    export const Constants = {
+      public: {
+        Enums: {
+          meme_status: ["new", "old", "retired"],
+          user_status: ["ACTIVE", "INACTIVE"],
+        },
+      },
+    } as const
 
     type PublicSchema = Database[Extract<keyof Database, "public">]
 
