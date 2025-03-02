@@ -154,12 +154,33 @@ export type Database = {
                           relationship.referenced_schema === table.schema &&
                           relationship.relation === table.name
                       )
-                      .sort(
-                        (a, b) =>
-                          a.foreign_key_name.localeCompare(b.foreign_key_name) ||
-                          a.referenced_relation.localeCompare(b.referenced_relation) ||
-                          a.referenced_columns[0].localeCompare(b.referenced_columns[0])
-                      )
+                      .sort((a, b) => {
+                        // First try to sort by foreign key name.
+                        const foreignKeyCompare = a.foreign_key_name.localeCompare(
+                          b.foreign_key_name
+                        )
+                        if (foreignKeyCompare !== 0) return foreignKeyCompare
+
+                        // Then try to sort by referenced relation.
+                        const referencedRelationCompare = a.referenced_relation.localeCompare(
+                          b.referenced_relation
+                        )
+                        if (referencedRelationCompare !== 0) return referencedRelationCompare
+
+                        // Then try to sort by referenced columns, finding the first difference.
+                        for (
+                          let i = 0;
+                          i < Math.min(a.referenced_columns.length, b.referenced_columns.length);
+                          i++
+                        ) {
+                          const refColCompare = a.referenced_columns[i].localeCompare(
+                            b.referenced_columns[i]
+                          )
+                          if (refColCompare !== 0) return refColCompare
+                        }
+                        // If all referenced columns are the same, sort by the number of referenced columns.
+                        return a.referenced_columns.length - b.referenced_columns.length
+                      })
                       .map(
                         (relationship) => `{
                         foreignKeyName: ${JSON.stringify(relationship.foreign_key_name)}
@@ -232,12 +253,33 @@ export type Database = {
                           relationship.referenced_schema === view.schema &&
                           relationship.relation === view.name
                       )
-                      .sort(
-                        (a, b) =>
-                          a.foreign_key_name.localeCompare(b.foreign_key_name) ||
-                          a.referenced_relation.localeCompare(b.referenced_relation) ||
-                          a.referenced_columns[0].localeCompare(b.referenced_columns[0])
-                      )
+                      .sort((a, b) => {
+                        // First try to sort by foreign key name.
+                        const foreignKeyCompare = a.foreign_key_name.localeCompare(
+                          b.foreign_key_name
+                        )
+                        if (foreignKeyCompare !== 0) return foreignKeyCompare
+
+                        // Then try to sort by referenced relation.
+                        const referencedRelationCompare = a.referenced_relation.localeCompare(
+                          b.referenced_relation
+                        )
+                        if (referencedRelationCompare !== 0) return referencedRelationCompare
+
+                        // Then try to sort by referenced columns, finding the first difference.
+                        for (
+                          let i = 0;
+                          i < Math.min(a.referenced_columns.length, b.referenced_columns.length);
+                          i++
+                        ) {
+                          const refColCompare = a.referenced_columns[i].localeCompare(
+                            b.referenced_columns[i]
+                          )
+                          if (refColCompare !== 0) return refColCompare
+                        }
+                        // If all referenced columns are the same, sort by the number of referenced columns.
+                        return a.referenced_columns.length - b.referenced_columns.length
+                      })
                       .map(
                         (relationship) => `{
                         foreignKeyName: ${JSON.stringify(relationship.foreign_key_name)}
