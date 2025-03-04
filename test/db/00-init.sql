@@ -141,3 +141,21 @@ create table table_with_primary_key_other_than_id (
 create type composite_type_with_record_attribute as (
   todo todos
 );
+
+create view users_view_with_multiple_refs_to_users as
+WITH initial_user AS (
+  SELECT 
+    u.id as initial_id,
+    u.name as initial_name
+  FROM users u
+  where u.id = 1
+),
+second_user AS (
+  SELECT 
+    u.id as second_id,
+    u.name as second_name
+  FROM users u
+  where u.id = 2
+)
+SELECT * from initial_user iu 
+cross join second_user su;
