@@ -495,6 +495,26 @@ export type CompositeTypes<
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
+export const Constants = {
+  ${schemas
+    .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+    .map((schema) => {
+      const schemaEnums = types
+        .filter((type) => type.schema === schema.name && type.enums.length > 0)
+        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+      return `${JSON.stringify(schema.name)}: {
+          Enums: {
+            ${schemaEnums.map(
+              (enum_) =>
+                `${JSON.stringify(enum_.name)}: [${enum_.enums
+                  .map((variant) => JSON.stringify(variant))
+                  .join(', ')}]`
+            )}
+          }
+        }`
+    })}
+} as const
 `
 
   output = await prettier.format(output, {
