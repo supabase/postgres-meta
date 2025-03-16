@@ -535,6 +535,15 @@ test('typegen: typescript', async () => {
       : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
         ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
         : never
+
+    export const Constants = {
+      public: {
+        Enums: {
+          meme_status: ["new", "old", "retired"],
+          user_status: ["ACTIVE", "INACTIVE"],
+        },
+      },
+    } as const
     "
   `)
 })
@@ -1090,6 +1099,15 @@ test('typegen w/ one-to-one relationships', async () => {
       : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
         ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
         : never
+
+    export const Constants = {
+      public: {
+        Enums: {
+          meme_status: ["new", "old", "retired"],
+          user_status: ["ACTIVE", "INACTIVE"],
+        },
+      },
+    } as const
     "
   `)
 })
@@ -1645,6 +1663,15 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
       : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
         ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
         : never
+
+    export const Constants = {
+      public: {
+        Enums: {
+          meme_status: ["new", "old", "retired"],
+          user_status: ["ACTIVE", "INACTIVE"],
+        },
+      },
+    } as const
     "
   `)
 })
