@@ -33,7 +33,8 @@ export const apply = async ({
     .forEach((c) => columnsByTableId[c.table_id].push(c))
 
   let output = `
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
+/** @deprecated Use \`unknown\` instead. \`Json\` will be removed in a future release. */
+export type Json = unknown
 
 export type Database = {
   ${schemas
@@ -138,7 +139,12 @@ export type Database = {
                         return `${output}?: never`
                       }
 
-                      output += `?: ${pgTypeToTsType(column.format, { types, schemas, tables, views })}`
+                      output += `?: ${pgTypeToTsType(column.format, {
+                        types,
+                        schemas,
+                        tables,
+                        views,
+                      })}`
 
                       if (column.is_nullable) {
                         output += '| null'
@@ -204,7 +210,12 @@ export type Database = {
                                return `${output}?: never`
                              }
 
-                             output += `?: ${pgTypeToTsType(column.format, { types, schemas, tables, views })} | null`
+                             output += `?: ${pgTypeToTsType(column.format, {
+                               types,
+                               schemas,
+                               tables,
+                               views,
+                             })} | null`
 
                              return output
                            })}
@@ -217,7 +228,12 @@ export type Database = {
                                return `${output}?: never`
                              }
 
-                             output += `?: ${pgTypeToTsType(column.format, { types, schemas, tables, views })} | null`
+                             output += `?: ${pgTypeToTsType(column.format, {
+                               types,
+                               schemas,
+                               tables,
+                               views,
+                             })} | null`
 
                              return output
                            })}
@@ -379,7 +395,12 @@ export type Database = {
                           const type = types.find(({ id }) => id === type_id)
                           let tsType = 'unknown'
                           if (type) {
-                            tsType = `${pgTypeToTsType(type.name, { types, schemas, tables, views })} | null`
+                            tsType = `${pgTypeToTsType(type.name, {
+                              types,
+                              schemas,
+                              tables,
+                              views,
+                            })} | null`
                           }
                           return `${JSON.stringify(name)}: ${tsType}`
                         })}
@@ -561,7 +582,7 @@ const pgTypeToTsType = (
   ) {
     return 'string'
   } else if (['json', 'jsonb'].includes(pgType)) {
-    return 'Json'
+    return 'unknown'
   } else if (pgType === 'void') {
     return 'undefined'
   } else if (pgType === 'record') {
