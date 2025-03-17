@@ -2040,25 +2040,19 @@ type PublicAViewSelect struct {
   Id *int64 \`json:"id"\`
 }
 
+type PublicUsersViewWithMultipleRefsToUsersSelect struct {
+  InitialId   *int64  \`json:"initial_id"\`
+  InitialName *string \`json:"initial_name"\`
+  SecondId    *int64  \`json:"second_id"\`
+  SecondName  *string \`json:"second_name"\`
+}
+
 type PublicTodosMatviewSelect struct {
   Details *string \`json:"details"\`
   Id      *int64  \`json:"id"\`
   UserId  *int64  \`json:"user-id"\`
 }
 
-type PublicUsersViewWithMultipleRefsToUsersSelect struct {
-  InitialId   sql.NullInt64  \`json:"initial_id"\`
-  InitialName sql.NullString \`json:"initial_name"\`
-  SecondId    sql.NullInt64  \`json:"second_id"\`
-  SecondName  sql.NullString \`json:"second_name"\`
-}
-
-type PublicTodosMatviewSelect struct {
-  Details sql.NullString \`json:"details"\`
-  Id      sql.NullInt64  \`json:"id"\`
-  UserId  sql.NullInt64  \`json:"user-id"\`
-}
-  
 type PublicCompositeTypeWithArrayAttribute struct {
   MyTextArray interface{} \`json:"my_text_array"\`
 }
