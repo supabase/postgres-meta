@@ -158,6 +158,18 @@ test('typegen: typescript', async () => {
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
               },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["initial_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["second_id"]
+              },
             ]
           }
           user_details: {
@@ -191,6 +203,18 @@ test('typegen: typescript', async () => {
                 columns: ["user_id"]
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "user_details_user_id_fkey"
+                columns: ["user_id"]
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["initial_id"]
+              },
+              {
+                foreignKeyName: "user_details_user_id_fkey"
+                columns: ["user_id"]
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["second_id"]
               },
             ]
           }
@@ -272,6 +296,18 @@ test('typegen: typescript', async () => {
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
               },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["initial_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["second_id"]
+              },
             ]
           }
           todos_view: {
@@ -309,6 +345,18 @@ test('typegen: typescript', async () => {
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
               },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["initial_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["second_id"]
+              },
             ]
           }
           users_view: {
@@ -326,6 +374,15 @@ test('typegen: typescript', async () => {
               id?: number | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+            }
+            Relationships: []
+          }
+          users_view_with_multiple_refs_to_users: {
+            Row: {
+              initial_id: number | null
+              initial_name: string | null
+              second_id: number | null
+              second_name: string | null
             }
             Relationships: []
           }
@@ -713,6 +770,20 @@ test('typegen w/ one-to-one relationships', async () => {
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
               },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["initial_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["second_id"]
+              },
             ]
           }
           user_details: {
@@ -749,6 +820,20 @@ test('typegen w/ one-to-one relationships', async () => {
                 isOneToOne: true
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "user_details_user_id_fkey"
+                columns: ["user_id"]
+                isOneToOne: true
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["initial_id"]
+              },
+              {
+                foreignKeyName: "user_details_user_id_fkey"
+                columns: ["user_id"]
+                isOneToOne: true
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["second_id"]
               },
             ]
           }
@@ -833,6 +918,20 @@ test('typegen w/ one-to-one relationships', async () => {
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
               },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["initial_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["second_id"]
+              },
             ]
           }
           todos_view: {
@@ -873,6 +972,20 @@ test('typegen w/ one-to-one relationships', async () => {
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
               },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["initial_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["second_id"]
+              },
             ]
           }
           users_view: {
@@ -890,6 +1003,15 @@ test('typegen w/ one-to-one relationships', async () => {
               id?: number | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+            }
+            Relationships: []
+          }
+          users_view_with_multiple_refs_to_users: {
+            Row: {
+              initial_id: number | null
+              initial_name: string | null
+              second_id: number | null
+              second_name: string | null
             }
             Relationships: []
           }
@@ -1277,6 +1399,20 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
               },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["initial_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["second_id"]
+              },
             ]
           }
           user_details: {
@@ -1313,6 +1449,20 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 isOneToOne: true
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "user_details_user_id_fkey"
+                columns: ["user_id"]
+                isOneToOne: true
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["initial_id"]
+              },
+              {
+                foreignKeyName: "user_details_user_id_fkey"
+                columns: ["user_id"]
+                isOneToOne: true
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["second_id"]
               },
             ]
           }
@@ -1397,6 +1547,20 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
               },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["initial_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["second_id"]
+              },
             ]
           }
           todos_view: {
@@ -1437,6 +1601,20 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 referencedRelation: "users_view"
                 referencedColumns: ["id"]
               },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["initial_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["second_id"]
+              },
             ]
           }
           users_view: {
@@ -1454,6 +1632,15 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id?: number | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+            }
+            Relationships: []
+          }
+          users_view_with_multiple_refs_to_users: {
+            Row: {
+              initial_id: number | null
+              initial_name: string | null
+              second_id: number | null
+              second_name: string | null
             }
             Relationships: []
           }
@@ -1853,6 +2040,13 @@ type PublicAViewSelect struct {
   Id *int64 \`json:"id"\`
 }
 
+type PublicUsersViewWithMultipleRefsToUsersSelect struct {
+  InitialId   *int64  \`json:"initial_id"\`
+  InitialName *string \`json:"initial_name"\`
+  SecondId    *int64  \`json:"second_id"\`
+  SecondName  *string \`json:"second_name"\`
+}
+
 type PublicTodosMatviewSelect struct {
   Details *string \`json:"details"\`
   Id      *int64  \`json:"id"\`
@@ -2198,6 +2392,18 @@ test('typegen: swift', async () => {
           case id = "id"
           case name = "name"
           case status = "status"
+        }
+      }
+      internal struct UsersViewWithMultipleRefsToUsersSelect: Codable, Hashable, Sendable {
+        internal let initialId: Int64?
+        internal let initialName: String?
+        internal let secondId: Int64?
+        internal let secondName: String?
+        internal enum CodingKeys: String, CodingKey {
+          case initialId = "initial_id"
+          case initialName = "initial_name"
+          case secondId = "second_id"
+          case secondName = "second_name"
         }
       }
       internal struct CompositeTypeWithArrayAttribute: Codable, Hashable, Sendable {
@@ -2549,6 +2755,18 @@ test('typegen: swift w/ public access control', async () => {
           case id = "id"
           case name = "name"
           case status = "status"
+        }
+      }
+      public struct UsersViewWithMultipleRefsToUsersSelect: Codable, Hashable, Sendable {
+        public let initialId: Int64?
+        public let initialName: String?
+        public let secondId: Int64?
+        public let secondName: String?
+        public enum CodingKeys: String, CodingKey {
+          case initialId = "initial_id"
+          case initialName = "initial_name"
+          case secondId = "second_id"
+          case secondName = "second_name"
         }
       }
       public struct CompositeTypeWithArrayAttribute: Codable, Hashable, Sendable {
