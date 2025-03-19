@@ -158,7 +158,10 @@ export type Database = {
                       .sort(
                         (a, b) =>
                           a.foreign_key_name.localeCompare(b.foreign_key_name) ||
-                          a.referenced_relation.localeCompare(b.referenced_relation)
+                          a.referenced_relation.localeCompare(b.referenced_relation) ||
+                          JSON.stringify(a.referenced_columns).localeCompare(
+                            JSON.stringify(b.referenced_columns)
+                          )
                       )
                       .map(
                         (relationship) => `{
@@ -235,7 +238,10 @@ export type Database = {
                       .sort(
                         (a, b) =>
                           a.foreign_key_name.localeCompare(b.foreign_key_name) ||
-                          a.referenced_relation.localeCompare(b.referenced_relation)
+                          a.referenced_relation.localeCompare(b.referenced_relation) ||
+                          JSON.stringify(a.referenced_columns).localeCompare(
+                            JSON.stringify(b.referenced_columns)
+                          )
                       )
                       .map(
                         (relationship) => `{
