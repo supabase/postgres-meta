@@ -1,8 +1,8 @@
 import crypto from 'crypto'
-import { PoolConfig } from 'pg'
+import { PoolConfig } from '../lib/types.js'
 import { getSecret } from '../lib/secrets.js'
 import { AccessControl } from './templates/swift.js'
-import pkg from '#package.json' assert { type: 'json' }
+import pkg from '#package.json' with { type: 'json' }
 
 export const PG_META_HOST = process.env.PG_META_HOST || '0.0.0.0'
 export const PG_META_PORT = Number(process.env.PG_META_PORT || 1337)
@@ -49,11 +49,16 @@ export const GENERATE_TYPES_SWIFT_ACCESS_CONTROL = process.env
   ? (process.env.PG_META_GENERATE_TYPES_SWIFT_ACCESS_CONTROL as AccessControl)
   : 'internal'
 
+export const PG_META_MAX_RESULT_SIZE = process.env.PG_META_MAX_RESULT_SIZE
+  ? parseInt(process.env.PG_META_MAX_RESULT_SIZE, 10)
+  : 2 * 1024 * 1024 * 1024 // default to 2GB max query size result
+
 export const DEFAULT_POOL_CONFIG: PoolConfig = {
   max: 1,
   connectionTimeoutMillis: PG_CONN_TIMEOUT_SECS * 1000,
   ssl: PG_META_DB_SSL_ROOT_CERT ? { ca: PG_META_DB_SSL_ROOT_CERT } : undefined,
   application_name: `postgres-meta ${pkg.version}`,
+  maxResultSize: PG_META_MAX_RESULT_SIZE,
 }
 
 export const PG_META_REQ_HEADER = process.env.PG_META_REQ_HEADER || 'request-id'

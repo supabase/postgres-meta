@@ -1,6 +1,7 @@
 import { Static, Type } from '@sinclair/typebox'
 import { DatabaseError } from 'pg-protocol'
 import type { Options as PrettierOptions } from 'prettier'
+import { PoolConfig as PgPoolConfig } from 'pg'
 
 export interface FormatterOptions extends PrettierOptions {}
 
@@ -251,13 +252,7 @@ export const postgresPublicationSchema = Type.Object({
   publish_delete: Type.Boolean(),
   publish_truncate: Type.Boolean(),
   tables: Type.Union([
-    Type.Array(
-      Type.Object({
-        id: Type.Integer(),
-        name: Type.String(),
-        schema: Type.String(),
-      })
-    ),
+    Type.Array(Type.Object({ id: Type.Integer(), name: Type.String(), schema: Type.String() })),
     Type.Null(),
   ]),
 })
@@ -445,12 +440,7 @@ export const postgresTypeSchema = Type.Object({
   schema: Type.String(),
   format: Type.String(),
   enums: Type.Array(Type.String()),
-  attributes: Type.Array(
-    Type.Object({
-      name: Type.String(),
-      type_id: Type.Integer(),
-    })
-  ),
+  attributes: Type.Array(Type.Object({ name: Type.String(), type_id: Type.Integer() })),
   comment: Type.Union([Type.String(), Type.Null()]),
 })
 export type PostgresType = Static<typeof postgresTypeSchema>
@@ -596,3 +586,7 @@ export const postgresColumnPrivilegesRevokeSchema = Type.Object({
   ]),
 })
 export type PostgresColumnPrivilegesRevoke = Static<typeof postgresColumnPrivilegesRevokeSchema>
+
+export interface PoolConfig extends PgPoolConfig {
+  maxResultSize?: number
+}
