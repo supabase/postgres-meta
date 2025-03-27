@@ -557,3 +557,176 @@ test('return interval as string', async () => {
     ]
   `)
 })
+
+test('line position error', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: { query: 'SELECT *\nFROM pg_class\nWHERE relname = missing_quotes;' },
+  })
+  expect(res.json()).toMatchInlineSnapshot(`
+    {
+      "code": "42703",
+      "error": "ERROR:  42703: column "missing_quotes" does not exist
+    LINE 3: WHERE relname = missing_quotes;
+                            ^
+    ",
+      "file": "parse_relation.c",
+      "formattedError": "ERROR:  42703: column "missing_quotes" does not exist
+    LINE 3: WHERE relname = missing_quotes;
+                            ^
+    ",
+      "length": 114,
+      "line": "3589",
+      "message": "column "missing_quotes" does not exist",
+      "name": "error",
+      "position": "40",
+      "routine": "errorMissingColumn",
+      "severity": "ERROR",
+    }
+  `)
+})
+
+test('error with additional details', async () => {
+  // This query will generate an error with details
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `DO $$ 
+      DECLARE 
+          my_var int;
+      BEGIN
+          -- This will trigger an error with detail, hint, and context
+          SELECT * INTO STRICT my_var FROM (VALUES (1), (2)) AS t(v);
+      END $$;`,
+    },
+  })
+
+  expect(res.json()).toMatchInlineSnapshot(`
+    {
+      "code": "P0003",
+      "error": "ERROR:  P0003: query returned more than one row
+    HINT:  Make sure the query returns a single row, or use LIMIT 1.
+    CONTEXT:  PL/pgSQL function inline_code_block line 6 at SQL statement
+    ",
+      "file": "pl_exec.c",
+      "formattedError": "ERROR:  P0003: query returned more than one row
+    HINT:  Make sure the query returns a single row, or use LIMIT 1.
+    CONTEXT:  PL/pgSQL function inline_code_block line 6 at SQL statement
+    ",
+      "hint": "Make sure the query returns a single row, or use LIMIT 1.",
+      "length": 216,
+      "line": "4349",
+      "message": "query returned more than one row",
+      "name": "error",
+      "routine": "exec_stmt_execsql",
+      "severity": "ERROR",
+      "where": "PL/pgSQL function inline_code_block line 6 at SQL statement",
+    }
+  `)
+})
+
+test('error with all formatting properties', async () => {
+  // This query will generate an error with all formatting properties
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `
+      DO $$ 
+      BEGIN
+        -- Using EXECUTE to force internal query to appear
+        EXECUTE 'SELECT * FROM nonexistent_table WHERE id = 1';
+      EXCEPTION WHEN OTHERS THEN
+        -- Re-raise with added context
+        RAISE EXCEPTION USING 
+          ERRCODE = SQLSTATE,
+          MESSAGE = SQLERRM,
+          DETAIL = 'This is additional detail information',
+          HINT = 'This is a hint for fixing the issue',
+          SCHEMA = 'public';
+      END $$;
+      `,
+    },
+  })
+
+  expect(res.json()).toMatchInlineSnapshot(`
+    {
+      "code": "42P01",
+      "detail": "This is additional detail information",
+      "error": "ERROR:  42P01: relation "nonexistent_table" does not exist
+    DETAIL:  This is additional detail information
+    HINT:  This is a hint for fixing the issue
+    CONTEXT:  PL/pgSQL function inline_code_block line 7 at RAISE
+    ",
+      "file": "pl_exec.c",
+      "formattedError": "ERROR:  42P01: relation "nonexistent_table" does not exist
+    DETAIL:  This is additional detail information
+    HINT:  This is a hint for fixing the issue
+    CONTEXT:  PL/pgSQL function inline_code_block line 7 at RAISE
+    ",
+      "hint": "This is a hint for fixing the issue",
+      "length": 242,
+      "line": "3859",
+      "message": "relation "nonexistent_table" does not exist",
+      "name": "error",
+      "routine": "exec_stmt_raise",
+      "schema": "public",
+      "severity": "ERROR",
+      "where": "PL/pgSQL function inline_code_block line 7 at RAISE",
+    }
+  `)
+})
+
+test('error with internalQuery property', async () => {
+  // First create a function that will execute a query internally
+  await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `
+      CREATE OR REPLACE FUNCTION test_internal_query() RETURNS void AS $$
+      BEGIN
+        -- This query will be the "internal query" when it fails
+        EXECUTE 'SELECT * FROM nonexistent_table';
+        RETURN;
+      END;
+      $$ LANGUAGE plpgsql;
+      `,
+    },
+  })
+
+  // Now call the function to trigger the error with internalQuery
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: 'SELECT test_internal_query();',
+    },
+  })
+
+  expect(res.json()).toMatchInlineSnapshot(`
+    {
+      "code": "42P01",
+      "error": "ERROR:  42P01: relation "nonexistent_table" does not exist
+    QUERY:  SELECT * FROM nonexistent_table
+    CONTEXT:  PL/pgSQL function test_internal_query() line 4 at EXECUTE
+    ",
+      "file": "parse_relation.c",
+      "formattedError": "ERROR:  42P01: relation "nonexistent_table" does not exist
+    QUERY:  SELECT * FROM nonexistent_table
+    CONTEXT:  PL/pgSQL function test_internal_query() line 4 at EXECUTE
+    ",
+      "internalPosition": "15",
+      "internalQuery": "SELECT * FROM nonexistent_table",
+      "length": 208,
+      "line": "1381",
+      "message": "relation "nonexistent_table" does not exist",
+      "name": "error",
+      "routine": "parserOpenTable",
+      "severity": "ERROR",
+      "where": "PL/pgSQL function test_internal_query() line 4 at EXECUTE",
+    }
+  `)
+})

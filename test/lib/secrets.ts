@@ -6,10 +6,7 @@ vi.mock('node:fs/promises', async (): Promise<typeof import('node:fs/promises')>
   const originalModule =
     await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises')
   const readFile = vi.fn()
-  return {
-    ...originalModule,
-    readFile,
-  }
+  return { ...originalModule, readFile }
 })
 
 describe('getSecret', () => {
@@ -57,6 +54,6 @@ describe('getSecret', () => {
     const e: NodeJS.ErrnoException = new Error('permission denied')
     e.code = 'EACCES'
     vi.mocked(readFile).mockRejectedValueOnce(e)
-    expect(getSecret('SECRET')).rejects.toThrow()
+    await expect(getSecret('SECRET')).rejects.toThrow()
   })
 })
