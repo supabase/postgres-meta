@@ -1,4 +1,3 @@
-import { PoolConfig } from 'pg'
 import * as Parser from './Parser.js'
 import PostgresMetaColumnPrivileges from './PostgresMetaColumnPrivileges.js'
 import PostgresMetaColumns from './PostgresMetaColumns.js'
@@ -20,7 +19,7 @@ import PostgresMetaTypes from './PostgresMetaTypes.js'
 import PostgresMetaVersion from './PostgresMetaVersion.js'
 import PostgresMetaViews from './PostgresMetaViews.js'
 import { init } from './db.js'
-import { PostgresMetaResult } from './types.js'
+import { PostgresMetaResult, PoolConfig } from './types.js'
 
 export default class PostgresMeta {
   query: (sql: string) => Promise<PostgresMetaResult<any>>

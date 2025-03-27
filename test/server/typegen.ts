@@ -472,6 +472,10 @@ test('typegen: typescript', async () => {
             Args: Record<PropertyKey, never>
             Returns: unknown
           }
+          test_internal_query: {
+            Args: Record<PropertyKey, never>
+            Returns: undefined
+          }
         }
         Enums: {
           meme_status: "new" | "old" | "retired"
@@ -1101,6 +1105,10 @@ test('typegen w/ one-to-one relationships', async () => {
             Args: Record<PropertyKey, never>
             Returns: unknown
           }
+          test_internal_query: {
+            Args: Record<PropertyKey, never>
+            Returns: undefined
+          }
         }
         Enums: {
           meme_status: "new" | "old" | "retired"
@@ -1729,6 +1737,10 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           postgres_fdw_handler: {
             Args: Record<PropertyKey, never>
             Returns: unknown
+          }
+          test_internal_query: {
+            Args: Record<PropertyKey, never>
+            Returns: undefined
           }
         }
         Enums: {

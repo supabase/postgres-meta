@@ -5,14 +5,10 @@ import { PG_META_REQ_HEADER } from './constants.js'
 import routes from './routes/index.js'
 import { extractRequestForLogging } from './utils.js'
 // Pseudo package declared only for this module
-import pkg from '#package.json' assert { type: 'json' }
+import pkg from '#package.json' with { type: 'json' }
 
 export const build = (opts: FastifyServerOptions = {}): FastifyInstance => {
-  const app = fastify({
-    disableRequestLogging: true,
-    requestIdHeader: PG_META_REQ_HEADER,
-    ...opts,
-  })
+  const app = fastify({ disableRequestLogging: true, requestIdHeader: PG_META_REQ_HEADER, ...opts })
 
   app.setErrorHandler((error, request, reply) => {
     app.log.error({ error: error.toString(), request: extractRequestForLogging(request) })

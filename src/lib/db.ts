@@ -1,7 +1,6 @@
-import pg, { PoolConfig } from 'pg'
-import { DatabaseError } from 'pg-protocol'
+import pg from 'pg'
 import { parse as parseArray } from 'postgres-array'
-import { PostgresMetaResult } from './types.js'
+import { PostgresMetaResult, PoolConfig } from './types.js'
 
 pg.types.setTypeParser(pg.types.builtins.INT8, (x) => {
   const asNumber = Number(x)
@@ -20,6 +19,42 @@ pg.types.setTypeParser(1182, parseArray) // _date
 pg.types.setTypeParser(1185, parseArray) // _timestamptz
 pg.types.setTypeParser(600, (x) => x) // point
 pg.types.setTypeParser(1017, (x) => x) // _point
+
+// Ensure any query will have an appropriate error handler on the pool to prevent connections errors
+// to bubble up all the stack eventually killing the server
+const poolerQueryHandleError = (pgpool: pg.Pool, sql: string): Promise<pg.QueryResult<any>> => {
+  return new Promise((resolve, reject) => {
+    let rejected = false
+    const connectionErrorHandler = (err: any) => {
+      // If the error hasn't already be propagated to the catch
+      if (!rejected) {
+        // This is a trick to wait for the next tick, leaving a chance for handled errors such as
+        // RESULT_SIZE_LIMIT to take over other stream errors such as `unexpected commandComplete message`
+        setTimeout(() => {
+          rejected = true
+          return reject(err)
+        })
+      }
+    }
+    // This listened avoid getting uncaught exceptions for errors happening at connection level within the stream
+    // such as parse or RESULT_SIZE_EXCEEDED errors instead, handle the error gracefully by bubbling in up to the caller
+    pgpool.once('error', connectionErrorHandler)
+    pgpool
+      .query(sql)
+      .then((results: pg.QueryResult<any>) => {
+        if (!rejected) {
+          return resolve(results)
+        }
+      })
+      .catch((err: any) => {
+        // If the error hasn't already be handled within the error listener
+        if (!rejected) {
+          rejected = true
+          return reject(err)
+        }
+      })
+  })
+}
 
 export const init: (config: PoolConfig) => {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -60,12 +95,13 @@ export const init: (config: PoolConfig) => {
   // compromise: if we run `query` after `pool.end()` is called (i.e. pool is
   // `null`), we temporarily create a pool and close it right after.
   let pool: pg.Pool | null = new pg.Pool(config)
+
   return {
     async query(sql) {
       try {
         if (!pool) {
           const pool = new pg.Pool(config)
-          let res = await pool.query(sql)
+          let res = await poolerQueryHandleError(pool, sql)
           if (Array.isArray(res)) {
             res = res.reverse().find((x) => x.rows.length !== 0) ?? { rows: [] }
           }
@@ -73,13 +109,13 @@ export const init: (config: PoolConfig) => {
           return { data: res.rows, error: null }
         }
 
-        let res = await pool.query(sql)
+        let res = await poolerQueryHandleError(pool, sql)
         if (Array.isArray(res)) {
           res = res.reverse().find((x) => x.rows.length !== 0) ?? { rows: [] }
         }
         return { data: res.rows, error: null }
       } catch (error: any) {
-        if (error instanceof DatabaseError) {
+        if (error.constructor.name === 'DatabaseError') {
           // Roughly based on:
           // - https://github.com/postgres/postgres/blob/fc4089f3c65a5f1b413a3299ba02b66a8e5e37d0/src/interfaces/libpq/fe-protocol3.c#L1018
           // - https://github.com/brianc/node-postgres/blob/b1a8947738ce0af004cb926f79829bb2abc64aa6/packages/pg/lib/native/query.js#L33
@@ -146,17 +182,42 @@ ${' '.repeat(5 + lineNumber.toString().length + 2 + lineOffset)}^
             },
           }
         }
-
-        return { data: null, error: { message: error.message } }
+        try {
+          // Handle stream errors and result size exceeded errors
+          if (error.code === 'RESULT_SIZE_EXCEEDED') {
+            // Force kill the connection without waiting for graceful shutdown
+            return {
+              data: null,
+              error: {
+                message: `Query result size (${error.resultSize} bytes) exceeded the configured limit (${error.maxResultSize} bytes)`,
+                code: error.code,
+                resultSize: error.resultSize,
+                maxResultSize: error.maxResultSize,
+              },
+            }
+          }
+          return { data: null, error: { code: error.code, message: error.message } }
+        } finally {
+          // If the error isn't a "DatabaseError" assume it's a connection related we kill the connection
+          // To attempt a clean reconnect on next try
+          await this.end()
+        }
       }
     },
 
     async end() {
-      const _pool = pool
-      pool = null
-      // Gracefully wait for active connections to be idle, then close all
-      // connections in the pool.
-      if (_pool) await _pool.end()
+      try {
+        const _pool = pool
+        pool = null
+        // Gracefully wait for active connections to be idle, then close all
+        // connections in the pool.
+        if (_pool) {
+          await _pool.end()
+        }
+      } catch (endError) {
+        // Ignore any errors during cleanup just log them
+        console.error('Failed ending connection pool', endError)
+      }
     },
   }
 }
