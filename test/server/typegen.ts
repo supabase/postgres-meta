@@ -4,13 +4,8 @@ import { app } from './utils'
 test('typegen: typescript', async () => {
   const { body } = await app.inject({ method: 'GET', path: '/generators/typescript' })
   expect(body).toMatchInlineSnapshot(`
-    "export type Json =
-      | string
-      | number
-      | boolean
-      | null
-      | { [key: string]: Json | undefined }
-      | Json[]
+    "/** @deprecated Use \`unknown\` instead. \`Json\` will be removed in a future release. */
+    export type Json = unknown
 
     export type Database = {
       public: {
@@ -59,7 +54,7 @@ test('typegen: typescript', async () => {
               category: number | null
               created_at: string
               id: number
-              metadata: Json | null
+              metadata: unknown | null
               name: string
               status: Database["public"]["Enums"]["meme_status"] | null
             }
@@ -67,7 +62,7 @@ test('typegen: typescript', async () => {
               category?: number | null
               created_at: string
               id?: number
-              metadata?: Json | null
+              metadata?: unknown | null
               name: string
               status?: Database["public"]["Enums"]["meme_status"] | null
             }
@@ -75,7 +70,7 @@ test('typegen: typescript', async () => {
               category?: number | null
               created_at?: string
               id?: number
-              metadata?: Json | null
+              metadata?: unknown | null
               name?: string
               status?: Database["public"]["Enums"]["meme_status"] | null
             }
@@ -240,19 +235,19 @@ test('typegen: typescript', async () => {
             Row: {
               created_at: string | null
               id: number
-              previous_value: Json | null
+              previous_value: unknown | null
               user_id: number | null
             }
             Insert: {
               created_at?: string | null
               id?: number
-              previous_value?: Json | null
+              previous_value?: unknown | null
               user_id?: number | null
             }
             Update: {
               created_at?: string | null
               id?: number
-              previous_value?: Json | null
+              previous_value?: unknown | null
               user_id?: number | null
             }
             Relationships: []
@@ -616,13 +611,8 @@ test('typegen w/ one-to-one relationships', async () => {
     query: { detect_one_to_one_relationships: 'true' },
   })
   expect(body).toMatchInlineSnapshot(`
-    "export type Json =
-      | string
-      | number
-      | boolean
-      | null
-      | { [key: string]: Json | undefined }
-      | Json[]
+    "/** @deprecated Use \`unknown\` instead. \`Json\` will be removed in a future release. */
+    export type Json = unknown
 
     export type Database = {
       public: {
@@ -671,7 +661,7 @@ test('typegen w/ one-to-one relationships', async () => {
               category: number | null
               created_at: string
               id: number
-              metadata: Json | null
+              metadata: unknown | null
               name: string
               status: Database["public"]["Enums"]["meme_status"] | null
             }
@@ -679,7 +669,7 @@ test('typegen w/ one-to-one relationships', async () => {
               category?: number | null
               created_at: string
               id?: number
-              metadata?: Json | null
+              metadata?: unknown | null
               name: string
               status?: Database["public"]["Enums"]["meme_status"] | null
             }
@@ -687,7 +677,7 @@ test('typegen w/ one-to-one relationships', async () => {
               category?: number | null
               created_at?: string
               id?: number
-              metadata?: Json | null
+              metadata?: unknown | null
               name?: string
               status?: Database["public"]["Enums"]["meme_status"] | null
             }
@@ -863,19 +853,19 @@ test('typegen w/ one-to-one relationships', async () => {
             Row: {
               created_at: string | null
               id: number
-              previous_value: Json | null
+              previous_value: unknown | null
               user_id: number | null
             }
             Insert: {
               created_at?: string | null
               id?: number
-              previous_value?: Json | null
+              previous_value?: unknown | null
               user_id?: number | null
             }
             Update: {
               created_at?: string | null
               id?: number
-              previous_value?: Json | null
+              previous_value?: unknown | null
               user_id?: number | null
             }
             Relationships: []
