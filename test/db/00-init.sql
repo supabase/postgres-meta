@@ -159,3 +159,25 @@ second_user AS (
 )
 SELECT * from initial_user iu 
 cross join second_user su;
+
+CREATE OR REPLACE FUNCTION public.get_user_audit_setof_single_row(user_row users)
+RETURNS SETOF users_audit
+LANGUAGE SQL STABLE
+ROWS 1
+AS $$
+  SELECT * FROM public.users_audit WHERE user_id = user_row.id;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_todos_setof_rows(user_row users)
+RETURNS SETOF todos
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM public.todos WHERE "user-id" = user_row.id;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_todos_setof_rows(todo_row todos)
+RETURNS SETOF todos
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM public.todos WHERE "user-id" = todo_row."user-id";
+$$;
