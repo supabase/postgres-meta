@@ -115,89 +115,101 @@ WHERE
     }
   }
 
-  async create({
-    table_id,
-    name,
-    type,
-    default_value,
-    default_value_format = 'literal',
-    is_identity = false,
-    identity_generation = 'BY DEFAULT',
-    // Can't pick a value as default since regular columns are nullable by default but PK columns aren't
-    is_nullable,
-    is_primary_key = false,
-    is_unique = false,
-    comment,
-    check,
-  }: {
-    table_id: number
-    name: string
-    type: string
-    default_value?: any
-    default_value_format?: 'expression' | 'literal'
-    is_identity?: boolean
-    identity_generation?: 'BY DEFAULT' | 'ALWAYS'
-    is_nullable?: boolean
-    is_primary_key?: boolean
-    is_unique?: boolean
-    comment?: string
-    check?: string
-  }): Promise<PostgresMetaResult<PostgresColumn>> {
+  async create(
+    columns: {
+      table_id: number
+      name: string
+      type: string
+      default_value?: any
+      default_value_format?: 'expression' | 'literal'
+      is_identity?: boolean
+      identity_generation?: 'BY DEFAULT' | 'ALWAYS'
+      is_nullable?: boolean
+      is_primary_key?: boolean
+      is_unique?: boolean
+      comment?: string
+      check?: string
+    }[]
+  ): Promise<PostgresMetaResult<PostgresColumn[]>> {
+    const { table_id } = columns[0]
+
     const { data, error } = await this.metaTables.retrieve({ id: table_id })
     if (error) {
       return { data: null, error }
     }
     const { name: table, schema } = data!
+    let sql = `BEGIN;`
+    for (const column of columns) {
+      const {
+        name,
+        type,
+        default_value,
+        default_value_format = 'literal',
+        is_identity = false,
+        identity_generation = 'BY DEFAULT',
+        // Can't pick a value as default since regular columns are nullable by default but PK columns aren't
+        is_nullable,
+        is_primary_key = false,
+        is_unique = false,
+        comment,
+        check,
+      } = column
+      sql += `
+      ALTER TABLE ${ident(schema)}.${ident(table)} ADD COLUMN ${ident(name)} ${typeIdent(type)}`
 
-    let defaultValueClause = ''
-    if (is_identity) {
-      if (default_value !== undefined) {
-        return {
-          data: null,
-          error: { message: 'Columns cannot both be identity and have a default value' },
+      let defaultValueClause = ''
+      if (is_identity) {
+        if (default_value !== undefined) {
+          return {
+            data: null,
+            error: { message: 'Columns cannot both be identity and have a default value' },
+          }
+        }
+
+        defaultValueClause = `GENERATED ${identity_generation} AS IDENTITY`
+      } else {
+        if (default_value === undefined) {
+          // skip
+        } else if (default_value_format === 'expression') {
+          defaultValueClause = `DEFAULT ${default_value}`
+        } else {
+          defaultValueClause = `DEFAULT ${literal(default_value)}`
         }
       }
 
-      defaultValueClause = `GENERATED ${identity_generation} AS IDENTITY`
-    } else {
-      if (default_value === undefined) {
-        // skip
-      } else if (default_value_format === 'expression') {
-        defaultValueClause = `DEFAULT ${default_value}`
-      } else {
-        defaultValueClause = `DEFAULT ${literal(default_value)}`
+      let isNullableClause = ''
+      if (is_nullable !== undefined) {
+        isNullableClause = is_nullable ? 'NULL' : 'NOT NULL'
       }
+      const isPrimaryKeyClause = is_primary_key ? 'PRIMARY KEY' : ''
+      const isUniqueClause = is_unique ? 'UNIQUE' : ''
+      const checkSql = check === undefined ? '' : `CHECK (${check})`
+      const commentSql =
+        comment === undefined
+          ? ''
+          : `COMMENT ON COLUMN ${ident(schema)}.${ident(table)}.${ident(name)} IS ${literal(
+              comment
+            )}`
+
+      sql += `
+      ${defaultValueClause}
+      ${isNullableClause}
+      ${isPrimaryKeyClause}
+      ${isUniqueClause}
+      ${checkSql};
+    ${commentSql};`
     }
 
-    let isNullableClause = ''
-    if (is_nullable !== undefined) {
-      isNullableClause = is_nullable ? 'NULL' : 'NOT NULL'
-    }
-    const isPrimaryKeyClause = is_primary_key ? 'PRIMARY KEY' : ''
-    const isUniqueClause = is_unique ? 'UNIQUE' : ''
-    const checkSql = check === undefined ? '' : `CHECK (${check})`
-    const commentSql =
-      comment === undefined
-        ? ''
-        : `COMMENT ON COLUMN ${ident(schema)}.${ident(table)}.${ident(name)} IS ${literal(comment)}`
-
-    const sql = `
-BEGIN;
-  ALTER TABLE ${ident(schema)}.${ident(table)} ADD COLUMN ${ident(name)} ${typeIdent(type)}
-    ${defaultValueClause}
-    ${isNullableClause}
-    ${isPrimaryKeyClause}
-    ${isUniqueClause}
-    ${checkSql};
-  ${commentSql};
-COMMIT;`
+    sql += `COMMIT;`
     {
       const { error } = await this.query(sql)
       if (error) {
         return { data: null, error }
       }
     }
-    return await this.retrieve({ name, table, schema })
+    const res = await this.list({ tableId: table_id, includedSchemas: [schema] })
+    res.data = res.data?.filter((d) => columns.find((c) => d.name === c.name)) as PostgresColumn[]
+    return res
   }
 
   async update(

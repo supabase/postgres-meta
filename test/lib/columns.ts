@@ -142,42 +142,46 @@ test('list columns with excluded schemas and include System Schemas', async () =
 test('retrieve, create, update, delete', async () => {
   const { data: testTable }: any = await pgMeta.tables.create({ name: 't' })
 
-  let res = await pgMeta.columns.create({
-    table_id: testTable!.id,
-    name: 'c',
-    type: 'int2',
-    default_value: 42,
-    comment: 'foo',
-  })
-  expect(res).toMatchInlineSnapshot(
-    { data: { id: expect.stringMatching(/^\d+\.1$/), table_id: expect.any(Number) } },
+  const createRes = await pgMeta.columns.create([
+    {
+      table_id: testTable!.id,
+      name: 'c',
+      type: 'int2',
+      default_value: 42,
+      comment: 'foo',
+    },
+  ])
+  expect(createRes).toMatchInlineSnapshot(
+    { data: [{ id: expect.stringMatching(/^\d+\.1$/), table_id: expect.any(Number) }] },
     `
     {
-      "data": {
-        "check": null,
-        "comment": "foo",
-        "data_type": "smallint",
-        "default_value": "'42'::smallint",
-        "enums": [],
-        "format": "int2",
-        "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
-        "identity_generation": null,
-        "is_generated": false,
-        "is_identity": false,
-        "is_nullable": true,
-        "is_unique": false,
-        "is_updatable": true,
-        "name": "c",
-        "ordinal_position": 1,
-        "schema": "public",
-        "table": "t",
-        "table_id": Any<Number>,
-      },
+      "data": [
+        {
+          "check": null,
+          "comment": "foo",
+          "data_type": "smallint",
+          "default_value": "'42'::smallint",
+          "enums": [],
+          "format": "int2",
+          "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
+          "identity_generation": null,
+          "is_generated": false,
+          "is_identity": false,
+          "is_nullable": true,
+          "is_unique": false,
+          "is_updatable": true,
+          "name": "c",
+          "ordinal_position": 1,
+          "schema": "public",
+          "table": "t",
+          "table_id": Any<Number>,
+        },
+      ],
       "error": null,
     }
   `
   )
-  res = await pgMeta.columns.retrieve({ id: res.data!.id })
+  let res = await pgMeta.columns.retrieve({ id: createRes.data![0].id })
   expect(res).toMatchInlineSnapshot(
     {
       data: { id: expect.stringMatching(/^\d+\.1$/), table_id: expect.any(Number) },
@@ -289,6 +293,187 @@ test('retrieve, create, update, delete', async () => {
   await pgMeta.tables.remove(testTable!.id)
 })
 
+test('create multiple columns at once', async () => {
+  const { data: testTable }: any = await pgMeta.tables.create({ name: 't' })
+
+  const createRes = await pgMeta.columns.create([
+    {
+      table_id: testTable!.id,
+      name: 'a',
+      type: 'int2',
+      default_value: 42,
+      comment: 'foo',
+    },
+    {
+      table_id: testTable!.id,
+      name: 'b',
+      type: 'int2[]',
+    },
+    {
+      table_id: testTable!.id,
+      name: 'c',
+      type: 'timestamptz',
+      default_value: 'NOW()',
+      default_value_format: 'expression',
+    },
+  ])
+  expect(createRes.error).toBeNull()
+  expect(createRes).toMatchInlineSnapshot(
+    {
+      data: [
+        { id: expect.stringMatching(/^\d+\.1$/), table_id: expect.any(Number) },
+        { id: expect.stringMatching(/^\d+\.2$/), table_id: expect.any(Number) },
+        { id: expect.stringMatching(/^\d+\.3$/), table_id: expect.any(Number) },
+      ],
+    },
+    `
+    {
+      "data": [
+        {
+          "check": null,
+          "comment": "foo",
+          "data_type": "smallint",
+          "default_value": "'42'::smallint",
+          "enums": [],
+          "format": "int2",
+          "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
+          "identity_generation": null,
+          "is_generated": false,
+          "is_identity": false,
+          "is_nullable": true,
+          "is_unique": false,
+          "is_updatable": true,
+          "name": "a",
+          "ordinal_position": 1,
+          "schema": "public",
+          "table": "t",
+          "table_id": Any<Number>,
+        },
+        {
+          "check": null,
+          "comment": null,
+          "data_type": "ARRAY",
+          "default_value": null,
+          "enums": [],
+          "format": "_int2",
+          "id": StringMatching /\\^\\\\d\\+\\\\\\.2\\$/,
+          "identity_generation": null,
+          "is_generated": false,
+          "is_identity": false,
+          "is_nullable": true,
+          "is_unique": false,
+          "is_updatable": true,
+          "name": "b",
+          "ordinal_position": 2,
+          "schema": "public",
+          "table": "t",
+          "table_id": Any<Number>,
+        },
+        {
+          "check": null,
+          "comment": null,
+          "data_type": "timestamp with time zone",
+          "default_value": "now()",
+          "enums": [],
+          "format": "timestamptz",
+          "id": StringMatching /\\^\\\\d\\+\\\\\\.3\\$/,
+          "identity_generation": null,
+          "is_generated": false,
+          "is_identity": false,
+          "is_nullable": true,
+          "is_unique": false,
+          "is_updatable": true,
+          "name": "c",
+          "ordinal_position": 3,
+          "schema": "public",
+          "table": "t",
+          "table_id": Any<Number>,
+        },
+      ],
+      "error": null,
+    }
+  `
+  )
+  let res = await pgMeta.columns.list({ tableId: testTable.id })
+  expect(res).toMatchInlineSnapshot(
+    {
+      data: [
+        { id: expect.stringMatching(/^\d+\.1$/), table_id: expect.any(Number) },
+        { id: expect.stringMatching(/^\d+\.2$/), table_id: expect.any(Number) },
+        { id: expect.stringMatching(/^\d+\.3$/), table_id: expect.any(Number) },
+      ],
+    },
+    `
+    {
+      "data": [
+        {
+          "check": null,
+          "comment": "foo",
+          "data_type": "smallint",
+          "default_value": "'42'::smallint",
+          "enums": [],
+          "format": "int2",
+          "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
+          "identity_generation": null,
+          "is_generated": false,
+          "is_identity": false,
+          "is_nullable": true,
+          "is_unique": false,
+          "is_updatable": true,
+          "name": "a",
+          "ordinal_position": 1,
+          "schema": "public",
+          "table": "t",
+          "table_id": Any<Number>,
+        },
+        {
+          "check": null,
+          "comment": null,
+          "data_type": "ARRAY",
+          "default_value": null,
+          "enums": [],
+          "format": "_int2",
+          "id": StringMatching /\\^\\\\d\\+\\\\\\.2\\$/,
+          "identity_generation": null,
+          "is_generated": false,
+          "is_identity": false,
+          "is_nullable": true,
+          "is_unique": false,
+          "is_updatable": true,
+          "name": "b",
+          "ordinal_position": 2,
+          "schema": "public",
+          "table": "t",
+          "table_id": Any<Number>,
+        },
+        {
+          "check": null,
+          "comment": null,
+          "data_type": "timestamp with time zone",
+          "default_value": "now()",
+          "enums": [],
+          "format": "timestamptz",
+          "id": StringMatching /\\^\\\\d\\+\\\\\\.3\\$/,
+          "identity_generation": null,
+          "is_generated": false,
+          "is_identity": false,
+          "is_nullable": true,
+          "is_unique": false,
+          "is_updatable": true,
+          "name": "c",
+          "ordinal_position": 3,
+          "schema": "public",
+          "table": "t",
+          "table_id": Any<Number>,
+        },
+      ],
+      "error": null,
+    }
+  `
+  )
+  await pgMeta.tables.remove(testTable!.id)
+})
+
 test('enum column with quoted name', async () => {
   await pgMeta.query('CREATE TYPE "T" AS ENUM (\'v\'); CREATE TABLE t ( c "T" );')
 
@@ -330,12 +515,14 @@ test('enum column with quoted name', async () => {
 test('primary key column', async () => {
   const { data: testTable } = await pgMeta.tables.create({ name: 't' })
 
-  await pgMeta.columns.create({
-    table_id: testTable!.id,
-    name: 'c',
-    type: 'int2',
-    is_primary_key: true,
-  })
+  await pgMeta.columns.create([
+    {
+      table_id: testTable!.id,
+      name: 'c',
+      type: 'int2',
+      is_primary_key: true,
+    },
+  ])
   const res = await pgMeta.query(`
 SELECT a.attname
 FROM   pg_index i
@@ -361,12 +548,14 @@ AND    i.indisprimary;
 test('unique column', async () => {
   const { data: testTable } = await pgMeta.tables.create({ name: 't' })
 
-  await pgMeta.columns.create({
-    table_id: testTable!.id,
-    name: 'c',
-    type: 'int2',
-    is_unique: true,
-  })
+  await pgMeta.columns.create([
+    {
+      table_id: testTable!.id,
+      name: 'c',
+      type: 'int2',
+      is_unique: true,
+    },
+  ])
   const res = await pgMeta.query(`
 SELECT a.attname
 FROM   pg_index i
@@ -393,40 +582,46 @@ AND    i.indisunique;
 test('array column', async () => {
   const { data: testTable } = await pgMeta.tables.create({ name: 't' })
 
-  const res = await pgMeta.columns.create({
-    table_id: testTable!.id,
-    name: 'c',
-    type: 'int2[]',
-  })
+  const res = await pgMeta.columns.create([
+    {
+      table_id: testTable!.id,
+      name: 'c',
+      type: 'int2[]',
+    },
+  ])
   expect(res).toMatchInlineSnapshot(
     {
-      data: {
-        id: expect.stringMatching(/^\d+\.1$/),
-        table_id: expect.any(Number),
-      },
+      data: [
+        {
+          id: expect.stringMatching(/^\d+\.1$/),
+          table_id: expect.any(Number),
+        },
+      ],
     },
     `
     {
-      "data": {
-        "check": null,
-        "comment": null,
-        "data_type": "ARRAY",
-        "default_value": null,
-        "enums": [],
-        "format": "_int2",
-        "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
-        "identity_generation": null,
-        "is_generated": false,
-        "is_identity": false,
-        "is_nullable": true,
-        "is_unique": false,
-        "is_updatable": true,
-        "name": "c",
-        "ordinal_position": 1,
-        "schema": "public",
-        "table": "t",
-        "table_id": Any<Number>,
-      },
+      "data": [
+        {
+          "check": null,
+          "comment": null,
+          "data_type": "ARRAY",
+          "default_value": null,
+          "enums": [],
+          "format": "_int2",
+          "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
+          "identity_generation": null,
+          "is_generated": false,
+          "is_identity": false,
+          "is_nullable": true,
+          "is_unique": false,
+          "is_updatable": true,
+          "name": "c",
+          "ordinal_position": 1,
+          "schema": "public",
+          "table": "t",
+          "table_id": Any<Number>,
+        },
+      ],
       "error": null,
     }
   `
@@ -438,42 +633,48 @@ test('array column', async () => {
 test('column with default value', async () => {
   const { data: testTable } = await pgMeta.tables.create({ name: 't' })
 
-  const res = await pgMeta.columns.create({
-    table_id: testTable!.id,
-    name: 'c',
-    type: 'timestamptz',
-    default_value: 'NOW()',
-    default_value_format: 'expression',
-  })
+  const res = await pgMeta.columns.create([
+    {
+      table_id: testTable!.id,
+      name: 'c',
+      type: 'timestamptz',
+      default_value: 'NOW()',
+      default_value_format: 'expression',
+    },
+  ])
   expect(res).toMatchInlineSnapshot(
     {
-      data: {
-        id: expect.stringMatching(/^\d+\.1$/),
-        table_id: expect.any(Number),
-      },
+      data: [
+        {
+          id: expect.stringMatching(/^\d+\.1$/),
+          table_id: expect.any(Number),
+        },
+      ],
     },
     `
     {
-      "data": {
-        "check": null,
-        "comment": null,
-        "data_type": "timestamp with time zone",
-        "default_value": "now()",
-        "enums": [],
-        "format": "timestamptz",
-        "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
-        "identity_generation": null,
-        "is_generated": false,
-        "is_identity": false,
-        "is_nullable": true,
-        "is_unique": false,
-        "is_updatable": true,
-        "name": "c",
-        "ordinal_position": 1,
-        "schema": "public",
-        "table": "t",
-        "table_id": Any<Number>,
-      },
+      "data": [
+        {
+          "check": null,
+          "comment": null,
+          "data_type": "timestamp with time zone",
+          "default_value": "now()",
+          "enums": [],
+          "format": "timestamptz",
+          "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
+          "identity_generation": null,
+          "is_generated": false,
+          "is_identity": false,
+          "is_nullable": true,
+          "is_unique": false,
+          "is_updatable": true,
+          "name": "c",
+          "ordinal_position": 1,
+          "schema": "public",
+          "table": "t",
+          "table_id": Any<Number>,
+        },
+      ],
       "error": null,
     }
   `
@@ -485,12 +686,14 @@ test('column with default value', async () => {
 test('column with constraint', async () => {
   const { data: testTable } = await pgMeta.tables.create({ name: 't' })
 
-  await pgMeta.columns.create({
-    table_id: testTable!.id,
-    name: 'c',
-    type: 'text',
-    check: "description <> ''",
-  })
+  await pgMeta.columns.create([
+    {
+      table_id: testTable!.id,
+      name: 'c',
+      type: 'text',
+      check: "description <> ''",
+    },
+  ])
   const res = await pgMeta.query(`
 SELECT pg_get_constraintdef((
   SELECT c.oid
@@ -515,12 +718,14 @@ SELECT pg_get_constraintdef((
 test('update with name unchanged', async () => {
   const { data: testTable } = await pgMeta.tables.create({ name: 't' })
 
-  let res = await pgMeta.columns.create({
-    table_id: testTable!.id,
-    name: 'c',
-    type: 'int2',
-  })
-  res = await pgMeta.columns.update(res.data!.id, {
+  let createRes = await pgMeta.columns.create([
+    {
+      table_id: testTable!.id,
+      name: 'c',
+      type: 'int2',
+    },
+  ])
+  let res = await pgMeta.columns.update(createRes.data![0].id, {
     name: 'c',
   })
   expect(res).toMatchInlineSnapshot(
@@ -563,12 +768,14 @@ test('update with name unchanged', async () => {
 test('update with array types', async () => {
   const { data: testTable } = await pgMeta.tables.create({ name: 't' })
 
-  let res = await pgMeta.columns.create({
-    table_id: testTable!.id,
-    name: 'c',
-    type: 'text',
-  })
-  res = await pgMeta.columns.update(res.data!.id, {
+  let createRes = await pgMeta.columns.create([
+    {
+      table_id: testTable!.id,
+      name: 'c',
+      type: 'text',
+    },
+  ])
+  let res = await pgMeta.columns.update(createRes.data![0].id, {
     type: 'text[]',
   })
   expect(res).toMatchInlineSnapshot(
@@ -611,12 +818,14 @@ test('update with array types', async () => {
 test('update with incompatible types', async () => {
   const { data: testTable } = await pgMeta.tables.create({ name: 't' })
 
-  let res = await pgMeta.columns.create({
-    table_id: testTable!.id,
-    name: 'c',
-    type: 'text',
-  })
-  res = await pgMeta.columns.update(res.data!.id, {
+  let createRes = await pgMeta.columns.create([
+    {
+      table_id: testTable!.id,
+      name: 'c',
+      type: 'text',
+    },
+  ])
+  let res = await pgMeta.columns.update(createRes.data![0].id, {
     type: 'int4',
   })
   expect(res).toMatchInlineSnapshot(
@@ -659,13 +868,15 @@ test('update with incompatible types', async () => {
 test('update is_unique', async () => {
   const { data: testTable } = await pgMeta.tables.create({ name: 't' })
 
-  let res = await pgMeta.columns.create({
-    table_id: testTable!.id,
-    name: 'c',
-    type: 'text',
-    is_unique: false,
-  })
-  res = await pgMeta.columns.update(res.data!.id, { is_unique: true })
+  let createRes = await pgMeta.columns.create([
+    {
+      table_id: testTable!.id,
+      name: 'c',
+      type: 'text',
+      is_unique: false,
+    },
+  ])
+  let res = await pgMeta.columns.update(createRes.data![0].id, { is_unique: true })
   expect(res).toMatchInlineSnapshot(
     {
       data: {
@@ -742,13 +953,15 @@ test('alter column to type with uppercase', async () => {
   const { data: testTable } = await pgMeta.tables.create({ name: 't' })
   await pgMeta.query('CREATE TYPE "T" AS ENUM ()')
 
-  let res = await pgMeta.columns.create({
-    table_id: testTable!.id,
-    name: 'c',
-    type: 'text',
-    is_unique: false,
-  })
-  res = await pgMeta.columns.update(res.data!.id, { type: 'T' })
+  let createRes = await pgMeta.columns.create([
+    {
+      table_id: testTable!.id,
+      name: 'c',
+      type: 'text',
+      is_unique: false,
+    },
+  ])
+  let res = await pgMeta.columns.update(createRes.data![0].id, { type: 'T' })
   expect(res).toMatchInlineSnapshot(
     {
       data: {
@@ -791,42 +1004,48 @@ test('enums are populated in enum array columns', async () => {
   await pgMeta.query(`create type test_enum as enum ('a')`)
   const { data: testTable } = await pgMeta.tables.create({ name: 't' })
 
-  let res = await pgMeta.columns.create({
-    table_id: testTable!.id,
-    name: 'c',
-    type: '_test_enum',
-  })
+  let res = await pgMeta.columns.create([
+    {
+      table_id: testTable!.id,
+      name: 'c',
+      type: '_test_enum',
+    },
+  ])
   expect(res).toMatchInlineSnapshot(
     {
-      data: {
-        id: expect.stringMatching(/^\d+\.1$/),
-        table_id: expect.any(Number),
-      },
+      data: [
+        {
+          id: expect.stringMatching(/^\d+\.1$/),
+          table_id: expect.any(Number),
+        },
+      ],
     },
     `
     {
-      "data": {
-        "check": null,
-        "comment": null,
-        "data_type": "ARRAY",
-        "default_value": null,
-        "enums": [
-          "a",
-        ],
-        "format": "_test_enum",
-        "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
-        "identity_generation": null,
-        "is_generated": false,
-        "is_identity": false,
-        "is_nullable": true,
-        "is_unique": false,
-        "is_updatable": true,
-        "name": "c",
-        "ordinal_position": 1,
-        "schema": "public",
-        "table": "t",
-        "table_id": Any<Number>,
-      },
+      "data": [
+        {
+          "check": null,
+          "comment": null,
+          "data_type": "ARRAY",
+          "default_value": null,
+          "enums": [
+            "a",
+          ],
+          "format": "_test_enum",
+          "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
+          "identity_generation": null,
+          "is_generated": false,
+          "is_identity": false,
+          "is_nullable": true,
+          "is_unique": false,
+          "is_updatable": true,
+          "name": "c",
+          "ordinal_position": 1,
+          "schema": "public",
+          "table": "t",
+          "table_id": Any<Number>,
+        },
+      ],
       "error": null,
     }
   `
