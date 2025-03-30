@@ -432,6 +432,10 @@ test('typegen: typescript', async () => {
               name: string
             }[]
           }
+          get_composite_type_data: {
+            Args: Record<PropertyKey, never>
+            Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"][]
+          }
           get_todos_setof_rows: {
             Args:
               | { user_row: Database["public"]["Tables"]["users"]["Row"] }
@@ -450,6 +454,14 @@ test('typegen: typescript', async () => {
               previous_value: Json | null
               user_id: number | null
             }[]
+          }
+          get_user_ids: {
+            Args: Record<PropertyKey, never>
+            Returns: number[]
+          }
+          get_user_summary: {
+            Args: Record<PropertyKey, never>
+            Returns: Record<string, unknown>[]
           }
           polymorphic_function: {
             Args: { "": string } | { "": boolean }
@@ -1065,6 +1077,10 @@ test('typegen w/ one-to-one relationships', async () => {
               name: string
             }[]
           }
+          get_composite_type_data: {
+            Args: Record<PropertyKey, never>
+            Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"][]
+          }
           get_todos_setof_rows: {
             Args:
               | { user_row: Database["public"]["Tables"]["users"]["Row"] }
@@ -1083,6 +1099,14 @@ test('typegen w/ one-to-one relationships', async () => {
               previous_value: Json | null
               user_id: number | null
             }[]
+          }
+          get_user_ids: {
+            Args: Record<PropertyKey, never>
+            Returns: number[]
+          }
+          get_user_summary: {
+            Args: Record<PropertyKey, never>
+            Returns: Record<string, unknown>[]
           }
           polymorphic_function: {
             Args: { "": string } | { "": boolean }
@@ -1698,6 +1722,10 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               name: string
             }[]
           }
+          get_composite_type_data: {
+            Args: Record<PropertyKey, never>
+            Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"][]
+          }
           get_todos_setof_rows: {
             Args:
               | { user_row: Database["public"]["Tables"]["users"]["Row"] }
@@ -1716,6 +1744,14 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               previous_value: Json | null
               user_id: number | null
             }[]
+          }
+          get_user_ids: {
+            Args: Record<PropertyKey, never>
+            Returns: number[]
+          }
+          get_user_summary: {
+            Args: Record<PropertyKey, never>
+            Returns: Record<string, unknown>[]
           }
           polymorphic_function: {
             Args: { "": string } | { "": boolean }
