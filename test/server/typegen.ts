@@ -3,7 +3,8 @@ import { app } from './utils'
 
 test('typegen: typescript', async () => {
   const { body } = await app.inject({ method: 'GET', path: '/generators/typescript' })
-  expect(body).toMatchInlineSnapshot(`
+  expect(body).toMatchInlineSnapshot(
+    `
     "export type Json =
       | string
       | number
@@ -389,33 +390,23 @@ test('typegen: typescript', async () => {
         }
         Functions: {
           blurb: {
-            Args: {
-              "": Database["public"]["Tables"]["todos"]["Row"]
-            }
+            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: string
           }
           blurb_varchar: {
-            Args: {
-              "": Database["public"]["Tables"]["todos"]["Row"]
-            }
+            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: string
           }
           details_is_long: {
-            Args: {
-              "": Database["public"]["Tables"]["todos"]["Row"]
-            }
+            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: boolean
           }
           details_length: {
-            Args: {
-              "": Database["public"]["Tables"]["todos"]["Row"]
-            }
+            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: number
           }
           details_words: {
-            Args: {
-              "": Database["public"]["Tables"]["todos"]["Row"]
-            }
+            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: string[]
           }
           function_returning_row: {
@@ -441,23 +432,31 @@ test('typegen: typescript', async () => {
               name: string
             }[]
           }
-          polymorphic_function:
-            | {
-                Args: {
-                  "": boolean
-                }
-                Returns: undefined
-              }
-            | {
-                Args: {
-                  "": string
-                }
-                Returns: undefined
-              }
+          get_todos_setof_rows: {
+            Args:
+              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
+              | { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }[]
+          }
+          get_user_audit_setof_single_row: {
+            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Returns: {
+              created_at: string | null
+              id: number
+              previous_value: Json | null
+              user_id: number | null
+            }[]
+          }
+          polymorphic_function: {
+            Args: { "": string } | { "": boolean }
+            Returns: undefined
+          }
           postgres_fdw_disconnect: {
-            Args: {
-              "": string
-            }
+            Args: { "": string }
             Returns: boolean
           }
           postgres_fdw_disconnect_all: {
@@ -606,7 +605,8 @@ test('typegen: typescript', async () => {
       },
     } as const
     "
-  `)
+  `
+  )
 })
 
 test('typegen w/ one-to-one relationships', async () => {
@@ -615,7 +615,8 @@ test('typegen w/ one-to-one relationships', async () => {
     path: '/generators/typescript',
     query: { detect_one_to_one_relationships: 'true' },
   })
-  expect(body).toMatchInlineSnapshot(`
+  expect(body).toMatchInlineSnapshot(
+    `
     "export type Json =
       | string
       | number
@@ -1022,33 +1023,23 @@ test('typegen w/ one-to-one relationships', async () => {
         }
         Functions: {
           blurb: {
-            Args: {
-              "": Database["public"]["Tables"]["todos"]["Row"]
-            }
+            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: string
           }
           blurb_varchar: {
-            Args: {
-              "": Database["public"]["Tables"]["todos"]["Row"]
-            }
+            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: string
           }
           details_is_long: {
-            Args: {
-              "": Database["public"]["Tables"]["todos"]["Row"]
-            }
+            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: boolean
           }
           details_length: {
-            Args: {
-              "": Database["public"]["Tables"]["todos"]["Row"]
-            }
+            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: number
           }
           details_words: {
-            Args: {
-              "": Database["public"]["Tables"]["todos"]["Row"]
-            }
+            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: string[]
           }
           function_returning_row: {
@@ -1074,23 +1065,31 @@ test('typegen w/ one-to-one relationships', async () => {
               name: string
             }[]
           }
-          polymorphic_function:
-            | {
-                Args: {
-                  "": boolean
-                }
-                Returns: undefined
-              }
-            | {
-                Args: {
-                  "": string
-                }
-                Returns: undefined
-              }
+          get_todos_setof_rows: {
+            Args:
+              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
+              | { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }[]
+          }
+          get_user_audit_setof_single_row: {
+            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Returns: {
+              created_at: string | null
+              id: number
+              previous_value: Json | null
+              user_id: number | null
+            }[]
+          }
+          polymorphic_function: {
+            Args: { "": string } | { "": boolean }
+            Returns: undefined
+          }
           postgres_fdw_disconnect: {
-            Args: {
-              "": string
-            }
+            Args: { "": string }
             Returns: boolean
           }
           postgres_fdw_disconnect_all: {
@@ -1239,7 +1238,8 @@ test('typegen w/ one-to-one relationships', async () => {
       },
     } as const
     "
-  `)
+  `
+  )
 })
 
 test('typegen: typescript w/ one-to-one relationships', async () => {
@@ -1248,7 +1248,8 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
     path: '/generators/typescript',
     query: { detect_one_to_one_relationships: 'true' },
   })
-  expect(body).toMatchInlineSnapshot(`
+  expect(body).toMatchInlineSnapshot(
+    `
     "export type Json =
       | string
       | number
@@ -1655,33 +1656,23 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
         }
         Functions: {
           blurb: {
-            Args: {
-              "": Database["public"]["Tables"]["todos"]["Row"]
-            }
+            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: string
           }
           blurb_varchar: {
-            Args: {
-              "": Database["public"]["Tables"]["todos"]["Row"]
-            }
+            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: string
           }
           details_is_long: {
-            Args: {
-              "": Database["public"]["Tables"]["todos"]["Row"]
-            }
+            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: boolean
           }
           details_length: {
-            Args: {
-              "": Database["public"]["Tables"]["todos"]["Row"]
-            }
+            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: number
           }
           details_words: {
-            Args: {
-              "": Database["public"]["Tables"]["todos"]["Row"]
-            }
+            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: string[]
           }
           function_returning_row: {
@@ -1707,23 +1698,31 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               name: string
             }[]
           }
-          polymorphic_function:
-            | {
-                Args: {
-                  "": boolean
-                }
-                Returns: undefined
-              }
-            | {
-                Args: {
-                  "": string
-                }
-                Returns: undefined
-              }
+          get_todos_setof_rows: {
+            Args:
+              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
+              | { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }[]
+          }
+          get_user_audit_setof_single_row: {
+            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Returns: {
+              created_at: string | null
+              id: number
+              previous_value: Json | null
+              user_id: number | null
+            }[]
+          }
+          polymorphic_function: {
+            Args: { "": string } | { "": boolean }
+            Returns: undefined
+          }
           postgres_fdw_disconnect: {
-            Args: {
-              "": string
-            }
+            Args: { "": string }
             Returns: boolean
           }
           postgres_fdw_disconnect_all: {
@@ -1872,7 +1871,8 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
       },
     } as const
     "
-  `)
+  `
+  )
 })
 
 test('typegen: go', async () => {
