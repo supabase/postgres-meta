@@ -148,6 +148,7 @@ const postgresFunctionSchema = Type.Object({
       name: Type.String(),
       type_id: Type.Number(),
       has_default: Type.Boolean(),
+      table_name: Type.Union([Type.String(), Type.Null()]),
     })
   ),
   argument_types: Type.String(),

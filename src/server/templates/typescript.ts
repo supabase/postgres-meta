@@ -343,7 +343,26 @@ export type Database = {
                         }
 
                         return 'unknown'
-                      })()}${fns[0].is_set_returning_function ? '[]' : ''}
+                      })()}${fns[0].is_set_returning_function && fns[0].returns_multiple_rows ? '[]' : ''}
+                      ${
+                        // if the function return a set of a table and some definition take in parameter another table
+                        fns[0].returns_set_of_table &&
+                        fns.some((fnd) => fnd.args.length === 1 && fnd.args[0].table_name)
+                          ? `SetofOptions: {
+                        from: ${fns
+                          // if the function take a row as first parameter
+                          .filter((fnd) => fnd.args.length === 1 && fnd.args[0].table_name)
+                          .map((fnd) => {
+                            const arg_type = types.find((t) => t.id === fnd.args[0].type_id)
+                            return JSON.stringify(arg_type?.format)
+                          })
+                          .join(' | ')}
+                        to: ${JSON.stringify(fns[0].return_table_name)}
+                        isOneToOne: ${fns[0].returns_multiple_rows ? false : true}
+                      }
+                      `
+                          : ''
+                      }
                     }`
               )
             })()}
