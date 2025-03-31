@@ -277,88 +277,74 @@ export type Database = {
 
               return Object.entries(schemaFunctionsGroupedByName).map(
                 ([fnName, fns]) =>
-                  `${JSON.stringify(fnName)}: ${fns
-                    .map(
-                      ({
-                        args,
-                        return_type_id,
-                        return_type_relation_id,
-                        is_set_returning_function,
-                      }) => `{
-                  Args: ${(() => {
-                    const inArgs = args.filter(({ mode }) => mode === 'in')
+                  `${JSON.stringify(fnName)}: {
+                      Args: ${fns
+                        .map(({ args }) => {
+                          const inArgs = args.filter(({ mode }) => mode === 'in')
 
-                    if (inArgs.length === 0) {
-                      return 'Record<PropertyKey, never>'
-                    }
+                          if (inArgs.length === 0) {
+                            return 'Record<PropertyKey, never>'
+                          }
 
-                    const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
-                      const type = types.find(({ id }) => id === type_id)
-                      let tsType = 'unknown'
-                      if (type) {
-                        tsType = pgTypeToTsType(type.name, { types, schemas, tables, views })
-                      }
-                      return { name, type: tsType, has_default }
-                    })
+                          const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
+                            const type = types.find(({ id }) => id === type_id)
+                            let tsType = 'unknown'
+                            if (type) {
+                              tsType = pgTypeToTsType(type.name, { types, schemas, tables, views })
+                            }
+                            return { name, type: tsType, has_default }
+                          })
+                          return `{ ${argsNameAndType.map(({ name, type, has_default }) => `${JSON.stringify(name)}${has_default ? '?' : ''}: ${type}`)} }`
+                        })
+                        // A function can have multiples definitions with differents args, but will always return the same type
+                        .join(' | ')}
+                      Returns: ${(() => {
+                        // Case 1: `returns table`.
+                        const tableArgs = fns[0].args.filter(({ mode }) => mode === 'table')
+                        if (tableArgs.length > 0) {
+                          const argsNameAndType = tableArgs.map(({ name, type_id }) => {
+                            const type = types.find(({ id }) => id === type_id)
+                            let tsType = 'unknown'
+                            if (type) {
+                              tsType = pgTypeToTsType(type.name, { types, schemas, tables, views })
+                            }
+                            return { name, type: tsType }
+                          })
 
-                    return `{
-                      ${argsNameAndType.map(
-                        ({ name, type, has_default }) =>
-                          `${JSON.stringify(name)}${has_default ? '?' : ''}: ${type}`
-                      )}
-                    }`
-                  })()}
-                  Returns: (${(() => {
-                    // Case 1: `returns table`.
-                    const tableArgs = args.filter(({ mode }) => mode === 'table')
-                    if (tableArgs.length > 0) {
-                      const argsNameAndType = tableArgs.map(({ name, type_id }) => {
-                        const type = types.find(({ id }) => id === type_id)
-                        let tsType = 'unknown'
-                        if (type) {
-                          tsType = pgTypeToTsType(type.name, { types, schemas, tables, views })
+                          return `{
+                            ${argsNameAndType.map(
+                              ({ name, type }) => `${JSON.stringify(name)}: ${type}`
+                            )}
+                          }`
                         }
-                        return { name, type: tsType }
-                      })
 
-                      return `{
-                        ${argsNameAndType.map(
-                          ({ name, type }) => `${JSON.stringify(name)}: ${type}`
-                        )}
-                      }`
-                    }
+                        // Case 2: returns a relation's row type.
+                        const relation = [...tables, ...views].find(
+                          ({ id }) => id === fns[0].return_type_relation_id
+                        )
+                        if (relation) {
+                          return `{
+                            ${columnsByTableId[relation.id].map(
+                              (column) =>
+                                `${JSON.stringify(column.name)}: ${pgTypeToTsType(column.format, {
+                                  types,
+                                  schemas,
+                                  tables,
+                                  views,
+                                })} ${column.is_nullable ? '| null' : ''}`
+                            )}
+                          }`
+                        }
 
-                    // Case 2: returns a relation's row type.
-                    const relation = [...tables, ...views].find(
-                      ({ id }) => id === return_type_relation_id
-                    )
-                    if (relation) {
-                      return `{
-                        ${columnsByTableId[relation.id].map(
-                          (column) =>
-                            `${JSON.stringify(column.name)}: ${pgTypeToTsType(column.format, {
-                              types,
-                              schemas,
-                              tables,
-                              views,
-                            })} ${column.is_nullable ? '| null' : ''}`
-                        )}
-                      }`
-                    }
+                        // Case 3: returns base/array/composite/enum type.
+                        const type = types.find(({ id }) => id === fns[0].return_type_id)
+                        if (type) {
+                          return pgTypeToTsType(type.name, { types, schemas, tables, views })
+                        }
 
-                    // Case 3: returns base/array/composite/enum type.
-                    const type = types.find(({ id }) => id === return_type_id)
-                    if (type) {
-                      return pgTypeToTsType(type.name, { types, schemas, tables, views })
-                    }
-
-                    return 'unknown'
-                  })()})${is_set_returning_function ? '[]' : ''}
-                }`
-                    )
-                    // We only sorted by name on schemaFunctions - here we sort by arg names, arg types, and return type.
-                    .sort()
-                    .join('|')}`
+                        return 'unknown'
+                      })()}${fns[0].is_set_returning_function ? '[]' : ''}
+                    }`
               )
             })()}
           }
