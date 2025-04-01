@@ -27,6 +27,14 @@ export const apply = async ({
   const columnsByTableId = Object.fromEntries<PostgresColumn[]>(
     [...tables, ...foreignTables, ...views, ...materializedViews].map((t) => [t.id, []])
   )
+  // group types by id for quicker lookup
+  const typesById = types.reduce(
+    (acc, type) => {
+      acc[type.id] = type
+      return acc
+    },
+    {} as Record<string, (typeof types)[number]>
+  )
   columns
     .filter((c) => c.table_id in columnsByTableId)
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
@@ -45,6 +53,7 @@ export type Database = {
       const schemaViews = [...views, ...materializedViews]
         .filter((view) => view.schema === schema.name)
         .sort(({ name: a }, { name: b }) => a.localeCompare(b))
+
       const schemaFunctions = functions
         .filter((func) => {
           if (func.schema !== schema.name) {
@@ -94,7 +103,7 @@ export type Database = {
                       ...schemaFunctions
                         .filter((fn) => fn.argument_types === table.name)
                         .map((fn) => {
-                          const type = types.find(({ id }) => id === fn.return_type_id)
+                          const type = typesById[fn.return_type_id]
                           let tsType = 'unknown'
                           if (type) {
                             tsType = pgTypeToTsType(type.name, { types, schemas, tables, views })
@@ -285,9 +294,8 @@ export type Database = {
                           if (inArgs.length === 0) {
                             return 'Record<PropertyKey, never>'
                           }
-
                           const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
-                            const type = types.find(({ id }) => id === type_id)
+                            const type = typesById[type_id]
                             let tsType = 'unknown'
                             if (type) {
                               tsType = pgTypeToTsType(type.name, { types, schemas, tables, views })
@@ -351,10 +359,15 @@ export type Database = {
                           ? `SetofOptions: {
                         from: ${fns
                           // if the function take a row as first parameter
-                          .filter((fnd) => fnd.args.length === 1 && fnd.args[0].table_name)
+                          .filter(
+                            (fnd) =>
+                              fnd.args.length === 1 &&
+                              fnd.args[0].table_name &&
+                              typesById[fnd.args[0].type_id]
+                          )
                           .map((fnd) => {
-                            const arg_type = types.find((t) => t.id === fnd.args[0].type_id)
-                            return JSON.stringify(arg_type?.format)
+                            const tableType = typesById[fnd.args[0].type_id]
+                            return JSON.stringify(tableType.format)
                           })
                           .join(' | ')}
                         to: ${JSON.stringify(fns[0].return_table_name)}

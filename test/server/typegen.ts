@@ -150,6 +150,12 @@ test('typegen: typescript', async () => {
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
@@ -192,6 +198,12 @@ test('typegen: typescript', async () => {
                 columns: ["user_id"]
                 referencedRelation: "a_view"
                 referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "user_details_user_id_fkey"
+                columns: ["user_id"]
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
               },
               {
                 foreignKeyName: "user_details_user_id_fkey"
@@ -288,6 +300,12 @@ test('typegen: typescript', async () => {
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
@@ -337,6 +355,12 @@ test('typegen: typescript', async () => {
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
@@ -359,6 +383,16 @@ test('typegen: typescript', async () => {
                 referencedColumns: ["second_id"]
               },
             ]
+          }
+          user_todos_summary_view: {
+            Row: {
+              todo_count: number | null
+              todo_details: string[] | null
+              user_id: number | null
+              user_name: string | null
+              user_status: Database["public"]["Enums"]["user_status"] | null
+            }
+            Relationships: []
           }
           users_view: {
             Row: {
@@ -435,6 +469,40 @@ test('typegen: typescript', async () => {
           get_composite_type_data: {
             Args: Record<PropertyKey, never>
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"][]
+          }
+          get_single_user_summary_from_view: {
+            Args:
+              | { search_user_id: number }
+              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
+              | { userview_row: Database["public"]["Views"]["users_view"]["Row"] }
+            Returns: {
+              todo_count: number | null
+              todo_details: string[] | null
+              user_id: number | null
+              user_name: string | null
+              user_status: Database["public"]["Enums"]["user_status"] | null
+            }
+            SetofOptions: {
+              from: "users" | "users_view"
+              to: "user_todos_summary_view"
+              isOneToOne: true
+            }
+          }
+          get_todos_from_user: {
+            Args:
+              | { search_user_id: number }
+              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
+              | { userview_row: Database["public"]["Views"]["users_view"]["Row"] }
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }[]
+            SetofOptions: {
+              from: "users" | "users_view"
+              to: "todos"
+              isOneToOne: false
+            }
           }
           get_todos_setof_rows: {
             Args:
@@ -787,6 +855,13 @@ test('typegen w/ one-to-one relationships', async () => {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
@@ -833,6 +908,13 @@ test('typegen w/ one-to-one relationships', async () => {
                 isOneToOne: true
                 referencedRelation: "a_view"
                 referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "user_details_user_id_fkey"
+                columns: ["user_id"]
+                isOneToOne: true
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
               },
               {
                 foreignKeyName: "user_details_user_id_fkey"
@@ -935,6 +1017,13 @@ test('typegen w/ one-to-one relationships', async () => {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
@@ -989,6 +1078,13 @@ test('typegen w/ one-to-one relationships', async () => {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
@@ -1014,6 +1110,16 @@ test('typegen w/ one-to-one relationships', async () => {
                 referencedColumns: ["second_id"]
               },
             ]
+          }
+          user_todos_summary_view: {
+            Row: {
+              todo_count: number | null
+              todo_details: string[] | null
+              user_id: number | null
+              user_name: string | null
+              user_status: Database["public"]["Enums"]["user_status"] | null
+            }
+            Relationships: []
           }
           users_view: {
             Row: {
@@ -1090,6 +1196,40 @@ test('typegen w/ one-to-one relationships', async () => {
           get_composite_type_data: {
             Args: Record<PropertyKey, never>
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"][]
+          }
+          get_single_user_summary_from_view: {
+            Args:
+              | { search_user_id: number }
+              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
+              | { userview_row: Database["public"]["Views"]["users_view"]["Row"] }
+            Returns: {
+              todo_count: number | null
+              todo_details: string[] | null
+              user_id: number | null
+              user_name: string | null
+              user_status: Database["public"]["Enums"]["user_status"] | null
+            }
+            SetofOptions: {
+              from: "users" | "users_view"
+              to: "user_todos_summary_view"
+              isOneToOne: true
+            }
+          }
+          get_todos_from_user: {
+            Args:
+              | { search_user_id: number }
+              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
+              | { userview_row: Database["public"]["Views"]["users_view"]["Row"] }
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }[]
+            SetofOptions: {
+              from: "users" | "users_view"
+              to: "todos"
+              isOneToOne: false
+            }
           }
           get_todos_setof_rows: {
             Args:
@@ -1442,6 +1582,13 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
@@ -1488,6 +1635,13 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 isOneToOne: true
                 referencedRelation: "a_view"
                 referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "user_details_user_id_fkey"
+                columns: ["user_id"]
+                isOneToOne: true
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
               },
               {
                 foreignKeyName: "user_details_user_id_fkey"
@@ -1590,6 +1744,13 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
@@ -1644,6 +1805,13 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
@@ -1669,6 +1837,16 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 referencedColumns: ["second_id"]
               },
             ]
+          }
+          user_todos_summary_view: {
+            Row: {
+              todo_count: number | null
+              todo_details: string[] | null
+              user_id: number | null
+              user_name: string | null
+              user_status: Database["public"]["Enums"]["user_status"] | null
+            }
+            Relationships: []
           }
           users_view: {
             Row: {
@@ -1745,6 +1923,40 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           get_composite_type_data: {
             Args: Record<PropertyKey, never>
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"][]
+          }
+          get_single_user_summary_from_view: {
+            Args:
+              | { search_user_id: number }
+              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
+              | { userview_row: Database["public"]["Views"]["users_view"]["Row"] }
+            Returns: {
+              todo_count: number | null
+              todo_details: string[] | null
+              user_id: number | null
+              user_name: string | null
+              user_status: Database["public"]["Enums"]["user_status"] | null
+            }
+            SetofOptions: {
+              from: "users" | "users_view"
+              to: "user_todos_summary_view"
+              isOneToOne: true
+            }
+          }
+          get_todos_from_user: {
+            Args:
+              | { search_user_id: number }
+              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
+              | { userview_row: Database["public"]["Views"]["users_view"]["Row"] }
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }[]
+            SetofOptions: {
+              from: "users" | "users_view"
+              to: "todos"
+              isOneToOne: false
+            }
           }
           get_todos_setof_rows: {
             Args:
@@ -2102,6 +2314,10 @@ test('typegen: go', async () => {
       Status    *string     \`json:"status"\`
     }
 
+    type PublicAViewSelect struct {
+      Id *int64 \`json:"id"\`
+    }
+
     type PublicTodosViewSelect struct {
       Details *string \`json:"details"\`
       Id      *int64  \`json:"id"\`
@@ -2114,8 +2330,12 @@ test('typegen: go', async () => {
       Status *string \`json:"status"\`
     }
 
-    type PublicAViewSelect struct {
-      Id *int64 \`json:"id"\`
+    type PublicUserTodosSummaryViewSelect struct {
+      TodoCount   *int64     \`json:"todo_count"\`
+      TodoDetails []*string  \`json:"todo_details"\`
+      UserId      *int64     \`json:"user_id"\`
+      UserName    *string    \`json:"user_name"\`
+      UserStatus  *string    \`json:"user_status"\`
     }
 
     type PublicUsersViewWithMultipleRefsToUsersSelect struct {
@@ -2460,6 +2680,20 @@ test('typegen: swift', async () => {
           case details = "details"
           case id = "id"
           case userId = "user-id"
+        }
+      }
+      internal struct UserTodosSummaryViewSelect: Codable, Hashable, Sendable {
+        internal let todoCount: Int64?
+        internal let todoDetails: [String]?
+        internal let userId: Int64?
+        internal let userName: String?
+        internal let userStatus: UserStatus?
+        internal enum CodingKeys: String, CodingKey {
+          case todoCount = "todo_count"
+          case todoDetails = "todo_details"
+          case userId = "user_id"
+          case userName = "user_name"
+          case userStatus = "user_status"
         }
       }
       internal struct UsersViewSelect: Codable, Hashable, Sendable {
@@ -2823,6 +3057,20 @@ test('typegen: swift w/ public access control', async () => {
           case details = "details"
           case id = "id"
           case userId = "user-id"
+        }
+      }
+      public struct UserTodosSummaryViewSelect: Codable, Hashable, Sendable {
+        public let todoCount: Int64?
+        public let todoDetails: [String]?
+        public let userId: Int64?
+        public let userName: String?
+        public let userStatus: UserStatus?
+        public enum CodingKeys: String, CodingKey {
+          case todoCount = "todo_count"
+          case todoDetails = "todo_details"
+          case userId = "user_id"
+          case userName = "user_name"
+          case userStatus = "user_status"
         }
       }
       public struct UsersViewSelect: Codable, Hashable, Sendable {
