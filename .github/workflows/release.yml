@@ -13,6 +13,8 @@ jobs:
     outputs:
       new-release-published: ${{ steps.semantic-release.outputs.new_release_published }}
       new-release-version: ${{ steps.semantic-release.outputs.new_release_version }}
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
