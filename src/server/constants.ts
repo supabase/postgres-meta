@@ -49,8 +49,10 @@ export const GENERATE_TYPES_SWIFT_ACCESS_CONTROL = process.env
   ? (process.env.PG_META_GENERATE_TYPES_SWIFT_ACCESS_CONTROL as AccessControl)
   : 'internal'
 
-export const PG_META_MAX_RESULT_SIZE = process.env.PG_META_MAX_RESULT_SIZE
-  ? parseInt(process.env.PG_META_MAX_RESULT_SIZE, 10)
+export const PG_META_MAX_RESULT_SIZE = process.env.PG_META_MAX_RESULT_SIZE_MB
+  ? // Node-postgres get a maximum size in bytes make the conversion from the env variable
+    // from MB to Bytes
+    parseInt(process.env.PG_META_MAX_RESULT_SIZE_MB, 10) * 1024 * 1024
   : 2 * 1024 * 1024 * 1024 // default to 2GB max query size result
 
 export const DEFAULT_POOL_CONFIG: PoolConfig = {
