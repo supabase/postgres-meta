@@ -80,7 +80,7 @@ test('list set-returning function with single object limit', async () => {
           "definition": "
         SELECT * FROM public.users_audit WHERE user_id = user_row.id;
       ",
-          "id": 16498,
+          "id": 16502,
           "identity_argument_types": "user_row users",
           "is_set_returning_function": true,
           "language": "sql",
@@ -126,7 +126,7 @@ test('list set-returning function with multiples definitions', async () => {
         "definition": "
       SELECT * FROM public.todos WHERE "user-id" = user_row.id;
     ",
-        "id": 16499,
+        "id": 16503,
         "identity_argument_types": "user_row users",
         "is_set_returning_function": true,
         "language": "sql",
@@ -164,7 +164,7 @@ test('list set-returning function with multiples definitions', async () => {
         "definition": "
       SELECT * FROM public.todos WHERE "user-id" = todo_row."user-id";
     ",
-        "id": 16500,
+        "id": 16504,
         "identity_argument_types": "todo_row todos",
         "is_set_returning_function": true,
         "language": "sql",
