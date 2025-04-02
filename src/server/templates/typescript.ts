@@ -354,21 +354,21 @@ export type Database = {
                       })()}${fns[0].is_set_returning_function && fns[0].returns_multiple_rows ? '[]' : ''}
                       ${
                         // if the function return a set of a table and some definition take in parameter another table
-                        fns[0].returns_set_of_table &&
-                        fns.some((fnd) => fnd.args.length === 1 && fnd.args[0].table_name)
+                        fns[0].returns_set_of_table
                           ? `SetofOptions: {
                         from: ${fns
-                          // if the function take a row as first parameter
-                          .filter(
-                            (fnd) =>
-                              fnd.args.length === 1 &&
-                              fnd.args[0].table_name &&
-                              typesById[fnd.args[0].type_id]
-                          )
                           .map((fnd) => {
-                            const tableType = typesById[fnd.args[0].type_id]
-                            return JSON.stringify(tableType.format)
+                            if (fnd.args.length > 0 && fnd.args[0].table_name) {
+                              const tableType = typesById[fnd.args[0].type_id]
+                              return JSON.stringify(tableType.format)
+                            } else {
+                              // If the function can be called with scalars or without any arguments, then add a * matching everything
+                              return '"*"'
+                            }
                           })
+                          // Dedup before join
+                          .filter((value, index, self) => self.indexOf(value) === index)
+                          .toSorted()
                           .join(' | ')}
                         to: ${JSON.stringify(fns[0].return_table_name)}
                         isOneToOne: ${fns[0].returns_multiple_rows ? false : true}
