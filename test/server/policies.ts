@@ -15,7 +15,7 @@ test('policy list filtering', async () => {
 test('policy list with specific included schema', async () => {
   const res = await app.inject({
     method: 'GET',
-    path: '/policies?includedSchemas=public',
+    path: '/policies?included_schema=public',
   })
   expect(res.statusCode).toBe(200)
   const policies = res.json()
@@ -48,8 +48,7 @@ test('create policy with missing required field', async () => {
       command: 'PERMISSIVE',
     },
   })
-  // The API returns 500 instead of 400 for invalid parameters
-  expect(res.statusCode).toBe(500)
+  expect(res.statusCode).toBe(400)
 })
 
 test('update policy with invalid id', async () => {

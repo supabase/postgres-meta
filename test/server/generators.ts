@@ -8,7 +8,7 @@ test('typescript generator route', async () => {
   })
   expect(res.statusCode).toBe(200)
   expect(res.headers['content-type']).toContain('text/plain')
-  expect(res.body).toBeTruthy()
+  expect(res.body).contain('public')
 })
 
 test('go generator route', async () => {
@@ -34,22 +34,18 @@ test('swift generator route', async () => {
 test('generator routes with includedSchemas parameter', async () => {
   const res = await app.inject({
     method: 'GET',
-    path: '/generators/typescript?includedSchemas=public',
+    path: '/generators/typescript?included_schemas=private',
   })
   expect(res.statusCode).toBe(200)
   expect(res.headers['content-type']).toContain('text/plain')
-  expect(res.body).toBeTruthy()
+  // the only schema is excluded database should be empty
+  expect(res.body).toContain('Database = {}')
 })
 
-// Skip this test as the OpenAPI endpoint is not implemented
-test.skip('openapi generator route', async () => {
+test('invalid generator route', async () => {
   const res = await app.inject({
     method: 'GET',
     path: '/generators/openapi',
   })
-  expect(res.statusCode).toBe(200)
-  expect(res.headers['content-type']).toContain('application/json')
-  const body = JSON.parse(res.body)
-  expect(body.openapi).toBeTruthy()
-  expect(body.paths).toBeTruthy()
+  expect(res.statusCode).toBe(404)
 })

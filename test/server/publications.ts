@@ -34,6 +34,7 @@ test('create publication with invalid options', async () => {
     },
   })
   // API accepts invalid type and converts it
+  // TODO: This should error out with invalid parameter
   expect(res.statusCode).toBe(200)
 })
 
