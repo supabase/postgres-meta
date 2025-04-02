@@ -458,6 +458,11 @@ test('typegen: typescript', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }[]
+            SetofOptions: {
+              from: "*"
+              to: "users"
+              isOneToOne: false
+            }
           }
           function_returning_table: {
             Args: Record<PropertyKey, never>
@@ -483,7 +488,7 @@ test('typegen: typescript', async () => {
               user_status: Database["public"]["Enums"]["user_status"] | null
             }
             SetofOptions: {
-              from: "users" | "users_view"
+              from: "*" | "users" | "users_view"
               to: "user_todos_summary_view"
               isOneToOne: true
             }
@@ -499,7 +504,7 @@ test('typegen: typescript', async () => {
               "user-id": number
             }[]
             SetofOptions: {
-              from: "users" | "users_view"
+              from: "*" | "users" | "users_view"
               to: "todos"
               isOneToOne: false
             }
@@ -514,7 +519,7 @@ test('typegen: typescript', async () => {
               "user-id": number
             }[]
             SetofOptions: {
-              from: "users" | "todos"
+              from: "todos" | "users"
               to: "todos"
               isOneToOne: false
             }
@@ -1185,6 +1190,11 @@ test('typegen w/ one-to-one relationships', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }[]
+            SetofOptions: {
+              from: "*"
+              to: "users"
+              isOneToOne: false
+            }
           }
           function_returning_table: {
             Args: Record<PropertyKey, never>
@@ -1210,7 +1220,7 @@ test('typegen w/ one-to-one relationships', async () => {
               user_status: Database["public"]["Enums"]["user_status"] | null
             }
             SetofOptions: {
-              from: "users" | "users_view"
+              from: "*" | "users" | "users_view"
               to: "user_todos_summary_view"
               isOneToOne: true
             }
@@ -1226,7 +1236,7 @@ test('typegen w/ one-to-one relationships', async () => {
               "user-id": number
             }[]
             SetofOptions: {
-              from: "users" | "users_view"
+              from: "*" | "users" | "users_view"
               to: "todos"
               isOneToOne: false
             }
@@ -1241,7 +1251,7 @@ test('typegen w/ one-to-one relationships', async () => {
               "user-id": number
             }[]
             SetofOptions: {
-              from: "users" | "todos"
+              from: "todos" | "users"
               to: "todos"
               isOneToOne: false
             }
@@ -1912,6 +1922,11 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }[]
+            SetofOptions: {
+              from: "*"
+              to: "users"
+              isOneToOne: false
+            }
           }
           function_returning_table: {
             Args: Record<PropertyKey, never>
@@ -1937,7 +1952,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               user_status: Database["public"]["Enums"]["user_status"] | null
             }
             SetofOptions: {
-              from: "users" | "users_view"
+              from: "*" | "users" | "users_view"
               to: "user_todos_summary_view"
               isOneToOne: true
             }
@@ -1953,7 +1968,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               "user-id": number
             }[]
             SetofOptions: {
-              from: "users" | "users_view"
+              from: "*" | "users" | "users_view"
               to: "todos"
               isOneToOne: false
             }
@@ -1968,7 +1983,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               "user-id": number
             }[]
             SetofOptions: {
-              from: "users" | "todos"
+              from: "todos" | "users"
               to: "todos"
               isOneToOne: false
             }
