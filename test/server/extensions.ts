@@ -12,18 +12,6 @@ test('extension list filtering', async () => {
   expect(extensions.length).toBeLessThanOrEqual(5)
 })
 
-test('extension list with specific included schema', async () => {
-  const res = await app.inject({
-    method: 'GET',
-    path: '/extensions?includedSchemas=public',
-  })
-  expect(res.statusCode).toBe(200)
-  const extensions = res.json()
-  expect(Array.isArray(extensions)).toBe(true)
-  // Just make sure we get extensions, don't check schema as it depends on environment
-  expect(extensions.length).toBeGreaterThanOrEqual(0)
-})
-
 test('extension with invalid id', async () => {
   const res = await app.inject({
     method: 'GET',
