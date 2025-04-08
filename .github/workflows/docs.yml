@@ -6,6 +6,9 @@ on:
       - master
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pages: write
 
 # Cancel old builds on new commit for same workflow + branch/PR
 concurrency:
