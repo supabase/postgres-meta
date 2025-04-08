@@ -198,9 +198,13 @@ ${' '.repeat(5 + lineNumber.toString().length + 2 + lineOffset)}^
           }
           return { data: null, error: { code: error.code, message: error.message } }
         } finally {
-          // If the error isn't a "DatabaseError" assume it's a connection related we kill the connection
-          // To attempt a clean reconnect on next try
-          await this.end()
+          try {
+            // If the error isn't a "DatabaseError" assume it's a connection related we kill the connection
+            // To attempt a clean reconnect on next try
+            await this.end.bind(this)
+          } catch (error) {
+            console.error('Failed to end the connection on error: ', { this: this, end: this.end })
+          }
         }
       }
     },
