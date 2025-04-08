@@ -99,114 +99,113 @@ export const init: (config: PoolConfig) => {
   return {
     async query(sql) {
       try {
-        try {
-          if (!pool) {
-            const pool = new pg.Pool(config)
-            let res = await poolerQueryHandleError(pool, sql)
-            if (Array.isArray(res)) {
-              res = res.reverse().find((x) => x.rows.length !== 0) ?? { rows: [] }
-            }
-            await pool.end()
-            return { data: res.rows, error: null }
-          }
-
+        if (!pool) {
+          const pool = new pg.Pool(config)
           let res = await poolerQueryHandleError(pool, sql)
           if (Array.isArray(res)) {
             res = res.reverse().find((x) => x.rows.length !== 0) ?? { rows: [] }
           }
+          await pool.end()
           return { data: res.rows, error: null }
-        } catch (error: any) {
-          if (error.constructor.name === 'DatabaseError') {
-            // Roughly based on:
-            // - https://github.com/postgres/postgres/blob/fc4089f3c65a5f1b413a3299ba02b66a8e5e37d0/src/interfaces/libpq/fe-protocol3.c#L1018
-            // - https://github.com/brianc/node-postgres/blob/b1a8947738ce0af004cb926f79829bb2abc64aa6/packages/pg/lib/native/query.js#L33
-            let formattedError = ''
-            {
-              if (error.severity) {
-                formattedError += `${error.severity}:  `
-              }
-              if (error.code) {
-                formattedError += `${error.code}: `
-              }
-              if (error.message) {
-                formattedError += error.message
-              }
-              formattedError += '\n'
-              if (error.position) {
-                // error.position is 1-based
-                const position = Number(error.position) - 1
+        }
 
-                let line = ''
-                let lineNumber = 0
-                let lineOffset = 0
+        let res = await poolerQueryHandleError(pool, sql)
+        if (Array.isArray(res)) {
+          res = res.reverse().find((x) => x.rows.length !== 0) ?? { rows: [] }
+        }
+        return { data: res.rows, error: null }
+      } catch (error: any) {
+        if (error.constructor.name === 'DatabaseError') {
+          // Roughly based on:
+          // - https://github.com/postgres/postgres/blob/fc4089f3c65a5f1b413a3299ba02b66a8e5e37d0/src/interfaces/libpq/fe-protocol3.c#L1018
+          // - https://github.com/brianc/node-postgres/blob/b1a8947738ce0af004cb926f79829bb2abc64aa6/packages/pg/lib/native/query.js#L33
+          let formattedError = ''
+          {
+            if (error.severity) {
+              formattedError += `${error.severity}:  `
+            }
+            if (error.code) {
+              formattedError += `${error.code}: `
+            }
+            if (error.message) {
+              formattedError += error.message
+            }
+            formattedError += '\n'
+            if (error.position) {
+              // error.position is 1-based
+              const position = Number(error.position) - 1
 
-                const lines = sql.split('\n')
-                let currentOffset = 0
-                for (let i = 0; i < lines.length; i++) {
-                  if (currentOffset + lines[i].length > position) {
-                    line = lines[i]
-                    lineNumber = i + 1 // 1-based
-                    lineOffset = position - currentOffset
-                    break
-                  }
-                  currentOffset += lines[i].length + 1 // 1 extra offset for newline
+              let line = ''
+              let lineNumber = 0
+              let lineOffset = 0
+
+              const lines = sql.split('\n')
+              let currentOffset = 0
+              for (let i = 0; i < lines.length; i++) {
+                if (currentOffset + lines[i].length > position) {
+                  line = lines[i]
+                  lineNumber = i + 1 // 1-based
+                  lineOffset = position - currentOffset
+                  break
                 }
-                formattedError += `LINE ${lineNumber}: ${line}
+                currentOffset += lines[i].length + 1 // 1 extra offset for newline
+              }
+              formattedError += `LINE ${lineNumber}: ${line}
 ${' '.repeat(5 + lineNumber.toString().length + 2 + lineOffset)}^
 `
-              }
-              if (error.detail) {
-                formattedError += `DETAIL:  ${error.detail}
-`
-              }
-              if (error.hint) {
-                formattedError += `HINT:  ${error.hint}
-`
-              }
-              if (error.internalQuery) {
-                formattedError += `QUERY:  ${error.internalQuery}
-`
-              }
-              if (error.where) {
-                formattedError += `CONTEXT:  ${error.where}
-`
-              }
             }
+            if (error.detail) {
+              formattedError += `DETAIL:  ${error.detail}
+`
+            }
+            if (error.hint) {
+              formattedError += `HINT:  ${error.hint}
+`
+            }
+            if (error.internalQuery) {
+              formattedError += `QUERY:  ${error.internalQuery}
+`
+            }
+            if (error.where) {
+              formattedError += `CONTEXT:  ${error.where}
+`
+            }
+          }
 
+          return {
+            data: null,
+            error: {
+              ...error,
+              // error.message is non-enumerable
+              message: error.message,
+              formattedError,
+            },
+          }
+        }
+        try {
+          // Handle stream errors and result size exceeded errors
+          if (error.code === 'RESULT_SIZE_EXCEEDED') {
+            // Force kill the connection without waiting for graceful shutdown
             return {
               data: null,
               error: {
-                ...error,
-                // error.message is non-enumerable
-                message: error.message,
-                formattedError,
+                message: `Query result size (${error.resultSize} bytes) exceeded the configured limit (${error.maxResultSize} bytes)`,
+                code: error.code,
+                resultSize: error.resultSize,
+                maxResultSize: error.maxResultSize,
               },
             }
           }
+          return { data: null, error: { code: error.code, message: error.message } }
+        } finally {
           try {
-            // Handle stream errors and result size exceeded errors
-            if (error.code === 'RESULT_SIZE_EXCEEDED') {
-              // Force kill the connection without waiting for graceful shutdown
-              return {
-                data: null,
-                error: {
-                  message: `Query result size (${error.resultSize} bytes) exceeded the configured limit (${error.maxResultSize} bytes)`,
-                  code: error.code,
-                  resultSize: error.resultSize,
-                  maxResultSize: error.maxResultSize,
-                },
-              }
-            }
-            return { data: null, error: { code: error.code, message: error.message } }
-          } finally {
             // If the error isn't a "DatabaseError" assume it's a connection related we kill the connection
             // To attempt a clean reconnect on next try
             await this.end.bind(this)
+          } catch (error) {
+            console.error('Failed to end the connection on error: ', { this: this, end: this.end })
           }
         }
-      } catch (error) {
-        // In case the connection cannot be gracefully ended log the error
-        console.error('Failed to end the connection on error: ', { this: this, end: this.end })
       }
     },
 
