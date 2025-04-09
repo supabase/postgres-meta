@@ -434,8 +434,8 @@ test('typegen: typescript', async () => {
           }
           get_todos_setof_rows: {
             Args:
-              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
               | { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
+              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
               details: string | null
               id: number
@@ -452,7 +452,7 @@ test('typegen: typescript', async () => {
             }[]
           }
           polymorphic_function: {
-            Args: { "": string } | { "": boolean }
+            Args: { "": boolean } | { "": string }
             Returns: undefined
           }
           postgres_fdw_disconnect: {
@@ -1067,8 +1067,8 @@ test('typegen w/ one-to-one relationships', async () => {
           }
           get_todos_setof_rows: {
             Args:
-              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
               | { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
+              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
               details: string | null
               id: number
@@ -1085,7 +1085,7 @@ test('typegen w/ one-to-one relationships', async () => {
             }[]
           }
           polymorphic_function: {
-            Args: { "": string } | { "": boolean }
+            Args: { "": boolean } | { "": string }
             Returns: undefined
           }
           postgres_fdw_disconnect: {
@@ -1700,8 +1700,8 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
           get_todos_setof_rows: {
             Args:
-              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
               | { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
+              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
               details: string | null
               id: number
@@ -1718,7 +1718,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             }[]
           }
           polymorphic_function: {
-            Args: { "": string } | { "": boolean }
+            Args: { "": boolean } | { "": string }
             Returns: undefined
           }
           postgres_fdw_disconnect: {
