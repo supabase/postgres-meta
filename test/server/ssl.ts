@@ -72,3 +72,55 @@ test('query with ssl with root cert', async () => {
 
   DEFAULT_POOL_CONFIG.ssl = defaultSsl
 })
+
+test('query with invalid space empty encrypted connection string', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    headers: {
+      'x-connection-encrypted': CryptoJS.AES.encrypt(` `, CRYPTO_KEY).toString(),
+    },
+    payload: { query: 'select 1;' },
+  })
+  expect(res.json()).toMatchInlineSnapshot(`
+    {
+      "error": "Invalid URL",
+    }
+  `)
+})
+
+test('query with invalid empty encrypted connection string', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    headers: {
+      'x-connection-encrypted': CryptoJS.AES.encrypt(``, CRYPTO_KEY).toString(),
+    },
+    payload: { query: 'select 1;' },
+  })
+  expect(res.json()).toMatchInlineSnapshot(`
+    {
+      "error": "SASL: SCRAM-SERVER-FIRST-MESSAGE: client password must be a string",
+      "message": "SASL: SCRAM-SERVER-FIRST-MESSAGE: client password must be a string",
+    }
+  `)
+})
+
+test('query with missing host connection string encrypted connection string', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    headers: {
+      'x-connection-encrypted': CryptoJS.AES.encrypt(
+        `postgres://name:password@:5432/postgres?sslmode=prefer`,
+        CRYPTO_KEY
+      ).toString(),
+    },
+    payload: { query: 'select 1;' },
+  })
+  expect(res.json()).toMatchInlineSnapshot(`
+    {
+      "error": "Invalid URL",
+    }
+  `)
+})
