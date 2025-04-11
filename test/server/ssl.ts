@@ -82,9 +82,10 @@ test('query with invalid space empty encrypted connection string', async () => {
     },
     payload: { query: 'select 1;' },
   })
+  expect(res.statusCode).toBe(500)
   expect(res.json()).toMatchInlineSnapshot(`
     {
-      "error": "Invalid URL",
+      "error": "failed to get upstream connection details",
     }
   `)
 })
@@ -98,10 +99,10 @@ test('query with invalid empty encrypted connection string', async () => {
     },
     payload: { query: 'select 1;' },
   })
+  expect(res.statusCode).toBe(500)
   expect(res.json()).toMatchInlineSnapshot(`
     {
-      "error": "SASL: SCRAM-SERVER-FIRST-MESSAGE: client password must be a string",
-      "message": "SASL: SCRAM-SERVER-FIRST-MESSAGE: client password must be a string",
+      "error": "failed to get upstream connection details",
     }
   `)
 })
@@ -118,9 +119,10 @@ test('query with missing host connection string encrypted connection string', as
     },
     payload: { query: 'select 1;' },
   })
+  expect(res.statusCode).toBe(500)
   expect(res.json()).toMatchInlineSnapshot(`
     {
-      "error": "Invalid URL",
+      "error": "failed to process upstream connection details",
     }
   `)
 })
