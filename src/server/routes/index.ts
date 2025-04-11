@@ -55,7 +55,7 @@ export default async (fastify: FastifyInstance) => {
         request.log.error({ message: 'pg connection string is invalid url' })
         throw new Error('failed to process upstream connection details')
       }
-      done()
+      return done()
     } catch (err) {
       return done(err as Error)
     }
