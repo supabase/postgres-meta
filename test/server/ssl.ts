@@ -72,3 +72,57 @@ test('query with ssl with root cert', async () => {
 
   DEFAULT_POOL_CONFIG.ssl = defaultSsl
 })
+
+test('query with invalid space empty encrypted connection string', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    headers: {
+      'x-connection-encrypted': CryptoJS.AES.encrypt(` `, CRYPTO_KEY).toString(),
+    },
+    payload: { query: 'select 1;' },
+  })
+  expect(res.statusCode).toBe(500)
+  expect(res.json()).toMatchInlineSnapshot(`
+    {
+      "error": "failed to get upstream connection details",
+    }
+  `)
+})
+
+test('query with invalid empty encrypted connection string', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    headers: {
+      'x-connection-encrypted': CryptoJS.AES.encrypt(``, CRYPTO_KEY).toString(),
+    },
+    payload: { query: 'select 1;' },
+  })
+  expect(res.statusCode).toBe(500)
+  expect(res.json()).toMatchInlineSnapshot(`
+    {
+      "error": "failed to get upstream connection details",
+    }
+  `)
+})
+
+test('query with missing host connection string encrypted connection string', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    headers: {
+      'x-connection-encrypted': CryptoJS.AES.encrypt(
+        `postgres://name:password@:5432/postgres?sslmode=prefer`,
+        CRYPTO_KEY
+      ).toString(),
+    },
+    payload: { query: 'select 1;' },
+  })
+  expect(res.statusCode).toBe(500)
+  expect(res.json()).toMatchInlineSnapshot(`
+    {
+      "error": "failed to process upstream connection details",
+    }
+  `)
+})
