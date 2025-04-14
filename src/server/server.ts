@@ -1,4 +1,5 @@
 import closeWithGrace from 'close-with-grace'
+import './sentry.js'
 import { pino } from 'pino'
 import { PostgresMeta } from '../lib/index.js'
 import { build as buildApp } from './app.js'
