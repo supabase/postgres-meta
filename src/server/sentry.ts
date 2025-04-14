@@ -17,21 +17,34 @@ const captureOptions: Sentry.NodeOptions =
         profilesSampleRate: 1.0,
       }
 
+const sensitiveKeys = ['pg', 'x-connection-encrypted']
+
+function redactSensitiveData(data: any) {
+  if (data && typeof data === 'object') {
+    for (const key of sensitiveKeys) {
+      if (key in data) {
+        data[key] = '[REDACTED]'
+      }
+    }
+  }
+}
+
 export default Sentry.init({
   enabled: Boolean(dsn),
   dsn: dsn,
   environment: sentryEnvironment,
   integrations: [nodeProfilingIntegration()],
-  beforeSend: (event) => {
-    if (event.request?.headers?.['Pg']) {
-      event.request.headers['Pg'] = String(event.request.headers['Pg'].length)
+  beforeSendTransaction(transaction) {
+    if (transaction.contexts?.trace?.data) {
+      redactSensitiveData(transaction.contexts.trace.data)
     }
-    if (event.request?.headers && event.request.headers['X-connection-encrypted']) {
-      event.request.headers['X-connection-encrypted'] = String(
-        event.request.headers['X-connection-encrypted'].length
-      )
+    return transaction
+  },
+  beforeSendSpan(span) {
+    if (span.data) {
+      redactSensitiveData(span.data)
     }
-    return event
+    return span
   },
   ...captureOptions,
 })
