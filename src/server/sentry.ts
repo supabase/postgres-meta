@@ -1,4 +1,4 @@
-import Sentry from '@sentry/node'
+import * as Sentry from '@sentry/node'
 import { nodeProfilingIntegration } from '@sentry/profiling-node'
 
 const sentryEnvironment = process.env.ENVIRONMENT ?? 'local'
@@ -13,8 +13,8 @@ const captureOptions: Sentry.NodeOptions =
         profilesSampleRate: 0.0001,
       }
     : {
-        tracesSampleRate: 0.1,
-        profilesSampleRate: 0.1,
+        tracesSampleRate: 1.0,
+        profilesSampleRate: 1.0,
       }
 
 export default Sentry.init({
@@ -22,5 +22,16 @@ export default Sentry.init({
   dsn: dsn,
   environment: sentryEnvironment,
   integrations: [nodeProfilingIntegration()],
+  beforeSend: (event) => {
+    if (event.request?.headers?.['Pg']) {
+      event.request.headers['Pg'] = String(event.request.headers['Pg'].length)
+    }
+    if (event.request?.headers && event.request.headers['X-connection-encrypted']) {
+      event.request.headers['X-connection-encrypted'] = String(
+        event.request.headers['X-connection-encrypted'].length
+      )
+    }
+    return event
+  },
   ...captureOptions,
 })

@@ -1,5 +1,5 @@
 import './sentry.js'
-import Sentry from '@sentry/node'
+import * as Sentry from '@sentry/node'
 import cors from '@fastify/cors'
 import swagger from '@fastify/swagger'
 import { fastify, FastifyInstance, FastifyServerOptions } from 'fastify'
