@@ -160,25 +160,19 @@ export const init: (config: PoolConfig) => {
                       }
                       currentOffset += lines[i].length + 1 // 1 extra offset for newline
                     }
-                    formattedError += `LINE ${lineNumber}: ${line}
-  ${' '.repeat(5 + lineNumber.toString().length + 2 + lineOffset)}^
-  `
+                    formattedError += `LINE ${lineNumber}: ${line}\n${' '.repeat(5 + lineNumber.toString().length + 2 + lineOffset)}^\n`
                   }
                   if (error.detail) {
-                    formattedError += `DETAIL:  ${error.detail}
-  `
+                    formattedError += `DETAIL:  ${error.detail}\n`
                   }
                   if (error.hint) {
-                    formattedError += `HINT:  ${error.hint}
-  `
+                    formattedError += `HINT:  ${error.hint}\n`
                   }
                   if (error.internalQuery) {
-                    formattedError += `QUERY:  ${error.internalQuery}
-  `
+                    formattedError += `QUERY:  ${error.internalQuery}\n`
                   }
                   if (error.where) {
-                    formattedError += `CONTEXT:  ${error.where}
-  `
+                    formattedError += `CONTEXT:  ${error.where}\n`
                   }
                 }
 
