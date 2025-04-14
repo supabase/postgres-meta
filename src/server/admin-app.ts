@@ -1,5 +1,5 @@
 import './sentry.js'
-import Sentry from '@sentry/node'
+import * as Sentry from '@sentry/node'
 import { fastify, FastifyInstance, FastifyServerOptions } from 'fastify'
 import fastifyMetrics from 'fastify-metrics'
 
