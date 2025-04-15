@@ -21,7 +21,7 @@ export default async (fastify: FastifyInstance) => {
     const connectionString = request.headers.pg
 
     const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
-    const { data, error } = await pgMeta.query(request.body.query, true)
+    const { data, error } = await pgMeta.query(request.body.query, false)
     await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })

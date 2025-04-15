@@ -62,7 +62,7 @@ const poolerQueryHandleError = (pgpool: pg.Pool, sql: string): Promise<pg.QueryR
 }
 
 export const init: (config: PoolConfig) => {
-  query: (sql: string, customQuery?: boolean) => Promise<PostgresMetaResult<any>>
+  query: (sql: string, trackQueryInSentry?: boolean) => Promise<PostgresMetaResult<any>>
   end: () => Promise<void>
 } = (config) => {
   return Sentry.startSpan({ op: 'db', name: 'db.init' }, () => {
@@ -103,10 +103,14 @@ export const init: (config: PoolConfig) => {
     let pool: pg.Pool | null = new pg.Pool(config)
 
     return {
-      async query(sql, customQuery = false) {
+      async query(sql, trackQueryInSentry = true) {
         return Sentry.startSpan(
           // For metrics purposes, log the query that will be run if it's not an user provided query (with possibly sentitives infos)
-          { op: 'db', name: 'init.query', attributes: { sql: customQuery ? 'custom' : sql } },
+          {
+            op: 'db',
+            name: 'init.query',
+            attributes: { sql: trackQueryInSentry ? sql : 'custom' },
+          },
           async () => {
             try {
               if (!pool) {
