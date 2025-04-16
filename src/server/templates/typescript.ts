@@ -304,6 +304,7 @@ export type Database = {
                           })
                           return `{ ${argsNameAndType.map(({ name, type, has_default }) => `${JSON.stringify(name)}${has_default ? '?' : ''}: ${type}`)} }`
                         })
+                        .toSorted()
                         // A function can have multiples definitions with differents args, but will always return the same type
                         .join(' | ')}
                       Returns: ${(() => {

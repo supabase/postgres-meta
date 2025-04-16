@@ -1,3 +1,5 @@
+import './sentry.js'
+import * as Sentry from '@sentry/node'
 import cors from '@fastify/cors'
 import swagger from '@fastify/swagger'
 import { fastify, FastifyInstance, FastifyServerOptions } from 'fastify'
@@ -9,6 +11,7 @@ import pkg from '#package.json' with { type: 'json' }
 
 export const build = (opts: FastifyServerOptions = {}): FastifyInstance => {
   const app = fastify({ disableRequestLogging: true, requestIdHeader: PG_META_REQ_HEADER, ...opts })
+  Sentry.setupFastifyErrorHandler(app)
 
   app.setErrorHandler((error, request, reply) => {
     app.log.error({ error: error.toString(), request: extractRequestForLogging(request) })
