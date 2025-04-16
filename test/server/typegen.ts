@@ -150,6 +150,12 @@ test('typegen: typescript', async () => {
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
@@ -192,6 +198,12 @@ test('typegen: typescript', async () => {
                 columns: ["user_id"]
                 referencedRelation: "a_view"
                 referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "user_details_user_id_fkey"
+                columns: ["user_id"]
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
               },
               {
                 foreignKeyName: "user_details_user_id_fkey"
@@ -288,6 +300,12 @@ test('typegen: typescript', async () => {
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
@@ -337,6 +355,12 @@ test('typegen: typescript', async () => {
               {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
@@ -359,6 +383,16 @@ test('typegen: typescript', async () => {
                 referencedColumns: ["second_id"]
               },
             ]
+          }
+          user_todos_summary_view: {
+            Row: {
+              todo_count: number | null
+              todo_details: string[] | null
+              user_id: number | null
+              user_name: string | null
+              user_status: Database["public"]["Enums"]["user_status"] | null
+            }
+            Relationships: []
           }
           users_view: {
             Row: {
@@ -424,6 +458,11 @@ test('typegen: typescript', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }[]
+            SetofOptions: {
+              from: "*"
+              to: "users"
+              isOneToOne: false
+            }
           }
           function_returning_table: {
             Args: Record<PropertyKey, never>
@@ -431,6 +470,44 @@ test('typegen: typescript', async () => {
               id: number
               name: string
             }[]
+          }
+          get_composite_type_data: {
+            Args: Record<PropertyKey, never>
+            Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"][]
+          }
+          get_single_user_summary_from_view: {
+            Args:
+              | { search_user_id: number }
+              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
+              | { userview_row: Database["public"]["Views"]["users_view"]["Row"] }
+            Returns: {
+              todo_count: number | null
+              todo_details: string[] | null
+              user_id: number | null
+              user_name: string | null
+              user_status: Database["public"]["Enums"]["user_status"] | null
+            }
+            SetofOptions: {
+              from: "*" | "users" | "users_view"
+              to: "user_todos_summary_view"
+              isOneToOne: true
+            }
+          }
+          get_todos_from_user: {
+            Args:
+              | { search_user_id: number }
+              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
+              | { userview_row: Database["public"]["Views"]["users_view"]["Row"] }
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }[]
+            SetofOptions: {
+              from: "*" | "users" | "users_view"
+              to: "todos"
+              isOneToOne: false
+            }
           }
           get_todos_setof_rows: {
             Args:
@@ -441,6 +518,11 @@ test('typegen: typescript', async () => {
               id: number
               "user-id": number
             }[]
+            SetofOptions: {
+              from: "todos" | "users"
+              to: "todos"
+              isOneToOne: false
+            }
           }
           get_user_audit_setof_single_row: {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
@@ -449,7 +531,20 @@ test('typegen: typescript', async () => {
               id: number
               previous_value: Json | null
               user_id: number | null
-            }[]
+            }
+            SetofOptions: {
+              from: "users"
+              to: "users_audit"
+              isOneToOne: true
+            }
+          }
+          get_user_ids: {
+            Args: Record<PropertyKey, never>
+            Returns: number[]
+          }
+          get_user_summary: {
+            Args: Record<PropertyKey, never>
+            Returns: Record<string, unknown>[]
           }
           polymorphic_function: {
             Args: { "": boolean } | { "": string }
@@ -765,6 +860,13 @@ test('typegen w/ one-to-one relationships', async () => {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
@@ -811,6 +913,13 @@ test('typegen w/ one-to-one relationships', async () => {
                 isOneToOne: true
                 referencedRelation: "a_view"
                 referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "user_details_user_id_fkey"
+                columns: ["user_id"]
+                isOneToOne: true
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
               },
               {
                 foreignKeyName: "user_details_user_id_fkey"
@@ -913,6 +1022,13 @@ test('typegen w/ one-to-one relationships', async () => {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
@@ -967,6 +1083,13 @@ test('typegen w/ one-to-one relationships', async () => {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
@@ -992,6 +1115,16 @@ test('typegen w/ one-to-one relationships', async () => {
                 referencedColumns: ["second_id"]
               },
             ]
+          }
+          user_todos_summary_view: {
+            Row: {
+              todo_count: number | null
+              todo_details: string[] | null
+              user_id: number | null
+              user_name: string | null
+              user_status: Database["public"]["Enums"]["user_status"] | null
+            }
+            Relationships: []
           }
           users_view: {
             Row: {
@@ -1057,6 +1190,11 @@ test('typegen w/ one-to-one relationships', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }[]
+            SetofOptions: {
+              from: "*"
+              to: "users"
+              isOneToOne: false
+            }
           }
           function_returning_table: {
             Args: Record<PropertyKey, never>
@@ -1064,6 +1202,44 @@ test('typegen w/ one-to-one relationships', async () => {
               id: number
               name: string
             }[]
+          }
+          get_composite_type_data: {
+            Args: Record<PropertyKey, never>
+            Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"][]
+          }
+          get_single_user_summary_from_view: {
+            Args:
+              | { search_user_id: number }
+              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
+              | { userview_row: Database["public"]["Views"]["users_view"]["Row"] }
+            Returns: {
+              todo_count: number | null
+              todo_details: string[] | null
+              user_id: number | null
+              user_name: string | null
+              user_status: Database["public"]["Enums"]["user_status"] | null
+            }
+            SetofOptions: {
+              from: "*" | "users" | "users_view"
+              to: "user_todos_summary_view"
+              isOneToOne: true
+            }
+          }
+          get_todos_from_user: {
+            Args:
+              | { search_user_id: number }
+              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
+              | { userview_row: Database["public"]["Views"]["users_view"]["Row"] }
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }[]
+            SetofOptions: {
+              from: "*" | "users" | "users_view"
+              to: "todos"
+              isOneToOne: false
+            }
           }
           get_todos_setof_rows: {
             Args:
@@ -1074,6 +1250,11 @@ test('typegen w/ one-to-one relationships', async () => {
               id: number
               "user-id": number
             }[]
+            SetofOptions: {
+              from: "todos" | "users"
+              to: "todos"
+              isOneToOne: false
+            }
           }
           get_user_audit_setof_single_row: {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
@@ -1082,7 +1263,20 @@ test('typegen w/ one-to-one relationships', async () => {
               id: number
               previous_value: Json | null
               user_id: number | null
-            }[]
+            }
+            SetofOptions: {
+              from: "users"
+              to: "users_audit"
+              isOneToOne: true
+            }
+          }
+          get_user_ids: {
+            Args: Record<PropertyKey, never>
+            Returns: number[]
+          }
+          get_user_summary: {
+            Args: Record<PropertyKey, never>
+            Returns: Record<string, unknown>[]
           }
           polymorphic_function: {
             Args: { "": boolean } | { "": string }
@@ -1398,6 +1592,13 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
@@ -1444,6 +1645,13 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 isOneToOne: true
                 referencedRelation: "a_view"
                 referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "user_details_user_id_fkey"
+                columns: ["user_id"]
+                isOneToOne: true
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
               },
               {
                 foreignKeyName: "user_details_user_id_fkey"
@@ -1546,6 +1754,13 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
@@ -1600,6 +1815,13 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 foreignKeyName: "todos_user-id_fkey"
                 columns: ["user-id"]
                 isOneToOne: false
+                referencedRelation: "user_todos_summary_view"
+                referencedColumns: ["user_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
                 referencedRelation: "users"
                 referencedColumns: ["id"]
               },
@@ -1625,6 +1847,16 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 referencedColumns: ["second_id"]
               },
             ]
+          }
+          user_todos_summary_view: {
+            Row: {
+              todo_count: number | null
+              todo_details: string[] | null
+              user_id: number | null
+              user_name: string | null
+              user_status: Database["public"]["Enums"]["user_status"] | null
+            }
+            Relationships: []
           }
           users_view: {
             Row: {
@@ -1690,6 +1922,11 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }[]
+            SetofOptions: {
+              from: "*"
+              to: "users"
+              isOneToOne: false
+            }
           }
           function_returning_table: {
             Args: Record<PropertyKey, never>
@@ -1697,6 +1934,44 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id: number
               name: string
             }[]
+          }
+          get_composite_type_data: {
+            Args: Record<PropertyKey, never>
+            Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"][]
+          }
+          get_single_user_summary_from_view: {
+            Args:
+              | { search_user_id: number }
+              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
+              | { userview_row: Database["public"]["Views"]["users_view"]["Row"] }
+            Returns: {
+              todo_count: number | null
+              todo_details: string[] | null
+              user_id: number | null
+              user_name: string | null
+              user_status: Database["public"]["Enums"]["user_status"] | null
+            }
+            SetofOptions: {
+              from: "*" | "users" | "users_view"
+              to: "user_todos_summary_view"
+              isOneToOne: true
+            }
+          }
+          get_todos_from_user: {
+            Args:
+              | { search_user_id: number }
+              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
+              | { userview_row: Database["public"]["Views"]["users_view"]["Row"] }
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }[]
+            SetofOptions: {
+              from: "*" | "users" | "users_view"
+              to: "todos"
+              isOneToOne: false
+            }
           }
           get_todos_setof_rows: {
             Args:
@@ -1707,6 +1982,11 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id: number
               "user-id": number
             }[]
+            SetofOptions: {
+              from: "todos" | "users"
+              to: "todos"
+              isOneToOne: false
+            }
           }
           get_user_audit_setof_single_row: {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
@@ -1715,7 +1995,20 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id: number
               previous_value: Json | null
               user_id: number | null
-            }[]
+            }
+            SetofOptions: {
+              from: "users"
+              to: "users_audit"
+              isOneToOne: true
+            }
+          }
+          get_user_ids: {
+            Args: Record<PropertyKey, never>
+            Returns: number[]
+          }
+          get_user_summary: {
+            Args: Record<PropertyKey, never>
+            Returns: Record<string, unknown>[]
           }
           polymorphic_function: {
             Args: { "": boolean } | { "": string }
@@ -1880,198 +2173,206 @@ test('typegen: go', async () => {
   expect(body).toMatchInlineSnapshot(`
     "package database
 
-type PublicUsersSelect struct {
-  Id     int64   \`json:"id"\`
-  Name   *string \`json:"name"\`
-  Status *string \`json:"status"\`
-}
+    type PublicUsersSelect struct {
+      Id     int64   \`json:"id"\`
+      Name   *string \`json:"name"\`
+      Status *string \`json:"status"\`
+    }
 
-type PublicUsersInsert struct {
-  Id     *int64  \`json:"id"\`
-  Name   *string \`json:"name"\`
-  Status *string \`json:"status"\`
-}
+    type PublicUsersInsert struct {
+      Id     *int64  \`json:"id"\`
+      Name   *string \`json:"name"\`
+      Status *string \`json:"status"\`
+    }
 
-type PublicUsersUpdate struct {
-  Id     *int64  \`json:"id"\`
-  Name   *string \`json:"name"\`
-  Status *string \`json:"status"\`
-}
+    type PublicUsersUpdate struct {
+      Id     *int64  \`json:"id"\`
+      Name   *string \`json:"name"\`
+      Status *string \`json:"status"\`
+    }
 
-type PublicTodosSelect struct {
-  Details *string \`json:"details"\`
-  Id      int64   \`json:"id"\`
-  UserId  int64   \`json:"user-id"\`
-}
+    type PublicTodosSelect struct {
+      Details *string \`json:"details"\`
+      Id      int64   \`json:"id"\`
+      UserId  int64   \`json:"user-id"\`
+    }
 
-type PublicTodosInsert struct {
-  Details *string \`json:"details"\`
-  Id      *int64  \`json:"id"\`
-  UserId  int64   \`json:"user-id"\`
-}
+    type PublicTodosInsert struct {
+      Details *string \`json:"details"\`
+      Id      *int64  \`json:"id"\`
+      UserId  int64   \`json:"user-id"\`
+    }
 
-type PublicTodosUpdate struct {
-  Details *string \`json:"details"\`
-  Id      *int64  \`json:"id"\`
-  UserId  *int64  \`json:"user-id"\`
-}
+    type PublicTodosUpdate struct {
+      Details *string \`json:"details"\`
+      Id      *int64  \`json:"id"\`
+      UserId  *int64  \`json:"user-id"\`
+    }
 
-type PublicUsersAuditSelect struct {
-  CreatedAt     *string     \`json:"created_at"\`
-  Id            int64       \`json:"id"\`
-  PreviousValue interface{} \`json:"previous_value"\`
-  UserId        *int64      \`json:"user_id"\`
-}
+    type PublicUsersAuditSelect struct {
+      CreatedAt     *string     \`json:"created_at"\`
+      Id            int64       \`json:"id"\`
+      PreviousValue interface{} \`json:"previous_value"\`
+      UserId        *int64      \`json:"user_id"\`
+    }
 
-type PublicUsersAuditInsert struct {
-  CreatedAt     *string     \`json:"created_at"\`
-  Id            *int64      \`json:"id"\`
-  PreviousValue interface{} \`json:"previous_value"\`
-  UserId        *int64      \`json:"user_id"\`
-}
+    type PublicUsersAuditInsert struct {
+      CreatedAt     *string     \`json:"created_at"\`
+      Id            *int64      \`json:"id"\`
+      PreviousValue interface{} \`json:"previous_value"\`
+      UserId        *int64      \`json:"user_id"\`
+    }
 
-type PublicUsersAuditUpdate struct {
-  CreatedAt     *string     \`json:"created_at"\`
-  Id            *int64      \`json:"id"\`
-  PreviousValue interface{} \`json:"previous_value"\`
-  UserId        *int64      \`json:"user_id"\`
-}
+    type PublicUsersAuditUpdate struct {
+      CreatedAt     *string     \`json:"created_at"\`
+      Id            *int64      \`json:"id"\`
+      PreviousValue interface{} \`json:"previous_value"\`
+      UserId        *int64      \`json:"user_id"\`
+    }
 
-type PublicUserDetailsSelect struct {
-  Details *string \`json:"details"\`
-  UserId  int64   \`json:"user_id"\`
-}
+    type PublicUserDetailsSelect struct {
+      Details *string \`json:"details"\`
+      UserId  int64   \`json:"user_id"\`
+    }
 
-type PublicUserDetailsInsert struct {
-  Details *string \`json:"details"\`
-  UserId  int64   \`json:"user_id"\`
-}
+    type PublicUserDetailsInsert struct {
+      Details *string \`json:"details"\`
+      UserId  int64   \`json:"user_id"\`
+    }
 
-type PublicUserDetailsUpdate struct {
-  Details *string \`json:"details"\`
-  UserId  *int64  \`json:"user_id"\`
-}
+    type PublicUserDetailsUpdate struct {
+      Details *string \`json:"details"\`
+      UserId  *int64  \`json:"user_id"\`
+    }
 
-type PublicEmptySelect struct {
+    type PublicEmptySelect struct {
 
-}
+    }
 
-type PublicEmptyInsert struct {
+    type PublicEmptyInsert struct {
 
-}
+    }
 
-type PublicEmptyUpdate struct {
+    type PublicEmptyUpdate struct {
 
-}
+    }
 
-type PublicTableWithOtherTablesRowTypeSelect struct {
-  Col1 interface{} \`json:"col1"\`
-  Col2 interface{} \`json:"col2"\`
-}
+    type PublicTableWithOtherTablesRowTypeSelect struct {
+      Col1 interface{} \`json:"col1"\`
+      Col2 interface{} \`json:"col2"\`
+    }
 
-type PublicTableWithOtherTablesRowTypeInsert struct {
-  Col1 interface{} \`json:"col1"\`
-  Col2 interface{} \`json:"col2"\`
-}
+    type PublicTableWithOtherTablesRowTypeInsert struct {
+      Col1 interface{} \`json:"col1"\`
+      Col2 interface{} \`json:"col2"\`
+    }
 
-type PublicTableWithOtherTablesRowTypeUpdate struct {
-  Col1 interface{} \`json:"col1"\`
-  Col2 interface{} \`json:"col2"\`
-}
+    type PublicTableWithOtherTablesRowTypeUpdate struct {
+      Col1 interface{} \`json:"col1"\`
+      Col2 interface{} \`json:"col2"\`
+    }
 
-type PublicTableWithPrimaryKeyOtherThanIdSelect struct {
-  Name    *string \`json:"name"\`
-  OtherId int64   \`json:"other_id"\`
-}
+    type PublicTableWithPrimaryKeyOtherThanIdSelect struct {
+      Name    *string \`json:"name"\`
+      OtherId int64   \`json:"other_id"\`
+    }
 
-type PublicTableWithPrimaryKeyOtherThanIdInsert struct {
-  Name    *string \`json:"name"\`
-  OtherId *int64  \`json:"other_id"\`
-}
+    type PublicTableWithPrimaryKeyOtherThanIdInsert struct {
+      Name    *string \`json:"name"\`
+      OtherId *int64  \`json:"other_id"\`
+    }
 
-type PublicTableWithPrimaryKeyOtherThanIdUpdate struct {
-  Name    *string \`json:"name"\`
-  OtherId *int64  \`json:"other_id"\`
-}
+    type PublicTableWithPrimaryKeyOtherThanIdUpdate struct {
+      Name    *string \`json:"name"\`
+      OtherId *int64  \`json:"other_id"\`
+    }
 
-type PublicCategorySelect struct {
-  Id   int32  \`json:"id"\`
-  Name string \`json:"name"\`
-}
+    type PublicCategorySelect struct {
+      Id   int32  \`json:"id"\`
+      Name string \`json:"name"\`
+    }
 
-type PublicCategoryInsert struct {
-  Id   *int32 \`json:"id"\`
-  Name string \`json:"name"\`
-}
+    type PublicCategoryInsert struct {
+      Id   *int32 \`json:"id"\`
+      Name string \`json:"name"\`
+    }
 
-type PublicCategoryUpdate struct {
-  Id   *int32  \`json:"id"\`
-  Name *string \`json:"name"\`
-}
+    type PublicCategoryUpdate struct {
+      Id   *int32  \`json:"id"\`
+      Name *string \`json:"name"\`
+    }
 
-type PublicMemesSelect struct {
-  Category  *int32      \`json:"category"\`
-  CreatedAt string      \`json:"created_at"\`
-  Id        int32       \`json:"id"\`
-  Metadata  interface{} \`json:"metadata"\`
-  Name      string      \`json:"name"\`
-  Status    *string     \`json:"status"\`
-}
+    type PublicMemesSelect struct {
+      Category  *int32      \`json:"category"\`
+      CreatedAt string      \`json:"created_at"\`
+      Id        int32       \`json:"id"\`
+      Metadata  interface{} \`json:"metadata"\`
+      Name      string      \`json:"name"\`
+      Status    *string     \`json:"status"\`
+    }
 
-type PublicMemesInsert struct {
-  Category  *int32      \`json:"category"\`
-  CreatedAt string      \`json:"created_at"\`
-  Id        *int32      \`json:"id"\`
-  Metadata  interface{} \`json:"metadata"\`
-  Name      string      \`json:"name"\`
-  Status    *string     \`json:"status"\`
-}
+    type PublicMemesInsert struct {
+      Category  *int32      \`json:"category"\`
+      CreatedAt string      \`json:"created_at"\`
+      Id        *int32      \`json:"id"\`
+      Metadata  interface{} \`json:"metadata"\`
+      Name      string      \`json:"name"\`
+      Status    *string     \`json:"status"\`
+    }
 
-type PublicMemesUpdate struct {
-  Category  *int32      \`json:"category"\`
-  CreatedAt *string     \`json:"created_at"\`
-  Id        *int32      \`json:"id"\`
-  Metadata  interface{} \`json:"metadata"\`
-  Name      *string     \`json:"name"\`
-  Status    *string     \`json:"status"\`
-}
+    type PublicMemesUpdate struct {
+      Category  *int32      \`json:"category"\`
+      CreatedAt *string     \`json:"created_at"\`
+      Id        *int32      \`json:"id"\`
+      Metadata  interface{} \`json:"metadata"\`
+      Name      *string     \`json:"name"\`
+      Status    *string     \`json:"status"\`
+    }
 
-type PublicTodosViewSelect struct {
-  Details *string \`json:"details"\`
-  Id      *int64  \`json:"id"\`
-  UserId  *int64  \`json:"user-id"\`
-}
+    type PublicAViewSelect struct {
+      Id *int64 \`json:"id"\`
+    }
 
-type PublicUsersViewSelect struct {
-  Id     *int64  \`json:"id"\`
-  Name   *string \`json:"name"\`
-  Status *string \`json:"status"\`
-}
+    type PublicTodosViewSelect struct {
+      Details *string \`json:"details"\`
+      Id      *int64  \`json:"id"\`
+      UserId  *int64  \`json:"user-id"\`
+    }
 
-type PublicAViewSelect struct {
-  Id *int64 \`json:"id"\`
-}
+    type PublicUsersViewSelect struct {
+      Id     *int64  \`json:"id"\`
+      Name   *string \`json:"name"\`
+      Status *string \`json:"status"\`
+    }
 
-type PublicUsersViewWithMultipleRefsToUsersSelect struct {
-  InitialId   *int64  \`json:"initial_id"\`
-  InitialName *string \`json:"initial_name"\`
-  SecondId    *int64  \`json:"second_id"\`
-  SecondName  *string \`json:"second_name"\`
-}
+    type PublicUserTodosSummaryViewSelect struct {
+      TodoCount   *int64     \`json:"todo_count"\`
+      TodoDetails []*string  \`json:"todo_details"\`
+      UserId      *int64     \`json:"user_id"\`
+      UserName    *string    \`json:"user_name"\`
+      UserStatus  *string    \`json:"user_status"\`
+    }
 
-type PublicTodosMatviewSelect struct {
-  Details *string \`json:"details"\`
-  Id      *int64  \`json:"id"\`
-  UserId  *int64  \`json:"user-id"\`
-}
+    type PublicUsersViewWithMultipleRefsToUsersSelect struct {
+      InitialId   *int64  \`json:"initial_id"\`
+      InitialName *string \`json:"initial_name"\`
+      SecondId    *int64  \`json:"second_id"\`
+      SecondName  *string \`json:"second_name"\`
+    }
 
-type PublicCompositeTypeWithArrayAttribute struct {
-  MyTextArray interface{} \`json:"my_text_array"\`
-}
+    type PublicTodosMatviewSelect struct {
+      Details *string \`json:"details"\`
+      Id      *int64  \`json:"id"\`
+      UserId  *int64  \`json:"user-id"\`
+    }
 
-type PublicCompositeTypeWithRecordAttribute struct {
-  Todo interface{} \`json:"todo"\`
-}"
+    type PublicCompositeTypeWithArrayAttribute struct {
+      MyTextArray interface{} \`json:"my_text_array"\`
+    }
+
+    type PublicCompositeTypeWithRecordAttribute struct {
+      Todo interface{} \`json:"todo"\`
+    }"
   `)
 })
 
@@ -2394,6 +2695,20 @@ test('typegen: swift', async () => {
           case details = "details"
           case id = "id"
           case userId = "user-id"
+        }
+      }
+      internal struct UserTodosSummaryViewSelect: Codable, Hashable, Sendable {
+        internal let todoCount: Int64?
+        internal let todoDetails: [String]?
+        internal let userId: Int64?
+        internal let userName: String?
+        internal let userStatus: UserStatus?
+        internal enum CodingKeys: String, CodingKey {
+          case todoCount = "todo_count"
+          case todoDetails = "todo_details"
+          case userId = "user_id"
+          case userName = "user_name"
+          case userStatus = "user_status"
         }
       }
       internal struct UsersViewSelect: Codable, Hashable, Sendable {
@@ -2757,6 +3072,20 @@ test('typegen: swift w/ public access control', async () => {
           case details = "details"
           case id = "id"
           case userId = "user-id"
+        }
+      }
+      public struct UserTodosSummaryViewSelect: Codable, Hashable, Sendable {
+        public let todoCount: Int64?
+        public let todoDetails: [String]?
+        public let userId: Int64?
+        public let userName: String?
+        public let userStatus: UserStatus?
+        public enum CodingKeys: String, CodingKey {
+          case todoCount = "todo_count"
+          case todoDetails = "todo_details"
+          case userId = "user_id"
+          case userName = "user_name"
+          case userStatus = "user_status"
         }
       }
       public struct UsersViewSelect: Codable, Hashable, Sendable {
