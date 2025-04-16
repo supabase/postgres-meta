@@ -29,6 +29,8 @@ export function translateErrorToResponseCode(
     return 504
   } else if (error.message === 'sorry, too many clients already') {
     return 503
+  } else if (error.message === 'Query read timeout') {
+    return 408
   }
   return defaultResponseCode
 }

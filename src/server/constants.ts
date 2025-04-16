@@ -16,6 +16,7 @@ const PG_META_DB_PASSWORD = (await getSecret('PG_META_DB_PASSWORD')) || 'postgre
 const PG_META_DB_SSL_MODE = process.env.PG_META_DB_SSL_MODE || 'disable'
 
 const PG_CONN_TIMEOUT_SECS = Number(process.env.PG_CONN_TIMEOUT_SECS || 15)
+const PG_QUERY_TIMEOUT_SECS = Number(process.env.PG_QUERY_TIMEOUT_SECS || 55)
 
 export let PG_CONNECTION = process.env.PG_META_DB_URL
 if (!PG_CONNECTION) {
@@ -58,6 +59,7 @@ export const PG_META_MAX_RESULT_SIZE = process.env.PG_META_MAX_RESULT_SIZE_MB
 export const DEFAULT_POOL_CONFIG: PoolConfig = {
   max: 1,
   connectionTimeoutMillis: PG_CONN_TIMEOUT_SECS * 1000,
+  query_timeout: PG_QUERY_TIMEOUT_SECS * 1000,
   ssl: PG_META_DB_SSL_ROOT_CERT ? { ca: PG_META_DB_SSL_ROOT_CERT } : undefined,
   application_name: `postgres-meta ${pkg.version}`,
   maxResultSize: PG_META_MAX_RESULT_SIZE,

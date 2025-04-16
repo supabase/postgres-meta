@@ -154,28 +154,58 @@ if (EXPORT_DOCS) {
 } else if (GENERATE_TYPES) {
   console.log(await getTypeOutput())
 } else {
-  const closeListeners = closeWithGrace(async ({ err }) => {
+  const closeListeners = closeWithGrace(async ({ err, signal, manual }) => {
     if (err) {
-      app.log.error(err)
+      app.log.error({ err }, 'server closing with error')
+    } else {
+      app.log.error(
+        { err: new Error('Signal Received') },
+        `${signal} signal received, server closing, close manual received: ${manual}`
+      )
     }
-    await app.close()
-    await adminApp.close()
+    try {
+      await app.close()
+    } catch (err) {
+      app.log.error({ err }, `Failed to close app`)
+      throw err
+    }
+    try {
+      await adminApp.close()
+    } catch (err) {
+      app.log.error({ err }, `Failed to close adminApp`)
+      throw err
+    }
   })
   app.addHook('onClose', async () => {
-    closeListeners.uninstall()
-    await adminApp.close()
+    try {
+      closeListeners.uninstall()
+      await adminApp.close()
+    } catch (err) {
+      app.log.error({ err }, `Failed to close adminApp in app onClose hook`)
+      throw err
+    }
   })
   adminApp.addHook('onClose', async () => {
-    closeListeners.uninstall()
-    await app.close()
+    try {
+      closeListeners.uninstall()
+      await app.close()
+    } catch (err) {
+      app.log.error({ err }, `Failed to close app in adminApp onClose hook`)
+      throw err
+    }
   })
 
   app.listen({ port: PG_META_PORT, host: PG_META_HOST }, (err) => {
     if (err) {
-      app.log.error(err)
+      app.log.error({ err }, 'Uncaught error in app, exit(1)')
       process.exit(1)
     }
     const adminPort = PG_META_PORT + 1
-    adminApp.listen({ port: adminPort, host: PG_META_HOST })
+    adminApp.listen({ port: adminPort, host: PG_META_HOST }, (err) => {
+      if (err) {
+        app.log.error({ err }, 'Uncaught error in adminApp, exit(1)')
+        process.exit(1)
+      }
+    })
   })
 }

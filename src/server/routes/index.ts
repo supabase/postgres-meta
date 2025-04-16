@@ -26,24 +26,39 @@ import { PG_CONNECTION, CRYPTO_KEY } from '../constants.js'
 export default async (fastify: FastifyInstance) => {
   // Adds a "pg" object to the request if it doesn't exist
   fastify.addHook('onRequest', (request, _reply, done) => {
-    // Node converts headers to lowercase
-    const encryptedHeader = request.headers['x-connection-encrypted']?.toString()
-    if (encryptedHeader) {
+    try {
+      // Node converts headers to lowercase
+      const encryptedHeader = request.headers['x-connection-encrypted']?.toString()
+      if (encryptedHeader) {
+        try {
+          request.headers.pg = CryptoJS.AES.decrypt(encryptedHeader, CRYPTO_KEY)
+            .toString(CryptoJS.enc.Utf8)
+            .trim()
+        } catch (e: any) {
+          request.log.warn({
+            message: 'failed to parse encrypted connstring',
+            error: e.toString(),
+          })
+          throw new Error('failed to process upstream connection details')
+        }
+      } else {
+        request.headers.pg = PG_CONNECTION
+      }
+      if (!request.headers.pg) {
+        request.log.error({ message: 'failed to get connection string' })
+        throw new Error('failed to get upstream connection details')
+      }
+      // Ensure the resulting connection string is a valid URL
       try {
-        request.headers.pg = CryptoJS.AES.decrypt(encryptedHeader, CRYPTO_KEY).toString(
-          CryptoJS.enc.Utf8
-        )
-      } catch (e: any) {
-        request.log.warn({
-          message: 'failed to parse encrypted connstring',
-          error: e.toString(),
-        })
+        new URL(request.headers.pg)
+      } catch (error) {
+        request.log.error({ message: 'pg connection string is invalid url' })
         throw new Error('failed to process upstream connection details')
       }
-    } else {
-      request.headers.pg = PG_CONNECTION
+      return done()
+    } catch (err) {
+      return done(err as Error)
     }
-    done()
   })
 
   fastify.register(ColumnPrivilegesRoute, { prefix: '/column-privileges' })
