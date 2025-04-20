@@ -270,3 +270,36 @@ LANGUAGE SQL STABLE
 AS $$
   SELECT * FROM todos WHERE "user-id" = userview_row.id;
 $$;
+
+-- Valid postgresql function override but that produce an unresolvable postgrest function call
+create function postgrest_unresolvable_function() returns void language sql as '';
+create function postgrest_unresolvable_function(a text) returns int language sql as 'select 1';
+create function postgrest_unresolvable_function(a int) returns text language sql as $$ 
+    SELECT 'toto' 
+$$;
+-- Valid postgresql function override with differents returns types depending of different arguments
+create function postgrest_resolvable_with_override_function() returns void language sql as '';
+create function postgrest_resolvable_with_override_function(a text) returns int language sql as 'select 1';
+create function postgrest_resolvable_with_override_function(b int) returns text language sql as $$ 
+    SELECT 'toto' 
+$$;
+-- Function overrides returning setof tables
+create function postgrest_resolvable_with_override_function(user_id bigint) returns setof users language sql stable as $$
+    SELECT * FROM users WHERE id = user_id;
+$$;
+create function postgrest_resolvable_with_override_function(todo_id bigint, completed boolean) returns setof todos language sql stable as $$
+    SELECT * FROM todos WHERE id = todo_id AND completed = completed;
+$$;
+-- Function override taking a table as argument and returning a setof
+create function postgrest_resolvable_with_override_function(user_row users) returns setof todos language sql stable as $$
+    SELECT * FROM todos WHERE "user-id" = user_row.id;
+$$;
+
+create or replace function public.polymorphic_function_with_different_return(text) returns void language sql as '';
+create or replace function public.polymorphic_function_with_different_return(bool) returns int language sql as 'SELECT 1';
+
+-- Function with a single unnamed params that isn't a json/jsonb/text should never appears in the type gen as it won't be in postgrest schema
+create or replace function public.polymorphic_function_with_unnamed_integer(int) returns int language sql as 'SELECT 1';
+create or replace function public.polymorphic_function_with_unnamed_json(json) returns int language sql as 'SELECT 1';
+create or replace function public.polymorphic_function_with_unnamed_jsonb(jsonb) returns int language sql as 'SELECT 1';
+create or replace function public.polymorphic_function_with_unnamed_text(text) returns int language sql as 'SELECT 1';
