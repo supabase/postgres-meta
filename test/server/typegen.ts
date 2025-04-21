@@ -423,26 +423,6 @@ test('typegen: typescript', async () => {
           }
         }
         Functions: {
-          blurb: {
-            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: string
-          }
-          blurb_varchar: {
-            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: string
-          }
-          details_is_long: {
-            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: boolean
-          }
-          details_length: {
-            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: number
-          }
-          details_words: {
-            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: string[]
-          }
           function_returning_row: {
             Args: Record<PropertyKey, never>
             Returns: {
@@ -458,14 +438,16 @@ test('typegen: typescript', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }[]
-            SetofOptions: {
-              from: "*"
-              to: "users"
-              isOneToOne: false
-            }
           }
           function_returning_table: {
             Args: Record<PropertyKey, never>
+            Returns: {
+              id: number
+              name: string
+            }[]
+          }
+          function_returning_table_with_args: {
+            Args: { user_id: number }
             Returns: {
               id: number
               name: string
@@ -475,55 +457,123 @@ test('typegen: typescript', async () => {
             Args: Record<PropertyKey, never>
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"][]
           }
-          get_single_user_summary_from_view: {
-            Args:
-              | { search_user_id: number }
-              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
-              | { userview_row: Database["public"]["Views"]["users_view"]["Row"] }
-            Returns: {
-              todo_count: number | null
-              todo_details: string[] | null
-              user_id: number | null
-              user_name: string | null
-              user_status: Database["public"]["Enums"]["user_status"] | null
-            }
-            SetofOptions: {
-              from: "*" | "users" | "users_view"
-              to: "user_todos_summary_view"
-              isOneToOne: true
-            }
-          }
-          get_todos_from_user: {
-            Args:
-              | { search_user_id: number }
-              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
-              | { userview_row: Database["public"]["Views"]["users_view"]["Row"] }
-            Returns: {
-              details: string | null
-              id: number
-              "user-id": number
-            }[]
-            SetofOptions: {
-              from: "*" | "users" | "users_view"
-              to: "todos"
-              isOneToOne: false
-            }
-          }
-          get_todos_setof_rows: {
-            Args:
-              | { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
-              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
-            Returns: {
-              details: string | null
-              id: number
-              "user-id": number
-            }[]
-            SetofOptions: {
-              from: "todos" | "users"
-              to: "todos"
-              isOneToOne: false
-            }
-          }
+          get_single_user_summary_from_view:
+            | {
+                Args: { search_user_id: number }
+                Returns: {
+                  todo_count: number | null
+                  todo_details: string[] | null
+                  user_id: number | null
+                  user_name: string | null
+                  user_status: Database["public"]["Enums"]["user_status"] | null
+                }
+                SetofOptions: {
+                  from: "*"
+                  to: "user_todos_summary_view"
+                  isOneToOne: true
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  todo_count: number | null
+                  todo_details: string[] | null
+                  user_id: number | null
+                  user_name: string | null
+                  user_status: Database["public"]["Enums"]["user_status"] | null
+                }
+                SetofOptions: {
+                  from: "users"
+                  to: "user_todos_summary_view"
+                  isOneToOne: true
+                }
+              }
+            | {
+                Args: {
+                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                }
+                Returns: {
+                  todo_count: number | null
+                  todo_details: string[] | null
+                  user_id: number | null
+                  user_name: string | null
+                  user_status: Database["public"]["Enums"]["user_status"] | null
+                }
+                SetofOptions: {
+                  from: "users_view"
+                  to: "user_todos_summary_view"
+                  isOneToOne: true
+                }
+              }
+          get_todos_from_user:
+            | {
+                Args: { search_user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+            | {
+                Args: {
+                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users_view"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+          get_todos_setof_rows:
+            | {
+                Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
           get_user_audit_setof_single_row: {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
@@ -547,8 +597,55 @@ test('typegen: typescript', async () => {
             Returns: Record<string, unknown>[]
           }
           polymorphic_function: {
-            Args: { "": boolean } | { "": string }
+            Args: { "": string }
             Returns: undefined
+          }
+          polymorphic_function_with_different_return: {
+            Args: { "": string }
+            Returns: string
+          }
+          polymorphic_function_with_no_params_or_unnamed:
+            | {
+                Args: Record<PropertyKey, never>
+                Returns: number
+              }
+            | {
+                Args: { "": string }
+                Returns: string
+              }
+          polymorphic_function_with_unnamed_default:
+            | {
+                Args: Record<PropertyKey, never>
+                Returns: {
+                  error: true
+                } & "Could not choose the best candidate function between: polymorphic_function_with_unnamed_default( => int4), polymorphic_function_with_unnamed_default(). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+              }
+            | {
+                Args: { "": string }
+                Returns: string
+              }
+          polymorphic_function_with_unnamed_default_overload:
+            | {
+                Args: Record<PropertyKey, never>
+                Returns: {
+                  error: true
+                } & "Could not choose the best candidate function between: polymorphic_function_with_unnamed_default_overload( => int4), polymorphic_function_with_unnamed_default_overload(). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+              }
+            | {
+                Args: { "": string }
+                Returns: string
+              }
+          polymorphic_function_with_unnamed_json: {
+            Args: { "": Json }
+            Returns: number
+          }
+          polymorphic_function_with_unnamed_jsonb: {
+            Args: { "": Json }
+            Returns: number
+          }
+          polymorphic_function_with_unnamed_text: {
+            Args: { "": string }
+            Returns: number
           }
           postgres_fdw_disconnect: {
             Args: { "": string }
@@ -566,6 +663,69 @@ test('typegen: typescript', async () => {
             Args: Record<PropertyKey, never>
             Returns: unknown
           }
+          postgrest_resolvable_with_override_function:
+            | {
+                Args: Record<PropertyKey, never>
+                Returns: undefined
+              }
+            | {
+                Args: { a: string }
+                Returns: number
+              }
+            | {
+                Args: { b: number }
+                Returns: string
+              }
+            | {
+                Args: { completed: boolean; todo_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+            | {
+                Args: { user_id: number }
+                Returns: {
+                  id: number
+                  name: string | null
+                  status: Database["public"]["Enums"]["user_status"] | null
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "users"
+                  isOneToOne: false
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+          postgrest_unresolvable_function:
+            | {
+                Args: Record<PropertyKey, never>
+                Returns: undefined
+              }
+            | {
+                Args: { a: unknown }
+                Returns: {
+                  error: true
+                } & "Could not choose the best candidate function between: postgrest_unresolvable_function(a => int4), postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+              }
           test_internal_query: {
             Args: Record<PropertyKey, never>
             Returns: undefined
@@ -1155,26 +1315,6 @@ test('typegen w/ one-to-one relationships', async () => {
           }
         }
         Functions: {
-          blurb: {
-            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: string
-          }
-          blurb_varchar: {
-            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: string
-          }
-          details_is_long: {
-            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: boolean
-          }
-          details_length: {
-            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: number
-          }
-          details_words: {
-            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: string[]
-          }
           function_returning_row: {
             Args: Record<PropertyKey, never>
             Returns: {
@@ -1190,14 +1330,16 @@ test('typegen w/ one-to-one relationships', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }[]
-            SetofOptions: {
-              from: "*"
-              to: "users"
-              isOneToOne: false
-            }
           }
           function_returning_table: {
             Args: Record<PropertyKey, never>
+            Returns: {
+              id: number
+              name: string
+            }[]
+          }
+          function_returning_table_with_args: {
+            Args: { user_id: number }
             Returns: {
               id: number
               name: string
@@ -1207,55 +1349,123 @@ test('typegen w/ one-to-one relationships', async () => {
             Args: Record<PropertyKey, never>
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"][]
           }
-          get_single_user_summary_from_view: {
-            Args:
-              | { search_user_id: number }
-              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
-              | { userview_row: Database["public"]["Views"]["users_view"]["Row"] }
-            Returns: {
-              todo_count: number | null
-              todo_details: string[] | null
-              user_id: number | null
-              user_name: string | null
-              user_status: Database["public"]["Enums"]["user_status"] | null
-            }
-            SetofOptions: {
-              from: "*" | "users" | "users_view"
-              to: "user_todos_summary_view"
-              isOneToOne: true
-            }
-          }
-          get_todos_from_user: {
-            Args:
-              | { search_user_id: number }
-              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
-              | { userview_row: Database["public"]["Views"]["users_view"]["Row"] }
-            Returns: {
-              details: string | null
-              id: number
-              "user-id": number
-            }[]
-            SetofOptions: {
-              from: "*" | "users" | "users_view"
-              to: "todos"
-              isOneToOne: false
-            }
-          }
-          get_todos_setof_rows: {
-            Args:
-              | { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
-              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
-            Returns: {
-              details: string | null
-              id: number
-              "user-id": number
-            }[]
-            SetofOptions: {
-              from: "todos" | "users"
-              to: "todos"
-              isOneToOne: false
-            }
-          }
+          get_single_user_summary_from_view:
+            | {
+                Args: { search_user_id: number }
+                Returns: {
+                  todo_count: number | null
+                  todo_details: string[] | null
+                  user_id: number | null
+                  user_name: string | null
+                  user_status: Database["public"]["Enums"]["user_status"] | null
+                }
+                SetofOptions: {
+                  from: "*"
+                  to: "user_todos_summary_view"
+                  isOneToOne: true
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  todo_count: number | null
+                  todo_details: string[] | null
+                  user_id: number | null
+                  user_name: string | null
+                  user_status: Database["public"]["Enums"]["user_status"] | null
+                }
+                SetofOptions: {
+                  from: "users"
+                  to: "user_todos_summary_view"
+                  isOneToOne: true
+                }
+              }
+            | {
+                Args: {
+                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                }
+                Returns: {
+                  todo_count: number | null
+                  todo_details: string[] | null
+                  user_id: number | null
+                  user_name: string | null
+                  user_status: Database["public"]["Enums"]["user_status"] | null
+                }
+                SetofOptions: {
+                  from: "users_view"
+                  to: "user_todos_summary_view"
+                  isOneToOne: true
+                }
+              }
+          get_todos_from_user:
+            | {
+                Args: { search_user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+            | {
+                Args: {
+                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users_view"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+          get_todos_setof_rows:
+            | {
+                Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
           get_user_audit_setof_single_row: {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
@@ -1279,8 +1489,55 @@ test('typegen w/ one-to-one relationships', async () => {
             Returns: Record<string, unknown>[]
           }
           polymorphic_function: {
-            Args: { "": boolean } | { "": string }
+            Args: { "": string }
             Returns: undefined
+          }
+          polymorphic_function_with_different_return: {
+            Args: { "": string }
+            Returns: string
+          }
+          polymorphic_function_with_no_params_or_unnamed:
+            | {
+                Args: Record<PropertyKey, never>
+                Returns: number
+              }
+            | {
+                Args: { "": string }
+                Returns: string
+              }
+          polymorphic_function_with_unnamed_default:
+            | {
+                Args: Record<PropertyKey, never>
+                Returns: {
+                  error: true
+                } & "Could not choose the best candidate function between: polymorphic_function_with_unnamed_default( => int4), polymorphic_function_with_unnamed_default(). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+              }
+            | {
+                Args: { "": string }
+                Returns: string
+              }
+          polymorphic_function_with_unnamed_default_overload:
+            | {
+                Args: Record<PropertyKey, never>
+                Returns: {
+                  error: true
+                } & "Could not choose the best candidate function between: polymorphic_function_with_unnamed_default_overload( => int4), polymorphic_function_with_unnamed_default_overload(). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+              }
+            | {
+                Args: { "": string }
+                Returns: string
+              }
+          polymorphic_function_with_unnamed_json: {
+            Args: { "": Json }
+            Returns: number
+          }
+          polymorphic_function_with_unnamed_jsonb: {
+            Args: { "": Json }
+            Returns: number
+          }
+          polymorphic_function_with_unnamed_text: {
+            Args: { "": string }
+            Returns: number
           }
           postgres_fdw_disconnect: {
             Args: { "": string }
@@ -1298,6 +1555,69 @@ test('typegen w/ one-to-one relationships', async () => {
             Args: Record<PropertyKey, never>
             Returns: unknown
           }
+          postgrest_resolvable_with_override_function:
+            | {
+                Args: Record<PropertyKey, never>
+                Returns: undefined
+              }
+            | {
+                Args: { a: string }
+                Returns: number
+              }
+            | {
+                Args: { b: number }
+                Returns: string
+              }
+            | {
+                Args: { completed: boolean; todo_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+            | {
+                Args: { user_id: number }
+                Returns: {
+                  id: number
+                  name: string | null
+                  status: Database["public"]["Enums"]["user_status"] | null
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "users"
+                  isOneToOne: false
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+          postgrest_unresolvable_function:
+            | {
+                Args: Record<PropertyKey, never>
+                Returns: undefined
+              }
+            | {
+                Args: { a: unknown }
+                Returns: {
+                  error: true
+                } & "Could not choose the best candidate function between: postgrest_unresolvable_function(a => int4), postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+              }
           test_internal_query: {
             Args: Record<PropertyKey, never>
             Returns: undefined
@@ -1887,26 +2207,6 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
         }
         Functions: {
-          blurb: {
-            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: string
-          }
-          blurb_varchar: {
-            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: string
-          }
-          details_is_long: {
-            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: boolean
-          }
-          details_length: {
-            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: number
-          }
-          details_words: {
-            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: string[]
-          }
           function_returning_row: {
             Args: Record<PropertyKey, never>
             Returns: {
@@ -1922,14 +2222,16 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }[]
-            SetofOptions: {
-              from: "*"
-              to: "users"
-              isOneToOne: false
-            }
           }
           function_returning_table: {
             Args: Record<PropertyKey, never>
+            Returns: {
+              id: number
+              name: string
+            }[]
+          }
+          function_returning_table_with_args: {
+            Args: { user_id: number }
             Returns: {
               id: number
               name: string
@@ -1939,55 +2241,123 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Args: Record<PropertyKey, never>
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"][]
           }
-          get_single_user_summary_from_view: {
-            Args:
-              | { search_user_id: number }
-              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
-              | { userview_row: Database["public"]["Views"]["users_view"]["Row"] }
-            Returns: {
-              todo_count: number | null
-              todo_details: string[] | null
-              user_id: number | null
-              user_name: string | null
-              user_status: Database["public"]["Enums"]["user_status"] | null
-            }
-            SetofOptions: {
-              from: "*" | "users" | "users_view"
-              to: "user_todos_summary_view"
-              isOneToOne: true
-            }
-          }
-          get_todos_from_user: {
-            Args:
-              | { search_user_id: number }
-              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
-              | { userview_row: Database["public"]["Views"]["users_view"]["Row"] }
-            Returns: {
-              details: string | null
-              id: number
-              "user-id": number
-            }[]
-            SetofOptions: {
-              from: "*" | "users" | "users_view"
-              to: "todos"
-              isOneToOne: false
-            }
-          }
-          get_todos_setof_rows: {
-            Args:
-              | { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
-              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
-            Returns: {
-              details: string | null
-              id: number
-              "user-id": number
-            }[]
-            SetofOptions: {
-              from: "todos" | "users"
-              to: "todos"
-              isOneToOne: false
-            }
-          }
+          get_single_user_summary_from_view:
+            | {
+                Args: { search_user_id: number }
+                Returns: {
+                  todo_count: number | null
+                  todo_details: string[] | null
+                  user_id: number | null
+                  user_name: string | null
+                  user_status: Database["public"]["Enums"]["user_status"] | null
+                }
+                SetofOptions: {
+                  from: "*"
+                  to: "user_todos_summary_view"
+                  isOneToOne: true
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  todo_count: number | null
+                  todo_details: string[] | null
+                  user_id: number | null
+                  user_name: string | null
+                  user_status: Database["public"]["Enums"]["user_status"] | null
+                }
+                SetofOptions: {
+                  from: "users"
+                  to: "user_todos_summary_view"
+                  isOneToOne: true
+                }
+              }
+            | {
+                Args: {
+                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                }
+                Returns: {
+                  todo_count: number | null
+                  todo_details: string[] | null
+                  user_id: number | null
+                  user_name: string | null
+                  user_status: Database["public"]["Enums"]["user_status"] | null
+                }
+                SetofOptions: {
+                  from: "users_view"
+                  to: "user_todos_summary_view"
+                  isOneToOne: true
+                }
+              }
+          get_todos_from_user:
+            | {
+                Args: { search_user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+            | {
+                Args: {
+                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users_view"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+          get_todos_setof_rows:
+            | {
+                Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
           get_user_audit_setof_single_row: {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
@@ -2011,8 +2381,55 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Returns: Record<string, unknown>[]
           }
           polymorphic_function: {
-            Args: { "": boolean } | { "": string }
+            Args: { "": string }
             Returns: undefined
+          }
+          polymorphic_function_with_different_return: {
+            Args: { "": string }
+            Returns: string
+          }
+          polymorphic_function_with_no_params_or_unnamed:
+            | {
+                Args: Record<PropertyKey, never>
+                Returns: number
+              }
+            | {
+                Args: { "": string }
+                Returns: string
+              }
+          polymorphic_function_with_unnamed_default:
+            | {
+                Args: Record<PropertyKey, never>
+                Returns: {
+                  error: true
+                } & "Could not choose the best candidate function between: polymorphic_function_with_unnamed_default( => int4), polymorphic_function_with_unnamed_default(). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+              }
+            | {
+                Args: { "": string }
+                Returns: string
+              }
+          polymorphic_function_with_unnamed_default_overload:
+            | {
+                Args: Record<PropertyKey, never>
+                Returns: {
+                  error: true
+                } & "Could not choose the best candidate function between: polymorphic_function_with_unnamed_default_overload( => int4), polymorphic_function_with_unnamed_default_overload(). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+              }
+            | {
+                Args: { "": string }
+                Returns: string
+              }
+          polymorphic_function_with_unnamed_json: {
+            Args: { "": Json }
+            Returns: number
+          }
+          polymorphic_function_with_unnamed_jsonb: {
+            Args: { "": Json }
+            Returns: number
+          }
+          polymorphic_function_with_unnamed_text: {
+            Args: { "": string }
+            Returns: number
           }
           postgres_fdw_disconnect: {
             Args: { "": string }
@@ -2030,6 +2447,69 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Args: Record<PropertyKey, never>
             Returns: unknown
           }
+          postgrest_resolvable_with_override_function:
+            | {
+                Args: Record<PropertyKey, never>
+                Returns: undefined
+              }
+            | {
+                Args: { a: string }
+                Returns: number
+              }
+            | {
+                Args: { b: number }
+                Returns: string
+              }
+            | {
+                Args: { completed: boolean; todo_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+            | {
+                Args: { user_id: number }
+                Returns: {
+                  id: number
+                  name: string | null
+                  status: Database["public"]["Enums"]["user_status"] | null
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "users"
+                  isOneToOne: false
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+          postgrest_unresolvable_function:
+            | {
+                Args: Record<PropertyKey, never>
+                Returns: undefined
+              }
+            | {
+                Args: { a: unknown }
+                Returns: {
+                  error: true
+                } & "Could not choose the best candidate function between: postgrest_unresolvable_function(a => int4), postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+              }
           test_internal_query: {
             Args: Record<PropertyKey, never>
             Returns: undefined
