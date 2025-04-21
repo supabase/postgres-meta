@@ -39,6 +39,55 @@ export const apply = async ({
     },
     {} as Record<string, (typeof types)[number]>
   )
+
+  const getReturnType = (fn: PostgresFunction): string => {
+    // Case 1: `returns table`.
+    const tableArgs = fn.args.filter(({ mode }) => mode === 'table')
+    if (tableArgs.length > 0) {
+      const argsNameAndType = tableArgs
+        .map(({ name, type_id }) => {
+          const type = types.find(({ id }) => id === type_id)
+          let tsType = 'unknown'
+          if (type) {
+            tsType = pgTypeToTsType(type.name, { types, schemas, tables, views })
+          }
+          return { name, type: tsType }
+        })
+        .sort((a, b) => a.name.localeCompare(b.name))
+
+      return `{
+        ${argsNameAndType.map(({ name, type }) => `${JSON.stringify(name)}: ${type}`)}
+      }`
+    }
+
+    // Case 2: returns a relation's row type.
+    const relation = [...tables, ...views].find(({ id }) => id === fn.return_type_relation_id)
+    if (relation) {
+      return `{
+        ${columnsByTableId[relation.id]
+          .map(
+            (column) =>
+              `${JSON.stringify(column.name)}: ${pgTypeToTsType(column.format, {
+                types,
+                schemas,
+                tables,
+                views,
+              })} ${column.is_nullable ? '| null' : ''}`
+          )
+          .sort()
+          .join(',\n')}
+      }`
+    }
+
+    // Case 3: returns base/array/composite/enum type.
+    const type = types.find(({ id }) => id === fn.return_type_id)
+    if (type) {
+      return pgTypeToTsType(type.name, { types, schemas, tables, views })
+    }
+
+    return 'unknown'
+  }
+
   columns
     .filter((c) => c.table_id in columnsByTableId)
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
@@ -106,14 +155,7 @@ export type Database = {
                       ),
                       ...schemaFunctions
                         .filter((fn) => fn.argument_types === table.name)
-                        .map((fn) => {
-                          const type = typesById[fn.return_type_id]
-                          let tsType = 'unknown'
-                          if (type) {
-                            tsType = pgTypeToTsType(type.name, { types, schemas, tables, views })
-                          }
-                          return `${JSON.stringify(fn.name)}: ${tsType} | null`
-                        }),
+                        .map((fn) => `${JSON.stringify(fn.name)}: ${getReturnType(fn)} | null`),
                     ]}
                   }
                   Insert: {
@@ -374,95 +416,79 @@ export type Database = {
 
                 // Generate all possible function signatures as a union
                 const signatures = (() => {
-                  // Special case: if any function has a single unnamed parameter
-                  const unnamedFns = fns.filter((fn) => fn.args.some(({ name }) => name === ''))
+                  const allSignatures: string[] = []
+
+                  // First check if we have a no-param function
+                  const noParamFns = fns.filter((fn) => fn.args.length === 0)
+                  const unnamedFns = fns.filter((fn) => {
+                    // Only include unnamed functions that:
+                    // 1. Have a single unnamed parameter
+                    // 2. The parameter is of a valid type (json, jsonb, text)
+                    // 3. All parameters have default values
+                    const inArgs = fn.args.filter(({ mode }) => VALID_FUNCTION_ARGS_MODE.has(mode))
+                    return (
+                      inArgs.length === 1 &&
+                      inArgs[0].name === '' &&
+                      (VALID_UNNAMED_FUNCTION_ARG_TYPES.has(inArgs[0].type_id) ||
+                        inArgs[0].has_default)
+                    )
+                  })
+
+                  // Special case: one no-param function and unnamed param function exist
+                  if (noParamFns.length === 1) {
+                    const noParamFn = noParamFns[0]
+                    const unnamedWithDefaultsFn = unnamedFns.find((fn) =>
+                      fn.args.every((arg) => arg.has_default)
+                    )
+
+                    // If we have a function with unnamed params that all have defaults, it creates a conflict
+                    if (unnamedWithDefaultsFn) {
+                      // Only generate the error signature in this case
+                      const conflictDesc = [
+                        `${fnName}()`,
+                        `${fnName}( => ${typesById[unnamedWithDefaultsFn.args[0].type_id]?.name || 'unknown'})`,
+                      ]
+                        .sort()
+                        .join(', ')
+
+                      allSignatures.push(`{
+                        Args: Record<PropertyKey, never>
+                        Returns: { error: true } & "Could not choose the best candidate function between: ${conflictDesc}. Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+                      }`)
+                    } else {
+                      // No conflict - just add the no params signature
+                      allSignatures.push(`{
+                        Args: Record<PropertyKey, never>
+                        Returns: ${getReturnType(noParamFn)}${noParamFn.is_set_returning_function && noParamFn.returns_multiple_rows ? '[]' : ''}
+                      }`)
+                    }
+                  }
                   if (unnamedFns.length > 0) {
-                    // Take only the first function with unnamed parameters
-                    const firstUnnamedFn = unnamedFns[0]
-                    const firstArgType = typesById[firstUnnamedFn.args[0].type_id]
-                    const tsType = firstArgType
-                      ? pgTypeToTsType(firstArgType.name, { types, schemas, tables, views })
-                      : 'unknown'
+                    // If we don't have a no-param function, process the unnamed args
+                    // Take only the first function with unnamed parameters that has a valid type
+                    const validUnnamedFn = unnamedFns.find(
+                      (fn) =>
+                        fn.args.length === 1 &&
+                        fn.args[0].name === '' &&
+                        VALID_UNNAMED_FUNCTION_ARG_TYPES.has(fn.args[0].type_id)
+                    )
 
-                    const returnType = (() => {
-                      // Case 1: `returns table`.
-                      const tableArgs = firstUnnamedFn.args.filter(({ mode }) => mode === 'table')
-                      if (tableArgs.length > 0) {
-                        const argsNameAndType = tableArgs
-                          .map(({ name, type_id }) => {
-                            const type = types.find(({ id }) => id === type_id)
-                            let tsType = 'unknown'
-                            if (type) {
-                              tsType = pgTypeToTsType(type.name, { types, schemas, tables, views })
-                            }
-                            return { name, type: tsType }
-                          })
-                          .sort((a, b) => a.name.localeCompare(b.name))
+                    if (validUnnamedFn) {
+                      const firstArgType = typesById[validUnnamedFn.args[0].type_id]
+                      const tsType = firstArgType
+                        ? pgTypeToTsType(firstArgType.name, { types, schemas, tables, views })
+                        : 'unknown'
 
-                        return `{
-                          ${argsNameAndType.map(
-                            ({ name, type }) => `${JSON.stringify(name)}: ${type}`
-                          )}
-                        }`
-                      }
-
-                      // Case 2: returns a relation's row type.
-                      const relation = [...tables, ...views].find(
-                        ({ id }) => id === firstUnnamedFn.return_type_relation_id
-                      )
-                      if (relation) {
-                        return `{
-                          ${columnsByTableId[relation.id]
-                            .map(
-                              (column) =>
-                                `${JSON.stringify(column.name)}: ${pgTypeToTsType(column.format, {
-                                  types,
-                                  schemas,
-                                  tables,
-                                  views,
-                                })} ${column.is_nullable ? '| null' : ''}`
-                            )
-                            .sort()
-                            .join(',\n')}
-                        }`
-                      }
-
-                      // Case 3: returns base/array/composite/enum type.
-                      const returnType = types.find(
-                        ({ id }) => id === firstUnnamedFn.return_type_id
-                      )
-                      if (returnType) {
-                        return pgTypeToTsType(returnType.name, { types, schemas, tables, views })
-                      }
-
-                      return 'unknown'
-                    })()
-
-                    return [
-                      `{
-                      Args: { "": ${tsType} },
-                      Returns: ${returnType}${firstUnnamedFn.is_set_returning_function && firstUnnamedFn.returns_multiple_rows ? '[]' : ''}
-                      ${
-                        firstUnnamedFn.returns_set_of_table
-                          ? `,
-                        SetofOptions: {
-                          from: ${
-                            firstUnnamedFn.args.length > 0 && firstUnnamedFn.args[0].table_name
-                              ? JSON.stringify(typesById[firstUnnamedFn.args[0].type_id].format)
-                              : '"*"'
-                          },
-                          to: ${JSON.stringify(firstUnnamedFn.return_table_name)},
-                          isOneToOne: ${firstUnnamedFn.returns_multiple_rows ? false : true}
-                        }`
-                          : ''
-                      }
-                    }`,
-                    ]
+                      allSignatures.push(`{
+                        Args: { "": ${tsType} }
+                        Returns: ${getReturnType(validUnnamedFn)}${validUnnamedFn.is_set_returning_function && validUnnamedFn.returns_multiple_rows ? '[]' : ''}
+                      }`)
+                    }
                   }
 
                   // For functions with named parameters, generate all signatures
                   const namedFns = fns.filter((fn) => !fn.args.some(({ name }) => name === ''))
-                  return namedFns.map((fn) => {
+                  namedFns.forEach((fn) => {
                     const inArgs = fn.args.filter(({ mode }) => mode === 'in')
                     const namedInArgs = inArgs
                       .filter((arg) => arg.name !== '')
@@ -488,112 +514,57 @@ export type Database = {
                         .sort()
                         .join(', ')
 
-                      return `{
+                      allSignatures.push(`{
                         Args: { ${inArgs
                           .map((arg) => `${JSON.stringify(arg.name)}: unknown`)
                           .sort()
-                          .join(', ')} },
+                          .join(', ')} }
                         Returns: { error: true } & "Could not choose the best candidate function between: ${conflictDesc}. Try renaming the parameters or the function itself in the database so function overloading can be resolved"
-                      }`
-                    }
-
-                    // Generate normal function signature
-                    const returnType = (() => {
-                      // Case 1: `returns table`.
-                      const tableArgs = fn.args.filter(({ mode }) => mode === 'table')
-                      if (tableArgs.length > 0) {
-                        const argsNameAndType = tableArgs
-                          .map(({ name, type_id }) => {
-                            const type = types.find(({ id }) => id === type_id)
+                      }`)
+                    } else if (inArgs.length > 0) {
+                      // Generate normal function signature
+                      const returnType = getReturnType(fn)
+                      allSignatures.push(`{
+                        Args: ${`{ ${inArgs
+                          .map(({ name, type_id, has_default }) => {
+                            const type = typesById[type_id]
                             let tsType = 'unknown'
                             if (type) {
-                              tsType = pgTypeToTsType(type.name, { types, schemas, tables, views })
-                            }
-                            return { name, type: tsType }
-                          })
-                          .sort((a, b) => a.name.localeCompare(b.name))
-
-                        return `{
-                          ${argsNameAndType.map(
-                            ({ name, type }) => `${JSON.stringify(name)}: ${type}`
-                          )}
-                        }`
-                      }
-
-                      // Case 2: returns a relation's row type.
-                      const relation = [...tables, ...views].find(
-                        ({ id }) => id === fn.return_type_relation_id
-                      )
-                      if (relation) {
-                        return `{
-                          ${columnsByTableId[relation.id]
-                            .map(
-                              (column) =>
-                                `${JSON.stringify(column.name)}: ${pgTypeToTsType(column.format, {
-                                  types,
-                                  schemas,
-                                  tables,
-                                  views,
-                                })} ${column.is_nullable ? '| null' : ''}`
-                            )
-                            .sort()
-                            .join(',\n')}
-                        }`
-                      }
-
-                      // Case 3: returns base/array/composite/enum type.
-                      const type = types.find(({ id }) => id === fn.return_type_id)
-                      if (type) {
-                        return pgTypeToTsType(type.name, { types, schemas, tables, views })
-                      }
-
-                      return 'unknown'
-                    })()
-
-                    return `{
-                      Args: ${
-                        inArgs.length === 0
-                          ? 'Record<PropertyKey, never>'
-                          : `{ ${inArgs
-                              .map(({ name, type_id, has_default }) => {
-                                const type = typesById[type_id]
-                                let tsType = 'unknown'
-                                if (type) {
-                                  tsType = pgTypeToTsType(type.name, {
-                                    types,
-                                    schemas,
-                                    tables,
-                                    views,
-                                  })
-                                }
-                                return `${JSON.stringify(name)}${has_default ? '?' : ''}: ${tsType}`
+                              tsType = pgTypeToTsType(type.name, {
+                                types,
+                                schemas,
+                                tables,
+                                views,
                               })
-                              .sort()
-                              .join(', ')} }`
-                      },
-                      Returns: ${returnType}${fn.is_set_returning_function && fn.returns_multiple_rows ? '[]' : ''}
-                      ${
-                        fn.returns_set_of_table
-                          ? `,
-                        SetofOptions: {
-                          from: ${
-                            fn.args.length > 0 && fn.args[0].table_name
-                              ? JSON.stringify(typesById[fn.args[0].type_id].format)
-                              : '"*"'
-                          },
-                          to: ${JSON.stringify(fn.return_table_name)},
-                          isOneToOne: ${fn.returns_multiple_rows ? false : true}
-                        }`
-                          : ''
-                      }
-                    }`
+                            }
+                            return `${JSON.stringify(name)}${has_default ? '?' : ''}: ${tsType}`
+                          })
+                          .sort()
+                          .join(', ')} }`}
+                        Returns: ${returnType}${fn.is_set_returning_function && fn.returns_multiple_rows ? '[]' : ''}
+                        ${
+                          fn.returns_set_of_table
+                            ? `SetofOptions: {
+                            from: ${
+                              fn.args.length > 0 && fn.args[0].table_name
+                                ? JSON.stringify(typesById[fn.args[0].type_id].format)
+                                : '"*"'
+                            }
+                            to: ${JSON.stringify(fn.return_table_name)}
+                            isOneToOne: ${fn.returns_multiple_rows ? false : true}
+                          }`
+                            : ''
+                        }
+                      }`)
+                    }
                   })
+
+                  // Remove duplicates and sort
+                  return Array.from(new Set(allSignatures)).sort()
                 })()
 
                 // Remove duplicates, sort, and join with |
-                return `${JSON.stringify(fnName)}: ${Array.from(new Set(signatures))
-                  .sort()
-                  .join('\n    | ')}`
+                return `${JSON.stringify(fnName)}: ${signatures.join('\n    | ')}`
               })
             })()}
           }
