@@ -8,7 +8,11 @@ import type {
   PostgresView,
 } from '../../lib/index.js'
 import type { GeneratorMetadata } from '../../lib/generators.js'
-import { GENERATE_TYPES_DEFAULT_SCHEMA } from '../constants.js'
+import {
+  VALID_UNNAMED_FUNCTION_ARG_TYPES,
+  GENERATE_TYPES_DEFAULT_SCHEMA,
+  VALID_FUNCTION_ARGS_MODE,
+} from '../constants.js'
 
 export const apply = async ({
   schemas,
@@ -274,25 +278,56 @@ export type Database = {
               if (schemaFunctions.length === 0) {
                 return '[_ in never]: never'
               }
+              const schemaFunctionsGroupedByName = schemaFunctions
+                .filter((func) => {
+                  // Get all input args (in, inout, variadic modes)
 
-              const schemaFunctionsGroupedByName = schemaFunctions.reduce(
-                (acc, curr) => {
-                  acc[curr.name] ??= []
-                  acc[curr.name].push(curr)
-                  return acc
-                },
-                {} as Record<string, PostgresFunction[]>
-              )
+                  const inArgs = func.args.filter(({ mode }) => VALID_FUNCTION_ARGS_MODE.has(mode))
+                  // Case 1: Function has no parameters
+                  if (inArgs.length === 0) {
+                    return true
+                  }
+
+                  // Case 2: All input args are named
+                  if (!inArgs.some(({ name }) => name === '')) {
+                    return true
+                  }
+
+                  // Case 3: All unnamed args have default values
+                  if (inArgs.every((arg) => (arg.name === '' ? arg.has_default : true))) {
+                    return true
+                  }
+
+                  // Case 4: Single unnamed parameter of valid type (json, jsonb, text)
+                  // Exclude all functions definitions that have only one single argument unnamed argument that isn't
+                  // a json/jsonb/text as it won't be considered by PostgREST
+                  if (
+                    inArgs.length === 1 &&
+                    inArgs[0].name === '' &&
+                    VALID_UNNAMED_FUNCTION_ARG_TYPES.has(inArgs[0].type_id)
+                  ) {
+                    return true
+                  }
+
+                  return false
+                })
+                .reduce(
+                  (acc, curr) => {
+                    acc[curr.name] ??= []
+                    acc[curr.name].push(curr)
+                    return acc
+                  },
+                  {} as Record<string, PostgresFunction[]>
+                )
 
               return Object.entries(schemaFunctionsGroupedByName).map(([fnName, fns]) => {
                 // Group functions by their argument names signature to detect conflicts
                 const fnsByArgNames = new Map<string, PostgresFunction[]>()
+                fns.sort((fn1, fn2) => fn1.id - fn2.id)
 
                 fns.forEach((fn) => {
                   const namedInArgs = fn.args
-                    .filter(
-                      ({ mode, name }) => ['in', 'inout', 'variadic'].includes(mode) && name !== ''
-                    )
+                    .filter(({ mode, name }) => VALID_FUNCTION_ARGS_MODE.has(mode) && name !== '')
                     .map((arg) => arg.name)
                     .sort()
                     .join(',')
@@ -312,8 +347,7 @@ export type Database = {
                     const firstFnArgTypes = new Map(
                       firstFn.args
                         .filter(
-                          ({ mode, name }) =>
-                            ['in', 'inout', 'variadic'].includes(mode) && name !== ''
+                          ({ mode, name }) => VALID_FUNCTION_ARGS_MODE.has(mode) && name !== ''
                         )
                         .map((arg) => [arg.name, String(arg.type_id)])
                     )
@@ -322,8 +356,7 @@ export type Database = {
                       const fnArgTypes = new Map(
                         fn.args
                           .filter(
-                            ({ mode, name }) =>
-                              ['in', 'inout', 'variadic'].includes(mode) && name !== ''
+                            ({ mode, name }) => VALID_FUNCTION_ARGS_MODE.has(mode) && name !== ''
                           )
                           .map((arg) => [arg.name, String(arg.type_id)])
                       )
