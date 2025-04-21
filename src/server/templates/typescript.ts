@@ -37,7 +37,7 @@ export const apply = async ({
       acc[type.id] = type
       return acc
     },
-    {} as Record<string, (typeof types)[number]>
+    {} as Record<number, (typeof types)[number]>
   )
 
   const getReturnType = (fn: PostgresFunction): string => {
@@ -46,7 +46,7 @@ export const apply = async ({
     if (tableArgs.length > 0) {
       const argsNameAndType = tableArgs
         .map(({ name, type_id }) => {
-          const type = types.find(({ id }) => id === type_id)
+          const type = typesById[type_id]
           let tsType = 'unknown'
           if (type) {
             tsType = pgTypeToTsType(type.name, { types, schemas, tables, views })
@@ -80,7 +80,7 @@ export const apply = async ({
     }
 
     // Case 3: returns base/array/composite/enum type.
-    const type = types.find(({ id }) => id === fn.return_type_id)
+    const type = typesById[fn.return_type_id]
     if (type) {
       return pgTypeToTsType(type.name, { types, schemas, tables, views })
     }
@@ -116,7 +116,7 @@ export type Database = {
           // Either:
           // 1. All input args are be named, or
           // 2. There is only one input arg which is unnamed
-          const inArgs = func.args.filter(({ mode }) => ['in', 'inout', 'variadic'].includes(mode))
+          const inArgs = func.args.filter(({ mode }) => VALID_FUNCTION_ARGS_MODE.has(mode))
 
           if (!inArgs.some(({ name }) => name === '')) {
             return true
@@ -323,7 +323,6 @@ export type Database = {
               const schemaFunctionsGroupedByName = schemaFunctions
                 .filter((func) => {
                   // Get all input args (in, inout, variadic modes)
-
                   const inArgs = func.args.filter(({ mode }) => VALID_FUNCTION_ARGS_MODE.has(mode))
                   // Case 1: Function has no parameters
                   if (inArgs.length === 0) {
@@ -419,7 +418,12 @@ export type Database = {
                   const allSignatures: string[] = []
 
                   // First check if we have a no-param function
-                  const noParamFns = fns.filter((fn) => fn.args.length === 0)
+                  const noParamFns = fns.filter(
+                    (fn) =>
+                      fn.args.length === 0 ||
+                      // If all the params of a function have non potgrest proxyable arguments
+                      fn.args.every((arg) => !VALID_FUNCTION_ARGS_MODE.has(arg.mode))
+                  )
                   const unnamedFns = fns.filter((fn) => {
                     // Only include unnamed functions that:
                     // 1. Have a single unnamed parameter
@@ -435,7 +439,7 @@ export type Database = {
                   })
 
                   // Special case: one no-param function and unnamed param function exist
-                  if (noParamFns.length === 1) {
+                  if (noParamFns.length > 0) {
                     const noParamFn = noParamFns[0]
                     const unnamedWithDefaultsFn = unnamedFns.find((fn) =>
                       fn.args.every((arg) => arg.has_default)
@@ -588,7 +592,7 @@ export type Database = {
                     ({ name, attributes }) =>
                       `${JSON.stringify(name)}: {
                         ${attributes.map(({ name, type_id }) => {
-                          const type = types.find(({ id }) => id === type_id)
+                          const type = typesById[type_id]
                           let tsType = 'unknown'
                           if (type) {
                             tsType = `${pgTypeToTsType(type.name, { types, schemas, tables, views })} | null`
@@ -729,11 +733,16 @@ export const Constants = {
 } as const
 `
 
-  output = await prettier.format(output, {
-    parser: 'typescript',
-    semi: false,
-  })
-  return output
+  try {
+    return await prettier.format(output, {
+      parser: 'typescript',
+      semi: false,
+    })
+  } catch (error) {
+    console.log('Error: ', output)
+    console.log(error)
+    throw error
+  }
 }
 
 // TODO: Make this more robust. Currently doesn't handle range types - returns them as unknown.
