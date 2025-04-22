@@ -129,6 +129,12 @@ test('typegen: typescript', async () => {
               details_is_long: boolean | null
               details_length: number | null
               details_words: string[] | null
+              test_unnamed_row_scalar: number | null
+              test_unnamed_row_setof: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
             }
             Insert: {
               details?: string | null
@@ -236,6 +242,14 @@ test('typegen: typescript', async () => {
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              test_unnamed_row_composite:
+                | Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
+                | null
+              test_unnamed_row_setof: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
             }
             Insert: {
               id?: number
@@ -467,11 +481,6 @@ test('typegen: typescript', async () => {
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
-                SetofOptions: {
-                  from: "*"
-                  to: "user_todos_summary_view"
-                  isOneToOne: true
-                }
               }
             | {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
@@ -513,11 +522,6 @@ test('typegen: typescript', async () => {
                   id: number
                   "user-id": number
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                }
               }
             | {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
@@ -683,11 +687,6 @@ test('typegen: typescript', async () => {
                   id: number
                   "user-id": number
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                }
               }
             | {
                 Args: { user_id: number }
@@ -696,11 +695,6 @@ test('typegen: typescript', async () => {
                   name: string | null
                   status: Database["public"]["Enums"]["user_status"] | null
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "users"
-                  isOneToOne: false
-                }
               }
             | {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
@@ -729,6 +723,54 @@ test('typegen: typescript', async () => {
           test_internal_query: {
             Args: Record<PropertyKey, never>
             Returns: undefined
+          }
+          test_unnamed_row_setof:
+            | {
+                Args: { user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+              }
+            | {
+                Args: never
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+            | {
+                Args: never
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+          test_unnamed_view_row: {
+            Args: never
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }[]
+            SetofOptions: {
+              from: "todos_view"
+              to: "todos"
+              isOneToOne: false
+            }
           }
         }
         Enums: {
@@ -997,6 +1039,12 @@ test('typegen w/ one-to-one relationships', async () => {
               details_is_long: boolean | null
               details_length: number | null
               details_words: string[] | null
+              test_unnamed_row_scalar: number | null
+              test_unnamed_row_setof: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
             }
             Insert: {
               details?: string | null
@@ -1116,6 +1164,14 @@ test('typegen w/ one-to-one relationships', async () => {
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              test_unnamed_row_composite:
+                | Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
+                | null
+              test_unnamed_row_setof: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
             }
             Insert: {
               id?: number
@@ -1359,11 +1415,6 @@ test('typegen w/ one-to-one relationships', async () => {
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
-                SetofOptions: {
-                  from: "*"
-                  to: "user_todos_summary_view"
-                  isOneToOne: true
-                }
               }
             | {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
@@ -1405,11 +1456,6 @@ test('typegen w/ one-to-one relationships', async () => {
                   id: number
                   "user-id": number
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                }
               }
             | {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
@@ -1575,11 +1621,6 @@ test('typegen w/ one-to-one relationships', async () => {
                   id: number
                   "user-id": number
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                }
               }
             | {
                 Args: { user_id: number }
@@ -1588,11 +1629,6 @@ test('typegen w/ one-to-one relationships', async () => {
                   name: string | null
                   status: Database["public"]["Enums"]["user_status"] | null
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "users"
-                  isOneToOne: false
-                }
               }
             | {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
@@ -1621,6 +1657,54 @@ test('typegen w/ one-to-one relationships', async () => {
           test_internal_query: {
             Args: Record<PropertyKey, never>
             Returns: undefined
+          }
+          test_unnamed_row_setof:
+            | {
+                Args: { user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+              }
+            | {
+                Args: never
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+            | {
+                Args: never
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+          test_unnamed_view_row: {
+            Args: never
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }[]
+            SetofOptions: {
+              from: "todos_view"
+              to: "todos"
+              isOneToOne: false
+            }
           }
         }
         Enums: {
@@ -1889,6 +1973,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               details_is_long: boolean | null
               details_length: number | null
               details_words: string[] | null
+              test_unnamed_row_scalar: number | null
+              test_unnamed_row_setof: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
             }
             Insert: {
               details?: string | null
@@ -2008,6 +2098,14 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              test_unnamed_row_composite:
+                | Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
+                | null
+              test_unnamed_row_setof: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
             }
             Insert: {
               id?: number
@@ -2251,11 +2349,6 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
-                SetofOptions: {
-                  from: "*"
-                  to: "user_todos_summary_view"
-                  isOneToOne: true
-                }
               }
             | {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
@@ -2297,11 +2390,6 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   id: number
                   "user-id": number
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                }
               }
             | {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
@@ -2467,11 +2555,6 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   id: number
                   "user-id": number
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                }
               }
             | {
                 Args: { user_id: number }
@@ -2480,11 +2563,6 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   name: string | null
                   status: Database["public"]["Enums"]["user_status"] | null
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "users"
-                  isOneToOne: false
-                }
               }
             | {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
@@ -2513,6 +2591,54 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           test_internal_query: {
             Args: Record<PropertyKey, never>
             Returns: undefined
+          }
+          test_unnamed_row_setof:
+            | {
+                Args: { user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+              }
+            | {
+                Args: never
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+            | {
+                Args: never
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
+                  to: "todos"
+                  isOneToOne: false
+                }
+              }
+          test_unnamed_view_row: {
+            Args: never
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }[]
+            SetofOptions: {
+              from: "todos_view"
+              to: "todos"
+              isOneToOne: false
+            }
           }
         }
         Enums: {
