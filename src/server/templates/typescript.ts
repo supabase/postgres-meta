@@ -40,6 +40,18 @@ export const apply = async ({
     {} as Record<number, (typeof types)[number]>
   )
 
+  const getTsReturnType = (fn: PostgresFunction, returnType: string) => {
+    return `${returnType}${fn.is_set_returning_function && fn.returns_multiple_rows ? '[]' : ''}
+                      ${
+                        fn.returns_set_of_table && fn.args.length === 1 && fn.args[0].table_name
+                          ? `SetofOptions: {
+                          from: ${JSON.stringify(typesById[fn.args[0].type_id].format)}
+                          to: ${JSON.stringify(fn.return_table_name)}
+                          isOneToOne: ${fn.returns_multiple_rows ? false : true}
+                        }`
+                          : ''
+                      }`
+  }
   const getReturnType = (fn: PostgresFunction): string => {
     // Case 1: `returns table`.
     const tableArgs = fn.args.filter(({ mode }) => mode === 'table')
@@ -343,9 +355,14 @@ export type Database = {
                   // Exclude all functions definitions that have only one single argument unnamed argument that isn't
                   // a json/jsonb/text as it won't be considered by PostgREST
                   if (
-                    inArgs.length === 1 &&
-                    inArgs[0].name === '' &&
-                    VALID_UNNAMED_FUNCTION_ARG_TYPES.has(inArgs[0].type_id)
+                    (inArgs.length === 1 &&
+                      inArgs[0].name === '' &&
+                      VALID_UNNAMED_FUNCTION_ARG_TYPES.has(inArgs[0].type_id)) ||
+                    // OR if the function have a single unnamed args which is another table (embeded function)
+                    (inArgs.length === 1 &&
+                      inArgs[0].name === '' &&
+                      inArgs[0].table_name &&
+                      func.return_table_name)
                   ) {
                     return true
                   }
@@ -434,7 +451,8 @@ export type Database = {
                       inArgs.length === 1 &&
                       inArgs[0].name === '' &&
                       (VALID_UNNAMED_FUNCTION_ARG_TYPES.has(inArgs[0].type_id) ||
-                        inArgs[0].has_default)
+                        inArgs[0].has_default) &&
+                      !fn.return_table_name
                     )
                   })
 
@@ -463,7 +481,7 @@ export type Database = {
                       // No conflict - just add the no params signature
                       allSignatures.push(`{
                         Args: Record<PropertyKey, never>
-                        Returns: ${getReturnType(noParamFn)}${noParamFn.is_set_returning_function && noParamFn.returns_multiple_rows ? '[]' : ''}
+                        Returns: ${getTsReturnType(noParamFn, getReturnType(noParamFn))}
                       }`)
                     }
                   }
@@ -485,9 +503,24 @@ export type Database = {
 
                       allSignatures.push(`{
                         Args: { "": ${tsType} }
-                        Returns: ${getReturnType(validUnnamedFn)}${validUnnamedFn.is_set_returning_function && validUnnamedFn.returns_multiple_rows ? '[]' : ''}
+                        Returns: ${getTsReturnType(validUnnamedFn, getReturnType(validUnnamedFn))}
                       }`)
                     }
+                  }
+                  const unnamedSetofFunctions = fns.filter((fn) => {
+                    // Only include unnamed functions that:
+                    // 1. Have a single unnamed parameter
+                    // 2. The parameter is of a valid type (json, jsonb, text)
+                    // 3. All parameters have default values
+                    const inArgs = fn.args.filter(({ mode }) => VALID_FUNCTION_ARGS_MODE.has(mode))
+                    return inArgs.length === 1 && inArgs[0].name === '' && fn.return_table_name
+                  })
+                  if (unnamedSetofFunctions.length > 0) {
+                    const unnamedEmbededFunctionsSignatures = unnamedSetofFunctions.map(
+                      (fn) =>
+                        `{ IsUnnamedEmbededTable: true, Args: Record<PropertyKey, never>, Returns: ${getTsReturnType(fn, getReturnType(fn))} }`
+                    )
+                    allSignatures.push(...unnamedEmbededFunctionsSignatures)
                   }
 
                   // For functions with named parameters, generate all signatures
@@ -545,20 +578,7 @@ export type Database = {
                           })
                           .sort()
                           .join(', ')} }`}
-                        Returns: ${returnType}${fn.is_set_returning_function && fn.returns_multiple_rows ? '[]' : ''}
-                        ${
-                          fn.returns_set_of_table
-                            ? `SetofOptions: {
-                            from: ${
-                              fn.args.length > 0 && fn.args[0].table_name
-                                ? JSON.stringify(typesById[fn.args[0].type_id].format)
-                                : '"*"'
-                            }
-                            to: ${JSON.stringify(fn.return_table_name)}
-                            isOneToOne: ${fn.returns_multiple_rows ? false : true}
-                          }`
-                            : ''
-                        }
+                        Returns: ${getTsReturnType(fn, returnType)}
                       }`)
                     }
                   })
@@ -567,8 +587,13 @@ export type Database = {
                   return Array.from(new Set(allSignatures)).sort()
                 })()
 
-                // Remove duplicates, sort, and join with |
-                return `${JSON.stringify(fnName)}: ${signatures.join('\n    | ')}`
+                if (signatures.length > 0) {
+                  // Remove duplicates, sort, and join with |
+                  return `${JSON.stringify(fnName)}: ${signatures.join('\n    | ')}`
+                } else {
+                  console.log('fns', fns)
+                  return `${JSON.stringify(fnName)}: ${fns.map((fn) => `{ Args: unknown, Returns: ${getTsReturnType(fn, getReturnType(fn))} }`).join('\n |')}`
+                }
               })
             })()}
           }

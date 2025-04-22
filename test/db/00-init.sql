@@ -328,3 +328,60 @@ create or replace function public.polymorphic_function_with_unnamed_default_over
 create or replace function public.polymorphic_function_with_unnamed_default_overload(text default 'default') returns text language sql as $$ SELECT 'foo' $$;
 create or replace function public.polymorphic_function_with_unnamed_default_overload(bool default true) returns int language sql as 'SELECT 3';
 
+-- Test function with unnamed row parameter returning setof
+CREATE OR REPLACE FUNCTION public.test_unnamed_row_setof(todos)
+RETURNS SETOF todos
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM public.todos WHERE "user-id" = $1."user-id";
+$$;
+
+CREATE OR REPLACE FUNCTION public.test_unnamed_row_setof(users)
+RETURNS SETOF todos
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM public.todos WHERE "user-id" = $1."id";
+$$;
+
+
+CREATE OR REPLACE FUNCTION public.test_unnamed_row_setof(user_id bigint)
+RETURNS SETOF todos
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM public.todos WHERE "user-id" = user_id;
+$$;
+
+-- Test function with unnamed row parameter returning scalar
+CREATE OR REPLACE FUNCTION public.test_unnamed_row_scalar(todos)
+RETURNS integer
+LANGUAGE SQL STABLE
+AS $$
+  SELECT COUNT(*) FROM public.todos WHERE "user-id" = $1."user-id";
+$$;
+
+-- Test function with unnamed view row parameter
+CREATE OR REPLACE FUNCTION public.test_unnamed_view_row(todos_view)
+RETURNS SETOF todos
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM public.todos WHERE "user-id" = $1."user-id";
+$$;
+
+-- Test function with multiple unnamed row parameters
+CREATE OR REPLACE FUNCTION public.test_unnamed_multiple_rows(users, todos)
+RETURNS SETOF todos
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM public.todos 
+  WHERE "user-id" = $1.id 
+  AND id = $2.id;
+$$;
+
+-- Test function with unnamed row parameter returning composite
+CREATE OR REPLACE FUNCTION public.test_unnamed_row_composite(users)
+RETURNS composite_type_with_array_attribute
+LANGUAGE SQL STABLE
+AS $$
+  SELECT ROW(ARRAY[$1.name])::composite_type_with_array_attribute;
+$$;
+
