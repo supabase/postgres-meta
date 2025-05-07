@@ -2,7 +2,7 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox'
 import { Type } from '@sinclair/typebox'
 import { PostgresMeta } from '../../lib/index.js'
 import { postgresViewSchema } from '../../lib/types.js'
-import { DEFAULT_POOL_CONFIG } from '../constants.js'
+import { createConnectionConfig } from '../utils.js'
 import { extractRequestForLogging } from '../utils.js'
 
 const route: FastifyPluginAsyncTypebox = async (fastify) => {
@@ -12,6 +12,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       schema: {
         headers: Type.Object({
           pg: Type.String(),
+          'x-pg-application-name': Type.Optional(Type.String()),
         }),
         querystring: Type.Object({
           include_system_schemas: Type.Optional(Type.Boolean()),
@@ -31,7 +32,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       },
     },
     async (request, reply) => {
-      const connectionString = request.headers.pg
+      const config = createConnectionConfig(request)
       const includeSystemSchemas = request.query.include_system_schemas
       const includedSchemas = request.query.included_schemas?.split(',')
       const excludedSchemas = request.query.excluded_schemas?.split(',')
@@ -39,7 +40,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       const offset = request.query.offset
       const includeColumns = request.query.include_columns
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const pgMeta = new PostgresMeta(config)
       const { data, error } = await pgMeta.views.list({
         includeSystemSchemas,
         includedSchemas,
@@ -65,6 +66,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       schema: {
         headers: Type.Object({
           pg: Type.String(),
+          'x-pg-application-name': Type.Optional(Type.String()),
         }),
         params: Type.Object({
           id: Type.Integer(),
@@ -78,10 +80,10 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       },
     },
     async (request, reply) => {
-      const connectionString = request.headers.pg
+      const config = createConnectionConfig(request)
       const id = request.params.id
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const pgMeta = new PostgresMeta(config)
       const { data, error } = await pgMeta.views.retrieve({ id })
       await pgMeta.end()
       if (error) {

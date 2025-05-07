@@ -1,11 +1,11 @@
 import { FastifyInstance } from 'fastify'
 import { PostgresMeta } from '../../lib/index.js'
-import { DEFAULT_POOL_CONFIG } from '../constants.js'
+import { createConnectionConfig } from '../utils.js'
 import { extractRequestForLogging } from '../utils.js'
 
 export default async (fastify: FastifyInstance) => {
   fastify.get<{
-    Headers: { pg: string }
+    Headers: { pg: string; 'x-pg-application-name'?: string }
     Querystring: {
       include_system_schemas?: string
       // Note: this only supports comma separated values (e.g., ".../functions?included_schemas=public,core")
@@ -15,14 +15,14 @@ export default async (fastify: FastifyInstance) => {
       offset?: number
     }
   }>('/', async (request, reply) => {
-    const connectionString = request.headers.pg
+    const config = createConnectionConfig(request)
     const includeSystemSchemas = request.query.include_system_schemas === 'true'
     const includedSchemas = request.query.included_schemas?.split(',')
     const excludedSchemas = request.query.excluded_schemas?.split(',')
     const limit = request.query.limit
     const offset = request.query.offset
 
-    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+    const pgMeta = new PostgresMeta(config)
     const { data, error } = await pgMeta.functions.list({
       includeSystemSchemas,
       includedSchemas,
@@ -41,15 +41,15 @@ export default async (fastify: FastifyInstance) => {
   })
 
   fastify.get<{
-    Headers: { pg: string }
+    Headers: { pg: string; 'x-pg-application-name'?: string }
     Params: {
       id: string
     }
   }>('/:id(\\d+)', async (request, reply) => {
-    const connectionString = request.headers.pg
+    const config = createConnectionConfig(request)
     const id = Number(request.params.id)
 
-    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+    const pgMeta = new PostgresMeta(config)
     const { data, error } = await pgMeta.functions.retrieve({ id })
     await pgMeta.end()
     if (error) {
@@ -62,12 +62,12 @@ export default async (fastify: FastifyInstance) => {
   })
 
   fastify.post<{
-    Headers: { pg: string }
+    Headers: { pg: string; 'x-pg-application-name'?: string }
     Body: any
   }>('/', async (request, reply) => {
-    const connectionString = request.headers.pg
+    const config = createConnectionConfig(request)
 
-    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+    const pgMeta = new PostgresMeta(config)
     const { data, error } = await pgMeta.functions.create(request.body as any)
     await pgMeta.end()
     if (error) {
@@ -79,16 +79,16 @@ export default async (fastify: FastifyInstance) => {
   })
 
   fastify.patch<{
-    Headers: { pg: string }
+    Headers: { pg: string; 'x-pg-application-name'?: string }
     Params: {
       id: string
     }
     Body: any
   }>('/:id(\\d+)', async (request, reply) => {
-    const connectionString = request.headers.pg
+    const config = createConnectionConfig(request)
     const id = Number(request.params.id)
 
-    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+    const pgMeta = new PostgresMeta(config)
     const { data, error } = await pgMeta.functions.update(id, request.body as any)
     await pgMeta.end()
     if (error) {
@@ -101,15 +101,15 @@ export default async (fastify: FastifyInstance) => {
   })
 
   fastify.delete<{
-    Headers: { pg: string }
+    Headers: { pg: string; 'x-pg-application-name'?: string }
     Params: {
       id: string
     }
   }>('/:id(\\d+)', async (request, reply) => {
-    const connectionString = request.headers.pg
+    const config = createConnectionConfig(request)
     const id = Number(request.params.id)
 
-    const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+    const pgMeta = new PostgresMeta(config)
     const { data, error } = await pgMeta.functions.remove(id)
     await pgMeta.end()
     if (error) {

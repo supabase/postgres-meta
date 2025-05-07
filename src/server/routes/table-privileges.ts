@@ -6,7 +6,7 @@ import {
   postgresTablePrivilegesRevokeSchema,
   postgresTablePrivilegesSchema,
 } from '../../lib/types.js'
-import { DEFAULT_POOL_CONFIG } from '../constants.js'
+import { createConnectionConfig } from '../utils.js'
 import { extractRequestForLogging, translateErrorToResponseCode } from '../utils.js'
 
 const route: FastifyPluginAsyncTypebox = async (fastify) => {
@@ -16,6 +16,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       schema: {
         headers: Type.Object({
           pg: Type.String(),
+          'x-pg-application-name': Type.Optional(Type.String()),
         }),
         querystring: Type.Object({
           include_system_schemas: Type.Optional(Type.Boolean()),
@@ -34,14 +35,14 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       },
     },
     async (request, reply) => {
-      const connectionString = request.headers.pg
+      const config = createConnectionConfig(request)
       const includeSystemSchemas = request.query.include_system_schemas
       const includedSchemas = request.query.included_schemas?.split(',')
       const excludedSchemas = request.query.excluded_schemas?.split(',')
       const limit = request.query.limit
       const offset = request.query.offset
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const pgMeta = new PostgresMeta(config)
       const { data, error } = await pgMeta.tablePrivileges.list({
         includeSystemSchemas,
         includedSchemas,
@@ -66,6 +67,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       schema: {
         headers: Type.Object({
           pg: Type.String(),
+          'x-pg-application-name': Type.Optional(Type.String()),
         }),
         body: Type.Array(postgresTablePrivilegesGrantSchema),
         response: {
@@ -77,9 +79,9 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       },
     },
     async (request, reply) => {
-      const connectionString = request.headers.pg
+      const config = createConnectionConfig(request)
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const pgMeta = new PostgresMeta(config)
       const { data, error } = await pgMeta.tablePrivileges.grant(request.body)
       await pgMeta.end()
       if (error) {
@@ -98,6 +100,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       schema: {
         headers: Type.Object({
           pg: Type.String(),
+          'x-pg-application-name': Type.Optional(Type.String()),
         }),
         body: Type.Array(postgresTablePrivilegesRevokeSchema),
         response: {
@@ -112,9 +115,9 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       },
     },
     async (request, reply) => {
-      const connectionString = request.headers.pg
+      const config = createConnectionConfig(request)
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const pgMeta = new PostgresMeta(config)
       const { data, error } = await pgMeta.tablePrivileges.revoke(request.body)
       await pgMeta.end()
       if (error) {
