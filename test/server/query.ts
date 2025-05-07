@@ -730,3 +730,24 @@ test('error with internalQuery property', async () => {
     }
   `)
 })
+
+test('custom application_name', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    headers: {
+      'x-pg-application-name': 'test',
+    },
+    payload: {
+      query: 'SHOW application_name;',
+    },
+  })
+
+  expect(res.json()).toMatchInlineSnapshot(`
+    [
+      {
+        "application_name": "test",
+      },
+    ]
+  `)
+})
