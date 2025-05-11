@@ -1,5 +1,7 @@
 import pgcs from 'pg-connection-string'
 import { FastifyRequest } from 'fastify'
+import { DEFAULT_POOL_CONFIG } from './constants.js'
+import { PoolConfig } from '../lib/types.js'
 
 export const extractRequestForLogging = (request: FastifyRequest) => {
   let pg: string = 'unknown'
@@ -19,6 +21,18 @@ export const extractRequestForLogging = (request: FastifyRequest) => {
     pg,
     opt: additional,
   }
+}
+
+export function createConnectionConfig(request: FastifyRequest): PoolConfig {
+  const connectionString = request.headers.pg as string
+  const config = { ...DEFAULT_POOL_CONFIG, connectionString }
+
+  // Override application_name if custom one provided in header
+  if (request.headers['x-pg-application-name']) {
+    config.application_name = request.headers['x-pg-application-name'] as string
+  }
+
+  return config
 }
 
 export function translateErrorToResponseCode(

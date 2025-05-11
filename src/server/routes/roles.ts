@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { PostgresMeta } from '../../lib/index.js'
-import { DEFAULT_POOL_CONFIG } from '../constants.js'
+import { createConnectionConfig } from '../utils.js'
 import { extractRequestForLogging } from '../utils.js'
 import {
   PostgresRoleCreate,
@@ -24,6 +24,7 @@ export default async (fastify: FastifyInstance) => {
       schema: {
         headers: Type.Object({
           pg: Type.String(),
+          'x-pg-application-name': Type.Optional(Type.String()),
         }),
         querystring: Type.Object({
           include_system_schemas: Type.Optional(Type.String()),
@@ -39,12 +40,12 @@ export default async (fastify: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      const connectionString = request.headers.pg
+      const config = createConnectionConfig(request)
       const includeDefaultRoles = request.query.include_default_roles === 'true'
       const limit = request.query.limit
       const offset = request.query.offset
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const pgMeta = new PostgresMeta(config)
       const { data, error } = await pgMeta.roles.list({
         includeDefaultRoles,
         limit,
@@ -72,6 +73,7 @@ export default async (fastify: FastifyInstance) => {
       schema: {
         headers: Type.Object({
           pg: Type.String(),
+          'x-pg-application-name': Type.Optional(Type.String()),
         }),
         params: Type.Object({
           id: Type.RegExp(/\d+/),
@@ -85,10 +87,10 @@ export default async (fastify: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      const connectionString = request.headers.pg
+      const config = createConnectionConfig(request)
       const id = Number(request.params.id)
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const pgMeta = new PostgresMeta(config)
       const { data, error } = await pgMeta.roles.retrieve({ id })
       await pgMeta.end()
       if (error) {
@@ -110,6 +112,7 @@ export default async (fastify: FastifyInstance) => {
       schema: {
         headers: Type.Object({
           pg: Type.String(),
+          'x-pg-application-name': Type.Optional(Type.String()),
         }),
         body: postgresRoleCreateSchema,
         response: {
@@ -121,9 +124,9 @@ export default async (fastify: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      const connectionString = request.headers.pg
+      const config = createConnectionConfig(request)
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const pgMeta = new PostgresMeta(config)
       const { data, error } = await pgMeta.roles.create(request.body)
       await pgMeta.end()
       if (error) {
@@ -148,6 +151,7 @@ export default async (fastify: FastifyInstance) => {
       schema: {
         headers: Type.Object({
           pg: Type.String(),
+          'x-pg-application-name': Type.Optional(Type.String()),
         }),
         params: Type.Object({
           id: Type.RegExp(/\d+/),
@@ -165,10 +169,10 @@ export default async (fastify: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      const connectionString = request.headers.pg
+      const config = createConnectionConfig(request)
       const id = Number(request.params.id)
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const pgMeta = new PostgresMeta(config)
       const { data, error } = await pgMeta.roles.update(id, request.body)
       await pgMeta.end()
       if (error) {
@@ -193,6 +197,7 @@ export default async (fastify: FastifyInstance) => {
       schema: {
         headers: Type.Object({
           pg: Type.String(),
+          'x-pg-application-name': Type.Optional(Type.String()),
         }),
         params: Type.Object({
           id: Type.RegExp(/\d+/),
@@ -212,10 +217,10 @@ export default async (fastify: FastifyInstance) => {
       },
     },
     async (request, reply) => {
-      const connectionString = request.headers.pg
+      const config = createConnectionConfig(request)
       const id = Number(request.params.id)
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const pgMeta = new PostgresMeta(config)
       const { data, error } = await pgMeta.roles.remove(id)
       await pgMeta.end()
       if (error) {

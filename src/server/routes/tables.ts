@@ -6,8 +6,11 @@ import {
   postgresTableSchema,
   postgresTableUpdateSchema,
 } from '../../lib/types.js'
-import { DEFAULT_POOL_CONFIG } from '../constants.js'
-import { extractRequestForLogging, translateErrorToResponseCode } from '../utils.js'
+import {
+  createConnectionConfig,
+  extractRequestForLogging,
+  translateErrorToResponseCode,
+} from '../utils.js'
 
 const route: FastifyPluginAsyncTypebox = async (fastify) => {
   fastify.get(
@@ -16,6 +19,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       schema: {
         headers: Type.Object({
           pg: Type.String(),
+          'x-pg-application-name': Type.Optional(Type.String()),
         }),
         querystring: Type.Object({
           include_system_schemas: Type.Optional(Type.Boolean()),
@@ -35,7 +39,6 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       },
     },
     async (request, reply) => {
-      const connectionString = request.headers.pg
       const includeSystemSchemas = request.query.include_system_schemas
       const includedSchemas = request.query.included_schemas?.split(',')
       const excludedSchemas = request.query.excluded_schemas?.split(',')
@@ -43,7 +46,8 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       const offset = request.query.offset
       const includeColumns = request.query.include_columns
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const config = createConnectionConfig(request)
+      const pgMeta = new PostgresMeta(config)
       const { data, error } = await pgMeta.tables.list({
         includeSystemSchemas,
         includedSchemas,
@@ -69,6 +73,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       schema: {
         headers: Type.Object({
           pg: Type.String(),
+          'x-pg-application-name': Type.Optional(Type.String()),
         }),
         params: Type.Object({
           id: Type.Integer(),
@@ -82,10 +87,10 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       },
     },
     async (request, reply) => {
-      const connectionString = request.headers.pg
       const id = request.params.id
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const config = createConnectionConfig(request)
+      const pgMeta = new PostgresMeta(config)
       const { data, error } = await pgMeta.tables.retrieve({ id })
       await pgMeta.end()
       if (error) {
@@ -104,6 +109,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       schema: {
         headers: Type.Object({
           pg: Type.String(),
+          'x-pg-application-name': Type.Optional(Type.String()),
         }),
         body: postgresTableCreateSchema,
         response: {
@@ -115,9 +121,8 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       },
     },
     async (request, reply) => {
-      const connectionString = request.headers.pg
-
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const config = createConnectionConfig(request)
+      const pgMeta = new PostgresMeta(config)
       const { data, error } = await pgMeta.tables.create(request.body)
       await pgMeta.end()
       if (error) {
@@ -136,6 +141,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       schema: {
         headers: Type.Object({
           pg: Type.String(),
+          'x-pg-application-name': Type.Optional(Type.String()),
         }),
         params: Type.Object({
           id: Type.Integer(),
@@ -153,10 +159,10 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       },
     },
     async (request, reply) => {
-      const connectionString = request.headers.pg
       const id = request.params.id
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const config = createConnectionConfig(request)
+      const pgMeta = new PostgresMeta(config)
       const { data, error } = await pgMeta.tables.update(id, request.body)
       await pgMeta.end()
       if (error) {
@@ -176,6 +182,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       schema: {
         headers: Type.Object({
           pg: Type.String(),
+          'x-pg-application-name': Type.Optional(Type.String()),
         }),
         params: Type.Object({
           id: Type.Integer(),
@@ -195,11 +202,11 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
       },
     },
     async (request, reply) => {
-      const connectionString = request.headers.pg
       const id = request.params.id
       const cascade = request.query.cascade
 
-      const pgMeta = new PostgresMeta({ ...DEFAULT_POOL_CONFIG, connectionString })
+      const config = createConnectionConfig(request)
+      const pgMeta = new PostgresMeta(config)
       const { data, error } = await pgMeta.tables.remove(id, { cascade })
       await pgMeta.end()
       if (error) {
