@@ -84,7 +84,7 @@ export type Database = {
                     ${[
                       ...columnsByTableId[table.id].map(
                         (column) =>
-                          `${JSON.stringify(column.name)}: ${pgTypeToTsType(column.format, {
+                          `${JSON.stringify(column.name)}: ${pgTypeToTsType(schema, column.format, {
                             types,
                             schemas,
                             tables,
@@ -97,7 +97,12 @@ export type Database = {
                           const type = types.find(({ id }) => id === fn.return_type_id)
                           let tsType = 'unknown'
                           if (type) {
-                            tsType = pgTypeToTsType(type.name, { types, schemas, tables, views })
+                            tsType = pgTypeToTsType(schema, type.name, {
+                              types,
+                              schemas,
+                              tables,
+                              views,
+                            })
                           }
                           return `${JSON.stringify(fn.name)}: ${tsType} | null`
                         }),
@@ -121,7 +126,12 @@ export type Database = {
                         output += ':'
                       }
 
-                      output += pgTypeToTsType(column.format, { types, schemas, tables, views })
+                      output += pgTypeToTsType(schema, column.format, {
+                        types,
+                        schemas,
+                        tables,
+                        views,
+                      })
 
                       if (column.is_nullable) {
                         output += '| null'
@@ -138,7 +148,12 @@ export type Database = {
                         return `${output}?: never`
                       }
 
-                      output += `?: ${pgTypeToTsType(column.format, { types, schemas, tables, views })}`
+                      output += `?: ${pgTypeToTsType(schema, column.format, {
+                        types,
+                        schemas,
+                        tables,
+                        views,
+                      })}`
 
                       if (column.is_nullable) {
                         output += '| null'
@@ -189,7 +204,7 @@ export type Database = {
                   Row: {
                     ${columnsByTableId[view.id].map(
                       (column) =>
-                        `${JSON.stringify(column.name)}: ${pgTypeToTsType(column.format, {
+                        `${JSON.stringify(column.name)}: ${pgTypeToTsType(schema, column.format, {
                           types,
                           schemas,
                           tables,
@@ -207,7 +222,12 @@ export type Database = {
                                return `${output}?: never`
                              }
 
-                             output += `?: ${pgTypeToTsType(column.format, { types, schemas, tables, views })} | null`
+                             output += `?: ${pgTypeToTsType(schema, column.format, {
+                               types,
+                               schemas,
+                               tables,
+                               views,
+                             })} | null`
 
                              return output
                            })}
@@ -220,7 +240,12 @@ export type Database = {
                                return `${output}?: never`
                              }
 
-                             output += `?: ${pgTypeToTsType(column.format, { types, schemas, tables, views })} | null`
+                             output += `?: ${pgTypeToTsType(schema, column.format, {
+                               types,
+                               schemas,
+                               tables,
+                               views,
+                             })} | null`
 
                              return output
                            })}
@@ -290,7 +315,12 @@ export type Database = {
                             const type = types.find(({ id }) => id === type_id)
                             let tsType = 'unknown'
                             if (type) {
-                              tsType = pgTypeToTsType(type.name, { types, schemas, tables, views })
+                              tsType = pgTypeToTsType(schema, type.name, {
+                                types,
+                                schemas,
+                                tables,
+                                views,
+                              })
                             }
                             return { name, type: tsType, has_default }
                           })
@@ -307,7 +337,12 @@ export type Database = {
                             const type = types.find(({ id }) => id === type_id)
                             let tsType = 'unknown'
                             if (type) {
-                              tsType = pgTypeToTsType(type.name, { types, schemas, tables, views })
+                              tsType = pgTypeToTsType(schema, type.name, {
+                                types,
+                                schemas,
+                                tables,
+                                views,
+                              })
                             }
                             return { name, type: tsType }
                           })
@@ -327,12 +362,16 @@ export type Database = {
                           return `{
                             ${columnsByTableId[relation.id].map(
                               (column) =>
-                                `${JSON.stringify(column.name)}: ${pgTypeToTsType(column.format, {
-                                  types,
-                                  schemas,
-                                  tables,
-                                  views,
-                                })} ${column.is_nullable ? '| null' : ''}`
+                                `${JSON.stringify(column.name)}: ${pgTypeToTsType(
+                                  schema,
+                                  column.format,
+                                  {
+                                    types,
+                                    schemas,
+                                    tables,
+                                    views,
+                                  }
+                                )} ${column.is_nullable ? '| null' : ''}`
                             )}
                           }`
                         }
@@ -340,7 +379,12 @@ export type Database = {
                         // Case 3: returns base/array/composite/enum type.
                         const type = types.find(({ id }) => id === fns[0].return_type_id)
                         if (type) {
-                          return pgTypeToTsType(type.name, { types, schemas, tables, views })
+                          return pgTypeToTsType(schema, type.name, {
+                            types,
+                            schemas,
+                            tables,
+                            views,
+                          })
                         }
 
                         return 'unknown'
@@ -372,7 +416,12 @@ export type Database = {
                           const type = types.find(({ id }) => id === type_id)
                           let tsType = 'unknown'
                           if (type) {
-                            tsType = `${pgTypeToTsType(type.name, { types, schemas, tables, views })} | null`
+                            tsType = `${pgTypeToTsType(schema, type.name, {
+                              types,
+                              schemas,
+                              tables,
+                              views,
+                            })} | null`
                           }
                           return `${JSON.stringify(name)}: ${tsType}`
                         })}
@@ -519,6 +568,7 @@ export const Constants = {
 
 // TODO: Make this more robust. Currently doesn't handle range types - returns them as unknown.
 const pgTypeToTsType = (
+  schema: PostgresSchema,
   pgType: string,
   {
     types,
@@ -560,10 +610,16 @@ const pgTypeToTsType = (
   } else if (pgType === 'record') {
     return 'Record<string, unknown>'
   } else if (pgType.startsWith('_')) {
-    return `(${pgTypeToTsType(pgType.substring(1), { types, schemas, tables, views })})[]`
+    return `(${pgTypeToTsType(schema, pgType.substring(1), {
+      types,
+      schemas,
+      tables,
+      views,
+    })})[]`
   } else {
-    const enumType = types.find((type) => type.name === pgType && type.enums.length > 0)
-    if (enumType) {
+    const enumTypes = types.filter((type) => type.name === pgType && type.enums.length > 0)
+    if (enumTypes.length > 0) {
+      const enumType = enumTypes.find((type) => type.schema === schema.name) || enumTypes[0]
       if (schemas.some(({ name }) => name === enumType.schema)) {
         return `Database[${JSON.stringify(enumType.schema)}]['Enums'][${JSON.stringify(
           enumType.name
@@ -572,8 +628,12 @@ const pgTypeToTsType = (
       return enumType.enums.map((variant) => JSON.stringify(variant)).join('|')
     }
 
-    const compositeType = types.find((type) => type.name === pgType && type.attributes.length > 0)
-    if (compositeType) {
+    const compositeTypes = types.filter(
+      (type) => type.name === pgType && type.attributes.length > 0
+    )
+    if (compositeTypes.length > 0) {
+      const compositeType =
+        compositeTypes.find((type) => type.schema === schema.name) || compositeTypes[0]
       if (schemas.some(({ name }) => name === compositeType.schema)) {
         return `Database[${JSON.stringify(
           compositeType.schema
@@ -582,8 +642,10 @@ const pgTypeToTsType = (
       return 'unknown'
     }
 
-    const tableRowType = tables.find((table) => table.name === pgType)
-    if (tableRowType) {
+    const tableRowTypes = tables.filter((table) => table.name === pgType)
+    if (tableRowTypes.length > 0) {
+      const tableRowType =
+        tableRowTypes.find((type) => type.schema === schema.name) || tableRowTypes[0]
       if (schemas.some(({ name }) => name === tableRowType.schema)) {
         return `Database[${JSON.stringify(tableRowType.schema)}]['Tables'][${JSON.stringify(
           tableRowType.name
@@ -592,8 +654,10 @@ const pgTypeToTsType = (
       return 'unknown'
     }
 
-    const viewRowType = views.find((view) => view.name === pgType)
-    if (viewRowType) {
+    const viewRowTypes = views.filter((view) => view.name === pgType)
+    if (viewRowTypes.length > 0) {
+      const viewRowType =
+        viewRowTypes.find((type) => type.schema === schema.name) || viewRowTypes[0]
       if (schemas.some(({ name }) => name === viewRowType.schema)) {
         return `Database[${JSON.stringify(viewRowType.schema)}]['Views'][${JSON.stringify(
           viewRowType.name
