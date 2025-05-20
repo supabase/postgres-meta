@@ -59,6 +59,9 @@ export const PG_META_MAX_RESULT_SIZE = process.env.PG_META_MAX_RESULT_SIZE_MB
 export const DEFAULT_POOL_CONFIG: PoolConfig = {
   max: 1,
   connectionTimeoutMillis: PG_CONN_TIMEOUT_SECS * 1000,
+  // node-postgrest need a statement_timeout to kill the connection when timeout is reached
+  // otherwise the query will keep running on the database even if query timeout was reached
+  statement_timeout: (PG_QUERY_TIMEOUT_SECS + 1) * 1000,
   query_timeout: PG_QUERY_TIMEOUT_SECS * 1000,
   ssl: PG_META_DB_SSL_ROOT_CERT ? { ca: PG_META_DB_SSL_ROOT_CERT } : undefined,
   application_name: `postgres-meta ${pkg.version}`,
