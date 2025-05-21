@@ -80,6 +80,11 @@ export const init: (config: PoolConfig) => {
       u.searchParams.delete('sslrootcert')
       config.connectionString = u.toString()
 
+      // For pooler connections like pgbouncer, statement_timeout isn't supported
+      if (u.port !== '5432') {
+        config.statement_timeout = undefined
+      }
+
       // sslmode:    null, 'disable', 'prefer', 'require', 'verify-ca', 'verify-full', 'no-verify'
       // config.ssl: true, false, {}
       if (sslmode === null) {
