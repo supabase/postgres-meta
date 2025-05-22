@@ -11,6 +11,7 @@ export default async (fastify: FastifyInstance) => {
       excluded_schemas?: string
       included_schemas?: string
       detect_one_to_one_relationships?: string
+      postgrest_version?: string
     }
   }>('/', async (request, reply) => {
     const config = createConnectionConfig(request)
@@ -19,6 +20,7 @@ export default async (fastify: FastifyInstance) => {
     const includedSchemas =
       request.query.included_schemas?.split(',').map((schema) => schema.trim()) ?? []
     const detectOneToOneRelationships = request.query.detect_one_to_one_relationships === 'true'
+    const postgrestVersion = request.query.postgrest_version
 
     const pgMeta: PostgresMeta = new PostgresMeta(config)
     const { data: generatorMeta, error: generatorMetaError } = await getGeneratorMetadata(pgMeta, {
@@ -34,6 +36,7 @@ export default async (fastify: FastifyInstance) => {
     return applyTypescriptTemplate({
       ...generatorMeta,
       detectOneToOneRelationships,
+      postgrestVersion,
     })
   })
 }
