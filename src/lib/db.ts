@@ -2,6 +2,7 @@ import pg from 'pg'
 import * as Sentry from '@sentry/node'
 import { parse as parseArray } from 'postgres-array'
 import { PostgresMetaResult, PoolConfig } from './types.js'
+import { PG_STATEMENT_TIMEOUT_SECS } from '../server/constants.js'
 
 pg.types.setTypeParser(pg.types.builtins.INT8, (x) => {
   const asNumber = Number(x)
@@ -80,11 +81,6 @@ export const init: (config: PoolConfig) => {
       u.searchParams.delete('sslrootcert')
       config.connectionString = u.toString()
 
-      // For pooler connections like pgbouncer, statement_timeout isn't supported
-      if (u.port !== '5432') {
-        config.statement_timeout = undefined
-      }
-
       // sslmode:    null, 'disable', 'prefer', 'require', 'verify-ca', 'verify-full', 'no-verify'
       // config.ssl: true, false, {}
       if (sslmode === null) {
@@ -117,10 +113,15 @@ export const init: (config: PoolConfig) => {
             attributes: { sql: trackQueryInSentry ? sql : 'custom' },
           },
           async () => {
+            // node-postgres need a statement_timeout to kill the connection when timeout is reached
+            // otherwise the query will keep running on the database even if query timeout was reached
+            // This need to be added at query and not connection level because poolers (pgbouncer) doesn't
+            // allow to set this parameter at connection time
+            const sqlWithStatementTimeout = `SET statement_timeout='${PG_STATEMENT_TIMEOUT_SECS}s';\n${sql}`
             try {
               if (!pool) {
                 const pool = new pg.Pool(config)
-                let res = await poolerQueryHandleError(pool, sql)
+                let res = await poolerQueryHandleError(pool, sqlWithStatementTimeout)
                 if (Array.isArray(res)) {
                   res = res.reverse().find((x) => x.rows.length !== 0) ?? { rows: [] }
                 }
@@ -128,7 +129,7 @@ export const init: (config: PoolConfig) => {
                 return { data: res.rows, error: null }
               }
 
-              let res = await poolerQueryHandleError(pool, sql)
+              let res = await poolerQueryHandleError(pool, sqlWithStatementTimeout)
               if (Array.isArray(res)) {
                 res = res.reverse().find((x) => x.rows.length !== 0) ?? { rows: [] }
               }
@@ -158,7 +159,7 @@ export const init: (config: PoolConfig) => {
                     let lineNumber = 0
                     let lineOffset = 0
 
-                    const lines = sql.split('\n')
+                    const lines = sqlWithStatementTimeout.split('\n')
                     let currentOffset = 0
                     for (let i = 0; i < lines.length; i++) {
                       if (currentOffset + lines[i].length > position) {
