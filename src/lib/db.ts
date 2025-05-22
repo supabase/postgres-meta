@@ -4,6 +4,8 @@ import { parse as parseArray } from 'postgres-array'
 import { PostgresMetaResult, PoolConfig } from './types.js'
 import { PG_STATEMENT_TIMEOUT_SECS } from '../server/constants.js'
 
+const STATEMENT_TIMEOUT_QUERY_PREFIX = `SET statement_timeout='${PG_STATEMENT_TIMEOUT_SECS}s';`
+
 pg.types.setTypeParser(pg.types.builtins.INT8, (x) => {
   const asNumber = Number(x)
   if (Number.isSafeInteger(asNumber)) {
@@ -117,7 +119,7 @@ export const init: (config: PoolConfig) => {
             // otherwise the query will keep running on the database even if query timeout was reached
             // This need to be added at query and not connection level because poolers (pgbouncer) doesn't
             // allow to set this parameter at connection time
-            const sqlWithStatementTimeout = `SET statement_timeout='${PG_STATEMENT_TIMEOUT_SECS}s';\n${sql}`
+            const sqlWithStatementTimeout = `${STATEMENT_TIMEOUT_QUERY_PREFIX}${sql}`
             try {
               if (!pool) {
                 const pool = new pg.Pool(config)
@@ -153,13 +155,17 @@ export const init: (config: PoolConfig) => {
                   formattedError += '\n'
                   if (error.position) {
                     // error.position is 1-based
-                    const position = Number(error.position) - 1
+                    // we also remove our `SET statement_timeout = 'XXs';\n` from the position
+                    const position =
+                      Number(error.position) - 1 - STATEMENT_TIMEOUT_QUERY_PREFIX.length
+                    // we set the new error position
+                    error.position = `${position + 1}`
 
                     let line = ''
                     let lineNumber = 0
                     let lineOffset = 0
 
-                    const lines = sqlWithStatementTimeout.split('\n')
+                    const lines = sql.split('\n')
                     let currentOffset = 0
                     for (let i = 0; i < lines.length; i++) {
                       if (currentOffset + lines[i].length > position) {
