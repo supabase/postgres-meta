@@ -2,6 +2,9 @@ import pg from 'pg'
 import * as Sentry from '@sentry/node'
 import { parse as parseArray } from 'postgres-array'
 import { PostgresMetaResult, PoolConfig } from './types.js'
+import { PG_STATEMENT_TIMEOUT_SECS } from '../server/constants.js'
+
+const STATEMENT_TIMEOUT_QUERY_PREFIX = `SET statement_timeout='${PG_STATEMENT_TIMEOUT_SECS}s';`
 
 pg.types.setTypeParser(pg.types.builtins.INT8, (x) => {
   const asNumber = Number(x)
@@ -112,10 +115,15 @@ export const init: (config: PoolConfig) => {
             attributes: { sql: trackQueryInSentry ? sql : 'custom' },
           },
           async () => {
+            // node-postgres need a statement_timeout to kill the connection when timeout is reached
+            // otherwise the query will keep running on the database even if query timeout was reached
+            // This need to be added at query and not connection level because poolers (pgbouncer) doesn't
+            // allow to set this parameter at connection time
+            const sqlWithStatementTimeout = `${STATEMENT_TIMEOUT_QUERY_PREFIX}${sql}`
             try {
               if (!pool) {
                 const pool = new pg.Pool(config)
-                let res = await poolerQueryHandleError(pool, sql)
+                let res = await poolerQueryHandleError(pool, sqlWithStatementTimeout)
                 if (Array.isArray(res)) {
                   res = res.reverse().find((x) => x.rows.length !== 0) ?? { rows: [] }
                 }
@@ -123,7 +131,7 @@ export const init: (config: PoolConfig) => {
                 return { data: res.rows, error: null }
               }
 
-              let res = await poolerQueryHandleError(pool, sql)
+              let res = await poolerQueryHandleError(pool, sqlWithStatementTimeout)
               if (Array.isArray(res)) {
                 res = res.reverse().find((x) => x.rows.length !== 0) ?? { rows: [] }
               }
@@ -147,7 +155,11 @@ export const init: (config: PoolConfig) => {
                   formattedError += '\n'
                   if (error.position) {
                     // error.position is 1-based
-                    const position = Number(error.position) - 1
+                    // we also remove our `SET statement_timeout = 'XXs';\n` from the position
+                    const position =
+                      Number(error.position) - 1 - STATEMENT_TIMEOUT_QUERY_PREFIX.length
+                    // we set the new error position
+                    error.position = `${position + 1}`
 
                     let line = ''
                     let lineNumber = 0

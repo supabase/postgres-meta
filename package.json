@@ -30,8 +30,8 @@
     "test": "run-s db:clean db:run test:run db:clean",
     "db:clean": "cd test/db && docker compose down",
     "db:run": "cd test/db && docker compose up --detach --wait",
-    "test:run": "PG_META_MAX_RESULT_SIZE_MB=20 PG_QUERY_TIMEOUT_SECS=3 PG_CONN_TIMEOUT_SECS=30 vitest run --coverage",
-    "test:update": "run-s db:clean db:run && PG_META_MAX_RESULT_SIZE_MB=20 PG_QUERY_TIMEOUT_SECS=3 PG_CONN_TIMEOUT_SECS=30 vitest run --update && run-s db:clean"
+    "test:run": "PG_META_MAX_RESULT_SIZE_MB=20 PG_QUERY_TIMEOUT_SECS=5 PG_CONN_TIMEOUT_SECS=30 vitest run --coverage",
+    "test:update": "run-s db:clean db:run && PG_META_MAX_RESULT_SIZE_MB=20 PG_QUERY_TIMEOUT_SECS=5 PG_CONN_TIMEOUT_SECS=30 vitest run --update && run-s db:clean"
   },
   "engines": {
     "node": ">=20",
