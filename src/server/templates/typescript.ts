@@ -21,8 +21,10 @@ export const apply = async ({
   functions,
   types,
   detectOneToOneRelationships,
+  postgrestVersion,
 }: GeneratorMetadata & {
   detectOneToOneRelationships: boolean
+  postgrestVersion?: string
 }): Promise<string> => {
   const columnsByTableId = Object.fromEntries<PostgresColumn[]>(
     [...tables, ...foreignTables, ...views, ...materializedViews].map((t) => [t.id, []])
@@ -31,6 +33,29 @@ export const apply = async ({
     .filter((c) => c.table_id in columnsByTableId)
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
     .forEach((c) => columnsByTableId[c.table_id].push(c))
+
+  const internal_supabase_schema = postgrestVersion
+    ? `// Allows to automatically instanciate createClient with right options
+  // instead of createClient<Database, { postgrestVersion: 'XX' }>(URL, KEY)
+  __internal_supabase: {
+    postgrestVersion: '${postgrestVersion}'
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }`
+    : ''
 
   let output = `
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
@@ -431,6 +456,7 @@ export type Database = {
           }
         }`
     })}
+  ${internal_supabase_schema}
 }
 
 type DefaultSchema = Database[Extract<keyof Database, ${JSON.stringify(GENERATE_TYPES_DEFAULT_SCHEMA)}>]
