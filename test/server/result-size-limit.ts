@@ -72,29 +72,23 @@ describe('test js parser error max result', () => {
   // Create a table with large data for testing
   beforeAll(async () => {
     // Create a table with a large text column
-    await pgMeta.query(
-      `
+    await pgMeta.query(`
       CREATE TABLE very_large_data (
         id SERIAL PRIMARY KEY,
         data TEXT
       );
-    `,
-      false
-    )
+    `)
 
     // Insert data that will exceed our limit in tests it's set around ~20MB
-    await pgMeta.query(
-      `
+    await pgMeta.query(`
       INSERT INTO very_large_data (data)
       VALUES (repeat('x', 710 * 1024 * 1024)) -- 700+MB string will raise a JS exception at parse time
-    `,
-      false
-    )
+    `)
   })
 
   afterAll(async () => {
     // Clean up the test table
-    await pgMeta.query('DROP TABLE very_large_data;', false)
+    await pgMeta.query('DROP TABLE very_large_data;')
   })
 
   test(
