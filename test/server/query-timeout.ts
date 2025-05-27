@@ -13,6 +13,7 @@ describe('test query timeout', () => {
       const res = await app.inject({
         method: 'POST',
         path: '/query',
+        query: `statementTimeoutSecs=${TIMEOUT - 2}`,
         payload: {
           query,
         },
@@ -33,6 +34,38 @@ describe('test query timeout', () => {
 
       // Should have no active connections except for our current query
       expect(connectionsRes.data).toHaveLength(0)
+    },
+    TIMEOUT * 1000
+  )
+
+  test(
+    'query without timeout parameter should not have timeout',
+    async () => {
+      const query = `SELECT pg_sleep(${TIMEOUT});`
+      // Execute a query that will sleep for 10 seconds without specifying timeout
+      const res = await app.inject({
+        method: 'POST',
+        path: '/query',
+        payload: {
+          query,
+        },
+      })
+
+      // Check that we get the proper timeout error response
+      expect(res.statusCode).toBe(408) // Request Timeout
+      expect(res.json()).toMatchObject({
+        error: expect.stringContaining('Query read timeout'),
+      })
+      // wait one second
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      // Verify that the connection has not been cleaned up sinice there is no statementTimetout
+      const connectionsRes = await pgMeta.query(`
+      SELECT * FROM pg_stat_activity where application_name = 'postgres-meta 0.0.0-automated' and query ILIKE '%${query}%';
+    `)
+
+      // Should have no active connections except for our current query
+      expect(connectionsRes.data).toHaveLength(1)
     },
     TIMEOUT * 1000
   )

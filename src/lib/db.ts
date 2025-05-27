@@ -2,9 +2,6 @@ import pg from 'pg'
 import * as Sentry from '@sentry/node'
 import { parse as parseArray } from 'postgres-array'
 import { PostgresMetaResult, PoolConfig } from './types.js'
-import { PG_STATEMENT_TIMEOUT_SECS } from '../server/constants.js'
-
-const STATEMENT_TIMEOUT_QUERY_PREFIX = `SET statement_timeout='${PG_STATEMENT_TIMEOUT_SECS}s';`
 
 pg.types.setTypeParser(pg.types.builtins.INT8, (x) => {
   const asNumber = Number(x)
@@ -65,7 +62,10 @@ const poolerQueryHandleError = (pgpool: pg.Pool, sql: string): Promise<pg.QueryR
 }
 
 export const init: (config: PoolConfig) => {
-  query: (sql: string, trackQueryInSentry?: boolean) => Promise<PostgresMetaResult<any>>
+  query: (
+    sql: string,
+    opts?: { statementQueryTimeout?: number; trackQueryInSentry?: boolean }
+  ) => Promise<PostgresMetaResult<any>>
   end: () => Promise<void>
 } = (config) => {
   return Sentry.startSpan({ op: 'db', name: 'db.init' }, () => {
@@ -106,7 +106,10 @@ export const init: (config: PoolConfig) => {
     let pool: pg.Pool | null = new pg.Pool(config)
 
     return {
-      async query(sql, trackQueryInSentry = true) {
+      async query(
+        sql,
+        { statementQueryTimeout, trackQueryInSentry } = { trackQueryInSentry: true }
+      ) {
         return Sentry.startSpan(
           // For metrics purposes, log the query that will be run if it's not an user provided query (with possibly sentitives infos)
           {
@@ -115,11 +118,14 @@ export const init: (config: PoolConfig) => {
             attributes: { sql: trackQueryInSentry ? sql : 'custom' },
           },
           async () => {
+            const statementTimeoutQueryPrefix = statementQueryTimeout
+              ? `SET statement_timeout='${statementQueryTimeout}s';`
+              : ''
             // node-postgres need a statement_timeout to kill the connection when timeout is reached
             // otherwise the query will keep running on the database even if query timeout was reached
             // This need to be added at query and not connection level because poolers (pgbouncer) doesn't
             // allow to set this parameter at connection time
-            const sqlWithStatementTimeout = `${STATEMENT_TIMEOUT_QUERY_PREFIX}${sql}`
+            const sqlWithStatementTimeout = `${statementTimeoutQueryPrefix}${sql}`
             try {
               if (!pool) {
                 const pool = new pg.Pool(config)
@@ -156,8 +162,7 @@ export const init: (config: PoolConfig) => {
                   if (error.position) {
                     // error.position is 1-based
                     // we also remove our `SET statement_timeout = 'XXs';\n` from the position
-                    const position =
-                      Number(error.position) - 1 - STATEMENT_TIMEOUT_QUERY_PREFIX.length
+                    const position = Number(error.position) - 1 - statementTimeoutQueryPrefix.length
                     // we set the new error position
                     error.position = `${position + 1}`
 
