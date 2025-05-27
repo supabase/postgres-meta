@@ -3,17 +3,18 @@ import { app } from './utils'
 import { pgMeta } from '../lib/utils'
 
 const TIMEOUT = (Number(process.env.PG_QUERY_TIMEOUT_SECS) ?? 10) + 2
+const STATEMENT_TIMEOUT = (Number(process.env.PG_QUERY_TIMEOUT_SECS) ?? 10) + 1
 
 describe('test query timeout', () => {
   test(
     `query timeout after ${TIMEOUT}s and connection cleanup`,
     async () => {
-      const query = `SELECT pg_sleep(${TIMEOUT});`
+      const query = `SELECT pg_sleep(${TIMEOUT + 10});`
       // Execute a query that will sleep for 10 seconds
       const res = await app.inject({
         method: 'POST',
         path: '/query',
-        query: `statementTimeoutSecs=${TIMEOUT - 2}`,
+        query: `statementTimeoutSecs=${STATEMENT_TIMEOUT}`,
         payload: {
           query,
         },
@@ -41,7 +42,7 @@ describe('test query timeout', () => {
   test(
     'query without timeout parameter should not have timeout',
     async () => {
-      const query = `SELECT pg_sleep(${TIMEOUT});`
+      const query = `SELECT pg_sleep(${TIMEOUT + 10});`
       // Execute a query that will sleep for 10 seconds without specifying timeout
       const res = await app.inject({
         method: 'POST',
