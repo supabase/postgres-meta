@@ -17,7 +17,6 @@ const PG_META_DB_SSL_MODE = process.env.PG_META_DB_SSL_MODE || 'disable'
 
 const PG_CONN_TIMEOUT_SECS = Number(process.env.PG_CONN_TIMEOUT_SECS || 15)
 const PG_QUERY_TIMEOUT_SECS = Number(process.env.PG_QUERY_TIMEOUT_SECS || 55)
-export const PG_STATEMENT_TIMEOUT_SECS = PG_QUERY_TIMEOUT_SECS + 1
 
 export let PG_CONNECTION = process.env.PG_META_DB_URL
 if (!PG_CONNECTION) {
