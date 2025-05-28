@@ -19,11 +19,18 @@ export default async (fastify: FastifyInstance) => {
     Body: {
       query: string
     }
+    Querystring: {
+      statementTimeoutSecs?: number
+    }
   }>('/', async (request, reply) => {
+    const statementTimeoutSecs = request.query.statementTimeoutSecs
     errorOnEmptyQuery(request)
     const config = createConnectionConfig(request)
     const pgMeta = new PostgresMeta(config)
-    const { data, error } = await pgMeta.query(request.body.query, false)
+    const { data, error } = await pgMeta.query(request.body.query, {
+      trackQueryInSentry: true,
+      statementQueryTimeout: statementTimeoutSecs,
+    })
     await pgMeta.end()
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })

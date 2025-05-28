@@ -22,7 +22,10 @@ import { init } from './db.js'
 import { PostgresMetaResult, PoolConfig } from './types.js'
 
 export default class PostgresMeta {
-  query: (sql: string, trackQueryInSentry?: boolean) => Promise<PostgresMetaResult<any>>
+  query: (
+    sql: string,
+    opts?: { statementQueryTimeout?: number; trackQueryInSentry?: boolean }
+  ) => Promise<PostgresMetaResult<any>>
   end: () => Promise<void>
   columnPrivileges: PostgresMetaColumnPrivileges
   columns: PostgresMetaColumns
