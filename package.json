@@ -46,7 +46,7 @@
     "@sinclair/typebox": "^0.31.25",
     "close-with-grace": "^2.1.0",
     "crypto-js": "^4.0.0",
-    "fastify": "^4.24.3",
+    "fastify": "^5.4.0",
     "fastify-metrics": "^10.0.0",
     "pg": "npm:@supabase/pg@0.0.3",
     "pg-connection-string": "^2.7.0",
