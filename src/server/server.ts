@@ -130,7 +130,7 @@ async function getTypeOutput(): Promise<string | null> {
     ),
     types: types!,
     detectOneToOneRelationships: GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS,
-    postgresVersion: POSTGREST_VERSION,
+    postgrestVersion: POSTGREST_VERSION,
   }
 
   switch (GENERATE_TYPES?.toLowerCase()) {
