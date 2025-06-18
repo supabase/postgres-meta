@@ -1,6 +1,3 @@
-// Use dynamic import to support module mock
-const fs = await import('node:fs/promises')
-
 export const getSecret = async (key: string) => {
   if (!key) {
     return ''
@@ -15,6 +12,8 @@ export const getSecret = async (key: string) => {
   if (!file) {
     return ''
   }
+  // Use dynamic import to support module mock
+  const fs = await import('node:fs/promises')
 
   return await fs.readFile(file, { encoding: 'utf8' }).catch((e) => {
     if (e.code == 'ENOENT') {
