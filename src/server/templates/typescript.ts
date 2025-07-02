@@ -36,9 +36,9 @@ export const apply = async ({
 
   const internal_supabase_schema = postgrestVersion
     ? `// Allows to automatically instanciate createClient with right options
-  // instead of createClient<Database, { postgrestVersion: 'XX' }>(URL, KEY)
-  __internal_supabase: {
-    postgrestVersion: '${postgrestVersion}'
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: '${postgrestVersion}'
     Tables: {
       [_ in never]: never
     }
