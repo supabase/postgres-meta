@@ -2389,9 +2389,9 @@ test('typegen: typescript w/ postgrestVersion', async () => {
         }
       }
       // Allows to automatically instanciate createClient with right options
-      // instead of createClient<Database, { postgrestVersion: 'XX' }>(URL, KEY)
-      __internal_supabase: {
-        postgrestVersion: "13"
+      // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+      __InternalSupabase: {
+        PostgrestVersion: "13"
         Tables: {
           [_ in never]: never
         }
