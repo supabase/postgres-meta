@@ -13,6 +13,7 @@ import {
   PG_CONNECTION,
   PG_META_HOST,
   PG_META_PORT,
+  POSTGREST_VERSION,
 } from './constants.js'
 import { apply as applyTypescriptTemplate } from './templates/typescript.js'
 import { apply as applyGoTemplate } from './templates/go.js'
@@ -129,6 +130,7 @@ async function getTypeOutput(): Promise<string | null> {
     ),
     types: types!,
     detectOneToOneRelationships: GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS,
+    postgrestVersion: POSTGREST_VERSION,
   }
 
   switch (GENERATE_TYPES?.toLowerCase()) {

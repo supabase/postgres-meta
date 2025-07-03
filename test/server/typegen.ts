@@ -491,21 +491,25 @@ test('typegen: typescript', async () => {
       }
     }
 
-    type DefaultSchema = Database[Extract<keyof Database, "public">]
+    type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+    type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
     export type Tables<
       DefaultSchemaTableNameOrOptions extends
         | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-        | { schema: keyof Database },
+        | { schema: keyof DatabaseWithoutInternals },
       TableName extends DefaultSchemaTableNameOrOptions extends {
-        schema: keyof Database
+        schema: keyof DatabaseWithoutInternals
       }
-        ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-            Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+        ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+            DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
         : never = never,
-    > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-      ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-          Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+    > = DefaultSchemaTableNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+      ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+          DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
           Row: infer R
         }
         ? R
@@ -523,14 +527,16 @@ test('typegen: typescript', async () => {
     export type TablesInsert<
       DefaultSchemaTableNameOrOptions extends
         | keyof DefaultSchema["Tables"]
-        | { schema: keyof Database },
+        | { schema: keyof DatabaseWithoutInternals },
       TableName extends DefaultSchemaTableNameOrOptions extends {
-        schema: keyof Database
+        schema: keyof DatabaseWithoutInternals
       }
-        ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+        ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
         : never = never,
-    > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-      ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+    > = DefaultSchemaTableNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+      ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
           Insert: infer I
         }
         ? I
@@ -546,14 +552,16 @@ test('typegen: typescript', async () => {
     export type TablesUpdate<
       DefaultSchemaTableNameOrOptions extends
         | keyof DefaultSchema["Tables"]
-        | { schema: keyof Database },
+        | { schema: keyof DatabaseWithoutInternals },
       TableName extends DefaultSchemaTableNameOrOptions extends {
-        schema: keyof Database
+        schema: keyof DatabaseWithoutInternals
       }
-        ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+        ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
         : never = never,
-    > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-      ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+    > = DefaultSchemaTableNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+      ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
           Update: infer U
         }
         ? U
@@ -569,14 +577,16 @@ test('typegen: typescript', async () => {
     export type Enums<
       DefaultSchemaEnumNameOrOptions extends
         | keyof DefaultSchema["Enums"]
-        | { schema: keyof Database },
+        | { schema: keyof DatabaseWithoutInternals },
       EnumName extends DefaultSchemaEnumNameOrOptions extends {
-        schema: keyof Database
+        schema: keyof DatabaseWithoutInternals
       }
-        ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+        ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
         : never = never,
-    > = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-      ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+    > = DefaultSchemaEnumNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+      ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
       : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
         ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
         : never
@@ -584,14 +594,16 @@ test('typegen: typescript', async () => {
     export type CompositeTypes<
       PublicCompositeTypeNameOrOptions extends
         | keyof DefaultSchema["CompositeTypes"]
-        | { schema: keyof Database },
+        | { schema: keyof DatabaseWithoutInternals },
       CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-        schema: keyof Database
+        schema: keyof DatabaseWithoutInternals
       }
-        ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+        ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
         : never = never,
-    > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-      ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+    > = PublicCompositeTypeNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+      ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
       : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
         ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
         : never
@@ -1124,21 +1136,25 @@ test('typegen w/ one-to-one relationships', async () => {
       }
     }
 
-    type DefaultSchema = Database[Extract<keyof Database, "public">]
+    type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+    type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
     export type Tables<
       DefaultSchemaTableNameOrOptions extends
         | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-        | { schema: keyof Database },
+        | { schema: keyof DatabaseWithoutInternals },
       TableName extends DefaultSchemaTableNameOrOptions extends {
-        schema: keyof Database
+        schema: keyof DatabaseWithoutInternals
       }
-        ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-            Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+        ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+            DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
         : never = never,
-    > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-      ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-          Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+    > = DefaultSchemaTableNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+      ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+          DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
           Row: infer R
         }
         ? R
@@ -1156,14 +1172,16 @@ test('typegen w/ one-to-one relationships', async () => {
     export type TablesInsert<
       DefaultSchemaTableNameOrOptions extends
         | keyof DefaultSchema["Tables"]
-        | { schema: keyof Database },
+        | { schema: keyof DatabaseWithoutInternals },
       TableName extends DefaultSchemaTableNameOrOptions extends {
-        schema: keyof Database
+        schema: keyof DatabaseWithoutInternals
       }
-        ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+        ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
         : never = never,
-    > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-      ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+    > = DefaultSchemaTableNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+      ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
           Insert: infer I
         }
         ? I
@@ -1179,14 +1197,16 @@ test('typegen w/ one-to-one relationships', async () => {
     export type TablesUpdate<
       DefaultSchemaTableNameOrOptions extends
         | keyof DefaultSchema["Tables"]
-        | { schema: keyof Database },
+        | { schema: keyof DatabaseWithoutInternals },
       TableName extends DefaultSchemaTableNameOrOptions extends {
-        schema: keyof Database
+        schema: keyof DatabaseWithoutInternals
       }
-        ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+        ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
         : never = never,
-    > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-      ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+    > = DefaultSchemaTableNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+      ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
           Update: infer U
         }
         ? U
@@ -1202,14 +1222,16 @@ test('typegen w/ one-to-one relationships', async () => {
     export type Enums<
       DefaultSchemaEnumNameOrOptions extends
         | keyof DefaultSchema["Enums"]
-        | { schema: keyof Database },
+        | { schema: keyof DatabaseWithoutInternals },
       EnumName extends DefaultSchemaEnumNameOrOptions extends {
-        schema: keyof Database
+        schema: keyof DatabaseWithoutInternals
       }
-        ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+        ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
         : never = never,
-    > = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-      ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+    > = DefaultSchemaEnumNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+      ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
       : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
         ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
         : never
@@ -1217,14 +1239,16 @@ test('typegen w/ one-to-one relationships', async () => {
     export type CompositeTypes<
       PublicCompositeTypeNameOrOptions extends
         | keyof DefaultSchema["CompositeTypes"]
-        | { schema: keyof Database },
+        | { schema: keyof DatabaseWithoutInternals },
       CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-        schema: keyof Database
+        schema: keyof DatabaseWithoutInternals
       }
-        ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+        ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
         : never = never,
-    > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-      ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+    > = PublicCompositeTypeNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+      ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
       : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
         ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
         : never
@@ -1757,21 +1781,25 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
       }
     }
 
-    type DefaultSchema = Database[Extract<keyof Database, "public">]
+    type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+    type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
     export type Tables<
       DefaultSchemaTableNameOrOptions extends
         | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-        | { schema: keyof Database },
+        | { schema: keyof DatabaseWithoutInternals },
       TableName extends DefaultSchemaTableNameOrOptions extends {
-        schema: keyof Database
+        schema: keyof DatabaseWithoutInternals
       }
-        ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-            Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+        ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+            DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
         : never = never,
-    > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-      ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-          Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+    > = DefaultSchemaTableNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+      ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+          DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
           Row: infer R
         }
         ? R
@@ -1789,14 +1817,16 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
     export type TablesInsert<
       DefaultSchemaTableNameOrOptions extends
         | keyof DefaultSchema["Tables"]
-        | { schema: keyof Database },
+        | { schema: keyof DatabaseWithoutInternals },
       TableName extends DefaultSchemaTableNameOrOptions extends {
-        schema: keyof Database
+        schema: keyof DatabaseWithoutInternals
       }
-        ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+        ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
         : never = never,
-    > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-      ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+    > = DefaultSchemaTableNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+      ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
           Insert: infer I
         }
         ? I
@@ -1812,14 +1842,16 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
     export type TablesUpdate<
       DefaultSchemaTableNameOrOptions extends
         | keyof DefaultSchema["Tables"]
-        | { schema: keyof Database },
+        | { schema: keyof DatabaseWithoutInternals },
       TableName extends DefaultSchemaTableNameOrOptions extends {
-        schema: keyof Database
+        schema: keyof DatabaseWithoutInternals
       }
-        ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+        ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
         : never = never,
-    > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-      ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+    > = DefaultSchemaTableNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+      ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
           Update: infer U
         }
         ? U
@@ -1835,14 +1867,16 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
     export type Enums<
       DefaultSchemaEnumNameOrOptions extends
         | keyof DefaultSchema["Enums"]
-        | { schema: keyof Database },
+        | { schema: keyof DatabaseWithoutInternals },
       EnumName extends DefaultSchemaEnumNameOrOptions extends {
-        schema: keyof Database
+        schema: keyof DatabaseWithoutInternals
       }
-        ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+        ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
         : never = never,
-    > = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-      ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+    > = DefaultSchemaEnumNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+      ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
       : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
         ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
         : never
@@ -1850,14 +1884,666 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
     export type CompositeTypes<
       PublicCompositeTypeNameOrOptions extends
         | keyof DefaultSchema["CompositeTypes"]
-        | { schema: keyof Database },
+        | { schema: keyof DatabaseWithoutInternals },
       CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-        schema: keyof Database
+        schema: keyof DatabaseWithoutInternals
       }
-        ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+        ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
         : never = never,
-    > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-      ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+    > = PublicCompositeTypeNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+      ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+      : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+        ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+        : never
+
+    export const Constants = {
+      public: {
+        Enums: {
+          meme_status: ["new", "old", "retired"],
+          user_status: ["ACTIVE", "INACTIVE"],
+        },
+      },
+    } as const
+    "
+  `
+  )
+})
+
+test('typegen: typescript w/ postgrestVersion', async () => {
+  const { body } = await app.inject({
+    method: 'GET',
+    path: '/generators/typescript',
+    query: { detect_one_to_one_relationships: 'true', postgrest_version: '13' },
+  })
+  expect(body).toMatchInlineSnapshot(
+    `
+    "export type Json =
+      | string
+      | number
+      | boolean
+      | null
+      | { [key: string]: Json | undefined }
+      | Json[]
+
+    export type Database = {
+      // Allows to automatically instanciate createClient with right options
+      // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+      __InternalSupabase: {
+        PostgrestVersion: "13"
+      }
+      public: {
+        Tables: {
+          category: {
+            Row: {
+              id: number
+              name: string
+            }
+            Insert: {
+              id?: number
+              name: string
+            }
+            Update: {
+              id?: number
+              name?: string
+            }
+            Relationships: []
+          }
+          empty: {
+            Row: {}
+            Insert: {}
+            Update: {}
+            Relationships: []
+          }
+          foreign_table: {
+            Row: {
+              id: number
+              name: string | null
+              status: Database["public"]["Enums"]["user_status"] | null
+            }
+            Insert: {
+              id: number
+              name?: string | null
+              status?: Database["public"]["Enums"]["user_status"] | null
+            }
+            Update: {
+              id?: number
+              name?: string | null
+              status?: Database["public"]["Enums"]["user_status"] | null
+            }
+            Relationships: []
+          }
+          memes: {
+            Row: {
+              category: number | null
+              created_at: string
+              id: number
+              metadata: Json | null
+              name: string
+              status: Database["public"]["Enums"]["meme_status"] | null
+            }
+            Insert: {
+              category?: number | null
+              created_at: string
+              id?: number
+              metadata?: Json | null
+              name: string
+              status?: Database["public"]["Enums"]["meme_status"] | null
+            }
+            Update: {
+              category?: number | null
+              created_at?: string
+              id?: number
+              metadata?: Json | null
+              name?: string
+              status?: Database["public"]["Enums"]["meme_status"] | null
+            }
+            Relationships: [
+              {
+                foreignKeyName: "memes_category_fkey"
+                columns: ["category"]
+                isOneToOne: false
+                referencedRelation: "category"
+                referencedColumns: ["id"]
+              },
+            ]
+          }
+          table_with_other_tables_row_type: {
+            Row: {
+              col1: Database["public"]["Tables"]["user_details"]["Row"] | null
+              col2: Database["public"]["Views"]["a_view"]["Row"] | null
+            }
+            Insert: {
+              col1?: Database["public"]["Tables"]["user_details"]["Row"] | null
+              col2?: Database["public"]["Views"]["a_view"]["Row"] | null
+            }
+            Update: {
+              col1?: Database["public"]["Tables"]["user_details"]["Row"] | null
+              col2?: Database["public"]["Views"]["a_view"]["Row"] | null
+            }
+            Relationships: []
+          }
+          table_with_primary_key_other_than_id: {
+            Row: {
+              name: string | null
+              other_id: number
+            }
+            Insert: {
+              name?: string | null
+              other_id?: number
+            }
+            Update: {
+              name?: string | null
+              other_id?: number
+            }
+            Relationships: []
+          }
+          todos: {
+            Row: {
+              details: string | null
+              id: number
+              "user-id": number
+              blurb: string | null
+              blurb_varchar: string | null
+              details_is_long: boolean | null
+              details_length: number | null
+              details_words: string[] | null
+            }
+            Insert: {
+              details?: string | null
+              id?: number
+              "user-id": number
+            }
+            Update: {
+              details?: string | null
+              id?: number
+              "user-id"?: number
+            }
+            Relationships: [
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "a_view"
+                referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users"
+                referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view"
+                referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["initial_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["second_id"]
+              },
+            ]
+          }
+          user_details: {
+            Row: {
+              details: string | null
+              user_id: number
+            }
+            Insert: {
+              details?: string | null
+              user_id: number
+            }
+            Update: {
+              details?: string | null
+              user_id?: number
+            }
+            Relationships: [
+              {
+                foreignKeyName: "user_details_user_id_fkey"
+                columns: ["user_id"]
+                isOneToOne: true
+                referencedRelation: "a_view"
+                referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "user_details_user_id_fkey"
+                columns: ["user_id"]
+                isOneToOne: true
+                referencedRelation: "users"
+                referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "user_details_user_id_fkey"
+                columns: ["user_id"]
+                isOneToOne: true
+                referencedRelation: "users_view"
+                referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "user_details_user_id_fkey"
+                columns: ["user_id"]
+                isOneToOne: true
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["initial_id"]
+              },
+              {
+                foreignKeyName: "user_details_user_id_fkey"
+                columns: ["user_id"]
+                isOneToOne: true
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["second_id"]
+              },
+            ]
+          }
+          users: {
+            Row: {
+              id: number
+              name: string | null
+              status: Database["public"]["Enums"]["user_status"] | null
+            }
+            Insert: {
+              id?: number
+              name?: string | null
+              status?: Database["public"]["Enums"]["user_status"] | null
+            }
+            Update: {
+              id?: number
+              name?: string | null
+              status?: Database["public"]["Enums"]["user_status"] | null
+            }
+            Relationships: []
+          }
+          users_audit: {
+            Row: {
+              created_at: string | null
+              id: number
+              previous_value: Json | null
+              user_id: number | null
+            }
+            Insert: {
+              created_at?: string | null
+              id?: number
+              previous_value?: Json | null
+              user_id?: number | null
+            }
+            Update: {
+              created_at?: string | null
+              id?: number
+              previous_value?: Json | null
+              user_id?: number | null
+            }
+            Relationships: []
+          }
+        }
+        Views: {
+          a_view: {
+            Row: {
+              id: number | null
+            }
+            Insert: {
+              id?: number | null
+            }
+            Update: {
+              id?: number | null
+            }
+            Relationships: []
+          }
+          todos_matview: {
+            Row: {
+              details: string | null
+              id: number | null
+              "user-id": number | null
+            }
+            Relationships: [
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "a_view"
+                referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users"
+                referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view"
+                referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["initial_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["second_id"]
+              },
+            ]
+          }
+          todos_view: {
+            Row: {
+              details: string | null
+              id: number | null
+              "user-id": number | null
+            }
+            Insert: {
+              details?: string | null
+              id?: number | null
+              "user-id"?: number | null
+            }
+            Update: {
+              details?: string | null
+              id?: number | null
+              "user-id"?: number | null
+            }
+            Relationships: [
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "a_view"
+                referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users"
+                referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view"
+                referencedColumns: ["id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["initial_id"]
+              },
+              {
+                foreignKeyName: "todos_user-id_fkey"
+                columns: ["user-id"]
+                isOneToOne: false
+                referencedRelation: "users_view_with_multiple_refs_to_users"
+                referencedColumns: ["second_id"]
+              },
+            ]
+          }
+          users_view: {
+            Row: {
+              id: number | null
+              name: string | null
+              status: Database["public"]["Enums"]["user_status"] | null
+            }
+            Insert: {
+              id?: number | null
+              name?: string | null
+              status?: Database["public"]["Enums"]["user_status"] | null
+            }
+            Update: {
+              id?: number | null
+              name?: string | null
+              status?: Database["public"]["Enums"]["user_status"] | null
+            }
+            Relationships: []
+          }
+          users_view_with_multiple_refs_to_users: {
+            Row: {
+              initial_id: number | null
+              initial_name: string | null
+              second_id: number | null
+              second_name: string | null
+            }
+            Relationships: []
+          }
+        }
+        Functions: {
+          blurb: {
+            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
+            Returns: string
+          }
+          blurb_varchar: {
+            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
+            Returns: string
+          }
+          details_is_long: {
+            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
+            Returns: boolean
+          }
+          details_length: {
+            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
+            Returns: number
+          }
+          details_words: {
+            Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
+            Returns: string[]
+          }
+          function_returning_row: {
+            Args: Record<PropertyKey, never>
+            Returns: {
+              id: number
+              name: string | null
+              status: Database["public"]["Enums"]["user_status"] | null
+            }
+          }
+          function_returning_set_of_rows: {
+            Args: Record<PropertyKey, never>
+            Returns: {
+              id: number
+              name: string | null
+              status: Database["public"]["Enums"]["user_status"] | null
+            }[]
+          }
+          function_returning_table: {
+            Args: Record<PropertyKey, never>
+            Returns: {
+              id: number
+              name: string
+            }[]
+          }
+          get_todos_setof_rows: {
+            Args:
+              | { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
+              | { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }[]
+          }
+          get_user_audit_setof_single_row: {
+            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Returns: {
+              created_at: string | null
+              id: number
+              previous_value: Json | null
+              user_id: number | null
+            }[]
+          }
+          polymorphic_function: {
+            Args: { "": boolean } | { "": string }
+            Returns: undefined
+          }
+          postgres_fdw_disconnect: {
+            Args: { "": string }
+            Returns: boolean
+          }
+          postgres_fdw_disconnect_all: {
+            Args: Record<PropertyKey, never>
+            Returns: boolean
+          }
+          postgres_fdw_get_connections: {
+            Args: Record<PropertyKey, never>
+            Returns: Record<string, unknown>[]
+          }
+          postgres_fdw_handler: {
+            Args: Record<PropertyKey, never>
+            Returns: unknown
+          }
+          test_internal_query: {
+            Args: Record<PropertyKey, never>
+            Returns: undefined
+          }
+        }
+        Enums: {
+          meme_status: "new" | "old" | "retired"
+          user_status: "ACTIVE" | "INACTIVE"
+        }
+        CompositeTypes: {
+          composite_type_with_array_attribute: {
+            my_text_array: string[] | null
+          }
+          composite_type_with_record_attribute: {
+            todo: Database["public"]["Tables"]["todos"]["Row"] | null
+          }
+        }
+      }
+    }
+
+    type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+    type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+    export type Tables<
+      DefaultSchemaTableNameOrOptions extends
+        | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+        | { schema: keyof DatabaseWithoutInternals },
+      TableName extends DefaultSchemaTableNameOrOptions extends {
+        schema: keyof DatabaseWithoutInternals
+      }
+        ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+            DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+        : never = never,
+    > = DefaultSchemaTableNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+      ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+          DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+          Row: infer R
+        }
+        ? R
+        : never
+      : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+            DefaultSchema["Views"])
+        ? (DefaultSchema["Tables"] &
+            DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+            Row: infer R
+          }
+          ? R
+          : never
+        : never
+
+    export type TablesInsert<
+      DefaultSchemaTableNameOrOptions extends
+        | keyof DefaultSchema["Tables"]
+        | { schema: keyof DatabaseWithoutInternals },
+      TableName extends DefaultSchemaTableNameOrOptions extends {
+        schema: keyof DatabaseWithoutInternals
+      }
+        ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+        : never = never,
+    > = DefaultSchemaTableNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+      ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+          Insert: infer I
+        }
+        ? I
+        : never
+      : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+        ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+            Insert: infer I
+          }
+          ? I
+          : never
+        : never
+
+    export type TablesUpdate<
+      DefaultSchemaTableNameOrOptions extends
+        | keyof DefaultSchema["Tables"]
+        | { schema: keyof DatabaseWithoutInternals },
+      TableName extends DefaultSchemaTableNameOrOptions extends {
+        schema: keyof DatabaseWithoutInternals
+      }
+        ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+        : never = never,
+    > = DefaultSchemaTableNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+      ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+          Update: infer U
+        }
+        ? U
+        : never
+      : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+        ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+            Update: infer U
+          }
+          ? U
+          : never
+        : never
+
+    export type Enums<
+      DefaultSchemaEnumNameOrOptions extends
+        | keyof DefaultSchema["Enums"]
+        | { schema: keyof DatabaseWithoutInternals },
+      EnumName extends DefaultSchemaEnumNameOrOptions extends {
+        schema: keyof DatabaseWithoutInternals
+      }
+        ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+        : never = never,
+    > = DefaultSchemaEnumNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+      ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+      : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+        ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+        : never
+
+    export type CompositeTypes<
+      PublicCompositeTypeNameOrOptions extends
+        | keyof DefaultSchema["CompositeTypes"]
+        | { schema: keyof DatabaseWithoutInternals },
+      CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+        schema: keyof DatabaseWithoutInternals
+      }
+        ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+        : never = never,
+    > = PublicCompositeTypeNameOrOptions extends {
+      schema: keyof DatabaseWithoutInternals
+    }
+      ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
       : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
         ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
         : never
