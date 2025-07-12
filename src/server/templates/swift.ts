@@ -392,7 +392,7 @@ function formatForSwiftTypeName(name: string): string {
   )
 }
 
-const SWIFT_KEYWORDS = ['in', 'default']
+const SWIFT_KEYWORDS = ['in', 'default', 'case']
 
 /**
  * Converts a Postgres name to pascalCase.
