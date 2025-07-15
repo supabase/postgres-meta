@@ -33,7 +33,7 @@ export default class PostgresMetaTypes {
         t.typrelid = 0
         or (
           select
-            c.relkind ${includeTableTypes ? `in ('c', 'r')` : `= 'c'`}
+            c.relkind ${includeTableTypes ? `in ('c', 'r', 'v')` : `= 'c'`}
           from
             pg_class c
           where

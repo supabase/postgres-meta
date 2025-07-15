@@ -10,11 +10,13 @@ test('query', async () => {
   expect(res.json()).toMatchInlineSnapshot(`
     [
       {
+        "decimal": null,
         "id": 1,
         "name": "Joe Bloggs",
         "status": "ACTIVE",
       },
       {
+        "decimal": null,
         "id": 2,
         "name": "Jane Doe",
         "status": "ACTIVE",
