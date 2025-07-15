@@ -51,6 +51,10 @@ export const GENERATE_TYPES_SWIFT_ACCESS_CONTROL = process.env
   ? (process.env.PG_META_GENERATE_TYPES_SWIFT_ACCESS_CONTROL as AccessControl)
   : 'internal'
 
+// json/jsonb/text types
+export const VALID_UNNAMED_FUNCTION_ARG_TYPES = new Set([114, 3802, 25])
+export const VALID_FUNCTION_ARGS_MODE = new Set(['in', 'inout', 'variadic'])
+
 export const PG_META_MAX_RESULT_SIZE = process.env.PG_META_MAX_RESULT_SIZE_MB
   ? // Node-postgres get a maximum size in bytes make the conversion from the env variable
     // from MB to Bytes

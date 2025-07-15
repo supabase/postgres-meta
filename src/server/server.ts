@@ -158,8 +158,11 @@ if (EXPORT_DOCS) {
 } else {
   const closeListeners = closeWithGrace(async ({ err, signal, manual }) => {
     if (err) {
+      console.log({ signal, manual, err })
+
       app.log.error({ err }, 'server closing with error')
     } else {
+      console.log({ signal, manual, err })
       app.log.error(
         { err: new Error('Signal Received') },
         `${signal} signal received, server closing, close manual received: ${manual}`
