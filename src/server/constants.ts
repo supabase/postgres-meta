@@ -57,6 +57,11 @@ export const PG_META_MAX_RESULT_SIZE = process.env.PG_META_MAX_RESULT_SIZE_MB
     parseInt(process.env.PG_META_MAX_RESULT_SIZE_MB, 10) * 1024 * 1024
   : 2 * 1024 * 1024 * 1024 // default to 2GB max query size result
 
+export const MAX_BODY_LIMIT = process.env.PG_META_MAX_BODY_LIMIT_MB
+  ? // Fastify server max body size allowed, is in bytes, convert from MB to Bytes
+    parseInt(process.env.PG_META_MAX_BODY_LIMIT_MB, 10) * 1024 * 1024
+  : 3 * 1024 * 1024
+
 export const DEFAULT_POOL_CONFIG: PoolConfig = {
   max: 1,
   connectionTimeoutMillis: PG_CONN_TIMEOUT_SECS * 1000,
