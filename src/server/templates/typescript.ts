@@ -45,7 +45,7 @@ export const apply = async ({
     },
     {} as Record<number, (typeof types)[number]>
   )
-  const getTsReturnType = (fn: PostgresFunction, returnType: string) => {
+  const getFunctionTsReturnType = (fn: PostgresFunction, returnType: string) => {
     return `${returnType}${fn.is_set_returning_function && fn.returns_multiple_rows ? '[]' : ''}
                         ${
                           fn.returns_set_of_table && fn.args.length === 1 && fn.args[0].table_name
@@ -58,7 +58,7 @@ export const apply = async ({
                         }`
   }
 
-  const getReturnType = (schema: PostgresSchema, fn: PostgresFunction): string => {
+  const getFunctionReturnType = (schema: PostgresSchema, fn: PostgresFunction): string => {
     // Case 1: `returns table`.
     const tableArgs = fn.args.filter(({ mode }) => mode === 'table')
     if (tableArgs.length > 0) {
@@ -177,7 +177,8 @@ export type Database = {
                       ...schemaFunctions
                         .filter((fn) => fn.argument_types === table.name)
                         .map(
-                          (fn) => `${JSON.stringify(fn.name)}: ${getReturnType(schema, fn)} | null`
+                          (fn) =>
+                            `${JSON.stringify(fn.name)}: ${getFunctionReturnType(schema, fn)} | null`
                         ),
                     ]}
                   }
@@ -512,7 +513,7 @@ export type Database = {
                       // No conflict - just add the no params signature
                       allSignatures.push(`{
                         Args: Record<PropertyKey, never>
-                        Returns: ${getTsReturnType(noParamFn, getReturnType(schema, noParamFn))}
+                        Returns: ${getFunctionTsReturnType(noParamFn, getFunctionReturnType(schema, noParamFn))}
                       }`)
                     }
                   }
@@ -539,7 +540,7 @@ export type Database = {
 
                       allSignatures.push(`{
                         Args: { "": ${tsType} }
-                        Returns: ${getTsReturnType(validUnnamedFn, getReturnType(schema, validUnnamedFn))}
+                        Returns: ${getFunctionTsReturnType(validUnnamedFn, getFunctionReturnType(schema, validUnnamedFn))}
                       }`)
                     }
                   }
@@ -554,7 +555,7 @@ export type Database = {
                   if (unnamedSetofFunctions.length > 0) {
                     const unnamedEmbededFunctionsSignatures = unnamedSetofFunctions.map(
                       (fn) =>
-                        `{ IsUnnamedEmbededTable: true, Args: Record<PropertyKey, never>, Returns: ${getTsReturnType(fn, getReturnType(schema, fn))} }`
+                        `{ IsUnnamedEmbededTable: true, Args: Record<PropertyKey, never>, Returns: ${getFunctionTsReturnType(fn, getFunctionReturnType(schema, fn))} }`
                     )
                     allSignatures.push(...unnamedEmbededFunctionsSignatures)
                   }
@@ -596,7 +597,7 @@ export type Database = {
                       }`)
                     } else if (inArgs.length > 0) {
                       // Generate normal function signature
-                      const returnType = getReturnType(schema, fn)
+                      const returnType = getFunctionReturnType(schema, fn)
                       allSignatures.push(`{
                         Args: ${`{ ${inArgs
                           .map(({ name, type_id, has_default }) => {
@@ -614,7 +615,7 @@ export type Database = {
                           })
                           .sort()
                           .join(', ')} }`}
-                        Returns: ${getTsReturnType(fn, returnType)}
+                        Returns: ${getFunctionTsReturnType(fn, returnType)}
                       }`)
                     }
                   })
@@ -627,7 +628,7 @@ export type Database = {
                   // Remove duplicates, sort, and join with |
                   return `${JSON.stringify(fnName)}: ${signatures.join('\n    | ')}`
                 } else {
-                  return `${JSON.stringify(fnName)}: ${fns.map((fn) => `{ Args: unknown, Returns: ${getTsReturnType(fn, getReturnType(schema, fn))} }`).join('\n |')}`
+                  return `${JSON.stringify(fnName)}: ${fns.map((fn) => `{ Args: {}, Returns: ${getFunctionTsReturnType(fn, getFunctionReturnType(schema, fn))} }`).join('\n |')}`
                 }
               })
             })()}
