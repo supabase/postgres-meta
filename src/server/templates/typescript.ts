@@ -276,15 +276,23 @@ export type Database = {
                 : schemaViews.map(
                     (view) => `${JSON.stringify(view.name)}: {
                   Row: {
-                    ${columnsByTableId[view.id].map(
-                      (column) =>
-                        `${JSON.stringify(column.name)}: ${pgTypeToTsType(schema, column.format, {
-                          types,
-                          schemas,
-                          tables,
-                          views,
-                        })} ${column.is_nullable ? '| null' : ''}`
-                    )}
+                    ${[
+                      ...columnsByTableId[view.id].map(
+                        (column) =>
+                          `${JSON.stringify(column.name)}: ${pgTypeToTsType(schema, column.format, {
+                            types,
+                            schemas,
+                            tables,
+                            views,
+                          })} ${column.is_nullable ? '| null' : ''}`
+                      ),
+                      ...schemaFunctions
+                        .filter((fn) => fn.argument_types === view.name)
+                        .map(
+                          (fn) =>
+                            `${JSON.stringify(fn.name)}: ${getFunctionReturnType(schema, fn)} | null`
+                        ),
+                    ]}
                   }
                   ${
                     'is_updatable' in view && view.is_updatable
@@ -409,8 +417,11 @@ export type Database = {
                   },
                   {} as Record<string, PostgresFunction[]>
                 )
+              const sortedGroupdSchemaFunctions = Object.entries(
+                schemaFunctionsGroupedByName
+              ).toSorted((a, b) => a[0].localeCompare(b[0]))
 
-              return Object.entries(schemaFunctionsGroupedByName).map(([fnName, fns]) => {
+              return sortedGroupdSchemaFunctions.map(([fnName, fns]) => {
                 // Group functions by their argument names signature to detect conflicts
                 const fnsByArgNames = new Map<string, PostgresFunction[]>()
                 fns.sort((fn1, fn2) => fn1.id - fn2.id)
@@ -553,10 +564,18 @@ export type Database = {
                     return inArgs.length === 1 && inArgs[0].name === '' && fn.return_table_name
                   })
                   if (unnamedSetofFunctions.length > 0) {
-                    const unnamedEmbededFunctionsSignatures = unnamedSetofFunctions.map(
-                      (fn) =>
-                        `{ IsUnnamedEmbededTable: true, Args: Record<PropertyKey, never>, Returns: ${getFunctionTsReturnType(fn, getFunctionReturnType(schema, fn))} }`
-                    )
+                    const unnamedEmbededFunctionsSignatures = unnamedSetofFunctions.map((fn) => {
+                      const firstArgType = typesById[fn.args[0].type_id]
+                      const tsType = firstArgType
+                        ? pgTypeToTsType(schema, firstArgType.name, {
+                            types,
+                            schemas,
+                            tables,
+                            views,
+                          })
+                        : 'Record<PropertyKey, never>'
+                      return `{ Args: ${tsType}, Returns: ${getFunctionTsReturnType(fn, getFunctionReturnType(schema, fn))} }`
+                    })
                     allSignatures.push(...unnamedEmbededFunctionsSignatures)
                   }
 
