@@ -37,7 +37,7 @@ test('list', async () => {
       id: expect.any(Number),
       live_rows_estimate: expect.any(Number),
       size: expect.any(String),
-    }, 
+    },
     `
     {
       "bytes": Any<Number>,
@@ -157,7 +157,7 @@ test('list', async () => {
       "size": Any<String>,
     }
   `
-)
+  )
 })
 
 test('list without columns', async () => {
