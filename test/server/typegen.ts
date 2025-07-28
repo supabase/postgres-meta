@@ -221,16 +221,19 @@ test('typegen: typescript', async () => {
           }
           users: {
             Row: {
+              decimal: number | null
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }
             Insert: {
+              decimal?: number | null
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
             }
             Update: {
+              decimal?: number | null
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
@@ -362,16 +365,19 @@ test('typegen: typescript', async () => {
           }
           users_view: {
             Row: {
+              decimal: number | null
               id: number | null
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }
             Insert: {
+              decimal?: number | null
               id?: number | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
             }
             Update: {
+              decimal?: number | null
               id?: number | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
@@ -412,6 +418,7 @@ test('typegen: typescript', async () => {
           function_returning_row: {
             Args: Record<PropertyKey, never>
             Returns: {
+              decimal: number | null
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
@@ -420,6 +427,7 @@ test('typegen: typescript', async () => {
           function_returning_set_of_rows: {
             Args: Record<PropertyKey, never>
             Returns: {
+              decimal: number | null
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
@@ -856,16 +864,19 @@ test('typegen w/ one-to-one relationships', async () => {
           }
           users: {
             Row: {
+              decimal: number | null
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }
             Insert: {
+              decimal?: number | null
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
             }
             Update: {
+              decimal?: number | null
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
@@ -1007,16 +1018,19 @@ test('typegen w/ one-to-one relationships', async () => {
           }
           users_view: {
             Row: {
+              decimal: number | null
               id: number | null
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }
             Insert: {
+              decimal?: number | null
               id?: number | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
             }
             Update: {
+              decimal?: number | null
               id?: number | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
@@ -1057,6 +1071,7 @@ test('typegen w/ one-to-one relationships', async () => {
           function_returning_row: {
             Args: Record<PropertyKey, never>
             Returns: {
+              decimal: number | null
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
@@ -1065,6 +1080,7 @@ test('typegen w/ one-to-one relationships', async () => {
           function_returning_set_of_rows: {
             Args: Record<PropertyKey, never>
             Returns: {
+              decimal: number | null
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
@@ -1501,16 +1517,19 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
           users: {
             Row: {
+              decimal: number | null
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }
             Insert: {
+              decimal?: number | null
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
             }
             Update: {
+              decimal?: number | null
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
@@ -1652,16 +1671,19 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
           users_view: {
             Row: {
+              decimal: number | null
               id: number | null
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }
             Insert: {
+              decimal?: number | null
               id?: number | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
             }
             Update: {
+              decimal?: number | null
               id?: number | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
@@ -1702,6 +1724,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           function_returning_row: {
             Args: Record<PropertyKey, never>
             Returns: {
+              decimal: number | null
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
@@ -1710,6 +1733,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           function_returning_set_of_rows: {
             Args: Record<PropertyKey, never>
             Returns: {
+              decimal: number | null
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
@@ -2151,16 +2175,19 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
           users: {
             Row: {
+              decimal: number | null
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }
             Insert: {
+              decimal?: number | null
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
             }
             Update: {
+              decimal?: number | null
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
@@ -2302,16 +2329,19 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
           users_view: {
             Row: {
+              decimal: number | null
               id: number | null
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }
             Insert: {
+              decimal?: number | null
               id?: number | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
             }
             Update: {
+              decimal?: number | null
               id?: number | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
@@ -2352,6 +2382,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           function_returning_row: {
             Args: Record<PropertyKey, never>
             Returns: {
+              decimal: number | null
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
@@ -2360,6 +2391,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           function_returning_set_of_rows: {
             Args: Record<PropertyKey, never>
             Returns: {
+              decimal: number | null
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
@@ -2566,198 +2598,202 @@ test('typegen: go', async () => {
   expect(body).toMatchInlineSnapshot(`
     "package database
 
-type PublicUsersSelect struct {
-  Id     int64   \`json:"id"\`
-  Name   *string \`json:"name"\`
-  Status *string \`json:"status"\`
-}
+    type PublicUsersSelect struct {
+      Decimal *float64 \`json:"decimal"\`
+      Id      int64    \`json:"id"\`
+      Name    *string  \`json:"name"\`
+      Status  *string  \`json:"status"\`
+    }
 
-type PublicUsersInsert struct {
-  Id     *int64  \`json:"id"\`
-  Name   *string \`json:"name"\`
-  Status *string \`json:"status"\`
-}
+    type PublicUsersInsert struct {
+      Decimal *float64 \`json:"decimal"\`
+      Id      *int64   \`json:"id"\`
+      Name    *string  \`json:"name"\`
+      Status  *string  \`json:"status"\`
+    }
 
-type PublicUsersUpdate struct {
-  Id     *int64  \`json:"id"\`
-  Name   *string \`json:"name"\`
-  Status *string \`json:"status"\`
-}
+    type PublicUsersUpdate struct {
+      Decimal *float64 \`json:"decimal"\`
+      Id      *int64   \`json:"id"\`
+      Name    *string  \`json:"name"\`
+      Status  *string  \`json:"status"\`
+    }
 
-type PublicTodosSelect struct {
-  Details *string \`json:"details"\`
-  Id      int64   \`json:"id"\`
-  UserId  int64   \`json:"user-id"\`
-}
+    type PublicTodosSelect struct {
+      Details *string \`json:"details"\`
+      Id      int64   \`json:"id"\`
+      UserId  int64   \`json:"user-id"\`
+    }
 
-type PublicTodosInsert struct {
-  Details *string \`json:"details"\`
-  Id      *int64  \`json:"id"\`
-  UserId  int64   \`json:"user-id"\`
-}
+    type PublicTodosInsert struct {
+      Details *string \`json:"details"\`
+      Id      *int64  \`json:"id"\`
+      UserId  int64   \`json:"user-id"\`
+    }
 
-type PublicTodosUpdate struct {
-  Details *string \`json:"details"\`
-  Id      *int64  \`json:"id"\`
-  UserId  *int64  \`json:"user-id"\`
-}
+    type PublicTodosUpdate struct {
+      Details *string \`json:"details"\`
+      Id      *int64  \`json:"id"\`
+      UserId  *int64  \`json:"user-id"\`
+    }
 
-type PublicUsersAuditSelect struct {
-  CreatedAt     *string     \`json:"created_at"\`
-  Id            int64       \`json:"id"\`
-  PreviousValue interface{} \`json:"previous_value"\`
-  UserId        *int64      \`json:"user_id"\`
-}
+    type PublicUsersAuditSelect struct {
+      CreatedAt     *string     \`json:"created_at"\`
+      Id            int64       \`json:"id"\`
+      PreviousValue interface{} \`json:"previous_value"\`
+      UserId        *int64      \`json:"user_id"\`
+    }
 
-type PublicUsersAuditInsert struct {
-  CreatedAt     *string     \`json:"created_at"\`
-  Id            *int64      \`json:"id"\`
-  PreviousValue interface{} \`json:"previous_value"\`
-  UserId        *int64      \`json:"user_id"\`
-}
+    type PublicUsersAuditInsert struct {
+      CreatedAt     *string     \`json:"created_at"\`
+      Id            *int64      \`json:"id"\`
+      PreviousValue interface{} \`json:"previous_value"\`
+      UserId        *int64      \`json:"user_id"\`
+    }
 
-type PublicUsersAuditUpdate struct {
-  CreatedAt     *string     \`json:"created_at"\`
-  Id            *int64      \`json:"id"\`
-  PreviousValue interface{} \`json:"previous_value"\`
-  UserId        *int64      \`json:"user_id"\`
-}
+    type PublicUsersAuditUpdate struct {
+      CreatedAt     *string     \`json:"created_at"\`
+      Id            *int64      \`json:"id"\`
+      PreviousValue interface{} \`json:"previous_value"\`
+      UserId        *int64      \`json:"user_id"\`
+    }
 
-type PublicUserDetailsSelect struct {
-  Details *string \`json:"details"\`
-  UserId  int64   \`json:"user_id"\`
-}
+    type PublicUserDetailsSelect struct {
+      Details *string \`json:"details"\`
+      UserId  int64   \`json:"user_id"\`
+    }
 
-type PublicUserDetailsInsert struct {
-  Details *string \`json:"details"\`
-  UserId  int64   \`json:"user_id"\`
-}
+    type PublicUserDetailsInsert struct {
+      Details *string \`json:"details"\`
+      UserId  int64   \`json:"user_id"\`
+    }
 
-type PublicUserDetailsUpdate struct {
-  Details *string \`json:"details"\`
-  UserId  *int64  \`json:"user_id"\`
-}
+    type PublicUserDetailsUpdate struct {
+      Details *string \`json:"details"\`
+      UserId  *int64  \`json:"user_id"\`
+    }
 
-type PublicEmptySelect struct {
+    type PublicEmptySelect struct {
 
-}
+    }
 
-type PublicEmptyInsert struct {
+    type PublicEmptyInsert struct {
 
-}
+    }
 
-type PublicEmptyUpdate struct {
+    type PublicEmptyUpdate struct {
 
-}
+    }
 
-type PublicTableWithOtherTablesRowTypeSelect struct {
-  Col1 interface{} \`json:"col1"\`
-  Col2 interface{} \`json:"col2"\`
-}
+    type PublicTableWithOtherTablesRowTypeSelect struct {
+      Col1 interface{} \`json:"col1"\`
+      Col2 interface{} \`json:"col2"\`
+    }
 
-type PublicTableWithOtherTablesRowTypeInsert struct {
-  Col1 interface{} \`json:"col1"\`
-  Col2 interface{} \`json:"col2"\`
-}
+    type PublicTableWithOtherTablesRowTypeInsert struct {
+      Col1 interface{} \`json:"col1"\`
+      Col2 interface{} \`json:"col2"\`
+    }
 
-type PublicTableWithOtherTablesRowTypeUpdate struct {
-  Col1 interface{} \`json:"col1"\`
-  Col2 interface{} \`json:"col2"\`
-}
+    type PublicTableWithOtherTablesRowTypeUpdate struct {
+      Col1 interface{} \`json:"col1"\`
+      Col2 interface{} \`json:"col2"\`
+    }
 
-type PublicTableWithPrimaryKeyOtherThanIdSelect struct {
-  Name    *string \`json:"name"\`
-  OtherId int64   \`json:"other_id"\`
-}
+    type PublicTableWithPrimaryKeyOtherThanIdSelect struct {
+      Name    *string \`json:"name"\`
+      OtherId int64   \`json:"other_id"\`
+    }
 
-type PublicTableWithPrimaryKeyOtherThanIdInsert struct {
-  Name    *string \`json:"name"\`
-  OtherId *int64  \`json:"other_id"\`
-}
+    type PublicTableWithPrimaryKeyOtherThanIdInsert struct {
+      Name    *string \`json:"name"\`
+      OtherId *int64  \`json:"other_id"\`
+    }
 
-type PublicTableWithPrimaryKeyOtherThanIdUpdate struct {
-  Name    *string \`json:"name"\`
-  OtherId *int64  \`json:"other_id"\`
-}
+    type PublicTableWithPrimaryKeyOtherThanIdUpdate struct {
+      Name    *string \`json:"name"\`
+      OtherId *int64  \`json:"other_id"\`
+    }
 
-type PublicCategorySelect struct {
-  Id   int32  \`json:"id"\`
-  Name string \`json:"name"\`
-}
+    type PublicCategorySelect struct {
+      Id   int32  \`json:"id"\`
+      Name string \`json:"name"\`
+    }
 
-type PublicCategoryInsert struct {
-  Id   *int32 \`json:"id"\`
-  Name string \`json:"name"\`
-}
+    type PublicCategoryInsert struct {
+      Id   *int32 \`json:"id"\`
+      Name string \`json:"name"\`
+    }
 
-type PublicCategoryUpdate struct {
-  Id   *int32  \`json:"id"\`
-  Name *string \`json:"name"\`
-}
+    type PublicCategoryUpdate struct {
+      Id   *int32  \`json:"id"\`
+      Name *string \`json:"name"\`
+    }
 
-type PublicMemesSelect struct {
-  Category  *int32      \`json:"category"\`
-  CreatedAt string      \`json:"created_at"\`
-  Id        int32       \`json:"id"\`
-  Metadata  interface{} \`json:"metadata"\`
-  Name      string      \`json:"name"\`
-  Status    *string     \`json:"status"\`
-}
+    type PublicMemesSelect struct {
+      Category  *int32      \`json:"category"\`
+      CreatedAt string      \`json:"created_at"\`
+      Id        int32       \`json:"id"\`
+      Metadata  interface{} \`json:"metadata"\`
+      Name      string      \`json:"name"\`
+      Status    *string     \`json:"status"\`
+    }
 
-type PublicMemesInsert struct {
-  Category  *int32      \`json:"category"\`
-  CreatedAt string      \`json:"created_at"\`
-  Id        *int32      \`json:"id"\`
-  Metadata  interface{} \`json:"metadata"\`
-  Name      string      \`json:"name"\`
-  Status    *string     \`json:"status"\`
-}
+    type PublicMemesInsert struct {
+      Category  *int32      \`json:"category"\`
+      CreatedAt string      \`json:"created_at"\`
+      Id        *int32      \`json:"id"\`
+      Metadata  interface{} \`json:"metadata"\`
+      Name      string      \`json:"name"\`
+      Status    *string     \`json:"status"\`
+    }
 
-type PublicMemesUpdate struct {
-  Category  *int32      \`json:"category"\`
-  CreatedAt *string     \`json:"created_at"\`
-  Id        *int32      \`json:"id"\`
-  Metadata  interface{} \`json:"metadata"\`
-  Name      *string     \`json:"name"\`
-  Status    *string     \`json:"status"\`
-}
+    type PublicMemesUpdate struct {
+      Category  *int32      \`json:"category"\`
+      CreatedAt *string     \`json:"created_at"\`
+      Id        *int32      \`json:"id"\`
+      Metadata  interface{} \`json:"metadata"\`
+      Name      *string     \`json:"name"\`
+      Status    *string     \`json:"status"\`
+    }
 
-type PublicTodosViewSelect struct {
-  Details *string \`json:"details"\`
-  Id      *int64  \`json:"id"\`
-  UserId  *int64  \`json:"user-id"\`
-}
+    type PublicTodosViewSelect struct {
+      Details *string \`json:"details"\`
+      Id      *int64  \`json:"id"\`
+      UserId  *int64  \`json:"user-id"\`
+    }
 
-type PublicUsersViewSelect struct {
-  Id     *int64  \`json:"id"\`
-  Name   *string \`json:"name"\`
-  Status *string \`json:"status"\`
-}
+    type PublicUsersViewSelect struct {
+      Decimal *float64 \`json:"decimal"\`
+      Id      *int64   \`json:"id"\`
+      Name    *string  \`json:"name"\`
+      Status  *string  \`json:"status"\`
+    }
 
-type PublicAViewSelect struct {
-  Id *int64 \`json:"id"\`
-}
+    type PublicAViewSelect struct {
+      Id *int64 \`json:"id"\`
+    }
 
-type PublicUsersViewWithMultipleRefsToUsersSelect struct {
-  InitialId   *int64  \`json:"initial_id"\`
-  InitialName *string \`json:"initial_name"\`
-  SecondId    *int64  \`json:"second_id"\`
-  SecondName  *string \`json:"second_name"\`
-}
+    type PublicUsersViewWithMultipleRefsToUsersSelect struct {
+      InitialId   *int64  \`json:"initial_id"\`
+      InitialName *string \`json:"initial_name"\`
+      SecondId    *int64  \`json:"second_id"\`
+      SecondName  *string \`json:"second_name"\`
+    }
 
-type PublicTodosMatviewSelect struct {
-  Details *string \`json:"details"\`
-  Id      *int64  \`json:"id"\`
-  UserId  *int64  \`json:"user-id"\`
-}
+    type PublicTodosMatviewSelect struct {
+      Details *string \`json:"details"\`
+      Id      *int64  \`json:"id"\`
+      UserId  *int64  \`json:"user-id"\`
+    }
 
-type PublicCompositeTypeWithArrayAttribute struct {
-  MyTextArray interface{} \`json:"my_text_array"\`
-}
+    type PublicCompositeTypeWithArrayAttribute struct {
+      MyTextArray interface{} \`json:"my_text_array"\`
+    }
 
-type PublicCompositeTypeWithRecordAttribute struct {
-  Todo interface{} \`json:"todo"\`
-}"
+    type PublicCompositeTypeWithRecordAttribute struct {
+      Todo interface{} \`json:"todo"\`
+    }"
   `)
 })
 
@@ -2991,30 +3027,36 @@ test('typegen: swift', async () => {
         }
       }
       internal struct UsersSelect: Codable, Hashable, Sendable, Identifiable {
+        internal let decimal: Decimal?
         internal let id: Int64
         internal let name: String?
         internal let status: UserStatus?
         internal enum CodingKeys: String, CodingKey {
+          case decimal = "decimal"
           case id = "id"
           case name = "name"
           case status = "status"
         }
       }
       internal struct UsersInsert: Codable, Hashable, Sendable, Identifiable {
+        internal let decimal: Decimal?
         internal let id: Int64?
         internal let name: String?
         internal let status: UserStatus?
         internal enum CodingKeys: String, CodingKey {
+          case decimal = "decimal"
           case id = "id"
           case name = "name"
           case status = "status"
         }
       }
       internal struct UsersUpdate: Codable, Hashable, Sendable, Identifiable {
+        internal let decimal: Decimal?
         internal let id: Int64?
         internal let name: String?
         internal let status: UserStatus?
         internal enum CodingKeys: String, CodingKey {
+          case decimal = "decimal"
           case id = "id"
           case name = "name"
           case status = "status"
@@ -3083,10 +3125,12 @@ test('typegen: swift', async () => {
         }
       }
       internal struct UsersViewSelect: Codable, Hashable, Sendable {
+        internal let decimal: Decimal?
         internal let id: Int64?
         internal let name: String?
         internal let status: UserStatus?
         internal enum CodingKeys: String, CodingKey {
+          case decimal = "decimal"
           case id = "id"
           case name = "name"
           case status = "status"
@@ -3354,30 +3398,36 @@ test('typegen: swift w/ public access control', async () => {
         }
       }
       public struct UsersSelect: Codable, Hashable, Sendable, Identifiable {
+        public let decimal: Decimal?
         public let id: Int64
         public let name: String?
         public let status: UserStatus?
         public enum CodingKeys: String, CodingKey {
+          case decimal = "decimal"
           case id = "id"
           case name = "name"
           case status = "status"
         }
       }
       public struct UsersInsert: Codable, Hashable, Sendable, Identifiable {
+        public let decimal: Decimal?
         public let id: Int64?
         public let name: String?
         public let status: UserStatus?
         public enum CodingKeys: String, CodingKey {
+          case decimal = "decimal"
           case id = "id"
           case name = "name"
           case status = "status"
         }
       }
       public struct UsersUpdate: Codable, Hashable, Sendable, Identifiable {
+        public let decimal: Decimal?
         public let id: Int64?
         public let name: String?
         public let status: UserStatus?
         public enum CodingKeys: String, CodingKey {
+          case decimal = "decimal"
           case id = "id"
           case name = "name"
           case status = "status"
@@ -3446,10 +3496,12 @@ test('typegen: swift w/ public access control', async () => {
         }
       }
       public struct UsersViewSelect: Codable, Hashable, Sendable {
+        public let decimal: Decimal?
         public let id: Int64?
         public let name: String?
         public let status: UserStatus?
         public enum CodingKeys: String, CodingKey {
+          case decimal = "decimal"
           case id = "id"
           case name = "name"
           case status = "status"
