@@ -309,6 +309,8 @@ const pgTypeToSwiftType = (
     swiftType = 'Float'
   } else if (pgType === 'float8') {
     swiftType = 'Double'
+  } else if (pgType === 'numeric') {
+    swiftType = 'Decimal'
   } else if (pgType === 'uuid') {
     swiftType = 'UUID'
   } else if (

@@ -37,7 +37,7 @@ test('list', async () => {
       id: expect.any(Number),
       live_rows_estimate: expect.any(Number),
       size: expect.any(String),
-    },
+    }, 
     `
     {
       "bytes": Any<Number>,
@@ -75,6 +75,24 @@ test('list', async () => {
           "is_updatable": true,
           "name": "name",
           "ordinal_position": 2,
+          "schema": "public",
+          "table": "users",
+        },
+        {
+          "check": null,
+          "comment": null,
+          "data_type": "numeric",
+          "default_value": null,
+          "enums": [],
+          "format": "numeric",
+          "identity_generation": null,
+          "is_generated": false,
+          "is_identity": false,
+          "is_nullable": true,
+          "is_unique": false,
+          "is_updatable": true,
+          "name": "decimal",
+          "ordinal_position": 4,
           "schema": "public",
           "table": "users",
         },
@@ -139,7 +157,7 @@ test('list', async () => {
       "size": Any<String>,
     }
   `
-  )
+)
 })
 
 test('list without columns', async () => {
