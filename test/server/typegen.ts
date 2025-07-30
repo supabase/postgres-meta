@@ -1299,7 +1299,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
       | Json[]
 
     export type Database = {
-      // Allows to automatically instanciate createClient with right options
+      // Allows to automatically instantiate createClient with right options
       // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
       __InternalSupabase: {
         PostgrestVersion: "13"
