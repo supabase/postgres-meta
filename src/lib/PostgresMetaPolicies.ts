@@ -112,6 +112,9 @@ export default class PostgresMetaPolicies {
     command?: string
     roles?: string[]
   }): Promise<PostgresMetaResult<PostgresPolicy>> {
+    if (!table || !name) {
+      return { data: null, error: { message: 'Missing required name or table parameter' } }
+    }
     const definitionClause = definition === undefined ? '' : `USING (${definition})`
     const checkClause = check === undefined ? '' : `WITH CHECK (${check})`
     const sql = `
