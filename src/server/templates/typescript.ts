@@ -35,7 +35,7 @@ export const apply = async ({
     .forEach((c) => columnsByTableId[c.table_id].push(c))
 
   const internal_supabase_schema = postgrestVersion
-    ? `// Allows to automatically instanciate createClient with right options
+    ? `// Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: '${postgrestVersion}'
