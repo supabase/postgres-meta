@@ -8,11 +8,7 @@ import type {
   PostgresView,
 } from '../../lib/index.js'
 import type { GeneratorMetadata } from '../../lib/generators.js'
-import {
-  GENERATE_TYPES_DEFAULT_SCHEMA,
-  VALID_FUNCTION_ARGS_MODE,
-  VALID_UNNAMED_FUNCTION_ARG_TYPES,
-} from '../constants.js'
+import { GENERATE_TYPES_DEFAULT_SCHEMA, VALID_FUNCTION_ARGS_MODE } from '../constants.js'
 
 export const apply = async ({
   schemas,
@@ -45,17 +41,18 @@ export const apply = async ({
     },
     {} as Record<number, (typeof types)[number]>
   )
+
   const getFunctionTsReturnType = (fn: PostgresFunction, returnType: string) => {
     return `${returnType}${fn.is_set_returning_function && fn.returns_multiple_rows ? '[]' : ''}
-                        ${
-                          fn.returns_set_of_table && fn.args.length === 1 && fn.args[0].table_name
-                            ? `SetofOptions: {
-                            from: ${JSON.stringify(typesById[fn.args[0].type_id].format)}
-                            to: ${JSON.stringify(fn.return_table_name)}
-                            isOneToOne: ${fn.returns_multiple_rows ? false : true}
+                          ${
+                            fn.returns_set_of_table && fn.args.length === 1 && fn.args[0].table_name
+                              ? `SetofOptions: {
+                              from: ${JSON.stringify(typesById[fn.args[0].type_id].format)}
+                              to: ${JSON.stringify(fn.return_table_name)}
+                              isOneToOne: ${fn.returns_multiple_rows ? false : true}
+                            }`
+                              : ''
                           }`
-                            : ''
-                        }`
   }
 
   const getFunctionReturnType = (schema: PostgresSchema, fn: PostgresFunction): string => {
@@ -373,42 +370,42 @@ export type Database = {
                 return '[_ in never]: never'
               }
               const schemaFunctionsGroupedByName = schemaFunctions
-                .filter((func) => {
-                  // Get all input args (in, inout, variadic modes)
-                  const inArgs = func.args.filter(({ mode }) => VALID_FUNCTION_ARGS_MODE.has(mode))
-                  // Case 1: Function has no parameters
-                  if (inArgs.length === 0) {
-                    return true
-                  }
+                // .filter((func) => {
+                //   // Get all input args (in, inout, variadic modes)
+                //   const inArgs = func.args.filter(({ mode }) => VALID_FUNCTION_ARGS_MODE.has(mode))
+                //   // Case 1: Function has no parameters
+                //   if (inArgs.length === 0) {
+                //     return true
+                //   }
 
-                  // Case 2: All input args are named
-                  if (!inArgs.some(({ name }) => name === '')) {
-                    return true
-                  }
+                //   // Case 2: All input args are named
+                //   if (!inArgs.some(({ name }) => name === '')) {
+                //     return true
+                //   }
 
-                  // Case 3: All unnamed args have default values
-                  if (inArgs.every((arg) => (arg.name === '' ? arg.has_default : true))) {
-                    return true
-                  }
+                //   // Case 3: All unnamed args have default values
+                //   if (inArgs.every((arg) => (arg.name === '' ? arg.has_default : true))) {
+                //     return true
+                //   }
 
-                  // Case 4: Single unnamed parameter of valid type (json, jsonb, text)
-                  // Exclude all functions definitions that have only one single argument unnamed argument that isn't
-                  // a json/jsonb/text as it won't be considered by PostgREST
-                  if (
-                    (inArgs.length === 1 &&
-                      inArgs[0].name === '' &&
-                      VALID_UNNAMED_FUNCTION_ARG_TYPES.has(inArgs[0].type_id)) ||
-                    // OR if the function have a single unnamed args which is another table (embeded function)
-                    (inArgs.length === 1 &&
-                      inArgs[0].name === '' &&
-                      inArgs[0].table_name &&
-                      func.return_table_name)
-                  ) {
-                    return true
-                  }
+                //   // Case 4: Single unnamed parameter of valid type (json, jsonb, text)
+                //   // Exclude all functions definitions that have only one single argument unnamed argument that isn't
+                //   // a json/jsonb/text as it won't be considered by PostgREST
+                //   if (
+                //     (inArgs.length === 1 &&
+                //       inArgs[0].name === '' &&
+                //       VALID_UNNAMED_FUNCTION_ARG_TYPES.has(inArgs[0].type_id)) ||
+                //     // OR if the function have a single unnamed args which is another table (embeded function)
+                //     (inArgs.length === 1 &&
+                //       inArgs[0].name === '' &&
+                //       inArgs[0].table_name &&
+                //       func.return_table_name)
+                //   ) {
+                //     return true
+                //   }
 
-                  return false
-                })
+                //   return false
+                // })
                 .reduce(
                   (acc, curr) => {
                     acc[curr.name] ??= []
@@ -417,238 +414,33 @@ export type Database = {
                   },
                   {} as Record<string, PostgresFunction[]>
                 )
-              const sortedGroupdSchemaFunctions = Object.entries(
-                schemaFunctionsGroupedByName
-              ).toSorted((a, b) => a[0].localeCompare(b[0]))
 
-              return sortedGroupdSchemaFunctions.map(([fnName, fns]) => {
-                // Group functions by their argument names signature to detect conflicts
-                const fnsByArgNames = new Map<string, PostgresFunction[]>()
-                fns.sort((fn1, fn2) => fn1.id - fn2.id)
+              return Object.entries(schemaFunctionsGroupedByName).map(([fnName, fns]) => {
+                const functionSignatures = fns.map((fn) => {
+                  const inArgs = fn.args.filter(({ mode }) => VALID_FUNCTION_ARGS_MODE.has(mode))
 
-                fns.forEach((fn) => {
-                  const namedInArgs = fn.args
-                    .filter(({ mode, name }) => VALID_FUNCTION_ARGS_MODE.has(mode) && name !== '')
-                    .map((arg) => arg.name)
-                    .sort()
-                    .join(',')
-
-                  if (!fnsByArgNames.has(namedInArgs)) {
-                    fnsByArgNames.set(namedInArgs, [])
-                  }
-                  fnsByArgNames.get(namedInArgs)!.push(fn)
-                })
-
-                // For each group of functions sharing the same argument names, check if they have conflicting types
-                const conflictingSignatures = new Set<string>()
-                fnsByArgNames.forEach((groupedFns, argNames) => {
-                  if (groupedFns.length > 1) {
-                    // Check if any args have different types within this group
-                    const firstFn = groupedFns[0]
-                    const firstFnArgTypes = new Map(
-                      firstFn.args
-                        .filter(
-                          ({ mode, name }) => VALID_FUNCTION_ARGS_MODE.has(mode) && name !== ''
-                        )
-                        .map((arg) => [arg.name, String(arg.type_id)])
-                    )
-
-                    const hasConflict = groupedFns.some((fn) => {
-                      const fnArgTypes = new Map(
-                        fn.args
-                          .filter(
-                            ({ mode, name }) => VALID_FUNCTION_ARGS_MODE.has(mode) && name !== ''
-                          )
-                          .map((arg) => [arg.name, String(arg.type_id)])
-                      )
-
-                      return [...firstFnArgTypes.entries()].some(
-                        ([name, typeId]) => fnArgTypes.get(name) !== typeId
-                      )
-                    })
-
-                    if (hasConflict) {
-                      conflictingSignatures.add(argNames)
-                    }
-                  }
-                })
-
-                // Generate all possible function signatures as a union
-                const signatures = (() => {
-                  const allSignatures: string[] = []
-
-                  // First check if we have a no-param function
-                  const noParamFns = fns.filter(
-                    (fn) =>
-                      fn.args.length === 0 ||
-                      // If all the params of a function have non potgrest proxyable arguments
-                      fn.args.every((arg) => !VALID_FUNCTION_ARGS_MODE.has(arg.mode))
-                  )
-                  const unnamedFns = fns.filter((fn) => {
-                    // Only include unnamed functions that:
-                    // 1. Have a single unnamed parameter
-                    // 2. The parameter is of a valid type (json, jsonb, text)
-                    // 3. All parameters have default values
-                    const inArgs = fn.args.filter(({ mode }) => VALID_FUNCTION_ARGS_MODE.has(mode))
-                    return (
-                      inArgs.length === 1 &&
-                      inArgs[0].name === '' &&
-                      (VALID_UNNAMED_FUNCTION_ARG_TYPES.has(inArgs[0].type_id) ||
-                        inArgs[0].has_default) &&
-                      !fn.return_table_name
-                    )
-                  })
-
-                  // Special case: one no-param function and unnamed param function exist
-                  if (noParamFns.length > 0) {
-                    const noParamFn = noParamFns[0]
-                    const unnamedWithDefaultsFn = unnamedFns.find((fn) =>
-                      fn.args.every((arg) => arg.has_default)
-                    )
-
-                    // If we have a function with unnamed params that all have defaults, it creates a conflict
-                    if (unnamedWithDefaultsFn) {
-                      // Only generate the error signature in this case
-                      const conflictDesc = [
-                        `${fnName}()`,
-                        `${fnName}( => ${typesById[unnamedWithDefaultsFn.args[0].type_id]?.name || 'unknown'})`,
-                      ]
-                        .sort()
-                        .join(', ')
-
-                      allSignatures.push(`{
-                        Args: Record<PropertyKey, never>
-                        Returns: { error: true } & "Could not choose the best candidate function between: ${conflictDesc}. Try renaming the parameters or the function itself in the database so function overloading can be resolved"
-                      }`)
-                    } else {
-                      // No conflict - just add the no params signature
-                      allSignatures.push(`{
-                        Args: Record<PropertyKey, never>
-                        Returns: ${getFunctionTsReturnType(noParamFn, getFunctionReturnType(schema, noParamFn))}
-                      }`)
-                    }
-                  }
-                  if (unnamedFns.length > 0) {
-                    // If we don't have a no-param function, process the unnamed args
-                    // Take only the first function with unnamed parameters that has a valid type
-                    const validUnnamedFn = unnamedFns.find(
-                      (fn) =>
-                        fn.args.length === 1 &&
-                        fn.args[0].name === '' &&
-                        VALID_UNNAMED_FUNCTION_ARG_TYPES.has(fn.args[0].type_id)
-                    )
-
-                    if (validUnnamedFn) {
-                      const firstArgType = typesById[validUnnamedFn.args[0].type_id]
-                      const tsType = firstArgType
-                        ? pgTypeToTsType(schema, firstArgType.name, {
-                            types,
-                            schemas,
-                            tables,
-                            views,
-                          })
-                        : 'unknown'
-
-                      allSignatures.push(`{
-                        Args: { "": ${tsType} }
-                        Returns: ${getFunctionTsReturnType(validUnnamedFn, getFunctionReturnType(schema, validUnnamedFn))}
-                      }`)
-                    }
-                  }
-                  const unnamedSetofFunctions = fns.filter((fn) => {
-                    // Only include unnamed functions that:
-                    // 1. Have a single unnamed parameter
-                    // 2. The parameter is of a valid type (json, jsonb, text)
-                    // 3. All parameters have default values
-                    const inArgs = fn.args.filter(({ mode }) => VALID_FUNCTION_ARGS_MODE.has(mode))
-                    return inArgs.length === 1 && inArgs[0].name === '' && fn.return_table_name
-                  })
-                  if (unnamedSetofFunctions.length > 0) {
-                    const unnamedEmbededFunctionsSignatures = unnamedSetofFunctions.map((fn) => {
-                      const firstArgType = typesById[fn.args[0].type_id]
-                      const tsType = firstArgType
-                        ? pgTypeToTsType(schema, firstArgType.name, {
-                            types,
-                            schemas,
-                            tables,
-                            views,
-                          })
-                        : 'Record<PropertyKey, never>'
-                      return `{ Args: ${tsType}, Returns: ${getFunctionTsReturnType(fn, getFunctionReturnType(schema, fn))} }`
-                    })
-                    allSignatures.push(...unnamedEmbededFunctionsSignatures)
-                  }
-
-                  // For functions with named parameters, generate all signatures
-                  const namedFns = fns.filter((fn) => !fn.args.some(({ name }) => name === ''))
-                  namedFns.forEach((fn) => {
-                    const inArgs = fn.args.filter(({ mode }) => mode === 'in')
-                    const namedInArgs = inArgs
-                      .filter((arg) => arg.name !== '')
-                      .map((arg) => arg.name)
-                      .sort()
-                      .join(',')
-
-                    // If this argument combination would cause a conflict, return an error type signature
-                    if (conflictingSignatures.has(namedInArgs)) {
-                      const conflictingFns = fnsByArgNames.get(namedInArgs)!
-                      const conflictDesc = conflictingFns
-                        .map((cfn) => {
-                          const argsStr = cfn.args
-                            .filter(({ mode }) => mode === 'in')
-                            .map((arg) => {
-                              const type = typesById[arg.type_id]
-                              return `${arg.name} => ${type?.name || 'unknown'}`
-                            })
-                            .sort()
-                            .join(', ')
-                          return `${fnName}(${argsStr})`
+                  let argsType = 'Record<PropertyKey, never>'
+                  if (inArgs.length > 0) {
+                    const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
+                      const type = types.find(({ id }) => id === type_id)
+                      let tsType = 'unknown'
+                      if (type) {
+                        tsType = pgTypeToTsType(schema, type.name, {
+                          types,
+                          schemas,
+                          tables,
+                          views,
                         })
-                        .sort()
-                        .join(', ')
+                      }
+                      return { name, type: tsType, has_default }
+                    })
+                    argsType = `{ ${argsNameAndType.map(({ name, type, has_default }) => `${JSON.stringify(name)}${has_default ? '?' : ''}: ${type}`)} }`
+                  }
 
-                      allSignatures.push(`{
-                        Args: { ${inArgs
-                          .map((arg) => `${JSON.stringify(arg.name)}: unknown`)
-                          .sort()
-                          .join(', ')} }
-                        Returns: { error: true } & "Could not choose the best candidate function between: ${conflictDesc}. Try renaming the parameters or the function itself in the database so function overloading can be resolved"
-                      }`)
-                    } else if (inArgs.length > 0) {
-                      // Generate normal function signature
-                      const returnType = getFunctionReturnType(schema, fn)
-                      allSignatures.push(`{
-                        Args: ${`{ ${inArgs
-                          .map(({ name, type_id, has_default }) => {
-                            const type = typesById[type_id]
-                            let tsType = 'unknown'
-                            if (type) {
-                              tsType = pgTypeToTsType(schema, type.name, {
-                                types,
-                                schemas,
-                                tables,
-                                views,
-                              })
-                            }
-                            return `${JSON.stringify(name)}${has_default ? '?' : ''}: ${tsType}`
-                          })
-                          .sort()
-                          .join(', ')} }`}
-                        Returns: ${getFunctionTsReturnType(fn, returnType)}
-                      }`)
-                    }
-                  })
+                  return `{ Args: ${argsType}; Returns: ${getFunctionTsReturnType(fn, getFunctionReturnType(schema, fn))} }`
+                })
 
-                  // Remove duplicates and sort
-                  return Array.from(new Set(allSignatures)).sort()
-                })()
-
-                if (signatures.length > 0) {
-                  // Remove duplicates, sort, and join with |
-                  return `${JSON.stringify(fnName)}: ${signatures.join('\n    | ')}`
-                } else {
-                  return `${JSON.stringify(fnName)}: ${fns.map((fn) => `{ Args: {}, Returns: ${getFunctionTsReturnType(fn, getFunctionReturnType(schema, fn))} }`).join('\n |')}`
-                }
+                return `${JSON.stringify(fnName)}:\n${functionSignatures.map((sig) => `| ${sig}`).join('\n')}`
               })
             })()}
           }

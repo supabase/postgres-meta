@@ -79,6 +79,11 @@ $$
 select substring($1.details, 1, 3);
 $$ language sql stable;
 
+create function public.blurb_varchar(public.todos_view) returns character varying as
+$$
+select substring($1.details, 1, 3);
+$$ language sql stable;
+
 create function public.details_length(public.todos) returns integer as
 $$
 select length($1.details);
@@ -110,6 +115,15 @@ stable
 as $$
   select * from public.users limit 1;
 $$;
+
+create or replace function public.function_returning_single_row(todos public.todos)
+returns public.users
+language sql
+stable
+as $$
+  select * from public.users limit 1;
+$$;
+
 
 create or replace function public.function_returning_set_of_rows()
 returns setof public.users
