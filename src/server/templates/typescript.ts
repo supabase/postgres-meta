@@ -316,7 +316,9 @@ export type Database = {
                   `${JSON.stringify(fnName)}: {
                       Args: ${fns
                         .map(({ args }) => {
-                          const inArgs = args.filter(({ mode }) => mode === 'in')
+                          const inArgs = args
+                            .toSorted((a, b) => a.name.localeCompare(b.name))
+                            .filter(({ mode }) => mode === 'in')
 
                           if (inArgs.length === 0) {
                             return 'Record<PropertyKey, never>'
