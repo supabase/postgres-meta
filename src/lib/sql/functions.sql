@@ -54,7 +54,7 @@ select
   else false
   end as returns_set_of_table,
   case 
-    when f.proretset and rt.typrelid != 0 then
+    when rt.typrelid != 0 then
       (select relname from pg_class where oid = rt.typrelid)
     else null
   end as return_table_name,

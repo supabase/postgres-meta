@@ -398,3 +398,19 @@ LANGUAGE SQL STABLE
 AS $$
   SELECT ROW(ARRAY[$1.name])::composite_type_with_array_attribute;
 $$;
+
+-- Function that returns a single element
+CREATE OR REPLACE FUNCTION public.function_using_table_returns(user_row users)
+RETURNS todos
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM public.todos WHERE user_id = user_row.id LIMIT 1;
+$$;
+
+CREATE OR REPLACE FUNCTION public.function_using_setof_rows_one(user_row users)
+RETURNS SETOF todos
+LANGUAGE SQL STABLE
+ROWS 1
+AS $$
+  SELECT * FROM public.todos WHERE user_id = user_row.idLIMIT 1;
+$$;

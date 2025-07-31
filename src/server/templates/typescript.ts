@@ -8,7 +8,11 @@ import type {
   PostgresView,
 } from '../../lib/index.js'
 import type { GeneratorMetadata } from '../../lib/generators.js'
-import { GENERATE_TYPES_DEFAULT_SCHEMA, VALID_FUNCTION_ARGS_MODE } from '../constants.js'
+import {
+  GENERATE_TYPES_DEFAULT_SCHEMA,
+  VALID_FUNCTION_ARGS_MODE,
+  VALID_UNNAMED_FUNCTION_ARG_TYPES,
+} from '../constants.js'
 
 export const apply = async ({
   schemas,
@@ -43,16 +47,45 @@ export const apply = async ({
   )
 
   const getFunctionTsReturnType = (fn: PostgresFunction, returnType: string) => {
+    // Determine if this function should have SetofOptions
+    let setofOptionsInfo = ''
+
+    // Only add SetofOptions for functions with table arguments (embedded functions)
+    // or specific functions that need RETURNS table-name introspection fixes
+    if (fn.args.length === 1 && fn.args[0].table_name) {
+      // Case 1: Standard embedded function with proper setof detection
+      if (fn.returns_set_of_table && fn.return_table_name) {
+        setofOptionsInfo = `SetofOptions: {
+          from: ${JSON.stringify(typesById[fn.args[0].type_id].format)}
+          to: ${JSON.stringify(fn.return_table_name)}
+          isOneToOne: ${fn.returns_multiple_rows ? false : true}
+          isSetofReturn: true
+        }`
+      }
+      // Case 2: Handle RETURNS table-name those are always a one to one relationship
+      else if (fn.return_table_name && !fn.returns_set_of_table) {
+        const sourceTable = typesById[fn.args[0].type_id].format
+        let targetTable = fn.return_table_name
+        setofOptionsInfo = `SetofOptions: {
+            from: ${JSON.stringify(sourceTable)}
+            to: ${JSON.stringify(targetTable)}
+            isOneToOne: true
+            isSetofReturn: false
+          }`
+      }
+    }
+    // Case 3: Special case for functions without table arguments but specific names
+    else if (fn.return_table_name) {
+      setofOptionsInfo = `SetofOptions: {
+        from: "*"
+        to: ${JSON.stringify(fn.return_table_name)}
+        isOneToOne: ${fn.returns_multiple_rows ? false : true}
+        isSetofReturn: ${fn.is_set_returning_function}
+      }`
+    }
+
     return `${returnType}${fn.is_set_returning_function && fn.returns_multiple_rows ? '[]' : ''}
-                          ${
-                            fn.returns_set_of_table && fn.args.length === 1 && fn.args[0].table_name
-                              ? `SetofOptions: {
-                              from: ${JSON.stringify(typesById[fn.args[0].type_id].format)}
-                              to: ${JSON.stringify(fn.return_table_name)}
-                              isOneToOne: ${fn.returns_multiple_rows ? false : true}
-                            }`
-                              : ''
-                          }`
+                          ${setofOptionsInfo ? `${setofOptionsInfo}` : ''}`
   }
 
   const getFunctionReturnType = (schema: PostgresSchema, fn: PostgresFunction): string => {
@@ -370,42 +403,53 @@ export type Database = {
                 return '[_ in never]: never'
               }
               const schemaFunctionsGroupedByName = schemaFunctions
-                // .filter((func) => {
-                //   // Get all input args (in, inout, variadic modes)
-                //   const inArgs = func.args.filter(({ mode }) => VALID_FUNCTION_ARGS_MODE.has(mode))
-                //   // Case 1: Function has no parameters
-                //   if (inArgs.length === 0) {
-                //     return true
-                //   }
+                .filter((func) => {
+                  // Get all input args (in, inout, variadic modes)
+                  const inArgs = func.args
+                    .toSorted((a, b) => a.name.localeCompare(b.name))
+                    .filter(({ mode }) => VALID_FUNCTION_ARGS_MODE.has(mode))
+                  // Case 1: Function has no parameters
+                  if (inArgs.length === 0) {
+                    return true
+                  }
 
-                //   // Case 2: All input args are named
-                //   if (!inArgs.some(({ name }) => name === '')) {
-                //     return true
-                //   }
+                  // Case 2: All input args are named
+                  if (!inArgs.some(({ name }) => name === '')) {
+                    return true
+                  }
 
-                //   // Case 3: All unnamed args have default values
-                //   if (inArgs.every((arg) => (arg.name === '' ? arg.has_default : true))) {
-                //     return true
-                //   }
+                  // Case 3: All unnamed args have default values AND are valid types
+                  if (
+                    inArgs.every((arg) => {
+                      if (arg.name === '') {
+                        return arg.has_default && VALID_UNNAMED_FUNCTION_ARG_TYPES.has(arg.type_id)
+                      }
+                      return true
+                    })
+                  ) {
+                    return true
+                  }
 
-                //   // Case 4: Single unnamed parameter of valid type (json, jsonb, text)
-                //   // Exclude all functions definitions that have only one single argument unnamed argument that isn't
-                //   // a json/jsonb/text as it won't be considered by PostgREST
-                //   if (
-                //     (inArgs.length === 1 &&
-                //       inArgs[0].name === '' &&
-                //       VALID_UNNAMED_FUNCTION_ARG_TYPES.has(inArgs[0].type_id)) ||
-                //     // OR if the function have a single unnamed args which is another table (embeded function)
-                //     (inArgs.length === 1 &&
-                //       inArgs[0].name === '' &&
-                //       inArgs[0].table_name &&
-                //       func.return_table_name)
-                //   ) {
-                //     return true
-                //   }
+                  // Case 4: Single unnamed parameter of valid type (json, jsonb, text)
+                  // Exclude all functions definitions that have only one single argument unnamed argument that isn't
+                  // a json/jsonb/text as it won't be considered by PostgREST
+                  if (
+                    inArgs.length === 1 &&
+                    inArgs[0].name === '' &&
+                    (VALID_UNNAMED_FUNCTION_ARG_TYPES.has(inArgs[0].type_id) ||
+                      // OR if the function have a single unnamed args which is another table (embeded function)
+                      (inArgs[0].table_name && func.return_table_name) ||
+                      // OR if the function takes a table row but doesn't qualify as embedded (for error reporting)
+                      (inArgs[0].table_name && !func.return_table_name))
+                  ) {
+                    return true
+                  }
 
-                //   return false
-                // })
+                  // NOTE: Functions with named table arguments are generally excluded
+                  // as they're not supported by PostgREST in the expected way
+
+                  return false
+                })
                 .reduce(
                   (acc, curr) => {
                     acc[curr.name] ??= []
@@ -415,12 +459,140 @@ export type Database = {
                   {} as Record<string, PostgresFunction[]>
                 )
 
-              return Object.entries(schemaFunctionsGroupedByName).map(([fnName, fns]) => {
+              return Object.entries(schemaFunctionsGroupedByName).map(([fnName, _fns]) => {
+                // Check for function overload conflicts
+                const fns = _fns.toSorted((a, b) => b.definition.localeCompare(a.definition))
+
                 const functionSignatures = fns.map((fn) => {
                   const inArgs = fn.args.filter(({ mode }) => VALID_FUNCTION_ARGS_MODE.has(mode))
 
-                  let argsType = 'Record<PropertyKey, never>'
-                  if (inArgs.length > 0) {
+                  // Special error case for functions that take table row but don't qualify as embedded functions
+                  const hasTableRowError = (fn: PostgresFunction) => {
+                    if (
+                      inArgs.length === 1 &&
+                      inArgs[0].name === '' &&
+                      inArgs[0].table_name &&
+                      !fn.return_table_name
+                    ) {
+                      return true
+                    }
+                    return false
+                  }
+
+                  // Check for generic conflict cases that need error reporting
+                  const getConflictError = (fn: PostgresFunction) => {
+                    const sameFunctions = fns.filter((f) => f.name === fn.name)
+                    if (sameFunctions.length <= 1) return null
+
+                    // Generic conflict detection patterns
+
+                    // Pattern 1: No-args vs default-args conflicts
+                    if (inArgs.length === 0) {
+                      const conflictingFns = sameFunctions.filter((otherFn) => {
+                        if (otherFn === fn) return false
+                        const otherInArgs = otherFn.args.filter(({ mode }) =>
+                          VALID_FUNCTION_ARGS_MODE.has(mode)
+                        )
+                        return (
+                          otherInArgs.length === 1 &&
+                          otherInArgs[0].name === '' &&
+                          otherInArgs[0].has_default
+                        )
+                      })
+
+                      if (conflictingFns.length > 0) {
+                        const conflictingFn = conflictingFns[0]
+                        const returnTypeName =
+                          types.find((t) => t.id === conflictingFn.return_type_id)?.name ||
+                          'unknown'
+                        return `Could not choose the best candidate function between: ${schema.name}.${fn.name}(), ${schema.name}.${fn.name}( => ${returnTypeName}). Try renaming the parameters or the function itself in the database so function overloading can be resolved`
+                      }
+                    }
+
+                    // Pattern 2: Same parameter name but different types (unresolvable overloads)
+                    if (inArgs.length === 1 && inArgs[0].name !== '') {
+                      const conflictingFns = sameFunctions.filter((otherFn) => {
+                        if (otherFn === fn) return false
+                        const otherInArgs = otherFn.args.filter(({ mode }) =>
+                          VALID_FUNCTION_ARGS_MODE.has(mode)
+                        )
+                        return (
+                          otherInArgs.length === 1 &&
+                          otherInArgs[0].name === inArgs[0].name &&
+                          otherInArgs[0].type_id !== inArgs[0].type_id
+                        )
+                      })
+
+                      if (conflictingFns.length > 0) {
+                        const allConflictingFunctions = [fn, ...conflictingFns]
+                        const conflictList = allConflictingFunctions
+                          .sort((a, b) => {
+                            const aArgs = a.args.filter(({ mode }) =>
+                              VALID_FUNCTION_ARGS_MODE.has(mode)
+                            )
+                            const bArgs = b.args.filter(({ mode }) =>
+                              VALID_FUNCTION_ARGS_MODE.has(mode)
+                            )
+                            return (aArgs[0]?.type_id || 0) - (bArgs[0]?.type_id || 0)
+                          })
+                          .map((f) => {
+                            const args = f.args.filter(({ mode }) =>
+                              VALID_FUNCTION_ARGS_MODE.has(mode)
+                            )
+                            return `${schema.name}.${fn.name}(${args.map((a) => `${a.name || ''} => ${types.find((t) => t.id === a.type_id)?.name || 'unknown'}`).join(', ')})`
+                          })
+                          .join(', ')
+
+                        return `Could not choose the best candidate function between: ${conflictList}. Try renaming the parameters or the function itself in the database so function overloading can be resolved`
+                      }
+                    }
+
+                    return null
+                  }
+
+                  let argsType = 'never'
+                  let returnType = getFunctionReturnType(schema, fn)
+
+                  // Check for specific error cases
+                  const conflictError = getConflictError(fn)
+                  if (conflictError) {
+                    if (inArgs.length > 0) {
+                      const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
+                        const type = types.find(({ id }) => id === type_id)
+                        let tsType = 'unknown'
+                        if (type) {
+                          tsType = pgTypeToTsType(schema, type.name, {
+                            types,
+                            schemas,
+                            tables,
+                            views,
+                          })
+                        }
+                        return { name, type: tsType, has_default }
+                      })
+                      argsType = `{ ${argsNameAndType.map(({ name, type, has_default }) => `${JSON.stringify(name)}${has_default ? '?' : ''}: ${type}`)} }`
+                    }
+                    returnType = `{ error: true } & ${JSON.stringify(conflictError)}`
+                  } else if (hasTableRowError(fn)) {
+                    // Special case for computed fields returning scalars functions
+                    if (inArgs.length > 0) {
+                      const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
+                        const type = types.find(({ id }) => id === type_id)
+                        let tsType = 'unknown'
+                        if (type) {
+                          tsType = pgTypeToTsType(schema, type.name, {
+                            types,
+                            schemas,
+                            tables,
+                            views,
+                          })
+                        }
+                        return { name, type: tsType, has_default }
+                      })
+                      argsType = `{ ${argsNameAndType.map(({ name, type, has_default }) => `${JSON.stringify(name)}${has_default ? '?' : ''}: ${type}`)} }`
+                    }
+                    returnType = `{ error: true } & ${JSON.stringify(`the function ${schema.name}.${fn.name} with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache`)}`
+                  } else if (inArgs.length > 0) {
                     const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
                       const type = types.find(({ id }) => id === type_id)
                       let tsType = 'unknown'
@@ -437,7 +609,7 @@ export type Database = {
                     argsType = `{ ${argsNameAndType.map(({ name, type, has_default }) => `${JSON.stringify(name)}${has_default ? '?' : ''}: ${type}`)} }`
                   }
 
-                  return `{ Args: ${argsType}; Returns: ${getFunctionTsReturnType(fn, getFunctionReturnType(schema, fn))} }`
+                  return `{ Args: ${argsType}; Returns: ${getFunctionTsReturnType(fn, returnType)} }`
                 })
 
                 return `${JSON.stringify(fnName)}:\n${functionSignatures.map((sig) => `| ${sig}`).join('\n')}`
