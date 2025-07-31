@@ -3,14 +3,19 @@ import * as Sentry from '@sentry/node'
 import cors from '@fastify/cors'
 import swagger from '@fastify/swagger'
 import { fastify, FastifyInstance, FastifyServerOptions } from 'fastify'
-import { PG_META_REQ_HEADER } from './constants.js'
+import { PG_META_REQ_HEADER, MAX_BODY_LIMIT } from './constants.js'
 import routes from './routes/index.js'
 import { extractRequestForLogging } from './utils.js'
 // Pseudo package declared only for this module
 import pkg from '#package.json' with { type: 'json' }
 
 export const build = (opts: FastifyServerOptions = {}): FastifyInstance => {
-  const app = fastify({ disableRequestLogging: true, requestIdHeader: PG_META_REQ_HEADER, ...opts })
+  const app = fastify({
+    disableRequestLogging: true,
+    requestIdHeader: PG_META_REQ_HEADER,
+    bodyLimit: MAX_BODY_LIMIT,
+    ...opts,
+  })
   Sentry.setupFastifyErrorHandler(app)
 
   app.setErrorHandler((error, request, reply) => {

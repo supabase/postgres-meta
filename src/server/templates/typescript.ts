@@ -137,7 +137,7 @@ export const apply = async ({
   }
 
   const internal_supabase_schema = postgrestVersion
-    ? `// Allows to automatically instanciate createClient with right options
+    ? `// Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: '${postgrestVersion}'
@@ -464,6 +464,7 @@ export type Database = {
                 const fns = _fns.toSorted((a, b) => b.definition.localeCompare(a.definition))
 
                 const functionSignatures = fns.map((fn) => {
+                  fn.args.sort((a, b) => a.name.localeCompare(b.name))
                   const inArgs = fn.args.filter(({ mode }) => VALID_FUNCTION_ARGS_MODE.has(mode))
 
                   // Special error case for functions that take table row but don't qualify as embedded functions
