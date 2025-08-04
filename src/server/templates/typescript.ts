@@ -361,9 +361,9 @@ export type Database = {
                           })
 
                           return `{
-                            ${argsNameAndType.map(
-                              ({ name, type }) => `${JSON.stringify(name)}: ${type}`
-                            )}
+                            ${argsNameAndType
+                              .toSorted((a, b) => a.name.localeCompare(b.name))
+                              .map(({ name, type }) => `${JSON.stringify(name)}: ${type}`)}
                           }`
                         }
 
@@ -373,19 +373,21 @@ export type Database = {
                         )
                         if (relation) {
                           return `{
-                            ${columnsByTableId[relation.id].map(
-                              (column) =>
-                                `${JSON.stringify(column.name)}: ${pgTypeToTsType(
-                                  schema,
-                                  column.format,
-                                  {
-                                    types,
-                                    schemas,
-                                    tables,
-                                    views,
-                                  }
-                                )} ${column.is_nullable ? '| null' : ''}`
-                            )}
+                            ${columnsByTableId[relation.id]
+                              .toSorted((a, b) => a.name.localeCompare(b.name))
+                              .map(
+                                (column) =>
+                                  `${JSON.stringify(column.name)}: ${pgTypeToTsType(
+                                    schema,
+                                    column.format,
+                                    {
+                                      types,
+                                      schemas,
+                                      tables,
+                                      views,
+                                    }
+                                  )} ${column.is_nullable ? '| null' : ''}`
+                              )}
                           }`
                         }
 
