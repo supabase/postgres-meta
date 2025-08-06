@@ -770,7 +770,6 @@ test('typegen: typescript', async () => {
           postgres_fdw_handler: { Args: never; Returns: unknown }
           postgrest_resolvable_with_override_function:
             | { Args: { a: string }; Returns: number }
-            | { Args: { b: number }; Returns: string }
             | {
                 Args: { user_id: number }
                 Returns: {
@@ -814,6 +813,7 @@ test('typegen: typescript', async () => {
                   isSetofReturn: true
                 }
               }
+            | { Args: { b: number }; Returns: string }
             | { Args: never; Returns: undefined }
           postgrest_unresolvable_function:
             | {
@@ -1847,7 +1847,6 @@ test('typegen w/ one-to-one relationships', async () => {
           postgres_fdw_handler: { Args: never; Returns: unknown }
           postgrest_resolvable_with_override_function:
             | { Args: { a: string }; Returns: number }
-            | { Args: { b: number }; Returns: string }
             | {
                 Args: { user_id: number }
                 Returns: {
@@ -1891,6 +1890,7 @@ test('typegen w/ one-to-one relationships', async () => {
                   isSetofReturn: true
                 }
               }
+            | { Args: { b: number }; Returns: string }
             | { Args: never; Returns: undefined }
           postgrest_unresolvable_function:
             | {
@@ -2924,7 +2924,6 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           postgres_fdw_handler: { Args: never; Returns: unknown }
           postgrest_resolvable_with_override_function:
             | { Args: { a: string }; Returns: number }
-            | { Args: { b: number }; Returns: string }
             | {
                 Args: { user_id: number }
                 Returns: {
@@ -2968,6 +2967,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   isSetofReturn: true
                 }
               }
+            | { Args: { b: number }; Returns: string }
             | { Args: never; Returns: undefined }
           postgrest_unresolvable_function:
             | {
@@ -4006,7 +4006,6 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           postgres_fdw_handler: { Args: never; Returns: unknown }
           postgrest_resolvable_with_override_function:
             | { Args: { a: string }; Returns: number }
-            | { Args: { b: number }; Returns: string }
             | {
                 Args: { user_id: number }
                 Returns: {
@@ -4050,6 +4049,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   isSetofReturn: true
                 }
               }
+            | { Args: { b: number }; Returns: string }
             | { Args: never; Returns: undefined }
           postgrest_unresolvable_function:
             | {
