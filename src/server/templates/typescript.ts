@@ -30,13 +30,110 @@ export const apply = async ({
   detectOneToOneRelationships: boolean
   postgrestVersion?: string
 }): Promise<string> => {
+  schemas.sort((a, b) => a.name.localeCompare(b.name))
+
   const columnsByTableId = Object.fromEntries<PostgresColumn[]>(
     [...tables, ...foreignTables, ...views, ...materializedViews].map((t) => [t.id, []])
   )
-  columns
-    .filter((c) => c.table_id in columnsByTableId)
-    .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-    .forEach((c) => columnsByTableId[c.table_id].push(c))
+  for (const column of columns) {
+    if (column.table_id in columnsByTableId) {
+      columnsByTableId[column.table_id].push(column)
+    }
+  }
+  for (const tableId in columnsByTableId) {
+    columnsByTableId[tableId].sort((a, b) => a.name.localeCompare(b.name))
+  }
+
+  const introspectionBySchema = Object.fromEntries<{
+    tables: Pick<PostgresTable, 'id' | 'name' | 'schema' | 'columns'>[]
+    views: PostgresView[]
+    functions: { fn: PostgresFunction; inArgs: PostgresFunction['args'] }[]
+    enums: PostgresType[]
+    compositeTypes: PostgresType[]
+  }>(
+    schemas.map((s) => [
+      s.name,
+      { tables: [], views: [], functions: [], enums: [], compositeTypes: [] },
+    ])
+  )
+  for (const table of tables) {
+    if (table.schema in introspectionBySchema) {
+      introspectionBySchema[table.schema].tables.push(table)
+    }
+  }
+  for (const table of foreignTables) {
+    if (table.schema in introspectionBySchema) {
+      introspectionBySchema[table.schema].tables.push(table)
+    }
+  }
+  for (const view of views) {
+    if (view.schema in introspectionBySchema) {
+      introspectionBySchema[view.schema].views.push(view)
+    }
+  }
+  for (const materializedView of materializedViews) {
+    if (materializedView.schema in introspectionBySchema) {
+      introspectionBySchema[materializedView.schema].views.push({
+        ...materializedView,
+        is_updatable: false,
+      })
+    }
+  }
+  for (const func of functions) {
+    if (func.schema in introspectionBySchema) {
+      func.args.sort((a, b) => a.name.localeCompare(b.name))
+      // Get all input args (in, inout, variadic modes)
+      const inArgs = func.args.filter(({ mode }) => VALID_FUNCTION_ARGS_MODE.has(mode))
+
+      if (
+        // Case 1: Function has no parameters
+        inArgs.length === 0 ||
+        // Case 2: All input args are named
+        !inArgs.some(({ name }) => name === '') ||
+        // Case 3: All unnamed args have default values AND are valid types
+        inArgs.every((arg) => {
+          if (arg.name === '') {
+            return arg.has_default && VALID_UNNAMED_FUNCTION_ARG_TYPES.has(arg.type_id)
+          }
+          return true
+        }) ||
+        // Case 4: Single unnamed parameter of valid type (json, jsonb, text)
+        // Exclude all functions definitions that have only one single argument unnamed argument that isn't
+        // a json/jsonb/text as it won't be considered by PostgREST
+        (inArgs.length === 1 &&
+          inArgs[0].name === '' &&
+          (VALID_UNNAMED_FUNCTION_ARG_TYPES.has(inArgs[0].type_id) ||
+            // OR if the function have a single unnamed args which is another table (embeded function)
+            (inArgs[0].table_name && func.return_table_name) ||
+            // OR if the function takes a table row but doesn't qualify as embedded (for error reporting)
+            (inArgs[0].table_name && !func.return_table_name)))
+      ) {
+        func.args.sort((a, b) => a.name.localeCompare(b.name))
+        introspectionBySchema[func.schema].functions.push({ fn: func, inArgs })
+      }
+
+      // NOTE: Functions with named table arguments are generally excluded
+      // as they're not supported by PostgREST in the expected way
+    }
+  }
+  for (const type of types) {
+    if (type.schema in introspectionBySchema) {
+      if (type.enums.length > 0) {
+        introspectionBySchema[type.schema].enums.push(type)
+      }
+      if (type.attributes.length > 0) {
+        introspectionBySchema[type.schema].compositeTypes.push(type)
+      }
+    }
+  }
+  for (const schema in introspectionBySchema) {
+    introspectionBySchema[schema].tables.sort((a, b) => a.name.localeCompare(b.name))
+    introspectionBySchema[schema].views.sort((a, b) => a.name.localeCompare(b.name))
+    introspectionBySchema[schema].functions.sort((a, b) => a.fn.name.localeCompare(b.fn.name))
+    introspectionBySchema[schema].enums.sort((a, b) => a.name.localeCompare(b.name))
+    introspectionBySchema[schema].compositeTypes.sort((a, b) => a.name.localeCompare(b.name))
+  }
+
   // group types by id for quicker lookup
   const typesById = types.reduce(
     (acc, type) => {
@@ -51,7 +148,7 @@ export const apply = async ({
     let setofOptionsInfo = ''
 
     // Only add SetofOptions for functions with table arguments (embedded functions)
-    // or specific functions that need RETURNS table-name introspection fixes
+    // or specific functions that RETURNS table-name
     if (fn.args.length === 1 && fn.args[0].table_name) {
       // Case 1: Standard embedded function with proper setof detection
       if (fn.returns_set_of_table && fn.return_table_name) {
@@ -74,7 +171,8 @@ export const apply = async ({
           }`
       }
     }
-    // Case 3: Special case for functions without table arguments but specific names
+    // Case 3: Special case for functions without table arguments still returning a table
+    // Those can be used in rpc to select sub fields of a table
     else if (fn.return_table_name) {
       setofOptionsInfo = `SetofOptions: {
         from: "*"
@@ -92,16 +190,14 @@ export const apply = async ({
     // Case 1: `returns table`.
     const tableArgs = fn.args.filter(({ mode }) => mode === 'table')
     if (tableArgs.length > 0) {
-      const argsNameAndType = tableArgs
-        .map(({ name, type_id }) => {
-          const type = typesById[type_id]
-          let tsType = 'unknown'
-          if (type) {
-            tsType = pgTypeToTsType(schema, type.name, { types, schemas, tables, views })
-          }
-          return { name, type: tsType }
-        })
-        .toSorted((a, b) => a.name.localeCompare(b.name))
+      const argsNameAndType = tableArgs.map(({ name, type_id }) => {
+        const type = typesById[type_id]
+        let tsType = 'unknown'
+        if (type) {
+          tsType = pgTypeToTsType(schema, type.name, { types, schemas, tables, views })
+        }
+        return { name, type: tsType }
+      })
 
       return `{
               ${argsNameAndType.map(({ name, type }) => `${JSON.stringify(name)}: ${type}`)}
@@ -109,11 +205,14 @@ export const apply = async ({
     }
 
     // Case 2: returns a relation's row type.
-    const relation = [...tables, ...views].find(({ id }) => id === fn.return_type_relation_id)
+    const relation =
+      introspectionBySchema[schema.name]?.tables.find(
+        ({ id }) => id === fn.return_type_relation_id
+      ) ||
+      introspectionBySchema[schema.name]?.views.find(({ id }) => id === fn.return_type_relation_id)
     if (relation) {
       return `{
               ${columnsByTableId[relation.id]
-                .toSorted((a, b) => a.name.localeCompare(b.name))
                 .map(
                   (column) =>
                     `${JSON.stringify(column.name)}: ${pgTypeToTsType(schema, column.format, {
@@ -123,7 +222,6 @@ export const apply = async ({
                       views,
                     })} ${column.is_nullable ? '| null' : ''}`
                 )
-                .sort()
                 .join(',\n')}
             }`
     }
@@ -135,6 +233,143 @@ export const apply = async ({
     }
 
     return 'unknown'
+  }
+  // Special error case for functions that take table row but don't qualify as embedded functions
+  const hasTableRowError = (fn: PostgresFunction, inArgs: PostgresFunction['args']) => {
+    if (
+      inArgs.length === 1 &&
+      inArgs[0].name === '' &&
+      inArgs[0].table_name &&
+      !fn.return_table_name
+    ) {
+      return true
+    }
+    return false
+  }
+
+  // Check for generic conflict cases that need error reporting
+  const getConflictError = (
+    schema: PostgresSchema,
+    fns: Array<{ fn: PostgresFunction; inArgs: PostgresFunction['args'] }>,
+    fn: PostgresFunction,
+    inArgs: PostgresFunction['args']
+  ) => {
+    // If there is a single function definition, there is no conflict
+    if (fns.length <= 1) return null
+
+    // Generic conflict detection patterns
+    // Pattern 1: No-args vs default-args conflicts
+    if (inArgs.length === 0) {
+      const conflictingFns = fns.filter(({ fn: otherFn, inArgs: otherInArgs }) => {
+        if (otherFn === fn) return false
+        return otherInArgs.length === 1 && otherInArgs[0].name === '' && otherInArgs[0].has_default
+      })
+
+      if (conflictingFns.length > 0) {
+        const conflictingFn = conflictingFns[0]
+        const returnTypeName = typesById[conflictingFn.fn.return_type_id]?.name || 'unknown'
+        return `Could not choose the best candidate function between: ${schema.name}.${fn.name}(), ${schema.name}.${fn.name}( => ${returnTypeName}). Try renaming the parameters or the function itself in the database so function overloading can be resolved`
+      }
+    }
+
+    // Pattern 2: Same parameter name but different types (unresolvable overloads)
+    if (inArgs.length === 1 && inArgs[0].name !== '') {
+      const conflictingFns = fns.filter(({ fn: otherFn, inArgs: otherInArgs }) => {
+        if (otherFn === fn) return false
+        return (
+          otherInArgs.length === 1 &&
+          otherInArgs[0].name === inArgs[0].name &&
+          otherInArgs[0].type_id !== inArgs[0].type_id
+        )
+      })
+
+      if (conflictingFns.length > 0) {
+        const allConflictingFunctions = [{ fn, inArgs }, ...conflictingFns]
+        const conflictList = allConflictingFunctions
+          .sort((a, b) => {
+            const aArgs = a.inArgs
+            const bArgs = b.inArgs
+            return (aArgs[0]?.type_id || 0) - (bArgs[0]?.type_id || 0)
+          })
+          .map((f) => {
+            const args = f.inArgs
+            return `${schema.name}.${fn.name}(${args.map((a) => `${a.name || ''} => ${typesById[a.type_id]?.name || 'unknown'}`).join(', ')})`
+          })
+          .join(', ')
+
+        return `Could not choose the best candidate function between: ${conflictList}. Try renaming the parameters or the function itself in the database so function overloading can be resolved`
+      }
+    }
+
+    return null
+  }
+
+  const getFunctionSignatures = (
+    schema: PostgresSchema,
+    fns: Array<{ fn: PostgresFunction; inArgs: PostgresFunction['args'] }>
+  ) => {
+    return fns.map(({ fn, inArgs }) => {
+      let argsType = 'never'
+      let returnType = getFunctionReturnType(schema, fn)
+
+      // Check for specific error cases
+      const conflictError = getConflictError(schema, fns, fn, inArgs)
+      if (conflictError) {
+        if (inArgs.length > 0) {
+          const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
+            const type = typesById[type_id]
+            let tsType = 'unknown'
+            if (type) {
+              tsType = pgTypeToTsType(schema, type.name, {
+                types,
+                schemas,
+                tables,
+                views,
+              })
+            }
+            return { name, type: tsType, has_default }
+          })
+          argsType = `{ ${argsNameAndType.map(({ name, type, has_default }) => `${JSON.stringify(name)}${has_default ? '?' : ''}: ${type}`)} }`
+        }
+        returnType = `{ error: true } & ${JSON.stringify(conflictError)}`
+      } else if (hasTableRowError(fn, inArgs)) {
+        // Special case for computed fields returning scalars functions
+        if (inArgs.length > 0) {
+          const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
+            const type = typesById[type_id]
+            let tsType = 'unknown'
+            if (type) {
+              tsType = pgTypeToTsType(schema, type.name, {
+                types,
+                schemas,
+                tables,
+                views,
+              })
+            }
+            return { name, type: tsType, has_default }
+          })
+          argsType = `{ ${argsNameAndType.map(({ name, type, has_default }) => `${JSON.stringify(name)}${has_default ? '?' : ''}: ${type}`)} }`
+        }
+        returnType = `{ error: true } & ${JSON.stringify(`the function ${schema.name}.${fn.name} with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache`)}`
+      } else if (inArgs.length > 0) {
+        const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
+          const type = typesById[type_id]
+          let tsType = 'unknown'
+          if (type) {
+            tsType = pgTypeToTsType(schema, type.name, {
+              types,
+              schemas,
+              tables,
+              views,
+            })
+          }
+          return { name, type: tsType, has_default }
+        })
+        argsType = `{ ${argsNameAndType.map(({ name, type, has_default }) => `${JSON.stringify(name)}${has_default ? '?' : ''}: ${type}`)} }`
+      }
+
+      return `{ Args: ${argsType}; Returns: ${getFunctionTsReturnType(fn, returnType)} }`
+    })
   }
 
   const internal_supabase_schema = postgrestVersion
@@ -150,44 +385,15 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 export type Database = {
   ${internal_supabase_schema}
-  ${schemas
-    .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-    .map((schema) => {
-      const schemaTables = [...tables, ...foreignTables]
-        .filter((table) => table.schema === schema.name)
-        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-      const schemaViews = [...views, ...materializedViews]
-        .filter((view) => view.schema === schema.name)
-        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-      const schemaFunctions = functions
-        .filter((func) => {
-          if (func.schema !== schema.name) {
-            return false
-          }
-
-          // Either:
-          // 1. All input args are be named, or
-          // 2. There is only one input arg which is unnamed
-          const inArgs = func.args.filter(({ mode }) => ['in', 'inout', 'variadic'].includes(mode))
-
-          if (!inArgs.some(({ name }) => name === '')) {
-            return true
-          }
-
-          if (inArgs.length === 1) {
-            return true
-          }
-
-          return false
-        })
-        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-      const schemaEnums = types
-        .filter((type) => type.schema === schema.name && type.enums.length > 0)
-        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-      const schemaCompositeTypes = types
-        .filter((type) => type.schema === schema.name && type.attributes.length > 0)
-        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-      return `${JSON.stringify(schema.name)}: {
+  ${schemas.map((schema) => {
+    const {
+      tables: schemaTables,
+      views: schemaViews,
+      functions: schemaFunctions,
+      enums: schemaEnums,
+      compositeTypes: schemaCompositeTypes,
+    } = introspectionBySchema[schema.name]
+    return `${JSON.stringify(schema.name)}: {
           Tables: {
             ${
               schemaTables.length === 0
@@ -206,9 +412,9 @@ export type Database = {
                           })} ${column.is_nullable ? '| null' : ''}`
                       ),
                       ...schemaFunctions
-                        .filter((fn) => fn.argument_types === table.name)
+                        .filter(({ fn }) => fn.argument_types === table.name)
                         .map(
-                          (fn) =>
+                          ({ fn }) =>
                             `${JSON.stringify(fn.name)}: ${getFunctionReturnType(schema, fn)} | null`
                         ),
                     ]}
@@ -318,15 +524,15 @@ export type Database = {
                           })} ${column.is_nullable ? '| null' : ''}`
                       ),
                       ...schemaFunctions
-                        .filter((fn) => fn.argument_types === view.name)
+                        .filter(({ fn }) => fn.argument_types === view.name)
                         .map(
-                          (fn) =>
+                          ({ fn }) =>
                             `${JSON.stringify(fn.name)}: ${getFunctionReturnType(schema, fn)} | null`
                         ),
                     ]}
                   }
                   ${
-                    'is_updatable' in view && view.is_updatable
+                    view.is_updatable
                       ? `Insert: {
                            ${columnsByTableId[view.id].map((column) => {
                              let output = JSON.stringify(column.name)
@@ -403,216 +609,22 @@ export type Database = {
               if (schemaFunctions.length === 0) {
                 return '[_ in never]: never'
               }
-              const schemaFunctionsGroupedByName = schemaFunctions
-                .filter((func) => {
-                  // Get all input args (in, inout, variadic modes)
-                  const inArgs = func.args
-                    .toSorted((a, b) => a.name.localeCompare(b.name))
-                    .filter(({ mode }) => VALID_FUNCTION_ARGS_MODE.has(mode))
-                  // Case 1: Function has no parameters
-                  if (inArgs.length === 0) {
-                    return true
-                  }
-
-                  // Case 2: All input args are named
-                  if (!inArgs.some(({ name }) => name === '')) {
-                    return true
-                  }
-
-                  // Case 3: All unnamed args have default values AND are valid types
-                  if (
-                    inArgs.every((arg) => {
-                      if (arg.name === '') {
-                        return arg.has_default && VALID_UNNAMED_FUNCTION_ARG_TYPES.has(arg.type_id)
-                      }
-                      return true
-                    })
-                  ) {
-                    return true
-                  }
-
-                  // Case 4: Single unnamed parameter of valid type (json, jsonb, text)
-                  // Exclude all functions definitions that have only one single argument unnamed argument that isn't
-                  // a json/jsonb/text as it won't be considered by PostgREST
-                  if (
-                    inArgs.length === 1 &&
-                    inArgs[0].name === '' &&
-                    (VALID_UNNAMED_FUNCTION_ARG_TYPES.has(inArgs[0].type_id) ||
-                      // OR if the function have a single unnamed args which is another table (embeded function)
-                      (inArgs[0].table_name && func.return_table_name) ||
-                      // OR if the function takes a table row but doesn't qualify as embedded (for error reporting)
-                      (inArgs[0].table_name && !func.return_table_name))
-                  ) {
-                    return true
-                  }
-
-                  // NOTE: Functions with named table arguments are generally excluded
-                  // as they're not supported by PostgREST in the expected way
-
-                  return false
-                })
-                .reduce(
-                  (acc, curr) => {
-                    acc[curr.name] ??= []
-                    acc[curr.name].push(curr)
-                    return acc
-                  },
-                  {} as Record<string, PostgresFunction[]>
+              const schemaFunctionsGroupedByName = schemaFunctions.reduce(
+                (acc, curr) => {
+                  acc[curr.fn.name] ??= []
+                  acc[curr.fn.name].push(curr)
+                  return acc
+                },
+                {} as Record<string, typeof schemaFunctions>
+              )
+              for (const fnName in schemaFunctionsGroupedByName) {
+                schemaFunctionsGroupedByName[fnName].sort((a, b) =>
+                  b.fn.definition.localeCompare(a.fn.definition)
                 )
+              }
 
-              return Object.entries(schemaFunctionsGroupedByName).map(([fnName, _fns]) => {
-                // Check for function overload conflicts
-                const fns = _fns.toSorted((a, b) => b.definition.localeCompare(a.definition))
-
-                const functionSignatures = fns.map((fn) => {
-                  const inArgs = fn.args.filter(({ mode }) => VALID_FUNCTION_ARGS_MODE.has(mode))
-
-                  // Special error case for functions that take table row but don't qualify as embedded functions
-                  const hasTableRowError = (fn: PostgresFunction) => {
-                    if (
-                      inArgs.length === 1 &&
-                      inArgs[0].name === '' &&
-                      inArgs[0].table_name &&
-                      !fn.return_table_name
-                    ) {
-                      return true
-                    }
-                    return false
-                  }
-
-                  // Check for generic conflict cases that need error reporting
-                  const getConflictError = (fn: PostgresFunction) => {
-                    const sameFunctions = fns.filter((f) => f.name === fn.name)
-                    if (sameFunctions.length <= 1) return null
-
-                    // Generic conflict detection patterns
-
-                    // Pattern 1: No-args vs default-args conflicts
-                    if (inArgs.length === 0) {
-                      const conflictingFns = sameFunctions.filter((otherFn) => {
-                        if (otherFn === fn) return false
-                        const otherInArgs = otherFn.args.filter(({ mode }) =>
-                          VALID_FUNCTION_ARGS_MODE.has(mode)
-                        )
-                        return (
-                          otherInArgs.length === 1 &&
-                          otherInArgs[0].name === '' &&
-                          otherInArgs[0].has_default
-                        )
-                      })
-
-                      if (conflictingFns.length > 0) {
-                        const conflictingFn = conflictingFns[0]
-                        const returnTypeName =
-                          types.find((t) => t.id === conflictingFn.return_type_id)?.name ||
-                          'unknown'
-                        return `Could not choose the best candidate function between: ${schema.name}.${fn.name}(), ${schema.name}.${fn.name}( => ${returnTypeName}). Try renaming the parameters or the function itself in the database so function overloading can be resolved`
-                      }
-                    }
-
-                    // Pattern 2: Same parameter name but different types (unresolvable overloads)
-                    if (inArgs.length === 1 && inArgs[0].name !== '') {
-                      const conflictingFns = sameFunctions.filter((otherFn) => {
-                        if (otherFn === fn) return false
-                        const otherInArgs = otherFn.args.filter(({ mode }) =>
-                          VALID_FUNCTION_ARGS_MODE.has(mode)
-                        )
-                        return (
-                          otherInArgs.length === 1 &&
-                          otherInArgs[0].name === inArgs[0].name &&
-                          otherInArgs[0].type_id !== inArgs[0].type_id
-                        )
-                      })
-
-                      if (conflictingFns.length > 0) {
-                        const allConflictingFunctions = [fn, ...conflictingFns]
-                        const conflictList = allConflictingFunctions
-                          .sort((a, b) => {
-                            const aArgs = a.args.filter(({ mode }) =>
-                              VALID_FUNCTION_ARGS_MODE.has(mode)
-                            )
-                            const bArgs = b.args.filter(({ mode }) =>
-                              VALID_FUNCTION_ARGS_MODE.has(mode)
-                            )
-                            return (aArgs[0]?.type_id || 0) - (bArgs[0]?.type_id || 0)
-                          })
-                          .map((f) => {
-                            const args = f.args.filter(({ mode }) =>
-                              VALID_FUNCTION_ARGS_MODE.has(mode)
-                            )
-                            return `${schema.name}.${fn.name}(${args.map((a) => `${a.name || ''} => ${types.find((t) => t.id === a.type_id)?.name || 'unknown'}`).join(', ')})`
-                          })
-                          .join(', ')
-
-                        return `Could not choose the best candidate function between: ${conflictList}. Try renaming the parameters or the function itself in the database so function overloading can be resolved`
-                      }
-                    }
-
-                    return null
-                  }
-
-                  let argsType = 'never'
-                  let returnType = getFunctionReturnType(schema, fn)
-
-                  // Check for specific error cases
-                  const conflictError = getConflictError(fn)
-                  if (conflictError) {
-                    if (inArgs.length > 0) {
-                      const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
-                        const type = types.find(({ id }) => id === type_id)
-                        let tsType = 'unknown'
-                        if (type) {
-                          tsType = pgTypeToTsType(schema, type.name, {
-                            types,
-                            schemas,
-                            tables,
-                            views,
-                          })
-                        }
-                        return { name, type: tsType, has_default }
-                      })
-                      argsType = `{ ${argsNameAndType.toSorted((a, b) => a.name.localeCompare(b.name)).map(({ name, type, has_default }) => `${JSON.stringify(name)}${has_default ? '?' : ''}: ${type}`)} }`
-                    }
-                    returnType = `{ error: true } & ${JSON.stringify(conflictError)}`
-                  } else if (hasTableRowError(fn)) {
-                    // Special case for computed fields returning scalars functions
-                    if (inArgs.length > 0) {
-                      const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
-                        const type = types.find(({ id }) => id === type_id)
-                        let tsType = 'unknown'
-                        if (type) {
-                          tsType = pgTypeToTsType(schema, type.name, {
-                            types,
-                            schemas,
-                            tables,
-                            views,
-                          })
-                        }
-                        return { name, type: tsType, has_default }
-                      })
-                      argsType = `{ ${argsNameAndType.toSorted((a, b) => a.name.localeCompare(b.name)).map(({ name, type, has_default }) => `${JSON.stringify(name)}${has_default ? '?' : ''}: ${type}`)} }`
-                    }
-                    returnType = `{ error: true } & ${JSON.stringify(`the function ${schema.name}.${fn.name} with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache`)}`
-                  } else if (inArgs.length > 0) {
-                    const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
-                      const type = types.find(({ id }) => id === type_id)
-                      let tsType = 'unknown'
-                      if (type) {
-                        tsType = pgTypeToTsType(schema, type.name, {
-                          types,
-                          schemas,
-                          tables,
-                          views,
-                        })
-                      }
-                      return { name, type: tsType, has_default }
-                    })
-                    argsType = `{ ${argsNameAndType.toSorted((a, b) => a.name.localeCompare(b.name)).map(({ name, type, has_default }) => `${JSON.stringify(name)}${has_default ? '?' : ''}: ${type}`)} }`
-                  }
-
-                  return `{ Args: ${argsType}; Returns: ${getFunctionTsReturnType(fn, returnType)} }`
-                })
-
+              return Object.entries(schemaFunctionsGroupedByName).map(([fnName, fns]) => {
+                const functionSignatures = getFunctionSignatures(schema, fns)
                 return `${JSON.stringify(fnName)}:\n${functionSignatures.map((sig) => `| ${sig}`).join('\n')}`
               })
             })()}
@@ -637,7 +649,7 @@ export type Database = {
                     ({ name, attributes }) =>
                       `${JSON.stringify(name)}: {
                         ${attributes.map(({ name, type_id }) => {
-                          const type = types.find(({ id }) => id === type_id)
+                          const type = typesById[type_id]
                           let tsType = 'unknown'
                           if (type) {
                             tsType = `${pgTypeToTsType(schema, type.name, {
@@ -654,7 +666,7 @@ export type Database = {
             }
           }
         }`
-    })}
+  })}
 }
 
 type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>
@@ -763,13 +775,9 @@ export type CompositeTypes<
   : never
 
 export const Constants = {
-  ${schemas
-    .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-    .map((schema) => {
-      const schemaEnums = types
-        .filter((type) => type.schema === schema.name && type.enums.length > 0)
-        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-      return `${JSON.stringify(schema.name)}: {
+  ${schemas.map((schema) => {
+    const schemaEnums = introspectionBySchema[schema.name]?.enums ?? []
+    return `${JSON.stringify(schema.name)}: {
           Enums: {
             ${schemaEnums.map(
               (enum_) =>
@@ -779,7 +787,7 @@ export const Constants = {
             )}
           }
         }`
-    })}
+  })}
 } as const
 `
 
