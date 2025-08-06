@@ -108,7 +108,6 @@ export const apply = async ({
             // OR if the function takes a table row but doesn't qualify as embedded (for error reporting)
             (inArgs[0].table_name && !func.return_table_name)))
       ) {
-        func.args.sort((a, b) => a.name.localeCompare(b.name))
         introspectionBySchema[func.schema].functions.push({ fn: func, inArgs })
       }
 
