@@ -144,6 +144,16 @@ export type Database = {
                         views,
                       })
 
+                      if (column.name.toLowerCase().startsWith("decimal")) {
+                        console.log("YOYOYOYO Insert", `'${column.name}'`, `'${column.format}'`)
+                      }
+
+                      // Numeric types can be inserted as strings to preserve
+                      // precision.
+                      if (column.format === "numeric") {
+                        output += '| string'
+                      }
+
                       if (column.is_nullable) {
                         output += '| null'
                       }
@@ -165,6 +175,12 @@ export type Database = {
                         tables,
                         views,
                       })}`
+
+                      // Numeric types can be inserted as strings to preserve
+                      // precision.
+                      if (column.format === "numeric") {
+                        output += '| string'
+                      }
 
                       if (column.is_nullable) {
                         output += '| null'
