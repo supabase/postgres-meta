@@ -30,4 +30,17 @@ describe('server/routes/types', () => {
     expect(Array.isArray(JSON.parse(response.body))).toBe(true)
     await app.close()
   })
+
+  test('should return 404 for non-existent type', async () => {
+    const app = build()
+    const response = await app.inject({
+      method: 'GET',
+      url: '/types/non-existent-type',
+      headers: {
+        pg: TEST_CONNECTION_STRING,
+      },
+    })
+    expect(response.statusCode).toBe(404)
+    await app.close()
+  })
 })
