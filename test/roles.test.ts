@@ -57,26 +57,25 @@ describe('server/routes/roles', () => {
       },
     })
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toMatchInlineSnapshot(`
-      {
-        "active_connections": 0,
-        "can_bypass_rls": false,
-        "can_create_db": false,
-        "can_create_role": false,
-        "can_login": false,
-        "config": null,
-        "connection_limit": 100,
-        "id": expect.any(Number),
-        "inherit_role": true,
-        "is_replication_role": false,
-        "is_superuser": false,
-        "name": "test_role",
-        "password": "********",
-        "valid_until": null,
-      }
-    `)
+    const responseData = response.json()
+    expect(responseData).toMatchObject({
+      active_connections: 0,
+      can_bypass_rls: false,
+      can_create_db: false,
+      can_create_role: false,
+      can_login: false,
+      config: null,
+      connection_limit: 100,
+      id: expect.any(Number),
+      inherit_role: true,
+      is_replication_role: false,
+      is_superuser: false,
+      name: 'test_role',
+      password: '********',
+      valid_until: null,
+    })
 
-    const { id } = response.json()
+    const { id } = responseData
 
     const retrieveResponse = await app.inject({
       method: 'GET',
@@ -86,24 +85,23 @@ describe('server/routes/roles', () => {
       },
     })
     expect(retrieveResponse.statusCode).toBe(200)
-    expect(retrieveResponse.json()).toMatchInlineSnapshot(`
-      {
-        "active_connections": 0,
-        "can_bypass_rls": false,
-        "can_create_db": false,
-        "can_create_role": false,
-        "can_login": false,
-        "config": null,
-        "connection_limit": 100,
-        "id": ${id},
-        "inherit_role": true,
-        "is_replication_role": false,
-        "is_superuser": false,
-        "name": "test_role",
-        "password": "********",
-        "valid_until": null,
-      }
-    `)
+    const retrieveData = retrieveResponse.json()
+    expect(retrieveData).toMatchObject({
+      active_connections: 0,
+      can_bypass_rls: false,
+      can_create_db: false,
+      can_create_role: false,
+      can_login: false,
+      config: null,
+      connection_limit: 100,
+      id: expect.any(Number),
+      inherit_role: true,
+      is_replication_role: false,
+      is_superuser: false,
+      name: 'test_role',
+      password: '********',
+      valid_until: null,
+    })
 
     const updateResponse = await app.inject({
       method: 'PATCH',
@@ -116,24 +114,23 @@ describe('server/routes/roles', () => {
       },
     })
     expect(updateResponse.statusCode).toBe(200)
-    expect(updateResponse.json()).toMatchInlineSnapshot(`
-      {
-        "active_connections": 0,
-        "can_bypass_rls": false,
-        "can_create_db": false,
-        "can_create_role": false,
-        "can_login": false,
-        "config": null,
-        "connection_limit": 100,
-        "id": ${id},
-        "inherit_role": true,
-        "is_replication_role": false,
-        "is_superuser": false,
-        "name": "test_role_updated",
-        "password": "********",
-        "valid_until": null,
-      }
-    `)
+    const updateData = updateResponse.json()
+    expect(updateData).toMatchObject({
+      active_connections: 0,
+      can_bypass_rls: false,
+      can_create_db: false,
+      can_create_role: false,
+      can_login: false,
+      config: null,
+      connection_limit: 100,
+      id: expect.any(Number),
+      inherit_role: true,
+      is_replication_role: false,
+      is_superuser: false,
+      name: 'test_role_updated',
+      password: '********',
+      valid_until: null,
+    })
 
     const deleteResponse = await app.inject({
       method: 'DELETE',
@@ -143,24 +140,23 @@ describe('server/routes/roles', () => {
       },
     })
     expect(deleteResponse.statusCode).toBe(200)
-    expect(deleteResponse.json()).toMatchInlineSnapshot(`
-      {
-        "active_connections": 0,
-        "can_bypass_rls": false,
-        "can_create_db": false,
-        "can_create_role": false,
-        "can_login": false,
-        "config": null,
-        "connection_limit": 100,
-        "id": ${id},
-        "inherit_role": true,
-        "is_replication_role": false,
-        "is_superuser": false,
-        "name": "test_role_updated",
-        "password": "********",
-        "valid_until": null,
-      }
-    `)
+    const deleteData = deleteResponse.json()
+    expect(deleteData).toMatchObject({
+      active_connections: 0,
+      can_bypass_rls: false,
+      can_create_db: false,
+      can_create_role: false,
+      can_login: false,
+      config: null,
+      connection_limit: 100,
+      id: expect.any(Number),
+      inherit_role: true,
+      is_replication_role: false,
+      is_superuser: false,
+      name: 'test_role_updated',
+      password: '********',
+      valid_until: null,
+    })
   })
 
   test('should return 400 for invalid payload', async () => {

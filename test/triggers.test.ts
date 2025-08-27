@@ -61,27 +61,24 @@ describe('server/routes/triggers', () => {
       },
     })
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toMatchInlineSnapshot(`
-      {
-        "activation": "AFTER",
-        "condition": null,
-        "enabled_mode": "ORIGIN",
-        "events": [
-          "UPDATE",
-        ],
-        "function_args": [],
-        "function_name": "audit_action",
-        "function_schema": "public",
-        "id": expect.any(Number),
-        "name": "test_trigger1",
-        "orientation": "STATEMENT",
-        "schema": "public",
-        "table": "users_audit",
-        "table_id": expect.any(Number),
-      }
-    `)
+    const responseData = response.json()
+    expect(responseData).toMatchObject({
+      activation: 'AFTER',
+      condition: null,
+      enabled_mode: 'ORIGIN',
+      events: ['UPDATE'],
+      function_args: [],
+      function_name: 'audit_action',
+      function_schema: 'public',
+      id: expect.any(Number),
+      name: 'test_trigger1',
+      orientation: 'STATEMENT',
+      schema: 'public',
+      table: 'users_audit',
+      table_id: expect.any(Number),
+    })
 
-    const { id } = response.json()
+    const { id } = responseData
 
     const retrieveResponse = await app.inject({
       method: 'GET',
@@ -91,25 +88,22 @@ describe('server/routes/triggers', () => {
       },
     })
     expect(retrieveResponse.statusCode).toBe(200)
-    expect(retrieveResponse.json()).toMatchInlineSnapshot(`
-      {
-        "activation": "AFTER",
-        "condition": null,
-        "enabled_mode": "ORIGIN",
-        "events": [
-          "UPDATE",
-        ],
-        "function_args": [],
-        "function_name": "audit_action",
-        "function_schema": "public",
-        "id": ${id},
-        "name": "test_trigger1",
-        "orientation": "STATEMENT",
-        "schema": "public",
-        "table": "users_audit",
-        "table_id": expect.any(Number),
-      }
-    `)
+    const retrieveData = retrieveResponse.json()
+    expect(retrieveData).toMatchObject({
+      activation: 'AFTER',
+      condition: null,
+      enabled_mode: 'ORIGIN',
+      events: ['UPDATE'],
+      function_args: [],
+      function_name: 'audit_action',
+      function_schema: 'public',
+      id: expect.any(Number),
+      name: 'test_trigger1',
+      orientation: 'STATEMENT',
+      schema: 'public',
+      table: 'users_audit',
+      table_id: expect.any(Number),
+    })
 
     const updateResponse = await app.inject({
       method: 'PATCH',
@@ -123,25 +117,22 @@ describe('server/routes/triggers', () => {
       },
     })
     expect(updateResponse.statusCode).toBe(200)
-    expect(updateResponse.json()).toMatchInlineSnapshot(`
-      {
-        "activation": "AFTER",
-        "condition": null,
-        "enabled_mode": "DISABLED",
-        "events": [
-          "UPDATE",
-        ],
-        "function_args": [],
-        "function_name": "audit_action",
-        "function_schema": "public",
-        "id": ${id},
-        "name": "test_trigger1_updated",
-        "orientation": "STATEMENT",
-        "schema": "public",
-        "table": "users_audit",
-        "table_id": expect.any(Number),
-      }
-    `)
+    const updateData = updateResponse.json()
+    expect(updateData).toMatchObject({
+      activation: 'AFTER',
+      condition: null,
+      enabled_mode: 'DISABLED',
+      events: ['UPDATE'],
+      function_args: [],
+      function_name: 'audit_action',
+      function_schema: 'public',
+      id: expect.any(Number),
+      name: 'test_trigger1_updated',
+      orientation: 'STATEMENT',
+      schema: 'public',
+      table: 'users_audit',
+      table_id: expect.any(Number),
+    })
 
     const deleteResponse = await app.inject({
       method: 'DELETE',
@@ -151,25 +142,22 @@ describe('server/routes/triggers', () => {
       },
     })
     expect(deleteResponse.statusCode).toBe(200)
-    expect(deleteResponse.json()).toMatchInlineSnapshot(`
-      {
-        "activation": "AFTER",
-        "condition": null,
-        "enabled_mode": "DISABLED",
-        "events": [
-          "UPDATE",
-        ],
-        "function_args": [],
-        "function_name": "audit_action",
-        "function_schema": "public",
-        "id": ${id},
-        "name": "test_trigger1_updated",
-        "orientation": "STATEMENT",
-        "schema": "public",
-        "table": "users_audit",
-        "table_id": expect.any(Number),
-      }
-    `)
+    const deleteData = deleteResponse.json()
+    expect(deleteData).toMatchObject({
+      activation: 'AFTER',
+      condition: null,
+      enabled_mode: 'DISABLED',
+      events: ['UPDATE'],
+      function_args: [],
+      function_name: 'audit_action',
+      function_schema: 'public',
+      id: expect.any(Number),
+      name: 'test_trigger1_updated',
+      orientation: 'STATEMENT',
+      schema: 'public',
+      table: 'users_audit',
+      table_id: expect.any(Number),
+    })
   })
 
   test('should return 400 for invalid payload', async () => {

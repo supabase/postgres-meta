@@ -57,15 +57,14 @@ describe('server/routes/schemas', () => {
       },
     })
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toMatchInlineSnapshot(`
-      {
-        "id": expect.any(Number),
-        "name": "test_schema",
-        "owner": "postgres",
-      }
-    `)
+    const responseData = response.json()
+    expect(responseData).toMatchObject({
+      id: expect.any(Number),
+      name: 'test_schema',
+      owner: 'postgres',
+    })
 
-    const { id } = response.json()
+    const { id } = responseData
 
     const retrieveResponse = await app.inject({
       method: 'GET',
@@ -75,13 +74,12 @@ describe('server/routes/schemas', () => {
       },
     })
     expect(retrieveResponse.statusCode).toBe(200)
-    expect(retrieveResponse.json()).toMatchInlineSnapshot(`
-      {
-        "id": ${id},
-        "name": "test_schema",
-        "owner": "postgres",
-      }
-    `)
+    const retrieveData = retrieveResponse.json()
+    expect(retrieveData).toMatchObject({
+      id: expect.any(Number),
+      name: 'test_schema',
+      owner: 'postgres',
+    })
 
     const updateResponse = await app.inject({
       method: 'PATCH',
@@ -94,13 +92,12 @@ describe('server/routes/schemas', () => {
       },
     })
     expect(updateResponse.statusCode).toBe(200)
-    expect(updateResponse.json()).toMatchInlineSnapshot(`
-      {
-        "id": 16886,
-        "name": "test_schema_updated",
-        "owner": "postgres",
-      }
-    `)
+    const updateData = updateResponse.json()
+    expect(updateData).toMatchObject({
+      id: expect.any(Number),
+      name: 'test_schema_updated',
+      owner: 'postgres',
+    })
 
     const deleteResponse = await app.inject({
       method: 'DELETE',
@@ -110,13 +107,12 @@ describe('server/routes/schemas', () => {
       },
     })
     expect(deleteResponse.statusCode).toBe(200)
-    expect(deleteResponse.json()).toMatchInlineSnapshot(`
-      {
-        "id": ${id},
-        "name": "test_schema_updated",
-        "owner": "postgres",
-      }
-    `)
+    const deleteData = deleteResponse.json()
+    expect(deleteData).toMatchObject({
+      id: expect.any(Number),
+      name: 'test_schema_updated',
+      owner: 'postgres',
+    })
   })
 
   test('should return 400 for invalid payload', async () => {

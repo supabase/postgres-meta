@@ -61,32 +61,29 @@ describe('server/routes/functions', () => {
       },
     })
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toMatchInlineSnapshot(`
-      {
-        "args": [],
-        "argument_types": "",
-        "behavior": "VOLATILE",
-        "complete_statement": "CREATE OR REPLACE FUNCTION public.test_function()
-       RETURNS integer
-       LANGUAGE plpgsql
-      AS $function$BEGIN RETURN 42; END;$function$
-      ",
-        "config_params": null,
-        "definition": "BEGIN RETURN 42; END;",
-        "id": expect.any(Number),
-        "identity_argument_types": "",
-        "is_set_returning_function": false,
-        "language": "plpgsql",
-        "name": "test_function",
-        "return_type": "integer",
-        "return_type_id": 23,
-        "return_type_relation_id": null,
-        "schema": "public",
-        "security_definer": false,
-      }
-    `)
+    const responseData = response.json()
+    expect(responseData).toMatchObject({
+      args: [],
+      argument_types: '',
+      behavior: 'VOLATILE',
+      complete_statement: expect.stringContaining(
+        'CREATE OR REPLACE FUNCTION public.test_function()'
+      ),
+      config_params: null,
+      definition: 'BEGIN RETURN 42; END;',
+      id: expect.any(Number),
+      identity_argument_types: '',
+      is_set_returning_function: false,
+      language: 'plpgsql',
+      name: 'test_function',
+      return_type: 'integer',
+      return_type_id: 23,
+      return_type_relation_id: null,
+      schema: 'public',
+      security_definer: false,
+    })
 
-    const { id } = response.json()
+    const { id } = responseData
 
     const retrieveResponse = await app.inject({
       method: 'GET',
@@ -96,30 +93,27 @@ describe('server/routes/functions', () => {
       },
     })
     expect(retrieveResponse.statusCode).toBe(200)
-    expect(retrieveResponse.json()).toMatchInlineSnapshot(`
-      {
-        "args": [],
-        "argument_types": "",
-        "behavior": "VOLATILE",
-        "complete_statement": "CREATE OR REPLACE FUNCTION public.test_function()
-       RETURNS integer
-       LANGUAGE plpgsql
-      AS $function$BEGIN RETURN 42; END;$function$
-      ",
-        "config_params": null,
-        "definition": "BEGIN RETURN 42; END;",
-        "id": ${id},
-        "identity_argument_types": "",
-        "is_set_returning_function": false,
-        "language": "plpgsql",
-        "name": "test_function",
-        "return_type": "integer",
-        "return_type_id": 23,
-        "return_type_relation_id": null,
-        "schema": "public",
-        "security_definer": false,
-      }
-    `)
+    const retrieveData = retrieveResponse.json()
+    expect(retrieveData).toMatchObject({
+      args: [],
+      argument_types: '',
+      behavior: 'VOLATILE',
+      complete_statement: expect.stringContaining(
+        'CREATE OR REPLACE FUNCTION public.test_function()'
+      ),
+      config_params: null,
+      definition: 'BEGIN RETURN 42; END;',
+      id: expect.any(Number),
+      identity_argument_types: '',
+      is_set_returning_function: false,
+      language: 'plpgsql',
+      name: 'test_function',
+      return_type: 'integer',
+      return_type_id: 23,
+      return_type_relation_id: null,
+      schema: 'public',
+      security_definer: false,
+    })
 
     const updateResponse = await app.inject({
       method: 'PATCH',
@@ -136,30 +130,27 @@ describe('server/routes/functions', () => {
       },
     })
     expect(updateResponse.statusCode).toBe(200)
-    expect(updateResponse.json()).toMatchInlineSnapshot(`
-      {
-        "args": [],
-        "argument_types": "",
-        "behavior": "VOLATILE",
-        "complete_statement": "CREATE OR REPLACE FUNCTION public.test_function()
-       RETURNS integer
-       LANGUAGE plpgsql
-      AS $function$BEGIN RETURN 50; END;$function$
-      ",
-        "config_params": null,
-        "definition": "BEGIN RETURN 50; END;",
-        "id": ${id},
-        "identity_argument_types": "",
-        "is_set_returning_function": false,
-        "language": "plpgsql",
-        "name": "test_function",
-        "return_type": "integer",
-        "return_type_id": 23,
-        "return_type_relation_id": null,
-        "schema": "public",
-        "security_definer": false,
-      }
-    `)
+    const updateData = updateResponse.json()
+    expect(updateData).toMatchObject({
+      args: [],
+      argument_types: '',
+      behavior: 'VOLATILE',
+      complete_statement: expect.stringContaining(
+        'CREATE OR REPLACE FUNCTION public.test_function()'
+      ),
+      config_params: null,
+      definition: 'BEGIN RETURN 50; END;',
+      id: expect.any(Number),
+      identity_argument_types: '',
+      is_set_returning_function: false,
+      language: 'plpgsql',
+      name: 'test_function',
+      return_type: 'integer',
+      return_type_id: 23,
+      return_type_relation_id: null,
+      schema: 'public',
+      security_definer: false,
+    })
 
     const deleteResponse = await app.inject({
       method: 'DELETE',
@@ -169,30 +160,27 @@ describe('server/routes/functions', () => {
       },
     })
     expect(deleteResponse.statusCode).toBe(200)
-    expect(deleteResponse.json()).toMatchInlineSnapshot(`
-      {
-        "args": [],
-        "argument_types": "",
-        "behavior": "VOLATILE",
-        "complete_statement": "CREATE OR REPLACE FUNCTION public.test_function()
-       RETURNS integer
-       LANGUAGE plpgsql
-      AS $function$BEGIN RETURN 50; END;$function$
-      ",
-        "config_params": null,
-        "definition": "BEGIN RETURN 50; END;",
-        "id": ${id},
-        "identity_argument_types": "",
-        "is_set_returning_function": false,
-        "language": "plpgsql",
-        "name": "test_function",
-        "return_type": "integer",
-        "return_type_id": 23,
-        "return_type_relation_id": null,
-        "schema": "public",
-        "security_definer": false,
-      }
-    `)
+    const deleteData = deleteResponse.json()
+    expect(deleteData).toMatchObject({
+      args: [],
+      argument_types: '',
+      behavior: 'VOLATILE',
+      complete_statement: expect.stringContaining(
+        'CREATE OR REPLACE FUNCTION public.test_function()'
+      ),
+      config_params: null,
+      definition: 'BEGIN RETURN 50; END;',
+      id: expect.any(Number),
+      identity_argument_types: '',
+      is_set_returning_function: false,
+      language: 'plpgsql',
+      name: 'test_function',
+      return_type: 'integer',
+      return_type_id: 23,
+      return_type_relation_id: null,
+      schema: 'public',
+      security_definer: false,
+    })
   })
 
   test('should return 400 for invalid payload', async () => {

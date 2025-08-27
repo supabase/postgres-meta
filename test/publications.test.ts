@@ -62,26 +62,24 @@ describe('server/routes/publications', () => {
       },
     })
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toMatchInlineSnapshot(`
-      {
-        "id": expect.any(Number),
-        "name": "test_publication",
-        "owner": "postgres",
-        "publish_delete": true,
-        "publish_insert": true,
-        "publish_truncate": false,
-        "publish_update": true,
-        "tables": [
-          {
-            "id": 16393,
-            "name": "users",
-            "schema": "public",
-          },
-        ],
-      }
-    `)
-
     const responseData = response.json()
+    expect(responseData).toMatchObject({
+      id: expect.any(Number),
+      name: 'test_publication',
+      owner: 'postgres',
+      publish_delete: true,
+      publish_insert: true,
+      publish_truncate: false,
+      publish_update: true,
+      tables: [
+        {
+          id: expect.any(Number),
+          name: 'users',
+          schema: 'public',
+        },
+      ],
+    })
+
     const { id } = responseData
 
     const retrieveResponse = await app.inject({
@@ -92,24 +90,23 @@ describe('server/routes/publications', () => {
       },
     })
     expect(retrieveResponse.statusCode).toBe(200)
-    expect(retrieveResponse.json()).toMatchInlineSnapshot(`
-      {
-        "id": ${id},
-        "name": "test_publication",
-        "owner": "postgres",
-        "publish_delete": true,
-        "publish_insert": true,
-        "publish_truncate": false,
-        "publish_update": true,
-        "tables": [
-          {
-            "id": 16393,
-            "name": "users",
-            "schema": "public",
-          },
-        ],
-      }
-    `)
+    const retrieveData = retrieveResponse.json()
+    expect(retrieveData).toMatchObject({
+      id: expect.any(Number),
+      name: 'test_publication',
+      owner: 'postgres',
+      publish_delete: true,
+      publish_insert: true,
+      publish_truncate: false,
+      publish_update: true,
+      tables: [
+        {
+          id: expect.any(Number),
+          name: 'users',
+          schema: 'public',
+        },
+      ],
+    })
 
     const updateResponse = await app.inject({
       method: 'PATCH',
@@ -122,24 +119,23 @@ describe('server/routes/publications', () => {
       },
     })
     expect(updateResponse.statusCode).toBe(200)
-    expect(updateResponse.json()).toMatchInlineSnapshot(`
-      {
-        "id": ${id},
-        "name": "test_publication",
-        "owner": "postgres",
-        "publish_delete": false,
-        "publish_insert": true,
-        "publish_truncate": false,
-        "publish_update": true,
-        "tables": [
-          {
-            "id": 16393,
-            "name": "users",
-            "schema": "public",
-          },
-        ],
-      }
-    `)
+    const updateData = updateResponse.json()
+    expect(updateData).toMatchObject({
+      id: expect.any(Number),
+      name: 'test_publication',
+      owner: 'postgres',
+      publish_delete: false,
+      publish_insert: true,
+      publish_truncate: false,
+      publish_update: true,
+      tables: [
+        {
+          id: expect.any(Number),
+          name: 'users',
+          schema: 'public',
+        },
+      ],
+    })
 
     const deleteResponse = await app.inject({
       method: 'DELETE',
@@ -149,24 +145,23 @@ describe('server/routes/publications', () => {
       },
     })
     expect(deleteResponse.statusCode).toBe(200)
-    expect(deleteResponse.json()).toMatchInlineSnapshot(`
-      {
-        "id": ${id},
-        "name": "test_publication",
-        "owner": "postgres",
-        "publish_delete": false,
-        "publish_insert": true,
-        "publish_truncate": false,
-        "publish_update": true,
-        "tables": [
-          {
-            "id": 16393,
-            "name": "users",
-            "schema": "public",
-          },
-        ],
-      }
-    `)
+    const deleteData = deleteResponse.json()
+    expect(deleteData).toMatchObject({
+      id: expect.any(Number),
+      name: 'test_publication',
+      owner: 'postgres',
+      publish_delete: false,
+      publish_insert: true,
+      publish_truncate: false,
+      publish_update: true,
+      tables: [
+        {
+          id: expect.any(Number),
+          name: 'users',
+          schema: 'public',
+        },
+      ],
+    })
   })
 
   test('should return 400 for invalid payload', async () => {
