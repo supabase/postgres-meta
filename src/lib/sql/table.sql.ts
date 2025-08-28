@@ -1,3 +1,4 @@
+export const TABLES_SQL = (schemaFilter?: string) => /* SQL */ `
 SELECT
   c.oid :: int8 AS id,
   nc.nspname AS schema,
@@ -41,6 +42,7 @@ FROM
         pg_attribute a,
         pg_namespace n
       where
+        ${schemaFilter ? `n.nspname ${schemaFilter} AND` : ''}
         i.indrelid = c.oid
         and c.relnamespace = n.oid
         and a.attrelid = c.oid
@@ -73,11 +75,14 @@ FROM
       join pg_namespace nta on cta.relnamespace = nta.oid
     ) on ta.attrelid = c.confrelid and ta.attnum = any (c.confkey)
     where
+      ${schemaFilter ? `nsa.nspname ${schemaFilter} AND` : ''}
+      ${schemaFilter ? `nta.nspname ${schemaFilter} AND` : ''}
       c.contype = 'f'
   ) as relationships
   on (relationships.source_schema = nc.nspname and relationships.source_table_name = c.relname)
   or (relationships.target_table_schema = nc.nspname and relationships.target_table_name = c.relname)
 WHERE
+  ${schemaFilter ? `nc.nspname ${schemaFilter} AND` : ''}
   c.relkind IN ('r', 'p')
   AND NOT pg_is_other_temp_schema(nc.oid)
   AND (
@@ -96,3 +101,4 @@ group by
   c.relreplident,
   nc.nspname,
   pk.primary_keys
+`

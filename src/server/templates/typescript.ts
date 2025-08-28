@@ -26,13 +26,17 @@ export const apply = async ({
   detectOneToOneRelationships: boolean
   postgrestVersion?: string
 }): Promise<string> => {
+  const start = Date.now()
+  console.log('applyTypescriptTemplate start: ', start)
   const columnsByTableId = Object.fromEntries<PostgresColumn[]>(
     [...tables, ...foreignTables, ...views, ...materializedViews].map((t) => [t.id, []])
   )
   columns
     .filter((c) => c.table_id in columnsByTableId)
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-    .forEach((c) => columnsByTableId[c.table_id].push(c))
+    .forEach((c) => {
+      columnsByTableId[c.table_id].push(c)
+    })
 
   const internal_supabase_schema = postgrestVersion
     ? `// Allows to automatically instantiate createClient with right options
@@ -578,6 +582,9 @@ export const Constants = {
     parser: 'typescript',
     semi: false,
   })
+  const end = Date.now()
+  console.log('applyTypescriptTemplate end: ', end)
+  console.log('elapsedTypescriptTemplate: ', end - start)
   return output
 }
 

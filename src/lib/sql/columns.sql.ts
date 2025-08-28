@@ -1,3 +1,4 @@
+export const COLUMNS_SQL = (schemaFilter?: string) => /* SQL */ `
 -- Adapted from information_schema.columns
 
 SELECT
@@ -97,6 +98,7 @@ FROM
     ORDER BY table_id, ordinal_position, oid asc
   ) AS check_constraints ON check_constraints.table_id = c.oid AND check_constraints.ordinal_position = a.attnum
 WHERE
+  ${schemaFilter ? `nc.nspname ${schemaFilter} AND` : ''}
   NOT pg_is_other_temp_schema(nc.oid)
   AND a.attnum > 0
   AND NOT a.attisdropped
@@ -109,3 +111,4 @@ WHERE
       'SELECT, INSERT, UPDATE, REFERENCES'
     )
   )
+`
