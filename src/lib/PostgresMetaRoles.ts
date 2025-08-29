@@ -1,5 +1,5 @@
 import { ident, literal } from 'pg-format'
-import { rolesSql } from './sql/index.js'
+import { ROLES_SQL } from './sql/index.js'
 import {
   PostgresMetaResult,
   PostgresRole,
@@ -34,7 +34,7 @@ export default class PostgresMetaRoles {
   } = {}): Promise<PostgresMetaResult<PostgresRole[]>> {
     let sql = `
 WITH
-  roles AS (${rolesSql})
+  roles AS (${ROLES_SQL({ limit, offset })})
 SELECT
   *
 FROM
@@ -51,12 +51,6 @@ WHERE
       // DETAIL:  Role names starting with "pg_" are reserved.
       // ```
       sql += ` AND NOT pg_catalog.starts_with(name, 'pg_')`
-    }
-    if (limit) {
-      sql += ` LIMIT ${limit}`
-    }
-    if (offset) {
-      sql += ` OFFSET ${offset}`
     }
     const result = await this.query(sql)
     if (result.data) {
@@ -78,7 +72,7 @@ WHERE
     name?: string
   }): Promise<PostgresMetaResult<PostgresRole>> {
     if (id) {
-      const sql = `${rolesSql} WHERE oid = ${literal(id)};`
+      const sql = `${ROLES_SQL({})} WHERE oid = ${literal(id)};`
       const { data, error } = await this.query(sql)
 
       if (error) {
@@ -90,7 +84,7 @@ WHERE
         return { data: data[0], error }
       }
     } else if (name) {
-      const sql = `${rolesSql} WHERE rolname = ${literal(name)};`
+      const sql = `${ROLES_SQL({})} WHERE rolname = ${literal(name)};`
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }

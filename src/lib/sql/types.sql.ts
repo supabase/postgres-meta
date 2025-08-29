@@ -1,3 +1,6 @@
+import type { SQLQueryPropsWithTypes } from './index.js'
+
+export const TYPES_SQL = (props: SQLQueryPropsWithTypes) => /* SQL */ `
 select
   t.oid::int8 as id,
   t.typname as name,
@@ -33,3 +36,32 @@ from
     group by
       c.oid
   ) as t_attributes on t_attributes.oid = t.typrelid
+  where
+      (
+        t.typrelid = 0
+        or (
+          select
+            c.relkind ${props.includeTableTypes ? `in ('c', 'r')` : `= 'c'`}
+          from
+            pg_class c
+          where
+            c.oid = t.typrelid
+        )
+      )
+      ${
+        props.includeArrayTypes
+          ? `and not exists (
+                 select
+                 from
+                   pg_type el
+                 where
+                   el.oid = t.typelem
+                   and el.typarray = t.oid
+               )`
+          : ''
+      }
+      ${props.schemaFilter ? `and n.nspname ${props.schemaFilter}` : ''}
+      ${props.idsFilter ? `and t.oid ${props.idsFilter}` : ''}
+${props.limit ? `limit ${props.limit}` : ''}
+${props.offset ? `offset ${props.offset}` : ''}
+`

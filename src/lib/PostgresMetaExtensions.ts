@@ -1,6 +1,7 @@
 import { ident, literal } from 'pg-format'
-import { extensionsSql } from './sql/index.js'
 import { PostgresMetaResult, PostgresExtension } from './types.js'
+import { EXTENSIONS_SQL } from './sql/index.js'
+import { filterByValue } from './helpers.js'
 
 export default class PostgresMetaExtensions {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -16,18 +17,13 @@ export default class PostgresMetaExtensions {
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresExtension[]>> {
-    let sql = extensionsSql
-    if (limit) {
-      sql = `${sql} LIMIT ${limit}`
-    }
-    if (offset) {
-      sql = `${sql} OFFSET ${offset}`
-    }
+    const sql = EXTENSIONS_SQL({ limit, offset })
     return await this.query(sql)
   }
 
   async retrieve({ name }: { name: string }): Promise<PostgresMetaResult<PostgresExtension>> {
-    const sql = `${extensionsSql} WHERE name = ${literal(name)};`
+    const nameFilter = filterByValue([`${name}`])
+    const sql = EXTENSIONS_SQL({ nameFilter })
     const { data, error } = await this.query(sql)
     if (error) {
       return { data, error }

@@ -1,3 +1,6 @@
+import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './index.js'
+
+export const INDEXES_SQL = (props: SQLQueryPropsWithSchemaFilterAndIdsFilter) => /* SQL */ `
 SELECT
     idx.indexrelid::int8 AS id,
     idx.indrelid::int8 AS table_id,
@@ -37,5 +40,11 @@ SELECT
     JOIN pg_am am ON c.relam = am.oid
     JOIN pg_attribute a ON a.attrelid = c.oid AND a.attnum = ANY(idx.indkey)
     JOIN pg_indexes ix ON c.relname = ix.indexname
+  WHERE
+    ${props.schemaFilter ? `n.nspname ${props.schemaFilter}` : 'true'}
+    ${props.idsFilter ? `AND idx.indexrelid ${props.idsFilter}` : ''}
   GROUP BY
     idx.indexrelid, idx.indrelid, n.nspname, idx.indnatts, idx.indnkeyatts, idx.indisunique, idx.indisprimary, idx.indisexclusion, idx.indimmediate, idx.indisclustered, idx.indisvalid, idx.indcheckxmin, idx.indisready, idx.indislive, idx.indisreplident, idx.indkey, idx.indcollation, idx.indclass, idx.indoption, idx.indexprs, idx.indpred, ix.indexdef, am.amname
+${props.limit ? `limit ${props.limit}` : ''}
+${props.offset ? `offset ${props.offset}` : ''}
+`

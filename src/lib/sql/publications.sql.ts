@@ -1,3 +1,6 @@
+import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './index.js'
+
+export const PUBLICATIONS_SQL = (props: SQLQueryPropsWithSchemaFilterAndIdsFilter) => /* SQL */ `
 SELECT
   p.oid :: int8 AS id,
   p.pubname AS name,
@@ -34,3 +37,8 @@ FROM
     WHERE
       pr.prpubid = p.oid
   ) AS pr ON 1 = 1
+WHERE
+  ${props.idsFilter ? `p.oid ${props.idsFilter}` : 'true'}
+${props.limit ? `limit ${props.limit}` : ''}
+${props.offset ? `offset ${props.offset}` : ''}
+`

@@ -24,3 +24,10 @@ export const filterByList = (include?: string[], exclude?: string[], defaultExcl
   }
   return ''
 }
+
+export const filterByValue = (ids?: string[]) => {
+  if (ids?.length) {
+    return `IN (${ids.map(literal).join(',')})`
+  }
+  return ''
+}

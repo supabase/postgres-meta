@@ -1,3 +1,6 @@
+import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './index.js'
+
+export const ROLES_SQL = (props: SQLQueryPropsWithSchemaFilterAndIdsFilter) => /* SQL */ `
 -- TODO: Consider using pg_authid vs. pg_roles for unencrypted password field
 SELECT
   oid :: int8 AS id,
@@ -25,3 +28,8 @@ SELECT
   rolconfig AS config
 FROM
   pg_roles
+WHERE
+  ${props.idsFilter ? `oid ${props.idsFilter}` : 'true'}
+${props.limit ? `limit ${props.limit}` : ''}
+${props.offset ? `offset ${props.offset}` : ''}
+`

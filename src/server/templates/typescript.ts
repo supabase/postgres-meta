@@ -26,8 +26,6 @@ export const apply = async ({
   detectOneToOneRelationships: boolean
   postgrestVersion?: string
 }): Promise<string> => {
-  const start = Date.now()
-  console.log('applyTypescriptTemplate start: ', start)
   const columnsByTableId = Object.fromEntries<PostgresColumn[]>(
     [...tables, ...foreignTables, ...views, ...materializedViews].map((t) => [t.id, []])
   )
@@ -582,9 +580,6 @@ export const Constants = {
     parser: 'typescript',
     semi: false,
   })
-  const end = Date.now()
-  console.log('applyTypescriptTemplate end: ', end)
-  console.log('elapsedTypescriptTemplate: ', end - start)
   return output
 }
 

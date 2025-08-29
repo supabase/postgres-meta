@@ -1,8 +1,8 @@
-import { ident, literal } from 'pg-format'
+import { ident } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
-import { filterByList } from './helpers.js'
-import { policiesSql } from './sql/index.js'
+import { filterByList, filterByValue } from './helpers.js'
 import { PostgresMetaResult, PostgresPolicy } from './types.js'
+import { POLICIES_SQL } from './sql/index.js'
 
 export default class PostgresMetaPolicies {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -24,21 +24,12 @@ export default class PostgresMetaPolicies {
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresPolicy[]>> {
-    let sql = policiesSql
-    const filter = filterByList(
+    const schemaFilter = filterByList(
       includedSchemas,
       excludedSchemas,
       !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
     )
-    if (filter) {
-      sql += ` WHERE n.nspname ${filter}`
-    }
-    if (limit) {
-      sql = `${sql} LIMIT ${limit}`
-    }
-    if (offset) {
-      sql = `${sql} OFFSET ${offset}`
-    }
+    let sql = POLICIES_SQL({ schemaFilter, limit, offset })
     return await this.query(sql)
   }
 
@@ -63,8 +54,10 @@ export default class PostgresMetaPolicies {
     table?: string
     schema?: string
   }): Promise<PostgresMetaResult<PostgresPolicy>> {
+    const schemaFilter = schema ? filterByList([schema], []) : undefined
     if (id) {
-      const sql = `${policiesSql} WHERE pol.oid = ${literal(id)};`
+      const idsFilter = filterByValue([`${id}`])
+      const sql = POLICIES_SQL({ idsFilter })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -74,9 +67,8 @@ export default class PostgresMetaPolicies {
         return { data: data[0], error }
       }
     } else if (name && table) {
-      const sql = `${policiesSql} WHERE pol.polname = ${literal(name)} AND n.nspname = ${literal(
-        schema
-      )} AND c.relname = ${literal(table)};`
+      const functionNameIdentifierFilter = filterByValue([`${table}.${name}`])
+      const sql = POLICIES_SQL({ schemaFilter, functionNameIdentifierFilter })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }

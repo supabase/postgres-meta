@@ -1,12 +1,13 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
-import { schemasSql } from './sql/index.js'
+import { SCHEMAS_SQL } from './sql/index.js'
 import {
   PostgresMetaResult,
   PostgresSchema,
   PostgresSchemaCreate,
   PostgresSchemaUpdate,
 } from './types.js'
+import { filterByValue } from './helpers.js'
 
 export default class PostgresMetaSchemas {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -24,15 +25,9 @@ export default class PostgresMetaSchemas {
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresSchema[]>> {
-    let sql = schemasSql
+    let sql = SCHEMAS_SQL({ limit, offset })
     if (!includeSystemSchemas) {
       sql = `${sql} AND NOT (n.nspname IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
-    }
-    if (limit) {
-      sql = `${sql} LIMIT ${limit}`
-    }
-    if (offset) {
-      sql = `${sql} OFFSET ${offset}`
     }
     return await this.query(sql)
   }
@@ -47,7 +42,8 @@ export default class PostgresMetaSchemas {
     name?: string
   }): Promise<PostgresMetaResult<PostgresSchema>> {
     if (id) {
-      const sql = `${schemasSql} AND n.oid = ${literal(id)};`
+      const idsFilter = filterByValue([`${id}`])
+      const sql = SCHEMAS_SQL({ idsFilter })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -57,7 +53,8 @@ export default class PostgresMetaSchemas {
         return { data: data[0], error }
       }
     } else if (name) {
-      const sql = `${schemasSql} AND n.nspname = ${literal(name)};`
+      const nameFilter = filterByValue([`${name}`])
+      const sql = SCHEMAS_SQL({ nameFilter })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }

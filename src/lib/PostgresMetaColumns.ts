@@ -2,7 +2,7 @@ import { ident, literal } from 'pg-format'
 import PostgresMetaTables from './PostgresMetaTables.js'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
 import { PostgresMetaResult, PostgresColumn } from './types.js'
-import { filterByList } from './helpers.js'
+import { filterByValue, filterByList } from './helpers.js'
 import { COLUMNS_SQL } from './sql/columns.sql.js'
 
 export default class PostgresMetaColumns {
@@ -34,24 +34,8 @@ export default class PostgresMetaColumns {
       excludedSchemas,
       !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
     )
-    let sql = `
-WITH
-  columns AS (${COLUMNS_SQL(schemaFilter)})
-SELECT
-  *
-FROM
-  columns
-WHERE
-  true`
-    if (tableId !== undefined) {
-      sql += ` AND table_id = ${literal(tableId)}`
-    }
-    if (limit) {
-      sql += ` LIMIT ${limit}`
-    }
-    if (offset) {
-      sql += ` OFFSET ${offset}`
-    }
+    const tableIdFilter = tableId ? filterByValue([`${tableId}`]) : undefined
+    const sql = COLUMNS_SQL({ schemaFilter, tableIdFilter, limit, offset })
     return await this.query(sql)
   }
 
@@ -84,7 +68,8 @@ WHERE
       }
       const matches = id.match(regexp) as RegExpMatchArray
       const [tableId, ordinalPos] = matches.slice(1).map(Number)
-      const sql = `${COLUMNS_SQL(schemaFilter)} AND c.oid = ${tableId} AND a.attnum = ${ordinalPos};`
+      const idsFilter = filterByValue([`${tableId}.${ordinalPos}`])
+      const sql = COLUMNS_SQL({ idsFilter })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -94,9 +79,8 @@ WHERE
         return { data: data[0], error }
       }
     } else if (name && table) {
-      const sql = `${COLUMNS_SQL(schemaFilter)} AND a.attname = ${literal(name)} AND c.relname = ${literal(
-        table
-      )};`
+      const columnNameFilter = filterByValue([`${table}.${name}`])
+      const sql = `${COLUMNS_SQL({ schemaFilter, columnNameFilter })};`
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }

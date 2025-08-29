@@ -1,8 +1,8 @@
 import { literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
 import { coalesceRowsToArray, filterByList } from './helpers.js'
-import { columnsSql, viewsSql } from './sql/index.js'
 import { PostgresMetaResult, PostgresView } from './types.js'
+import { VIEWS_SQL, COLUMNS_SQL } from './sql/index.js'
 
 export default class PostgresMetaViews {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -11,22 +11,6 @@ export default class PostgresMetaViews {
     this.query = query
   }
 
-  async list(options: {
-    includeSystemSchemas?: boolean
-    includedSchemas?: string[]
-    excludedSchemas?: string[]
-    limit?: number
-    offset?: number
-    includeColumns: false
-  }): Promise<PostgresMetaResult<(PostgresView & { columns: never })[]>>
-  async list(options?: {
-    includeSystemSchemas?: boolean
-    includedSchemas?: string[]
-    excludedSchemas?: string[]
-    limit?: number
-    offset?: number
-    includeColumns?: boolean
-  }): Promise<PostgresMetaResult<(PostgresView & { columns: unknown[] })[]>>
   async list({
     includeSystemSchemas = false,
     includedSchemas,
@@ -42,21 +26,12 @@ export default class PostgresMetaViews {
     offset?: number
     includeColumns?: boolean
   } = {}): Promise<PostgresMetaResult<PostgresView[]>> {
-    let sql = generateEnrichedViewsSql({ includeColumns })
-    const filter = filterByList(
+    const schemaFilter = filterByList(
       includedSchemas,
       excludedSchemas,
       !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
     )
-    if (filter) {
-      sql += ` where schema ${filter}`
-    }
-    if (limit) {
-      sql += ` limit ${limit}`
-    }
-    if (offset) {
-      sql += ` offset ${offset}`
-    }
+    let sql = generateEnrichedViewsSql({ includeColumns, schemaFilter, limit, offset })
     return await this.query(sql)
   }
 
@@ -77,9 +52,11 @@ export default class PostgresMetaViews {
     name?: string
     schema?: string
   }): Promise<PostgresMetaResult<PostgresView>> {
+    const schemaFilter = schema ? filterByList([schema], []) : undefined
     if (id) {
       const sql = `${generateEnrichedViewsSql({
         includeColumns: true,
+        schemaFilter,
       })} where views.id = ${literal(id)};`
       const { data, error } = await this.query(sql)
       if (error) {
@@ -92,6 +69,7 @@ export default class PostgresMetaViews {
     } else if (name) {
       const sql = `${generateEnrichedViewsSql({
         includeColumns: true,
+        schemaFilter,
       })} where views.name = ${literal(name)} and views.schema = ${literal(schema)};`
       const { data, error } = await this.query(sql)
       if (error) {
@@ -110,9 +88,19 @@ export default class PostgresMetaViews {
   }
 }
 
-const generateEnrichedViewsSql = ({ includeColumns }: { includeColumns: boolean }) => `
-with views as (${viewsSql})
-  ${includeColumns ? `, columns as (${columnsSql})` : ''}
+const generateEnrichedViewsSql = ({
+  includeColumns,
+  schemaFilter,
+  limit,
+  offset,
+}: {
+  includeColumns: boolean
+  schemaFilter?: string
+  limit?: number
+  offset?: number
+}) => `
+with views as (${VIEWS_SQL({ schemaFilter, limit, offset })})
+  ${includeColumns ? `, columns as (${COLUMNS_SQL({ schemaFilter, limit, offset })}` : ''}
 select
   *
   ${includeColumns ? `, ${coalesceRowsToArray('columns', 'columns.table_id = views.id')}` : ''}

@@ -1,4 +1,4 @@
-import { configSql } from './sql/index.js'
+import { CONFIG_SQL } from './sql/index.js'
 import { PostgresMetaResult, PostgresConfig } from './types.js'
 
 export default class PostgresMetaConfig {
@@ -15,13 +15,7 @@ export default class PostgresMetaConfig {
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresConfig[]>> {
-    let sql = configSql
-    if (limit) {
-      sql = `${sql} LIMIT ${limit}`
-    }
-    if (offset) {
-      sql = `${sql} OFFSET ${offset}`
-    }
+    let sql = CONFIG_SQL({ limit, offset })
     return await this.query(sql)
   }
 }

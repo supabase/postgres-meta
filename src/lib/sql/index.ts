@@ -1,36 +1,42 @@
-import { readFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { TABLES_SQL } from './table.sql.js'
-import { COLUMNS_SQL } from './columns.sql.js'
+export type SQLQueryProps = {
+  limit?: number
+  offset?: number
+}
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-export const columnPrivilegesSql = await readFile(join(__dirname, 'column_privileges.sql'), 'utf-8')
-export const columnsSql = COLUMNS_SQL()
-export const configSql = await readFile(join(__dirname, 'config.sql'), 'utf-8')
-export const extensionsSql = await readFile(join(__dirname, 'extensions.sql'), 'utf-8')
-export const foreignTablesSql = await readFile(join(__dirname, 'foreign_tables.sql'), 'utf-8')
-export const functionsSql = await readFile(join(__dirname, 'functions.sql'), 'utf-8')
-export const indexesSql = await readFile(join(__dirname, 'indexes.sql'), 'utf-8')
-export const materializedViewsSql = await readFile(
-  join(__dirname, 'materialized_views.sql'),
-  'utf-8'
-)
-export const policiesSql = await readFile(join(__dirname, 'policies.sql'), 'utf-8')
-export const publicationsSql = await readFile(join(__dirname, 'publications.sql'), 'utf-8')
-export const tableRelationshipsSql = await readFile(
-  join(__dirname, 'table_relationships.sql'),
-  'utf-8'
-)
-export const rolesSql = await readFile(join(__dirname, 'roles.sql'), 'utf-8')
-export const schemasSql = await readFile(join(__dirname, 'schemas.sql'), 'utf-8')
-export const tablePrivilegesSql = await readFile(join(__dirname, 'table_privileges.sql'), 'utf-8')
-export const tablesSql = TABLES_SQL()
-export const triggersSql = await readFile(join(__dirname, 'triggers.sql'), 'utf-8')
-export const typesSql = await readFile(join(__dirname, 'types.sql'), 'utf-8')
-export const versionSql = await readFile(join(__dirname, 'version.sql'), 'utf-8')
-export const viewsKeyDependenciesSql = await readFile(
-  join(__dirname, 'views_key_dependencies.sql'),
-  'utf-8'
-)
-export const viewsSql = await readFile(join(__dirname, 'views.sql'), 'utf-8')
+export type SQLQueryPropsWithSchemaFilter = SQLQueryProps & {
+  schemaFilter?: string
+}
+
+export type SQLQueryPropsWithIdsFilter = SQLQueryProps & {
+  idsFilter?: string
+}
+
+export type SQLQueryPropsWithSchemaFilterAndIdsFilter = SQLQueryProps & {
+  schemaFilter?: string
+  idsFilter?: string
+}
+
+export type SQLQueryPropsWithTypes = SQLQueryPropsWithSchemaFilterAndIdsFilter & {
+  includeTableTypes?: boolean
+  includeArrayTypes?: boolean
+}
+
+// Export all SQL functions
+export { VERSION_SQL } from './version.sql.js'
+export { CONFIG_SQL } from './config.sql.js'
+export { EXTENSIONS_SQL } from './extensions.sql.js'
+export { PUBLICATIONS_SQL } from './publications.sql.js'
+export { ROLES_SQL } from './roles.sql.js'
+export { SCHEMAS_SQL } from './schemas.sql.js'
+export { FUNCTIONS_SQL } from './functions.sql.js'
+export { INDEXES_SQL } from './indexes.sql.js'
+export { POLICIES_SQL } from './policies.sql.js'
+export { TRIGGERS_SQL } from './triggers.sql.js'
+export { TYPES_SQL } from './types.sql.js'
+export { TABLES_SQL } from './table.sql.js'
+export { VIEWS_SQL } from './views.sql.js'
+export { MATERIALIZED_VIEWS_SQL } from './materialized_views.sql.js'
+export { FOREIGN_TABLES_SQL } from './foreign_tables.sql.js'
+export { COLUMNS_SQL } from './columns.sql.js'
+export { TABLE_PRIVILEGES_SQL } from './table_privileges.sql.js'
+export { COLUMN_PRIVILEGES_SQL } from './column_privileges.sql.js'

@@ -1,14 +1,13 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
-import { coalesceRowsToArray, filterByList } from './helpers.js'
+import { coalesceRowsToArray, filterByValue, filterByList } from './helpers.js'
 import {
   PostgresMetaResult,
   PostgresTable,
   PostgresTableCreate,
   PostgresTableUpdate,
 } from './types.js'
-import { TABLES_SQL } from './sql/table.sql.js'
-import { COLUMNS_SQL } from './sql/columns.sql.js'
+import { TABLES_SQL, COLUMNS_SQL } from './sql/index.js'
 
 export default class PostgresMetaTables {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -48,22 +47,18 @@ export default class PostgresMetaTables {
     offset?: number
     includeColumns?: boolean
   } = {}): Promise<PostgresMetaResult<PostgresTable[]>> {
-    const filter = filterByList(
+    const schemaFilter = filterByList(
       includedSchemas,
       excludedSchemas,
       !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
     )
-    let sql = generateEnrichedTablesSql({ includeColumns, schemaFilter: filter })
-    if (filter) {
-      sql += ` where schema ${filter}`
-    }
+    let sql = generateEnrichedTablesSql({ includeColumns, schemaFilter })
     if (limit) {
       sql += ` limit ${limit}`
     }
     if (offset) {
       sql += ` offset ${offset}`
     }
-    console.log('sql tables: ', sql)
     return await this.query(sql)
   }
 
@@ -86,9 +81,11 @@ export default class PostgresMetaTables {
   }): Promise<PostgresMetaResult<PostgresTable>> {
     const schemaFilter = schema ? filterByList([schema], []) : undefined
     if (id) {
+      const idsFilter = filterByValue([`${id}`])
       const sql = `${generateEnrichedTablesSql({
         schemaFilter,
         includeColumns: true,
+        idsFilter,
       })} where tables.id = ${literal(id)};`
       const { data, error } = await this.query(sql)
       if (error) {
@@ -99,10 +96,12 @@ export default class PostgresMetaTables {
         return { data: data[0], error }
       }
     } else if (name) {
+      const tableIdentifierFilter = filterByValue([`${schema}.${name}`])
       const sql = `${generateEnrichedTablesSql({
         schemaFilter,
         includeColumns: true,
-      })} where tables.name = ${literal(name)} and tables.schema = ${literal(schema)};`
+        tableIdentifierFilter,
+      })}`
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -255,12 +254,16 @@ COMMIT;`
 const generateEnrichedTablesSql = ({
   includeColumns,
   schemaFilter,
+  tableIdentifierFilter,
+  idsFilter,
 }: {
   includeColumns: boolean
   schemaFilter?: string
+  tableIdentifierFilter?: string
+  idsFilter?: string
 }) => `
-with tables as (${TABLES_SQL(schemaFilter)})
-  ${includeColumns ? `, columns as (${COLUMNS_SQL(schemaFilter)})` : ''}
+with tables as (${TABLES_SQL({ schemaFilter, tableIdentifierFilter, idsFilter })})
+  ${includeColumns ? `, columns as (${COLUMNS_SQL({ schemaFilter, tableIdFilter: idsFilter })})` : ''}
 select
   *
   ${includeColumns ? `, ${coalesceRowsToArray('columns', 'columns.table_id = tables.id')}` : ''}

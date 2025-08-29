@@ -1,7 +1,7 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
-import { filterByList } from './helpers.js'
-import { columnPrivilegesSql } from './sql/index.js'
+import { filterByValue, filterByList } from './helpers.js'
+import { COLUMN_PRIVILEGES_SQL } from './sql/column_privileges.sql.js'
 import {
   PostgresMetaResult,
   PostgresColumnPrivileges,
@@ -29,25 +29,12 @@ export default class PostgresMetaColumnPrivileges {
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresColumnPrivileges[]>> {
-    let sql = `
-with column_privileges as (${columnPrivilegesSql})
-select *
-from column_privileges
-`
-    const filter = filterByList(
+    const schemaFilter = filterByList(
       includedSchemas,
       excludedSchemas,
       !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
     )
-    if (filter) {
-      sql += ` where relation_schema ${filter}`
-    }
-    if (limit) {
-      sql += ` limit ${limit}`
-    }
-    if (offset) {
-      sql += ` offset ${offset}`
-    }
+    const sql = COLUMN_PRIVILEGES_SQL({ schemaFilter, limit, offset })
     return await this.query(sql)
   }
 
@@ -86,12 +73,8 @@ end $$;
 
     // Return the updated column privileges for modified columns.
     const columnIds = [...new Set(grants.map(({ column_id }) => column_id))]
-    sql = `
-with column_privileges as (${columnPrivilegesSql})
-select *
-from column_privileges
-where column_id in (${columnIds.map(literal).join(',')})
-`
+    const columnIdsFilter = filterByValue(columnIds)
+    sql = COLUMN_PRIVILEGES_SQL({ schemaFilter: undefined, columnIdsFilter })
     return await this.query(sql)
   }
 
@@ -130,12 +113,8 @@ end $$;
 
     // Return the updated column privileges for modified columns.
     const columnIds = [...new Set(revokes.map(({ column_id }) => column_id))]
-    sql = `
-with column_privileges as (${columnPrivilegesSql})
-select *
-from column_privileges
-where column_id in (${columnIds.map(literal).join(',')})
-`
+    const columnIdsFilter = filterByValue(columnIds)
+    sql = COLUMN_PRIVILEGES_SQL({ schemaFilter: undefined, columnIdsFilter })
     return await this.query(sql)
   }
 }

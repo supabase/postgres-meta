@@ -1,4 +1,12 @@
-export const FOREIGN_TABLES_SQL = (schemaFilter?: string) => /* SQL */ `
+import type { SQLQueryProps } from './index.js'
+
+export const FOREIGN_TABLES_SQL = (
+  props: SQLQueryProps & {
+    schemaFilter?: string
+    idsFilter?: string
+    tableIdentifierFilter?: string
+  }
+) => /* SQL */ `
 SELECT
   c.oid :: int8 AS id,
   n.nspname AS schema,
@@ -8,6 +16,10 @@ FROM
   pg_class c
   JOIN pg_namespace n ON n.oid = c.relnamespace
 WHERE
-  ${schemaFilter ? `n.nspname ${schemaFilter} AND` : ''}
+  ${props.schemaFilter ? `n.nspname ${props.schemaFilter} AND` : ''}
+  ${props.idsFilter ? `c.oid ${props.idsFilter} AND` : ''}
+  ${props.tableIdentifierFilter ? `(n.nspname || '.' || c.relname) ${props.tableIdentifierFilter} AND` : ''}
   c.relkind = 'f'
+${props.limit ? `limit ${props.limit}` : ''}
+${props.offset ? `offset ${props.offset}` : ''}
 `

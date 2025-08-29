@@ -1,3 +1,10 @@
+import type { SQLQueryPropsWithSchemaFilter } from './index.js'
+
+export const COLUMN_PRIVILEGES_SQL = (
+  props: SQLQueryPropsWithSchemaFilter & {
+    columnIdsFilter?: string
+  }
+) => /* SQL */ `
 -- Lists each column's privileges in the form of:
 --
 -- [
@@ -28,8 +35,8 @@
 -- - we include column privileges for materialized views
 --   (reason for exclusion in information_schema.column_privileges:
 --    https://www.postgresql.org/message-id/9136.1502740844%40sss.pgh.pa.us)
--- - we query a.attrelid and a.attnum to generate `column_id`
--- - `table_catalog` is omitted
+-- - we query a.attrelid and a.attnum to generate \`column_id\`
+-- - \`table_catalog\` is omitted
 -- - table_schema -> relation_schema, table_name -> relation_name
 --
 -- Column privileges are intertwined with table privileges in that table
@@ -37,12 +44,12 @@
 --
 -- grant all on mytable to myrole;
 --
--- Then `myrole` is granted privileges for ALL columns. Likewise, if we do:
+-- Then \`myrole\` is granted privileges for ALL columns. Likewise, if we do:
 --
 -- grant all (id) on mytable to myrole;
 -- revoke all on mytable from myrole;
 --
--- Then the grant on the `id` column is revoked.
+-- Then the grant on the \`id\` column is revoked.
 --
 -- This is unlike how grants for schemas and tables interact, where you need
 -- privileges for BOTH the schema the table is in AND the table itself in order
@@ -130,6 +137,8 @@ from
    union all select (0)::oid as oid,
                     'PUBLIC') grantee(oid, rolname)
 where ((x.relnamespace = nc.oid)
+       ${props.schemaFilter ? `and nc.nspname ${props.schemaFilter}` : ''}
+       ${props.columnIdsFilter ? `and (x.attrelid || '.' || x.attnum) ${props.columnIdsFilter}` : ''}
        and (x.grantee = grantee.oid)
        and (x.grantor = u_grantor.oid)
        and (x.prtype = any (ARRAY['INSERT',
@@ -143,3 +152,6 @@ group by column_id,
          nc.nspname,
          x.relname,
          x.attname
+${props.limit ? `limit ${props.limit}` : ''}
+${props.offset ? `offset ${props.offset}` : ''}
+`

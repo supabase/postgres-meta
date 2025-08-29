@@ -1,4 +1,8 @@
-export const MATERIALIZED_VIEWS_SQL = (schemaFilter?: string) => /* SQL */ `
+import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './index.js'
+
+export const MATERIALIZED_VIEWS_SQL = (
+  props: SQLQueryPropsWithSchemaFilterAndIdsFilter
+) => /* SQL */ `
 select
   c.oid::int8 as id,
   n.nspname as schema,
@@ -9,6 +13,9 @@ from
   pg_class c
   join pg_namespace n on n.oid = c.relnamespace
 where
-  ${schemaFilter ? `n.nspname ${schemaFilter} AND` : ''}
+  ${props.schemaFilter ? `n.nspname ${props.schemaFilter} AND` : ''}
+  ${props.idsFilter ? `c.oid ${props.idsFilter} AND` : ''}
   c.relkind = 'm'
+${props.limit ? `limit ${props.limit}` : ''}
+${props.offset ? `offset ${props.offset}` : ''}
 `

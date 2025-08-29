@@ -1,3 +1,6 @@
+import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './index.js'
+
+export const CONFIG_SQL = (props: SQLQueryPropsWithSchemaFilterAndIdsFilter) => /* SQL */ `
 SELECT
   name,
   setting,
@@ -23,3 +26,6 @@ FROM
 ORDER BY
   category,
   name
+${props.limit ? `limit ${props.limit}` : ''}
+${props.offset ? `offset ${props.offset}` : ''}
+`
