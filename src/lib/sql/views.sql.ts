@@ -1,6 +1,10 @@
-import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './index.js'
+import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './common.js'
 
-export const VIEWS_SQL = (props: SQLQueryPropsWithSchemaFilterAndIdsFilter) => /* SQL */ `
+export const VIEWS_SQL = (
+  props: SQLQueryPropsWithSchemaFilterAndIdsFilter & {
+    viewIdentifierFilter?: string
+  }
+) => /* SQL */ `
 SELECT
   c.oid :: int8 AS id,
   n.nspname AS schema,
@@ -14,6 +18,7 @@ FROM
 WHERE
   ${props.schemaFilter ? `n.nspname ${props.schemaFilter} AND` : ''}
   ${props.idsFilter ? `c.oid ${props.idsFilter} AND` : ''}
+  ${props.viewIdentifierFilter ? `(n.nspname || '.' || c.relname) ${props.viewIdentifierFilter} AND` : ''}
   c.relkind = 'v'
 ${props.limit ? `limit ${props.limit}` : ''}
 ${props.offset ? `offset ${props.offset}` : ''}

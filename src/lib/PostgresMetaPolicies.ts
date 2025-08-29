@@ -2,7 +2,7 @@ import { ident } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
 import { filterByList, filterByValue } from './helpers.js'
 import { PostgresMetaResult, PostgresPolicy } from './types.js'
-import { POLICIES_SQL } from './sql/index.js'
+import { POLICIES_SQL } from './sql/policies.sql.js'
 
 export default class PostgresMetaPolicies {
   query: (sql: string) => Promise<PostgresMetaResult<any>>

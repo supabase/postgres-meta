@@ -2,7 +2,7 @@ import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
 import { filterByList, filterByValue } from './helpers.js'
 import { PostgresMetaResult, PostgresFunction, PostgresFunctionCreate } from './types.js'
-import { FUNCTIONS_SQL } from './sql/index.js'
+import { FUNCTIONS_SQL } from './sql/functions.sql.js'
 
 export default class PostgresMetaFunctions {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -29,7 +29,7 @@ export default class PostgresMetaFunctions {
       excludedSchemas,
       !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
     )
-    let sql = FUNCTIONS_SQL({ schemaFilter, limit, offset })
+    const sql = FUNCTIONS_SQL({ schemaFilter, limit, offset })
     return await this.query(sql)
   }
 
@@ -56,7 +56,7 @@ export default class PostgresMetaFunctions {
   }): Promise<PostgresMetaResult<PostgresFunction>> {
     const schemaFilter = schema ? filterByList([schema], []) : undefined
     if (id) {
-      const idsFilter = filterByValue([`${id}`])
+      const idsFilter = filterByValue([id])
       const sql = FUNCTIONS_SQL({ idsFilter })
       const { data, error } = await this.query(sql)
       if (error) {

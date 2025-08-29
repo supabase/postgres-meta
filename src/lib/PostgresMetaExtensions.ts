@@ -1,6 +1,6 @@
 import { ident, literal } from 'pg-format'
 import { PostgresMetaResult, PostgresExtension } from './types.js'
-import { EXTENSIONS_SQL } from './sql/index.js'
+import { EXTENSIONS_SQL } from './sql/extensions.sql.js'
 import { filterByValue } from './helpers.js'
 
 export default class PostgresMetaExtensions {

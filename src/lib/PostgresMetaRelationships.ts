@@ -24,14 +24,14 @@ export default class PostgresMetaRelationships {
     includedSchemas?: string[]
     excludedSchemas?: string[]
   } = {}): Promise<PostgresMetaResult<PostgresRelationship[]>> {
-    const filter = filterByList(
+    const schemaFilter = filterByList(
       includedSchemas,
       excludedSchemas,
       !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
     )
     let allTableM2oAndO2oRelationships: PostgresRelationship[]
     {
-      const sql = TABLE_RELATIONSHIPS_SQL(filter)
+      const sql = TABLE_RELATIONSHIPS_SQL({ schemaFilter })
       const { data, error } = (await this.query(sql)) as PostgresMetaResult<PostgresRelationship[]>
       if (error) {
         return { data: null, error }
@@ -59,8 +59,9 @@ export default class PostgresMetaRelationships {
         column_dependencies: ColDep[]
       }
 
+      const viewsKeyDependenciesSql = VIEWS_KEY_DEPENDENCIES_SQL({ schemaFilter })
       const { data: viewsKeyDependencies, error } = (await this.query(
-        VIEWS_KEY_DEPENDENCIES_SQL(filter)
+        viewsKeyDependenciesSql
       )) as PostgresMetaResult<KeyDep[]>
       if (error) {
         return { data: null, error }

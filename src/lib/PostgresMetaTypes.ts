@@ -1,7 +1,7 @@
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
 import { filterByList } from './helpers.js'
 import { PostgresMetaResult, PostgresType } from './types.js'
-import { TYPES_SQL } from './sql/index.js'
+import { TYPES_SQL } from './sql/types.sql.js'
 
 export default class PostgresMetaTypes {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -32,7 +32,7 @@ export default class PostgresMetaTypes {
       excludedSchemas,
       !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
     )
-    let sql = TYPES_SQL({ schemaFilter, limit, offset, includeTableTypes, includeArrayTypes })
+    const sql = TYPES_SQL({ schemaFilter, limit, offset, includeTableTypes, includeArrayTypes })
     return await this.query(sql)
   }
 }

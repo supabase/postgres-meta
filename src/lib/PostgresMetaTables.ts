@@ -7,7 +7,8 @@ import {
   PostgresTableCreate,
   PostgresTableUpdate,
 } from './types.js'
-import { TABLES_SQL, COLUMNS_SQL } from './sql/index.js'
+import { TABLES_SQL } from './sql/table.sql.js'
+import { COLUMNS_SQL } from './sql/columns.sql.js'
 
 export default class PostgresMetaTables {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -52,13 +53,7 @@ export default class PostgresMetaTables {
       excludedSchemas,
       !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
     )
-    let sql = generateEnrichedTablesSql({ includeColumns, schemaFilter })
-    if (limit) {
-      sql += ` limit ${limit}`
-    }
-    if (offset) {
-      sql += ` offset ${offset}`
-    }
+    const sql = generateEnrichedTablesSql({ includeColumns, schemaFilter, limit, offset })
     return await this.query(sql)
   }
 
@@ -81,12 +76,12 @@ export default class PostgresMetaTables {
   }): Promise<PostgresMetaResult<PostgresTable>> {
     const schemaFilter = schema ? filterByList([schema], []) : undefined
     if (id) {
-      const idsFilter = filterByValue([`${id}`])
-      const sql = `${generateEnrichedTablesSql({
+      const idsFilter = filterByValue([id])
+      const sql = generateEnrichedTablesSql({
         schemaFilter,
         includeColumns: true,
         idsFilter,
-      })} where tables.id = ${literal(id)};`
+      })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -97,11 +92,11 @@ export default class PostgresMetaTables {
       }
     } else if (name) {
       const tableIdentifierFilter = filterByValue([`${schema}.${name}`])
-      const sql = `${generateEnrichedTablesSql({
+      const sql = generateEnrichedTablesSql({
         schemaFilter,
         includeColumns: true,
         tableIdentifierFilter,
-      })}`
+      })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -256,14 +251,18 @@ const generateEnrichedTablesSql = ({
   schemaFilter,
   tableIdentifierFilter,
   idsFilter,
+  limit,
+  offset,
 }: {
   includeColumns: boolean
   schemaFilter?: string
   tableIdentifierFilter?: string
   idsFilter?: string
+  limit?: number
+  offset?: number
 }) => `
-with tables as (${TABLES_SQL({ schemaFilter, tableIdentifierFilter, idsFilter })})
-  ${includeColumns ? `, columns as (${COLUMNS_SQL({ schemaFilter, tableIdFilter: idsFilter })})` : ''}
+with tables as (${TABLES_SQL({ schemaFilter, tableIdentifierFilter, idsFilter, limit, offset })})
+  ${includeColumns ? `, columns as (${COLUMNS_SQL({ schemaFilter, tableIdFilter: idsFilter, tableIdentifierFilter: tableIdentifierFilter })})` : ''}
 select
   *
   ${includeColumns ? `, ${coalesceRowsToArray('columns', 'columns.table_id = tables.id')}` : ''}

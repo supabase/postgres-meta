@@ -1,4 +1,4 @@
-import type { SQLQueryPropsWithSchemaFilter } from './index.js'
+import type { SQLQueryPropsWithSchemaFilter } from './common.js'
 
 export const COLUMNS_SQL = (
   props: SQLQueryPropsWithSchemaFilter & {

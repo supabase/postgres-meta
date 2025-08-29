@@ -1,6 +1,11 @@
-import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './index.js'
+import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './common.js'
 
-export const TRIGGERS_SQL = (props: SQLQueryPropsWithSchemaFilterAndIdsFilter) => /* SQL */ `
+export const TRIGGERS_SQL = (
+  props: SQLQueryPropsWithSchemaFilterAndIdsFilter & {
+    tableNameFilter?: string
+    nameFilter?: string
+  }
+) => /* SQL */ `
 SELECT
   pg_t.oid AS id,
   pg_t.tgrelid AS table_id,
@@ -12,7 +17,7 @@ SELECT
     END AS enabled_mode,
   (
     STRING_TO_ARRAY(
-      ENCODE(pg_t.tgargs, 'escape'), '\x00'
+      ENCODE(pg_t.tgargs, 'escape'), '\\000'
     )
   )[:pg_t.tgnargs] AS function_args,
   is_t.trigger_name AS name,
@@ -41,6 +46,8 @@ JOIN pg_namespace AS pg_n
 ON pg_p.pronamespace = pg_n.oid
 WHERE
   ${props.schemaFilter ? `table_ns.nspname ${props.schemaFilter}` : 'true'}
+  ${props.tableNameFilter ? `AND pg_c.relname ${props.tableNameFilter}` : ''}
+  ${props.nameFilter ? `AND is_t.trigger_name ${props.nameFilter}` : ''}
   ${props.idsFilter ? `AND pg_t.oid ${props.idsFilter}` : ''}
 GROUP BY
   pg_t.oid,

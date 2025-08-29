@@ -1,4 +1,4 @@
-import { VERSION_SQL } from './sql/index.js'
+import { VERSION_SQL } from './sql/version.sql.js'
 import { PostgresMetaResult, PostgresVersion } from './types.js'
 
 export default class PostgresMetaVersion {

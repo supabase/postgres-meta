@@ -1,4 +1,4 @@
-import type { SQLQueryProps } from './index.js'
+import type { SQLQueryProps } from './common.js'
 
 export const EXTENSIONS_SQL = (props: SQLQueryProps & { nameFilter?: string }) => /* SQL */ `
 SELECT

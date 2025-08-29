@@ -34,14 +34,18 @@ export async function getGeneratorMetadata(
   const includedSchemas = filters.includedSchemas ?? []
   const excludedSchemas = filters.excludedSchemas ?? []
 
-  const { data: schemas, error: schemasError } = await pgMeta.schemas.list()
+  const { data: schemas, error: schemasError } = await pgMeta.schemas.list({
+    includeSystemSchemas: false,
+    includedSchemas: includedSchemas.length > 0 ? includedSchemas : undefined,
+    excludedSchemas: excludedSchemas.length > 0 ? excludedSchemas : undefined,
+  })
   if (schemasError) {
     return { data: null, error: schemasError }
   }
 
   const { data: tables, error: tablesError } = await pgMeta.tables.list({
     includedSchemas: includedSchemas.length > 0 ? includedSchemas : undefined,
-    excludedSchemas,
+    excludedSchemas: excludedSchemas.length > 0 ? excludedSchemas : undefined,
     includeColumns: false,
   })
   if (tablesError) {
@@ -50,7 +54,7 @@ export async function getGeneratorMetadata(
 
   const { data: foreignTables, error: foreignTablesError } = await pgMeta.foreignTables.list({
     includedSchemas: includedSchemas.length > 0 ? includedSchemas : undefined,
-    excludedSchemas,
+    excludedSchemas: excludedSchemas.length > 0 ? excludedSchemas : undefined,
     includeColumns: false,
   })
   if (foreignTablesError) {
@@ -59,7 +63,7 @@ export async function getGeneratorMetadata(
 
   const { data: views, error: viewsError } = await pgMeta.views.list({
     includedSchemas: includedSchemas.length > 0 ? includedSchemas : undefined,
-    excludedSchemas,
+    excludedSchemas: excludedSchemas.length > 0 ? excludedSchemas : undefined,
     includeColumns: false,
   })
   if (viewsError) {
@@ -69,7 +73,7 @@ export async function getGeneratorMetadata(
   const { data: materializedViews, error: materializedViewsError } =
     await pgMeta.materializedViews.list({
       includedSchemas: includedSchemas.length > 0 ? includedSchemas : undefined,
-      excludedSchemas,
+      excludedSchemas: excludedSchemas.length > 0 ? excludedSchemas : undefined,
       includeColumns: false,
     })
   if (materializedViewsError) {
@@ -78,7 +82,8 @@ export async function getGeneratorMetadata(
 
   const { data: columns, error: columnsError } = await pgMeta.columns.list({
     includedSchemas: includedSchemas.length > 0 ? includedSchemas : undefined,
-    excludedSchemas,
+    excludedSchemas: excludedSchemas.length > 0 ? excludedSchemas : undefined,
+    includeSystemSchemas: false,
   })
   if (columnsError) {
     return { data: null, error: columnsError }
@@ -86,7 +91,8 @@ export async function getGeneratorMetadata(
 
   const { data: relationships, error: relationshipsError } = await pgMeta.relationships.list({
     includedSchemas: includedSchemas.length > 0 ? includedSchemas : undefined,
-    excludedSchemas,
+    excludedSchemas: excludedSchemas.length > 0 ? excludedSchemas : undefined,
+    includeSystemSchemas: false,
   })
   if (relationshipsError) {
     return { data: null, error: relationshipsError }
@@ -94,15 +100,14 @@ export async function getGeneratorMetadata(
 
   const { data: functions, error: functionsError } = await pgMeta.functions.list({
     includedSchemas: includedSchemas.length > 0 ? includedSchemas : undefined,
-    excludedSchemas,
+    excludedSchemas: excludedSchemas.length > 0 ? excludedSchemas : undefined,
+    includeSystemSchemas: false,
   })
   if (functionsError) {
     return { data: null, error: functionsError }
   }
 
   const { data: types, error: typesError } = await pgMeta.types.list({
-    includedSchemas: includedSchemas.length > 0 ? includedSchemas : undefined,
-    excludedSchemas,
     includeTableTypes: true,
     includeArrayTypes: true,
     includeSystemSchemas: true,

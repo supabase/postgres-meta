@@ -1,7 +1,9 @@
-import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './index.js'
+import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './common.js'
 
 export const MATERIALIZED_VIEWS_SQL = (
-  props: SQLQueryPropsWithSchemaFilterAndIdsFilter
+  props: SQLQueryPropsWithSchemaFilterAndIdsFilter & {
+    materializedViewIdentifierFilter?: string
+  }
 ) => /* SQL */ `
 select
   c.oid::int8 as id,
@@ -15,6 +17,7 @@ from
 where
   ${props.schemaFilter ? `n.nspname ${props.schemaFilter} AND` : ''}
   ${props.idsFilter ? `c.oid ${props.idsFilter} AND` : ''}
+  ${props.materializedViewIdentifierFilter ? `(n.nspname || '.' || c.relname) ${props.materializedViewIdentifierFilter} AND` : ''}
   c.relkind = 'm'
 ${props.limit ? `limit ${props.limit}` : ''}
 ${props.offset ? `offset ${props.offset}` : ''}

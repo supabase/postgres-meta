@@ -1,4 +1,4 @@
-import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './index.js'
+import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './common.js'
 
 export const INDEXES_SQL = (props: SQLQueryPropsWithSchemaFilterAndIdsFilter) => /* SQL */ `
 SELECT

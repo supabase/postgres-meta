@@ -1,6 +1,11 @@
-import type { SQLQueryPropsWithTypes } from './index.js'
+import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './common.js'
 
-export const TYPES_SQL = (props: SQLQueryPropsWithTypes) => /* SQL */ `
+export const TYPES_SQL = (
+  props: SQLQueryPropsWithSchemaFilterAndIdsFilter & {
+    includeTableTypes?: boolean
+    includeArrayTypes?: boolean
+  }
+) => /* SQL */ `
 select
   t.oid::int8 as id,
   t.typname as name,
@@ -49,7 +54,7 @@ from
         )
       )
       ${
-        props.includeArrayTypes
+        !props.includeArrayTypes
           ? `and not exists (
                  select
                  from

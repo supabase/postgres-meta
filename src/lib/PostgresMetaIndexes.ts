@@ -1,8 +1,7 @@
-import { literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
-import { filterByList } from './helpers.js'
+import { filterByList, filterByValue } from './helpers.js'
 import { PostgresMetaResult, PostgresIndex } from './types.js'
-import { INDEXES_SQL } from './sql/index.js'
+import { INDEXES_SQL } from './sql/indexes.sql.js'
 
 export default class PostgresMetaIndexes {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -29,7 +28,7 @@ export default class PostgresMetaIndexes {
       excludedSchemas,
       !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
     )
-    let sql = INDEXES_SQL({ schemaFilter, limit, offset })
+    const sql = INDEXES_SQL({ schemaFilter, limit, offset })
     return await this.query(sql)
   }
 
@@ -45,13 +44,13 @@ export default class PostgresMetaIndexes {
   }): Promise<PostgresMetaResult<PostgresIndex>>
   async retrieve({
     id,
-    args = [],
   }: {
     id?: number
     args?: string[]
   }): Promise<PostgresMetaResult<PostgresIndex>> {
     if (id) {
-      const sql = `${INDEXES_SQL({})} WHERE id = ${literal(id)};`
+      const idsFilter = filterByValue([id])
+      const sql = INDEXES_SQL({ idsFilter })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }

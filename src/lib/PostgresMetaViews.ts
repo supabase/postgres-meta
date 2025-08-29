@@ -1,8 +1,8 @@
-import { literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
-import { coalesceRowsToArray, filterByList } from './helpers.js'
+import { coalesceRowsToArray, filterByList, filterByValue } from './helpers.js'
 import { PostgresMetaResult, PostgresView } from './types.js'
-import { VIEWS_SQL, COLUMNS_SQL } from './sql/index.js'
+import { VIEWS_SQL } from './sql/views.sql.js'
+import { COLUMNS_SQL } from './sql/columns.sql.js'
 
 export default class PostgresMetaViews {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -31,7 +31,7 @@ export default class PostgresMetaViews {
       excludedSchemas,
       !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
     )
-    let sql = generateEnrichedViewsSql({ includeColumns, schemaFilter, limit, offset })
+    const sql = generateEnrichedViewsSql({ includeColumns, schemaFilter, limit, offset })
     return await this.query(sql)
   }
 
@@ -52,12 +52,12 @@ export default class PostgresMetaViews {
     name?: string
     schema?: string
   }): Promise<PostgresMetaResult<PostgresView>> {
-    const schemaFilter = schema ? filterByList([schema], []) : undefined
     if (id) {
-      const sql = `${generateEnrichedViewsSql({
+      const idsFilter = filterByValue([id])
+      const sql = generateEnrichedViewsSql({
         includeColumns: true,
-        schemaFilter,
-      })} where views.id = ${literal(id)};`
+        idsFilter,
+      })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -67,10 +67,11 @@ export default class PostgresMetaViews {
         return { data: data[0], error }
       }
     } else if (name) {
-      const sql = `${generateEnrichedViewsSql({
+      const viewIdentifierFilter = filterByValue([`${schema}.${name}`])
+      const sql = generateEnrichedViewsSql({
         includeColumns: true,
-        schemaFilter,
-      })} where views.name = ${literal(name)} and views.schema = ${literal(schema)};`
+        viewIdentifierFilter,
+      })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -91,16 +92,20 @@ export default class PostgresMetaViews {
 const generateEnrichedViewsSql = ({
   includeColumns,
   schemaFilter,
+  idsFilter,
+  viewIdentifierFilter,
   limit,
   offset,
 }: {
   includeColumns: boolean
   schemaFilter?: string
+  idsFilter?: string
+  viewIdentifierFilter?: string
   limit?: number
   offset?: number
 }) => `
-with views as (${VIEWS_SQL({ schemaFilter, limit, offset })})
-  ${includeColumns ? `, columns as (${COLUMNS_SQL({ schemaFilter, limit, offset })}` : ''}
+with views as (${VIEWS_SQL({ schemaFilter, limit, offset, viewIdentifierFilter, idsFilter })})
+  ${includeColumns ? `, columns as (${COLUMNS_SQL({ schemaFilter, tableIdentifierFilter: viewIdentifierFilter, tableIdFilter: idsFilter })})` : ''}
 select
   *
   ${includeColumns ? `, ${coalesceRowsToArray('columns', 'columns.table_id = views.id')}` : ''}

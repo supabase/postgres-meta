@@ -1,6 +1,11 @@
-import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './index.js'
+import type { SQLQueryPropsWithIdsFilter } from './common.js'
 
-export const ROLES_SQL = (props: SQLQueryPropsWithSchemaFilterAndIdsFilter) => /* SQL */ `
+export const ROLES_SQL = (
+  props: SQLQueryPropsWithIdsFilter & {
+    includeDefaultRoles?: boolean
+    nameFilter?: string
+  }
+) => /* SQL */ `
 -- TODO: Consider using pg_authid vs. pg_roles for unencrypted password field
 SELECT
   oid :: int8 AS id,
@@ -30,6 +35,10 @@ FROM
   pg_roles
 WHERE
   ${props.idsFilter ? `oid ${props.idsFilter}` : 'true'}
+  -- All default/predefined roles start with pg_: https://www.postgresql.org/docs/15/predefined-roles.html
+  -- The pg_ prefix is also reserved.
+  ${!props.includeDefaultRoles ? `AND NOT pg_catalog.starts_with(rolname, 'pg_')` : ''}
+  ${props.nameFilter ? `AND rolname ${props.nameFilter}` : ''}
 ${props.limit ? `limit ${props.limit}` : ''}
 ${props.offset ? `offset ${props.offset}` : ''}
 `

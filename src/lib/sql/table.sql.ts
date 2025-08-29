@@ -1,4 +1,4 @@
-import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './index.js'
+import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './common.js'
 
 export const TABLES_SQL = (
   props: SQLQueryPropsWithSchemaFilterAndIdsFilter & { tableIdentifierFilter?: string }

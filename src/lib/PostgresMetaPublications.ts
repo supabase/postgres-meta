@@ -1,6 +1,7 @@
 import { ident, literal } from 'pg-format'
 import { PostgresMetaResult, PostgresPublication } from './types.js'
-import { PUBLICATIONS_SQL } from './sql/index.js'
+import { PUBLICATIONS_SQL } from './sql/publications.sql.js'
+import { filterByValue } from './helpers.js'
 
 export default class PostgresMetaPublications {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -30,7 +31,8 @@ export default class PostgresMetaPublications {
     name?: string
   }): Promise<PostgresMetaResult<PostgresPublication>> {
     if (id) {
-      const sql = `${PUBLICATIONS_SQL({})} WHERE p.oid = ${literal(id)};`
+      const idsFilter = filterByValue([id])
+      const sql = PUBLICATIONS_SQL({ idsFilter })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -40,7 +42,8 @@ export default class PostgresMetaPublications {
         return { data: data[0], error }
       }
     } else if (name) {
-      const sql = `${PUBLICATIONS_SQL({})} WHERE p.pubname = ${literal(name)};`
+      const nameFilter = filterByValue([name])
+      const sql = PUBLICATIONS_SQL({ nameFilter })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }

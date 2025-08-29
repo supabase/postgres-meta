@@ -1,4 +1,4 @@
-import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './index.js'
+import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './common.js'
 
 export const FUNCTIONS_SQL = (
   props: SQLQueryPropsWithSchemaFilterAndIdsFilter & {
@@ -31,7 +31,7 @@ with functions as (
     ${props.schemaFilter ? `join pg_namespace n on p.pronamespace = n.oid` : ''}
   where
     ${props.schemaFilter ? `n.nspname ${props.schemaFilter} AND` : ''}
-    ${props.idsFilter ? `p.oid::text ${props.idsFilter} AND` : ''}
+    ${props.idsFilter ? `p.oid ${props.idsFilter} AND` : ''}
     ${props.nameFilter ? `p.proname ${props.nameFilter} AND` : ''}
     p.prokind = 'f'
 )

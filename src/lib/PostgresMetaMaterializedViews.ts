@@ -1,7 +1,7 @@
-import { literal } from 'pg-format'
-import { filterByList, coalesceRowsToArray } from './helpers.js'
+import { filterByList, coalesceRowsToArray, filterByValue } from './helpers.js'
 import { PostgresMetaResult, PostgresMaterializedView } from './types.js'
-import { MATERIALIZED_VIEWS_SQL, COLUMNS_SQL } from './sql/index.js'
+import { MATERIALIZED_VIEWS_SQL } from './sql/materialized_views.sql.js'
+import { COLUMNS_SQL } from './sql/columns.sql.js'
 
 export default class PostgresMetaMaterializedViews {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -45,12 +45,12 @@ export default class PostgresMetaMaterializedViews {
     name?: string
     schema?: string
   }): Promise<PostgresMetaResult<PostgresMaterializedView>> {
-    const schemaFilter = schema ? filterByList([schema], []) : undefined
     if (id) {
-      const sql = `${generateEnrichedMaterializedViewsSql({
+      const idsFilter = filterByValue([id])
+      const sql = generateEnrichedMaterializedViewsSql({
         includeColumns: true,
-        schemaFilter,
-      })} where materialized_views.id = ${literal(id)};`
+        idsFilter,
+      })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -60,12 +60,11 @@ export default class PostgresMetaMaterializedViews {
         return { data: data[0], error }
       }
     } else if (name) {
-      const sql = `${generateEnrichedMaterializedViewsSql({
+      const materializedViewIdentifierFilter = filterByValue([`${schema}.${name}`])
+      const sql = generateEnrichedMaterializedViewsSql({
         includeColumns: true,
-        schemaFilter,
-      })} where materialized_views.name = ${literal(
-        name
-      )} and materialized_views.schema = ${literal(schema)};`
+        materializedViewIdentifierFilter,
+      })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -86,16 +85,20 @@ export default class PostgresMetaMaterializedViews {
 const generateEnrichedMaterializedViewsSql = ({
   includeColumns,
   schemaFilter,
+  materializedViewIdentifierFilter,
+  idsFilter,
   limit,
   offset,
 }: {
   includeColumns: boolean
   schemaFilter?: string
+  materializedViewIdentifierFilter?: string
+  idsFilter?: string
   limit?: number
   offset?: number
 }) => `
-with materialized_views as (${MATERIALIZED_VIEWS_SQL({ schemaFilter, limit, offset })})
-  ${includeColumns ? `, columns as (${COLUMNS_SQL({ schemaFilter, limit, offset })}` : ''}
+with materialized_views as (${MATERIALIZED_VIEWS_SQL({ schemaFilter, limit, offset, materializedViewIdentifierFilter, idsFilter })})
+  ${includeColumns ? `, columns as (${COLUMNS_SQL({ schemaFilter, limit, offset, tableIdentifierFilter: materializedViewIdentifierFilter, tableIdFilter: idsFilter })})` : ''}
 select
   *
   ${

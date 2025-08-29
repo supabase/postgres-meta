@@ -13,7 +13,11 @@ COALESCE(
 ) AS ${source}`
 }
 
-export const filterByList = (include?: string[], exclude?: string[], defaultExclude?: string[]) => {
+export const filterByList = (
+  include?: (string | number)[],
+  exclude?: (string | number)[],
+  defaultExclude?: (string | number)[]
+) => {
   if (defaultExclude) {
     exclude = defaultExclude.concat(exclude ?? [])
   }
@@ -25,7 +29,7 @@ export const filterByList = (include?: string[], exclude?: string[], defaultExcl
   return ''
 }
 
-export const filterByValue = (ids?: string[]) => {
+export const filterByValue = (ids?: (string | number)[]) => {
   if (ids?.length) {
     return `IN (${ids.map(literal).join(',')})`
   }

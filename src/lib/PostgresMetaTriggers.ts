@@ -1,8 +1,8 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
-import { filterByList } from './helpers.js'
+import { filterByList, filterByValue } from './helpers.js'
 import { PostgresMetaResult, PostgresTrigger } from './types.js'
-import { TRIGGERS_SQL } from './sql/index.js'
+import { TRIGGERS_SQL } from './sql/triggers.sql.js'
 
 export default class PostgresMetaTriggers {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -56,7 +56,8 @@ export default class PostgresMetaTriggers {
   }): Promise<PostgresMetaResult<PostgresTrigger>> {
     const schemaFilter = schema ? filterByList([schema], []) : undefined
     if (id) {
-      const sql = `${TRIGGERS_SQL({ schemaFilter })} WHERE id = ${literal(id)};`
+      const idsFilter = filterByValue([id])
+      const sql = TRIGGERS_SQL({ idsFilter })
 
       const { data, error } = await this.query(sql)
 
@@ -74,9 +75,9 @@ export default class PostgresMetaTriggers {
     }
 
     if (name && schema && table) {
-      const sql = `${TRIGGERS_SQL({ schemaFilter })} WHERE name = ${literal(name)} AND schema = ${literal(
-        schema
-      )} AND triggers.table = ${literal(table)};`
+      const nameFilter = filterByValue([name])
+      const tableNameFilter = filterByValue([table])
+      const sql = TRIGGERS_SQL({ schemaFilter, nameFilter, tableNameFilter })
 
       const { data, error } = await this.query(sql)
 
@@ -160,7 +161,6 @@ export default class PostgresMetaTriggers {
     if (error) {
       return { data: null, error }
     }
-
     return await this.retrieve({
       name,
       table,
