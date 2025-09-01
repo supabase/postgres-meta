@@ -9,5 +9,4 @@ SELECT
       pg_stat_activity
   ) AS active_connections,
   current_setting('max_connections') :: int8 AS max_connections
-
 `

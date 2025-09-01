@@ -35,10 +35,12 @@ with functions as (
     ${props.idsFilter ? `p.oid ${props.idsFilter} AND` : ''}
     ${props.nameFilter ? `p.proname ${props.nameFilter} AND` : ''}
     ${
-      props.args && props.args.length > 0
-        ? `p.proargtypes::text = ${
-            props.args.length
-              ? `(
+      props.args === undefined
+        ? ''
+        : props.args.length > 0
+          ? `p.proargtypes::text = ${
+              props.args.length
+                ? `(
           SELECT STRING_AGG(type_oid::text, ' ') FROM (
             SELECT (
               split_args.arr[
@@ -57,9 +59,9 @@ with functions as (
             ) AS split_args
           ) args
     )`
-              : "''"
-          } AND`
-        : ''
+                : "''"
+            } AND`
+          : ''
     }
     p.prokind = 'f'
 )
