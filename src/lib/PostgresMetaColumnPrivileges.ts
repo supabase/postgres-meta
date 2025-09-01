@@ -74,7 +74,7 @@ end $$;
     // Return the updated column privileges for modified columns.
     const columnIds = [...new Set(grants.map(({ column_id }) => column_id))]
     const columnIdsFilter = filterByValue(columnIds)
-    sql = COLUMN_PRIVILEGES_SQL({ schemaFilter: undefined, columnIdsFilter })
+    sql = COLUMN_PRIVILEGES_SQL({ columnIdsFilter })
     return await this.query(sql)
   }
 
@@ -114,7 +114,7 @@ end $$;
     // Return the updated column privileges for modified columns.
     const columnIds = [...new Set(revokes.map(({ column_id }) => column_id))]
     const columnIdsFilter = filterByValue(columnIds)
-    sql = COLUMN_PRIVILEGES_SQL({ schemaFilter: undefined, columnIdsFilter })
+    sql = COLUMN_PRIVILEGES_SQL({ columnIdsFilter })
     return await this.query(sql)
   }
 }

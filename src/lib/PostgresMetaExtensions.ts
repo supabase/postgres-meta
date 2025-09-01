@@ -22,7 +22,7 @@ export default class PostgresMetaExtensions {
   }
 
   async retrieve({ name }: { name: string }): Promise<PostgresMetaResult<PostgresExtension>> {
-    const nameFilter = filterByValue([`${name}`])
+    const nameFilter = filterByValue([name])
     const sql = EXTENSIONS_SQL({ nameFilter })
     const { data, error } = await this.query(sql)
     if (error) {

@@ -3,6 +3,7 @@ import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './common.js'
 export const FUNCTIONS_SQL = (
   props: SQLQueryPropsWithSchemaFilterAndIdsFilter & {
     nameFilter?: string
+    args?: string[]
   }
 ) => /* SQL */ `
 -- CTE with sane arg_modes, arg_names, and arg_types.
@@ -33,6 +34,33 @@ with functions as (
     ${props.schemaFilter ? `n.nspname ${props.schemaFilter} AND` : ''}
     ${props.idsFilter ? `p.oid ${props.idsFilter} AND` : ''}
     ${props.nameFilter ? `p.proname ${props.nameFilter} AND` : ''}
+    ${
+      props.args && props.args.length > 0
+        ? `p.proargtypes::text = ${
+            props.args.length
+              ? `(
+          SELECT STRING_AGG(type_oid::text, ' ') FROM (
+            SELECT (
+              split_args.arr[
+                array_length(
+                  split_args.arr,
+                  1
+                )
+              ]::regtype::oid
+            ) AS type_oid FROM (
+              SELECT STRING_TO_ARRAY(
+                UNNEST(
+                  ARRAY[${props.args}]
+                ),
+                ' '
+              ) AS arr
+            ) AS split_args
+          ) args
+    )`
+              : "''"
+          } AND`
+        : ''
+    }
     p.prokind = 'f'
 )
 select

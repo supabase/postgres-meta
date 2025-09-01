@@ -68,7 +68,7 @@ export default class PostgresMetaFunctions {
       }
     } else if (name && schema && args) {
       const nameFilter = filterByValue([name])
-      const sql = this.generateRetrieveFunctionSql({ schemaFilter, nameFilter, schema, name, args })
+      const sql = FUNCTIONS_SQL({ schemaFilter, nameFilter, args: args.map(literal) })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -163,6 +163,11 @@ export default class PostgresMetaFunctions {
           )}(${identityArgs})  SET SCHEMA ${ident(schema)};`
         : ''
 
+    const currentSchemaFilter = currentFunc!.schema
+      ? filterByList([currentFunc!.schema], [])
+      : undefined
+    const currentNameFilter = currentFunc!.name ? filterByValue([currentFunc!.name]) : undefined
+
     const sql = `
       DO LANGUAGE plpgsql $$
       BEGIN
@@ -171,7 +176,7 @@ export default class PostgresMetaFunctions {
 
           IF (
             SELECT id
-            FROM (${FUNCTIONS_SQL({})}) AS f
+            FROM (${FUNCTIONS_SQL({ schemaFilter: currentSchemaFilter, nameFilter: currentNameFilter })}) AS f
             WHERE f.schema = ${literal(currentFunc!.schema)}
             AND f.name = ${literal(currentFunc!.name)}
             AND f.identity_argument_types = ${literal(identityArgs)}
@@ -255,41 +260,5 @@ export default class PostgresMetaFunctions {
           : ''
       };
     `
-  }
-
-  private generateRetrieveFunctionSql({
-    schemaFilter,
-    nameFilter,
-    args,
-  }: {
-    schemaFilter?: string
-    nameFilter?: string
-    schema: string
-    name: string
-    args: string[]
-  }): string {
-    return `${FUNCTIONS_SQL({ schemaFilter, nameFilter })} JOIN pg_proc AS p ON f.oid = p.oid WHERE p.proargtypes::text = ${
-      args.length
-        ? `(
-          SELECT STRING_AGG(type_oid::text, ' ') FROM (
-            SELECT (
-              split_args.arr[
-                array_length(
-                  split_args.arr,
-                  1
-                )
-              ]::regtype::oid
-            ) AS type_oid FROM (
-              SELECT STRING_TO_ARRAY(
-                UNNEST(
-                  ARRAY[${args.map(literal)}]
-                ),
-                ' '
-              ) AS arr
-            ) AS split_args
-          ) args
-    )`
-        : literal('')
-    }`
   }
 }

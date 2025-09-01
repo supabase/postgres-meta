@@ -59,7 +59,7 @@ export default class PostgresMetaSchemas {
         return { data: data[0], error }
       }
     } else if (name) {
-      const nameFilter = filterByValue([`${name}`])
+      const nameFilter = filterByValue([name])
       const sql = SCHEMAS_SQL({ nameFilter })
       const { data, error } = await this.query(sql)
       if (error) {
