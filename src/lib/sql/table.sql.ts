@@ -80,10 +80,8 @@ FROM
       join pg_namespace nta on cta.relnamespace = nta.oid
     ) on ta.attrelid = c.confrelid and ta.attnum = any (c.confkey)
     where
-      ${props.schemaFilter ? `nsa.nspname ${props.schemaFilter} AND` : ''}
-      ${props.schemaFilter ? `nta.nspname ${props.schemaFilter} AND` : ''}
-      ${props.tableIdentifierFilter ? `nsa.nspname || '.' || csa.relname ${props.tableIdentifierFilter} AND` : ''}
-      ${props.tableIdentifierFilter ? `nta.nspname || '.' || cta.relname ${props.tableIdentifierFilter} AND` : ''}
+      ${props.schemaFilter ? `nsa.nspname ${props.schemaFilter} OR nta.nspname ${props.schemaFilter} AND` : ''}
+      ${props.tableIdentifierFilter ? `(nsa.nspname || '.' || csa.relname) ${props.tableIdentifierFilter} OR (nta.nspname || '.' || cta.relname) ${props.tableIdentifierFilter} AND` : ''}
       c.contype = 'f'
   ) as relationships
   on (relationships.source_schema = nc.nspname and relationships.source_table_name = c.relname)
