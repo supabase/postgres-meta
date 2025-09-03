@@ -1,7 +1,7 @@
-import { literal } from 'pg-format'
-import { coalesceRowsToArray, filterByList } from './helpers.js'
-import { columnsSql, foreignTablesSql } from './sql/index.js'
+import { coalesceRowsToArray, filterByList, filterByValue } from './helpers.js'
 import { PostgresMetaResult, PostgresForeignTable } from './types.js'
+import { FOREIGN_TABLES_SQL } from './sql/foreign_tables.sql.js'
+import { COLUMNS_SQL } from './sql/columns.sql.js'
 
 export default class PostgresMetaForeignTables {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -37,17 +37,8 @@ export default class PostgresMetaForeignTables {
     offset?: number
     includeColumns?: boolean
   } = {}): Promise<PostgresMetaResult<PostgresForeignTable[]>> {
-    let sql = generateEnrichedForeignTablesSql({ includeColumns })
-    const filter = filterByList(includedSchemas, excludedSchemas)
-    if (filter) {
-      sql += ` where schema ${filter}`
-    }
-    if (limit) {
-      sql += ` limit ${limit}`
-    }
-    if (offset) {
-      sql += ` offset ${offset}`
-    }
+    const schemaFilter = filterByList(includedSchemas, excludedSchemas)
+    const sql = generateEnrichedForeignTablesSql({ includeColumns, schemaFilter, limit, offset })
     return await this.query(sql)
   }
 
@@ -69,9 +60,11 @@ export default class PostgresMetaForeignTables {
     schema?: string
   }): Promise<PostgresMetaResult<PostgresForeignTable>> {
     if (id) {
-      const sql = `${generateEnrichedForeignTablesSql({
+      const idsFilter = filterByValue([`${id}`])
+      const sql = generateEnrichedForeignTablesSql({
         includeColumns: true,
-      })} where foreign_tables.id = ${literal(id)};`
+        idsFilter,
+      })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -81,11 +74,11 @@ export default class PostgresMetaForeignTables {
         return { data: data[0], error }
       }
     } else if (name) {
-      const sql = `${generateEnrichedForeignTablesSql({
+      const nameFilter = filterByValue([`${schema}.${name}`])
+      const sql = generateEnrichedForeignTablesSql({
         includeColumns: true,
-      })} where foreign_tables.name = ${literal(name)} and foreign_tables.schema = ${literal(
-        schema
-      )};`
+        tableIdentifierFilter: nameFilter,
+      })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -103,9 +96,23 @@ export default class PostgresMetaForeignTables {
   }
 }
 
-const generateEnrichedForeignTablesSql = ({ includeColumns }: { includeColumns: boolean }) => `
-with foreign_tables as (${foreignTablesSql})
-  ${includeColumns ? `, columns as (${columnsSql})` : ''}
+const generateEnrichedForeignTablesSql = ({
+  includeColumns,
+  schemaFilter,
+  idsFilter,
+  tableIdentifierFilter,
+  limit,
+  offset,
+}: {
+  includeColumns: boolean
+  schemaFilter?: string
+  idsFilter?: string
+  tableIdentifierFilter?: string
+  limit?: number
+  offset?: number
+}) => `
+with foreign_tables as (${FOREIGN_TABLES_SQL({ schemaFilter, tableIdentifierFilter, limit, offset })})
+  ${includeColumns ? `, columns as (${COLUMNS_SQL({ schemaFilter, tableIdentifierFilter, tableIdFilter: idsFilter })})` : ''}
 select
   *
   ${

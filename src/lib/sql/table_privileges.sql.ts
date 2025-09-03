@@ -1,4 +1,11 @@
--- Despite the name `table_privileges`, this includes other kinds of relations:
+import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './common.js'
+
+export const TABLE_PRIVILEGES_SQL = (
+  props: SQLQueryPropsWithSchemaFilterAndIdsFilter & {
+    nameIdentifierFilter?: string
+  }
+) => /* SQL */ `
+-- Despite the name \`table_privileges\`, this includes other kinds of relations:
 -- views, matviews, etc. "Relation privileges" just doesn't roll off the tongue.
 --
 -- For each relation, get its relacl in a jsonb format,
@@ -59,6 +66,9 @@ left join (
 ) as grantee (oid, rolname)
   on grantee.oid = _priv.grantee
 where c.relkind in ('r', 'v', 'm', 'f', 'p')
+  ${props.schemaFilter ? `and nc.nspname ${props.schemaFilter}` : ''}
+  ${props.idsFilter ? `and c.oid ${props.idsFilter}` : ''}
+  ${props.nameIdentifierFilter ? `and (nc.nspname || '.' || c.relname) ${props.nameIdentifierFilter}` : ''}
   and not pg_is_other_temp_schema(c.relnamespace)
   and (
     pg_has_role(c.relowner, 'USAGE')
@@ -73,3 +83,6 @@ group by
   nc.nspname,
   c.relname,
   c.relkind
+${props.limit ? `limit ${props.limit}` : ''}
+${props.offset ? `offset ${props.offset}` : ''}
+`

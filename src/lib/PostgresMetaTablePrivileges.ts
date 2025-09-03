@@ -1,13 +1,13 @@
-import { ident, literal } from 'pg-format'
+import { ident } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
-import { filterByList } from './helpers.js'
-import { tablePrivilegesSql } from './sql/index.js'
+import { filterByList, filterByValue } from './helpers.js'
 import {
   PostgresMetaResult,
   PostgresTablePrivileges,
   PostgresTablePrivilegesGrant,
   PostgresTablePrivilegesRevoke,
 } from './types.js'
+import { TABLE_PRIVILEGES_SQL } from './sql/table_privileges.sql.js'
 
 export default class PostgresMetaTablePrivileges {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -29,25 +29,12 @@ export default class PostgresMetaTablePrivileges {
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresTablePrivileges[]>> {
-    let sql = `
-with table_privileges as (${tablePrivilegesSql})
-select *
-from table_privileges
-`
-    const filter = filterByList(
+    const schemaFilter = filterByList(
       includedSchemas,
       excludedSchemas,
       !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
     )
-    if (filter) {
-      sql += ` where schema ${filter}`
-    }
-    if (limit) {
-      sql += ` limit ${limit}`
-    }
-    if (offset) {
-      sql += ` offset ${offset}`
-    }
+    const sql = TABLE_PRIVILEGES_SQL({ schemaFilter, limit, offset })
     return await this.query(sql)
   }
 
@@ -69,11 +56,8 @@ from table_privileges
     schema?: string
   }): Promise<PostgresMetaResult<PostgresTablePrivileges>> {
     if (id) {
-      const sql = `
-with table_privileges as (${tablePrivilegesSql})
-select *
-from table_privileges
-where table_privileges.relation_id = ${literal(id)};`
+      const idsFilter = filterByValue([id])
+      const sql = TABLE_PRIVILEGES_SQL({ idsFilter })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -83,13 +67,8 @@ where table_privileges.relation_id = ${literal(id)};`
         return { data: data[0], error }
       }
     } else if (name) {
-      const sql = `
-with table_privileges as (${tablePrivilegesSql})
-select *
-from table_privileges
-where table_privileges.schema = ${literal(schema)}
-  and table_privileges.name = ${literal(name)}
-`
+      const nameIdentifierFilter = filterByValue([`${schema}.${name}`])
+      const sql = TABLE_PRIVILEGES_SQL({ nameIdentifierFilter })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -129,12 +108,7 @@ end $$;
 
     // Return the updated table privileges for modified relations.
     const relationIds = [...new Set(grants.map(({ relation_id }) => relation_id))]
-    sql = `
-with table_privileges as (${tablePrivilegesSql})
-select *
-from table_privileges
-where relation_id in (${relationIds.map(literal).join(',')})
-`
+    sql = TABLE_PRIVILEGES_SQL({ idsFilter: filterByList(relationIds) })
     return await this.query(sql)
   }
 
@@ -159,12 +133,7 @@ end $$;
 
     // Return the updated table privileges for modified relations.
     const relationIds = [...new Set(revokes.map(({ relation_id }) => relation_id))]
-    sql = `
-with table_privileges as (${tablePrivilegesSql})
-select *
-from table_privileges
-where relation_id in (${relationIds.map(literal).join(',')})
-`
+    sql = TABLE_PRIVILEGES_SQL({ idsFilter: filterByList(relationIds) })
     return await this.query(sql)
   }
 }

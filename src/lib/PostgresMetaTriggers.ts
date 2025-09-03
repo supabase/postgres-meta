@@ -1,8 +1,8 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
-import { filterByList } from './helpers.js'
-import { triggersSql } from './sql/index.js'
+import { filterByList, filterByValue } from './helpers.js'
 import { PostgresMetaResult, PostgresTrigger } from './types.js'
+import { TRIGGERS_SQL } from './sql/triggers.sql.js'
 
 export default class PostgresMetaTriggers {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -24,21 +24,12 @@ export default class PostgresMetaTriggers {
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresTrigger[]>> {
-    let sql = enrichedTriggersSql
-    const filter = filterByList(
+    const schemaFilter = filterByList(
       includedSchemas,
       excludedSchemas,
       !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
     )
-    if (filter) {
-      sql += ` WHERE schema ${filter}`
-    }
-    if (limit) {
-      sql = `${sql} LIMIT ${limit}`
-    }
-    if (offset) {
-      sql = `${sql} OFFSET ${offset}`
-    }
+    let sql = TRIGGERS_SQL({ schemaFilter, limit, offset })
     return await this.query(sql)
   }
 
@@ -63,8 +54,10 @@ export default class PostgresMetaTriggers {
     schema?: string
     table?: string
   }): Promise<PostgresMetaResult<PostgresTrigger>> {
+    const schemaFilter = schema ? filterByList([schema], []) : undefined
     if (id) {
-      const sql = `${enrichedTriggersSql} WHERE id = ${literal(id)};`
+      const idsFilter = filterByValue([id])
+      const sql = TRIGGERS_SQL({ idsFilter })
 
       const { data, error } = await this.query(sql)
 
@@ -82,9 +75,9 @@ export default class PostgresMetaTriggers {
     }
 
     if (name && schema && table) {
-      const sql = `${enrichedTriggersSql} WHERE name = ${literal(name)} AND schema = ${literal(
-        schema
-      )} AND triggers.table = ${literal(table)};`
+      const nameFilter = filterByValue([name])
+      const tableNameFilter = filterByValue([table])
+      const sql = TRIGGERS_SQL({ schemaFilter, nameFilter, tableNameFilter })
 
       const { data, error } = await this.query(sql)
 
@@ -168,7 +161,6 @@ export default class PostgresMetaTriggers {
     if (error) {
       return { data: null, error }
     }
-
     return await this.retrieve({
       name,
       table,
@@ -254,12 +246,3 @@ export default class PostgresMetaTriggers {
     return { data: triggerRecord!, error: null }
   }
 }
-
-const enrichedTriggersSql = `
-  WITH triggers AS (
-    ${triggersSql}
-  )
-  SELECT
-    *
-  FROM triggers
-`

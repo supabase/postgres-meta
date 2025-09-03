@@ -1,3 +1,8 @@
+import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './common.js'
+
+export const POLICIES_SQL = (
+  props: SQLQueryPropsWithSchemaFilterAndIdsFilter & { functionNameIdentifierFilter?: string }
+) => /* SQL */ `
 SELECT
   pol.oid :: int8 AS id,
   n.nspname AS schema,
@@ -40,3 +45,10 @@ FROM
   pg_policy pol
   JOIN pg_class c ON c.oid = pol.polrelid
   LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
+WHERE
+  ${props.schemaFilter ? `n.nspname ${props.schemaFilter}` : 'true'}
+  ${props.idsFilter ? `AND pol.oid ${props.idsFilter}` : ''}
+  ${props.functionNameIdentifierFilter ? `AND (c.relname || '.' || pol.polname) ${props.functionNameIdentifierFilter}` : ''}
+${props.limit ? `limit ${props.limit}` : ''}
+${props.offset ? `offset ${props.offset}` : ''}
+`

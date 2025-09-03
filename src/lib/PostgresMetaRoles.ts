@@ -1,11 +1,12 @@
 import { ident, literal } from 'pg-format'
-import { rolesSql } from './sql/index.js'
+import { ROLES_SQL } from './sql/roles.sql.js'
 import {
   PostgresMetaResult,
   PostgresRole,
   PostgresRoleCreate,
   PostgresRoleUpdate,
 } from './types.js'
+import { filterByValue } from './helpers.js'
 export function changeRoleConfig2Object(config: string[]) {
   if (!config) {
     return null
@@ -32,32 +33,7 @@ export default class PostgresMetaRoles {
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresRole[]>> {
-    let sql = `
-WITH
-  roles AS (${rolesSql})
-SELECT
-  *
-FROM
-  roles
-WHERE
-  true`
-    if (!includeDefaultRoles) {
-      // All default/predefined roles start with pg_: https://www.postgresql.org/docs/15/predefined-roles.html
-      // The pg_ prefix is also reserved:
-      //
-      // ```
-      // postgres=# create role pg_mytmp;
-      // ERROR:  role name "pg_mytmp" is reserved
-      // DETAIL:  Role names starting with "pg_" are reserved.
-      // ```
-      sql += ` AND NOT pg_catalog.starts_with(name, 'pg_')`
-    }
-    if (limit) {
-      sql += ` LIMIT ${limit}`
-    }
-    if (offset) {
-      sql += ` OFFSET ${offset}`
-    }
+    const sql = ROLES_SQL({ limit, offset, includeDefaultRoles })
     const result = await this.query(sql)
     if (result.data) {
       result.data = result.data.map((role: any) => {
@@ -78,7 +54,8 @@ WHERE
     name?: string
   }): Promise<PostgresMetaResult<PostgresRole>> {
     if (id) {
-      const sql = `${rolesSql} WHERE oid = ${literal(id)};`
+      const idsFilter = filterByValue([id])
+      const sql = ROLES_SQL({ idsFilter })
       const { data, error } = await this.query(sql)
 
       if (error) {
@@ -90,7 +67,8 @@ WHERE
         return { data: data[0], error }
       }
     } else if (name) {
-      const sql = `${rolesSql} WHERE rolname = ${literal(name)};`
+      const nameFilter = filterByValue([name])
+      const sql = ROLES_SQL({ nameFilter })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }

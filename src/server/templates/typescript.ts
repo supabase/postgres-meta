@@ -32,7 +32,9 @@ export const apply = async ({
   columns
     .filter((c) => c.table_id in columnsByTableId)
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-    .forEach((c) => columnsByTableId[c.table_id].push(c))
+    .forEach((c) => {
+      columnsByTableId[c.table_id].push(c)
+    })
 
   const internal_supabase_schema = postgrestVersion
     ? `// Allows to automatically instantiate createClient with right options

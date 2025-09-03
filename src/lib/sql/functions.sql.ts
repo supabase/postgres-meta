@@ -1,9 +1,17 @@
+import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './common.js'
+
+export const FUNCTIONS_SQL = (
+  props: SQLQueryPropsWithSchemaFilterAndIdsFilter & {
+    nameFilter?: string
+    args?: string[]
+  }
+) => /* SQL */ `
 -- CTE with sane arg_modes, arg_names, and arg_types.
 -- All three are always of the same length.
 -- All three include all args, including OUT and TABLE args.
 with functions as (
   select
-    *,
+    p.*,
     -- proargmodes is null when all arg modes are IN
     coalesce(
       p.proargmodes,
@@ -21,7 +29,40 @@ with functions as (
       array_fill(true, array[pronargdefaults])) as arg_has_defaults
   from
     pg_proc as p
+    ${props.schemaFilter ? `join pg_namespace n on p.pronamespace = n.oid` : ''}
   where
+    ${props.schemaFilter ? `n.nspname ${props.schemaFilter} AND` : ''}
+    ${props.idsFilter ? `p.oid ${props.idsFilter} AND` : ''}
+    ${props.nameFilter ? `p.proname ${props.nameFilter} AND` : ''}
+    ${
+      props.args === undefined
+        ? ''
+        : props.args.length > 0
+          ? `p.proargtypes::text = ${
+              props.args.length
+                ? `(
+          SELECT STRING_AGG(type_oid::text, ' ') FROM (
+            SELECT (
+              split_args.arr[
+                array_length(
+                  split_args.arr,
+                  1
+                )
+              ]::regtype::oid
+            ) AS type_oid FROM (
+              SELECT STRING_TO_ARRAY(
+                UNNEST(
+                  ARRAY[${props.args}]
+                ),
+                ' '
+              ) AS arr
+            ) AS split_args
+          ) args
+    )`
+                : "''"
+            } AND`
+          : ''
+    }
     p.prokind = 'f'
 )
 select
@@ -105,3 +146,6 @@ from
     group by
       t1.oid
   ) f_args on f_args.oid = f.oid
+${props.limit ? `limit ${props.limit}` : ''}
+${props.offset ? `offset ${props.offset}` : ''}
+`

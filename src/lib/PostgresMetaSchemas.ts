@@ -1,12 +1,13 @@
-import { ident, literal } from 'pg-format'
-import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
-import { schemasSql } from './sql/index.js'
+import { ident } from 'pg-format'
+import { SCHEMAS_SQL } from './sql/schemas.sql.js'
 import {
   PostgresMetaResult,
   PostgresSchema,
   PostgresSchemaCreate,
   PostgresSchemaUpdate,
 } from './types.js'
+import { filterByList, filterByValue } from './helpers.js'
+import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
 
 export default class PostgresMetaSchemas {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -16,24 +17,24 @@ export default class PostgresMetaSchemas {
   }
 
   async list({
+    includedSchemas,
+    excludedSchemas,
     includeSystemSchemas = false,
     limit,
     offset,
   }: {
+    includedSchemas?: string[]
+    excludedSchemas?: string[]
     includeSystemSchemas?: boolean
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresSchema[]>> {
-    let sql = schemasSql
-    if (!includeSystemSchemas) {
-      sql = `${sql} AND NOT (n.nspname IN (${DEFAULT_SYSTEM_SCHEMAS.map(literal).join(',')}))`
-    }
-    if (limit) {
-      sql = `${sql} LIMIT ${limit}`
-    }
-    if (offset) {
-      sql = `${sql} OFFSET ${offset}`
-    }
+    const schemaFilter = filterByList(
+      includedSchemas,
+      excludedSchemas,
+      !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
+    )
+    const sql = SCHEMAS_SQL({ limit, offset, includeSystemSchemas, nameFilter: schemaFilter })
     return await this.query(sql)
   }
 
@@ -47,7 +48,8 @@ export default class PostgresMetaSchemas {
     name?: string
   }): Promise<PostgresMetaResult<PostgresSchema>> {
     if (id) {
-      const sql = `${schemasSql} AND n.oid = ${literal(id)};`
+      const idsFilter = filterByValue([id])
+      const sql = SCHEMAS_SQL({ idsFilter })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -57,7 +59,8 @@ export default class PostgresMetaSchemas {
         return { data: data[0], error }
       }
     } else if (name) {
-      const sql = `${schemasSql} AND n.nspname = ${literal(name)};`
+      const nameFilter = filterByValue([name])
+      const sql = SCHEMAS_SQL({ nameFilter })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }

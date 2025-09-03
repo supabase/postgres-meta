@@ -1,6 +1,7 @@
 import { ident, literal } from 'pg-format'
-import { publicationsSql } from './sql/index.js'
-import { PostgresMetaResult, PostgresPublication, PostgresTable } from './types.js'
+import { PostgresMetaResult, PostgresPublication } from './types.js'
+import { PUBLICATIONS_SQL } from './sql/publications.sql.js'
+import { filterByValue } from './helpers.js'
 
 export default class PostgresMetaPublications {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -16,13 +17,7 @@ export default class PostgresMetaPublications {
     limit?: number
     offset?: number
   }): Promise<PostgresMetaResult<PostgresPublication[]>> {
-    let sql = publicationsSql
-    if (limit) {
-      sql = `${sql} LIMIT ${limit}`
-    }
-    if (offset) {
-      sql = `${sql} OFFSET ${offset}`
-    }
+    let sql = PUBLICATIONS_SQL({ limit, offset })
     return await this.query(sql)
   }
 
@@ -36,7 +31,8 @@ export default class PostgresMetaPublications {
     name?: string
   }): Promise<PostgresMetaResult<PostgresPublication>> {
     if (id) {
-      const sql = `${publicationsSql} WHERE p.oid = ${literal(id)};`
+      const idsFilter = filterByValue([id])
+      const sql = PUBLICATIONS_SQL({ idsFilter })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -46,7 +42,8 @@ export default class PostgresMetaPublications {
         return { data: data[0], error }
       }
     } else if (name) {
-      const sql = `${publicationsSql} WHERE p.pubname = ${literal(name)};`
+      const nameFilter = filterByValue([name])
+      const sql = PUBLICATIONS_SQL({ nameFilter })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -223,7 +220,7 @@ begin
   create temp table pg_meta_publication_tmp (name) on commit drop as values (coalesce(new_name, old.pubname));
 end $$;
 
-with publications as (${publicationsSql}) select * from publications where name = (select name from pg_meta_publication_tmp);
+with publications as (${PUBLICATIONS_SQL({})}) select * from publications where name = (select name from pg_meta_publication_tmp);
 `
     const { data, error } = await this.query(sql)
     if (error) {

@@ -1,10 +1,9 @@
-import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
-import { filterByList } from './helpers.js'
-import { indexesSql } from './sql/index.js'
+import { filterByList, filterByValue } from './helpers.js'
 import { PostgresMetaResult, PostgresIndex } from './types.js'
+import { INDEXES_SQL } from './sql/indexes.sql.js'
 
-export default class PostgresMetaFunctions {
+export default class PostgresMetaIndexes {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
 
   constructor(query: (sql: string) => Promise<PostgresMetaResult<any>>) {
@@ -24,21 +23,12 @@ export default class PostgresMetaFunctions {
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresIndex[]>> {
-    let sql = enrichedSql
-    const filter = filterByList(
+    const schemaFilter = filterByList(
       includedSchemas,
       excludedSchemas,
       !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
     )
-    if (filter) {
-      sql += ` WHERE schema ${filter}`
-    }
-    if (limit) {
-      sql = `${sql} LIMIT ${limit}`
-    }
-    if (offset) {
-      sql = `${sql} OFFSET ${offset}`
-    }
+    const sql = INDEXES_SQL({ schemaFilter, limit, offset })
     return await this.query(sql)
   }
 
@@ -54,13 +44,13 @@ export default class PostgresMetaFunctions {
   }): Promise<PostgresMetaResult<PostgresIndex>>
   async retrieve({
     id,
-    args = [],
   }: {
     id?: number
     args?: string[]
   }): Promise<PostgresMetaResult<PostgresIndex>> {
     if (id) {
-      const sql = `${enrichedSql} WHERE id = ${literal(id)};`
+      const idsFilter = filterByValue([id])
+      const sql = INDEXES_SQL({ idsFilter })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -74,12 +64,3 @@ export default class PostgresMetaFunctions {
     }
   }
 }
-
-const enrichedSql = `
-  WITH x AS (
-    ${indexesSql}
-  )
-  SELECT
-    x.*
-  FROM x
-`
