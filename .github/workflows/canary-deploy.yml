@@ -105,19 +105,3 @@ jobs:
             org.opencontainers.image.revision=${{ github.event.pull_request.head.sha }}
             canary.pr.number=${{ github.event.pull_request.number }}
             canary.pr.author=${{ github.event.pull_request.user.login }}
-
-      # Save canary info for the comment workflow
-      - name: Save canary info
-        run: |
-          mkdir -p canary-info
-          echo "${{ steps.meta.outputs.tags }}" > canary-info/canary-tags.txt
-          echo "${{ github.event.pull_request.number }}" > canary-info/pr-number.txt
-          echo "${{ github.event.pull_request.head.sha }}" > canary-info/commit-sha.txt
-          echo "postgres-meta" > canary-info/package-name.txt
-
-      - name: Upload canary info
-        uses: actions/upload-artifact@v4
-        with:
-          name: canary-info
-          path: canary-info/
-          retention-days: 7

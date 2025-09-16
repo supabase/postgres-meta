@@ -35,42 +35,52 @@ jobs:
 
             if (prs.data.length > 0) {
               const pr = prs.data[0];
-              core.setOutput('pr_number', pr.number);
-              core.setOutput('found', 'true');
-              console.log(`Found PR #${pr.number}`);
+              
+              // Check if PR has the deploy-canary label
+              const labels = pr.labels.map(label => label.name);
+              const hasCanaryLabel = labels.includes('deploy-canary');
+              
+              if (hasCanaryLabel) {
+                core.setOutput('pr_number', pr.number);
+                core.setOutput('found', 'true');
+                core.setOutput('has_canary_label', 'true');
+                console.log(`Found PR #${pr.number} with deploy-canary label`);
+              } else {
+                core.setOutput('found', 'false');
+                core.setOutput('has_canary_label', 'false');
+                console.log(`Found PR #${pr.number} but it doesn't have deploy-canary label`);
+              }
             } else {
               core.setOutput('found', 'false');
+              core.setOutput('has_canary_label', 'false');
               console.log('No associated PR found');
             }
 
-      # Only continue if we found a PR and the workflow succeeded
-      - name: Download canary info
-        if: ${{ steps.pr-info.outputs.found == 'true' && github.event.workflow_run.conclusion == 'success' }}
-        uses: actions/download-artifact@v4
-        with:
-          name: canary-info
-          path: canary-info/
-          run-id: ${{ github.event.workflow_run.id }}
-        continue-on-error: true
-
-      - name: Read canary info
-        if: ${{ steps.pr-info.outputs.found == 'true' && github.event.workflow_run.conclusion == 'success' }}
+      # Extract canary info from the workflow run
+      - name: Extract canary info
+        if: ${{ steps.pr-info.outputs.found == 'true' && steps.pr-info.outputs.has_canary_label == 'true' && github.event.workflow_run.conclusion == 'success' }}
         id: canary-info
-        run: |
-          if [ -f "canary-info/canary-tags.txt" ]; then
-            # Read the first tag (DockerHub) from the tags
-            FIRST_TAG=$(head -n1 canary-info/canary-tags.txt)
-            echo "tag=$FIRST_TAG" >> $GITHUB_OUTPUT
-            echo "found=true" >> $GITHUB_OUTPUT
-            echo "commit-sha=$(cat canary-info/commit-sha.txt)" >> $GITHUB_OUTPUT
-          else
-            echo "found=false" >> $GITHUB_OUTPUT
-          fi
-        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const workflowRun = context.payload.workflow_run;
+
+            // Extract PR number from the branch name or workflow run
+            const prNumber = '${{ steps.pr-info.outputs.pr_number }}';
+            const commitSha = workflowRun.head_sha;
+
+            // Generate the canary tag based on the pattern used in canary-deploy.yml
+            const canaryTag = `supabase/postgres-meta:canary-pr-${prNumber}-${commitSha}`;
+
+            core.setOutput('tag', canaryTag);
+            core.setOutput('found', 'true');
+            core.setOutput('commit-sha', commitSha);
+
+            console.log(`Generated canary tag: ${canaryTag}`);
 
       # Find existing comment
       - name: Find existing comment
-        if: ${{ steps.pr-info.outputs.found == 'true' }}
+        if: ${{ steps.pr-info.outputs.found == 'true' && steps.pr-info.outputs.has_canary_label == 'true' }}
         uses: peter-evans/find-comment@v3
         id: find-comment
         with:
@@ -80,7 +90,7 @@ jobs:
 
       # Create or update comment based on workflow status
       - name: Create or update canary comment
-        if: ${{ steps.pr-info.outputs.found == 'true' }}
+        if: ${{ steps.pr-info.outputs.found == 'true' && steps.pr-info.outputs.has_canary_label == 'true' }}
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
