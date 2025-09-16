@@ -154,7 +154,7 @@ export const apply = async ({
         setofOptionsInfo = `SetofOptions: {
           from: ${JSON.stringify(typesById[fn.args[0].type_id].format)}
           to: ${JSON.stringify(fn.return_table_name)}
-          isOneToOne: ${Boolean(fn.returns_multiple_rows)}
+          isOneToOne: ${Boolean(!fn.returns_multiple_rows)}
           isSetofReturn: true
         }`
       }
@@ -176,7 +176,7 @@ export const apply = async ({
       setofOptionsInfo = `SetofOptions: {
         from: "*"
         to: ${JSON.stringify(fn.return_table_name)}
-        isOneToOne: ${Boolean(fn.returns_multiple_rows)}
+        isOneToOne: ${Boolean(!fn.returns_multiple_rows)}
         isSetofReturn: ${fn.is_set_returning_function}
       }`
     }
