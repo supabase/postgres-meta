@@ -513,3 +513,52 @@ test('retrieve set-returning function', async () => {
   `
   )
 })
+
+test('retrieve function by args filter - polymorphic function with text argument', async () => {
+  const res = await pgMeta.functions.retrieve({
+    schema: 'public',
+    name: 'polymorphic_function',
+    args: ['text'],
+  })
+  expect(res.data).toMatchObject({
+    name: 'polymorphic_function',
+    schema: 'public',
+    argument_types: 'text',
+    args: [
+      { type_id: 25, mode: 'in' }, // text type_id is 25
+    ],
+  })
+  expect(res.error).toBeNull()
+})
+
+test('retrieve function by args filter - polymorphic function with boolean argument', async () => {
+  const res = await pgMeta.functions.retrieve({
+    schema: 'public',
+    name: 'polymorphic_function',
+    args: ['boolean'],
+  })
+  expect(res.data).toMatchObject({
+    name: 'polymorphic_function',
+    schema: 'public',
+    argument_types: 'boolean',
+    args: [
+      { type_id: 16, mode: 'in' }, // boolean type_id is 16
+    ],
+  })
+  expect(res.error).toBeNull()
+})
+
+test('retrieve function by args filter - function with no arguments', async () => {
+  const res = await pgMeta.functions.retrieve({
+    schema: 'public',
+    name: 'function_returning_set_of_rows',
+    args: [],
+  })
+  expect(res.data).toMatchObject({
+    name: 'function_returning_set_of_rows',
+    schema: 'public',
+    argument_types: '',
+    args: [],
+  })
+  expect(res.error).toBeNull()
+})

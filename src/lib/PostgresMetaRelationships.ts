@@ -1,23 +1,37 @@
-import { literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
-import { tableRelationshipsSql, viewsKeyDependenciesSql } from './sql/index.js'
-import { PostgresMetaResult, PostgresRelationship } from './types.js'
+import { filterByList } from './helpers.js'
+import type { PostgresMetaResult, PostgresRelationship } from './types.js'
+import { TABLE_RELATIONSHIPS_SQL } from './sql/table_relationships.sql.js'
+import { VIEWS_KEY_DEPENDENCIES_SQL } from './sql/views_key_dependencies.sql.js'
 
 /*
  * Only used for generating types at the moment. Will need some cleanups before
  * using it for other things, e.g. /relationships endpoint.
  */
 export default class PostgresMetaRelationships {
-  query: (sql: string) => Promise<PostgresMetaResult<any>>
+  query: (sql: string) => Promise<PostgresMetaResult<unknown>>
 
-  constructor(query: (sql: string) => Promise<PostgresMetaResult<any>>) {
+  constructor(query: (sql: string) => Promise<PostgresMetaResult<unknown>>) {
     this.query = query
   }
 
-  async list(): Promise<PostgresMetaResult<PostgresRelationship[]>> {
+  async list({
+    includeSystemSchemas = false,
+    includedSchemas,
+    excludedSchemas,
+  }: {
+    includeSystemSchemas?: boolean
+    includedSchemas?: string[]
+    excludedSchemas?: string[]
+  } = {}): Promise<PostgresMetaResult<PostgresRelationship[]>> {
+    const schemaFilter = filterByList(
+      includedSchemas,
+      excludedSchemas,
+      !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
+    )
     let allTableM2oAndO2oRelationships: PostgresRelationship[]
     {
-      let sql = tableRelationshipsSql
+      const sql = TABLE_RELATIONSHIPS_SQL({ schemaFilter })
       const { data, error } = (await this.query(sql)) as PostgresMetaResult<PostgresRelationship[]>
       if (error) {
         return { data: null, error }
@@ -45,8 +59,9 @@ export default class PostgresMetaRelationships {
         column_dependencies: ColDep[]
       }
 
+      const viewsKeyDependenciesSql = VIEWS_KEY_DEPENDENCIES_SQL({ schemaFilter })
       const { data: viewsKeyDependencies, error } = (await this.query(
-        allViewsKeyDependenciesSql
+        viewsKeyDependenciesSql
       )) as PostgresMetaResult<KeyDep[]>
       if (error) {
         return { data: null, error }
@@ -62,8 +77,8 @@ export default class PostgresMetaRelationships {
             return allEntries.reduce<T[][]>(
               (results, entries) =>
                 results
-                  .map((result) => entries.map((entry) => [...result, entry]))
-                  .reduce((subResults, result) => [...subResults, ...result], []),
+                  .map((result) => entries.map((entry) => result.concat(entry)))
+                  .reduce((subResults, result) => subResults.concat(result), []),
               [[]]
             )
           }
@@ -147,8 +162,3 @@ export default class PostgresMetaRelationships {
     }
   }
 }
-
-const allViewsKeyDependenciesSql = viewsKeyDependenciesSql.replaceAll(
-  '__EXCLUDED_SCHEMAS',
-  literal(DEFAULT_SYSTEM_SCHEMAS)
-)

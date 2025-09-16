@@ -1,4 +1,5 @@
 import prettier from 'prettier'
+import type { GeneratorMetadata } from '../../lib/generators.js'
 import type {
   PostgresColumn,
   PostgresFunction,
@@ -7,7 +8,6 @@ import type {
   PostgresType,
   PostgresView,
 } from '../../lib/index.js'
-import type { GeneratorMetadata } from '../../lib/generators.js'
 import {
   GENERATE_TYPES_DEFAULT_SCHEMA,
   VALID_FUNCTION_ARGS_MODE,
@@ -154,14 +154,14 @@ export const apply = async ({
         setofOptionsInfo = `SetofOptions: {
           from: ${JSON.stringify(typesById[fn.args[0].type_id].format)}
           to: ${JSON.stringify(fn.return_table_name)}
-          isOneToOne: ${fn.returns_multiple_rows ? false : true}
+          isOneToOne: ${Boolean(fn.returns_multiple_rows)}
           isSetofReturn: true
         }`
       }
       // Case 2: Handle RETURNS table-name those are always a one to one relationship
       else if (fn.return_table_name && !fn.returns_set_of_table) {
         const sourceTable = typesById[fn.args[0].type_id].format
-        let targetTable = fn.return_table_name
+        const targetTable = fn.return_table_name
         setofOptionsInfo = `SetofOptions: {
             from: ${JSON.stringify(sourceTable)}
             to: ${JSON.stringify(targetTable)}
@@ -176,7 +176,7 @@ export const apply = async ({
       setofOptionsInfo = `SetofOptions: {
         from: "*"
         to: ${JSON.stringify(fn.return_table_name)}
-        isOneToOne: ${fn.returns_multiple_rows ? false : true}
+        isOneToOne: ${Boolean(fn.returns_multiple_rows)}
         isSetofReturn: ${fn.is_set_returning_function}
       }`
     }
@@ -193,7 +193,12 @@ export const apply = async ({
         const type = typesById[type_id]
         let tsType = 'unknown'
         if (type) {
-          tsType = pgTypeToTsType(schema, type.name, { types, schemas, tables, views })
+          tsType = pgTypeToTsType(schema, type.name, {
+            types,
+            schemas,
+            tables,
+            views,
+          })
         }
         return { name, type: tsType }
       })
@@ -228,7 +233,12 @@ export const apply = async ({
     // Case 3: returns base/array/composite/enum type.
     const type = typesById[fn.return_type_id]
     if (type) {
-      return pgTypeToTsType(schema, type.name, { types, schemas, tables, views })
+      return pgTypeToTsType(schema, type.name, {
+        types,
+        schemas,
+        tables,
+        views,
+      })
     }
 
     return 'unknown'

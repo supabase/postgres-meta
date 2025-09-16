@@ -13,7 +13,7 @@ jobs:
     # Must match glibc verison in node:20
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: 'pyramation/libpg-query-node'
           ref: 'v15'

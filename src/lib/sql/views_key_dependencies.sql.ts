@@ -1,3 +1,6 @@
+import type { SQLQueryPropsWithSchemaFilter } from './common.js'
+
+export const VIEWS_KEY_DEPENDENCIES_SQL = (props: SQLQueryPropsWithSchemaFilter) => /* SQL */ `
 -- Adapted from
 -- https://github.com/PostgREST/postgrest/blob/f9f0f79fa914ac00c11fbf7f4c558e14821e67e2/src/PostgREST/SchemaCache.hs#L820
 with recursive
@@ -25,6 +28,7 @@ pks_fks as (
   from pg_constraint
   left join lateral unnest(confkey) with ordinality as _(col, ord) on true
   where contype='f'
+  ${props.schemaFilter ? `and connamespace::regnamespace::text ${props.schemaFilter}` : ''}
 ),
 views as (
   select
@@ -35,7 +39,8 @@ views as (
   from pg_class c
   join pg_namespace n on n.oid = c.relnamespace
   join pg_rewrite r on r.ev_class = c.oid
-  where c.relkind in ('v', 'm') and n.nspname not in (__EXCLUDED_SCHEMAS)
+  where c.relkind in ('v', 'm') 
+    ${props.schemaFilter ? `and n.nspname ${props.schemaFilter}` : ''}
 ),
 transform_json as (
   select
@@ -71,48 +76,48 @@ transform_json as (
       -- -----------------------------------------------
       -- pattern           | replacement         | flags
       -- -----------------------------------------------
-      -- `<>` in pg_node_tree is the same as `null` in JSON, but due to very poor performance of json_typeof
+      -- <> in pg_node_tree is the same as null in JSON, but due to very poor performance of json_typeof
       -- we need to make this an empty array here to prevent json_array_elements from throwing an error
       -- when the targetList is null.
       -- We'll need to put it first, to make the node protection below work for node lists that start with
-      -- null: `(<> ...`, too. This is the case for coldefexprs, when the first column does not have a default value.
+      -- null: (<> ..., too. This is the case for coldefexprs, when the first column does not have a default value.
          '<>'              , '()'
-      -- `,` is not part of the pg_node_tree format, but used in the regex.
-      -- This removes all `,` that might be part of column names.
+      -- , is not part of the pg_node_tree format, but used in the regex.
+      -- This removes all , that might be part of column names.
       ), ','               , ''
-      -- The same applies for `{` and `}`, although those are used a lot in pg_node_tree.
+      -- The same applies for { and }, although those are used a lot in pg_node_tree.
       -- We remove the escaped ones, which might be part of column names again.
-      ), E'\\{'            , ''
-      ), E'\\}'            , ''
+      ), E'\\\\{'            , ''
+      ), E'\\\\}'            , ''
       -- The fields we need are formatted as json manually to protect them from the regex.
       ), ' :targetList '   , ',"targetList":'
       ), ' :resno '        , ',"resno":'
       ), ' :resorigtbl '   , ',"resorigtbl":'
       ), ' :resorigcol '   , ',"resorigcol":'
-      -- Make the regex also match the node type, e.g. `{QUERY ...`, to remove it in one pass.
+      -- Make the regex also match the node type, e.g. \`{QUERY ...\`, to remove it in one pass.
       ), '{'               , '{ :'
-      -- Protect node lists, which start with `({` or `((` from the greedy regex.
-      -- The extra `{` is removed again later.
+      -- Protect node lists, which start with \`({\` or \`((\` from the greedy regex.
+      -- The extra \`{\` is removed again later.
       ), '(('              , '{(('
       ), '({'              , '{({'
       -- This regex removes all unused fields to avoid the need to format all of them correctly.
       -- This leads to a smaller json result as well.
-      -- Removal stops at `,` for used fields (see above) and `}` for the end of the current node.
-      -- Nesting can't be parsed correctly with a regex, so we stop at `{` as well and
+      -- Removal stops at \`,\` for used fields (see above) and \`}\` for the end of the current node.
+      -- Nesting can't be parsed correctly with a regex, so we stop at \`{\` as well and
       -- add an empty key for the followig node.
       ), ' :[^}{,]+'       , ',"":'              , 'g'
-      -- For performance, the regex also added those empty keys when hitting a `,` or `}`.
+      -- For performance, the regex also added those empty keys when hitting a \`,\` or \`}\`.
       -- Those are removed next.
       ), ',"":}'           , '}'
       ), ',"":,'           , ','
       -- This reverses the "node list protection" from above.
       ), '{('              , '('
-      -- Every key above has been added with a `,` so far. The first key in an object doesn't need it.
+      -- Every key above has been added with a \`,\` so far. The first key in an object doesn't need it.
       ), '{,'              , '{'
-      -- pg_node_tree has `()` around lists, but JSON uses `[]`
+      -- pg_node_tree has \`()\` around lists, but JSON uses \`[]\`
       ), '('               , '['
       ), ')'               , ']'
-      -- pg_node_tree has ` ` between list items, but JSON uses `,`
+      -- pg_node_tree has \` \` between list items, but JSON uses \`,\`
       ), ' '             , ','
     )::json as view_definition
   from views
@@ -139,7 +144,7 @@ recursion(view_id, view_schema, view_name, view_column, resorigtbl, resorigcol, 
     false,
     ARRAY[resorigtbl]
   from results r
-  where view_schema not in (__EXCLUDED_SCHEMAS)
+  where ${props.schemaFilter ? `view_schema ${props.schemaFilter}` : 'true'}
   union all
   select
     view.view_id,
@@ -189,3 +194,4 @@ join pg_namespace sch on sch.oid = tbl.relnamespace
 group by sch.nspname, tbl.relname,  rep.view_schema, rep.view_name, pks_fks.conname, pks_fks.contype, pks_fks.ncol
 -- make sure we only return key for which all columns are referenced in the view - no partial PKs or FKs
 having ncol = array_length(array_agg(row(col.attname, view_columns) order by pks_fks.ord), 1)
+`

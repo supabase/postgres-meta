@@ -1,8 +1,8 @@
 import { ident, literal } from 'pg-format'
 import { DEFAULT_SYSTEM_SCHEMAS } from './constants.js'
-import { filterByList } from './helpers.js'
-import { functionsSql } from './sql/index.js'
+import { filterByList, filterByValue } from './helpers.js'
 import { PostgresMetaResult, PostgresFunction, PostgresFunctionCreate } from './types.js'
+import { FUNCTIONS_SQL } from './sql/functions.sql.js'
 
 export default class PostgresMetaFunctions {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
@@ -24,21 +24,12 @@ export default class PostgresMetaFunctions {
     limit?: number
     offset?: number
   } = {}): Promise<PostgresMetaResult<PostgresFunction[]>> {
-    let sql = enrichedFunctionsSql
-    const filter = filterByList(
+    const schemaFilter = filterByList(
       includedSchemas,
       excludedSchemas,
       !includeSystemSchemas ? DEFAULT_SYSTEM_SCHEMAS : undefined
     )
-    if (filter) {
-      sql += ` WHERE schema ${filter}`
-    }
-    if (limit) {
-      sql = `${sql} LIMIT ${limit}`
-    }
-    if (offset) {
-      sql = `${sql} OFFSET ${offset}`
-    }
+    const sql = FUNCTIONS_SQL({ schemaFilter, limit, offset })
     return await this.query(sql)
   }
 
@@ -63,8 +54,10 @@ export default class PostgresMetaFunctions {
     schema?: string
     args?: string[]
   }): Promise<PostgresMetaResult<PostgresFunction>> {
+    const schemaFilter = schema ? filterByList([schema], []) : undefined
     if (id) {
-      const sql = `${enrichedFunctionsSql} WHERE id = ${literal(id)};`
+      const idsFilter = filterByValue([id])
+      const sql = FUNCTIONS_SQL({ idsFilter })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -74,7 +67,8 @@ export default class PostgresMetaFunctions {
         return { data: data[0], error }
       }
     } else if (name && schema && args) {
-      const sql = this.generateRetrieveFunctionSql({ name, schema, args })
+      const nameFilter = filterByValue([name])
+      const sql = FUNCTIONS_SQL({ schemaFilter, nameFilter, args: args.map(literal) })
       const { data, error } = await this.query(sql)
       if (error) {
         return { data, error }
@@ -169,6 +163,11 @@ export default class PostgresMetaFunctions {
           )}(${identityArgs})  SET SCHEMA ${ident(schema)};`
         : ''
 
+    const currentSchemaFilter = currentFunc!.schema
+      ? filterByList([currentFunc!.schema], [])
+      : undefined
+    const currentNameFilter = currentFunc!.name ? filterByValue([currentFunc!.name]) : undefined
+
     const sql = `
       DO LANGUAGE plpgsql $$
       BEGIN
@@ -177,7 +176,7 @@ export default class PostgresMetaFunctions {
 
           IF (
             SELECT id
-            FROM (${functionsSql}) AS f
+            FROM (${FUNCTIONS_SQL({ schemaFilter: currentSchemaFilter, nameFilter: currentNameFilter })}) AS f
             WHERE f.schema = ${literal(currentFunc!.schema)}
             AND f.name = ${literal(currentFunc!.name)}
             AND f.identity_argument_types = ${literal(identityArgs)}
@@ -262,49 +261,4 @@ export default class PostgresMetaFunctions {
       };
     `
   }
-
-  private generateRetrieveFunctionSql({
-    schema,
-    name,
-    args,
-  }: {
-    schema: string
-    name: string
-    args: string[]
-  }): string {
-    return `${enrichedFunctionsSql} JOIN pg_proc AS p ON id = p.oid WHERE schema = ${literal(
-      schema
-    )} AND name = ${literal(name)} AND p.proargtypes::text = ${
-      args.length
-        ? `(
-          SELECT STRING_AGG(type_oid::text, ' ') FROM (
-            SELECT (
-              split_args.arr[
-                array_length(
-                  split_args.arr,
-                  1
-                )
-              ]::regtype::oid
-            ) AS type_oid FROM (
-              SELECT STRING_TO_ARRAY(
-                UNNEST(
-                  ARRAY[${args.map(literal)}]
-                ),
-                ' '
-              ) AS arr
-            ) AS split_args
-          ) args
-    )`
-        : literal('')
-    }`
-  }
 }
-
-const enrichedFunctionsSql = `
-  WITH f AS (
-    ${functionsSql}
-  )
-  SELECT
-    f.*
-  FROM f
-`
