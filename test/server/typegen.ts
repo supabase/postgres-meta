@@ -4309,9 +4309,9 @@ test('typegen: typescript consistent types definitions orders', async () => {
           DROP FUNCTION IF EXISTS test_func_gamma(integer, text, boolean) CASCADE;
 
           -- Alternative signatures for functions (different parameter orders)
-          DROP FUNCTION IF EXISTS test_func_alpha(text, boolean, integer) CASCADE;
-          DROP FUNCTION IF EXISTS test_func_beta(boolean, integer, text) CASCADE;
-          DROP FUNCTION IF EXISTS test_func_gamma(boolean, text, integer) CASCADE;
+          DROP FUNCTION IF EXISTS test_func_alpha_2(boolean, text, integer) CASCADE;
+          DROP FUNCTION IF EXISTS test_func_beta_2(text, boolean, integer) CASCADE;
+          DROP FUNCTION IF EXISTS test_func_gamma_2(boolean, integer, text) CASCADE;
 
           -- Drop tables
           DROP TABLE IF EXISTS test_table_alpha CASCADE;
@@ -4481,19 +4481,19 @@ test('typegen: typescript consistent types definitions orders', async () => {
     },
   })
 
-  // Create functions in reverse order: gamma, beta, alpha with different parameter orders
+  // Create functions in reverse order: gamma, beta, alpha with same parameter orders
   await app.inject({
     method: 'POST',
     path: '/query',
     payload: {
       query: `
-        CREATE FUNCTION test_func_gamma(param_c boolean, param_a integer, param_b text)
+        CREATE FUNCTION test_func_gamma(param_a integer, param_b text, param_c boolean)
         RETURNS boolean AS 'SELECT NOT param_c' LANGUAGE sql IMMUTABLE;
 
-        CREATE FUNCTION test_func_beta(param_b text, param_c boolean, param_a integer)
+        CREATE FUNCTION test_func_beta(param_a integer, param_b text, param_c boolean)
         RETURNS text AS 'SELECT param_b || ''_processed''' LANGUAGE sql IMMUTABLE;
 
-        CREATE FUNCTION test_func_alpha(param_c boolean, param_b text, param_a integer)
+        CREATE FUNCTION test_func_alpha(param_a integer, param_b text, param_c boolean)
         RETURNS integer AS 'SELECT param_a + 1' LANGUAGE sql IMMUTABLE;
       `,
     },

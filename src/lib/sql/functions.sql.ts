@@ -177,6 +177,7 @@ from
           ) as t2
           left join pg_type pt on pt.oid = t1.type_id
           left join pg_class pc on pc.oid = pt.typrelid
+          order by t1.name asc
       ) sub
     group by
       oid
