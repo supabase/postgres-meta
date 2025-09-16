@@ -43,30 +43,27 @@ jobs:
               console.log('No associated PR found');
             }
 
-      # Only continue if we found a PR and the workflow succeeded
-      - name: Download canary info
-        if: ${{ steps.pr-info.outputs.found == 'true' && github.event.workflow_run.conclusion == 'success' }}
-        uses: actions/download-artifact@v4
-        with:
-          name: canary-info
-          path: canary-info/
-          run-id: ${{ github.event.workflow_run.id }}
-        continue-on-error: true
-
-      - name: Read canary info
+      # Extract canary info from the workflow run
+      - name: Extract canary info
         if: ${{ steps.pr-info.outputs.found == 'true' && github.event.workflow_run.conclusion == 'success' }}
         id: canary-info
-        run: |
-          if [ -f "canary-info/canary-tags.txt" ]; then
-            # Read the first tag (DockerHub) from the tags
-            FIRST_TAG=$(head -n1 canary-info/canary-tags.txt)
-            echo "tag=$FIRST_TAG" >> $GITHUB_OUTPUT
-            echo "found=true" >> $GITHUB_OUTPUT
-            echo "commit-sha=$(cat canary-info/commit-sha.txt)" >> $GITHUB_OUTPUT
-          else
-            echo "found=false" >> $GITHUB_OUTPUT
-          fi
-        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const workflowRun = context.payload.workflow_run;
+
+            // Extract PR number from the branch name or workflow run
+            const prNumber = '${{ steps.pr-info.outputs.pr_number }}';
+            const commitSha = workflowRun.head_sha;
+
+            // Generate the canary tag based on the pattern used in canary-deploy.yml
+            const canaryTag = `supabase/postgres-meta:canary-pr-${prNumber}-${commitSha}`;
+
+            core.setOutput('tag', canaryTag);
+            core.setOutput('found', 'true');
+            core.setOutput('commit-sha', commitSha);
+
+            console.log(`Generated canary tag: ${canaryTag}`);
 
       # Find existing comment
       - name: Find existing comment
