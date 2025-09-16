@@ -99,6 +99,11 @@ jobs:
             docker pull {0}
             ```
 
+            You can also set the version in a supabase local project by running:
+            ```bash
+            echo "{0}" > supabase/.temp/pgmeta-version
+            ```
+
             Or use it in your docker-compose.yml:
             ```yaml
             services:
