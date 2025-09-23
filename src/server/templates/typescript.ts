@@ -8,7 +8,7 @@ import type {
   PostgresView,
 } from '../../lib/index.js'
 import type { GeneratorMetadata } from '../../lib/generators.js'
-import { GENERATE_TYPES_DEFAULT_SCHEMA } from '../constants.js'
+import { GENERATE_TYPES_DEFAULT_SCHEMA, VALID_FUNCTION_ARGS_MODE } from '../constants.js'
 
 export const apply = async ({
   schemas,
@@ -26,15 +26,99 @@ export const apply = async ({
   detectOneToOneRelationships: boolean
   postgrestVersion?: string
 }): Promise<string> => {
+  schemas.sort((a, b) => a.name.localeCompare(b.name))
+
   const columnsByTableId = Object.fromEntries<PostgresColumn[]>(
     [...tables, ...foreignTables, ...views, ...materializedViews].map((t) => [t.id, []])
   )
-  columns
-    .filter((c) => c.table_id in columnsByTableId)
-    .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-    .forEach((c) => {
-      columnsByTableId[c.table_id].push(c)
-    })
+  for (const column of columns) {
+    if (column.table_id in columnsByTableId) {
+      columnsByTableId[column.table_id].push(column)
+    }
+  }
+  for (const tableId in columnsByTableId) {
+    columnsByTableId[tableId].sort((a, b) => a.name.localeCompare(b.name))
+  }
+
+  const introspectionBySchema = Object.fromEntries<{
+    tables: Pick<PostgresTable, 'id' | 'name' | 'schema' | 'columns'>[]
+    views: PostgresView[]
+    functions: { fn: PostgresFunction; inArgs: PostgresFunction['args'] }[]
+    enums: PostgresType[]
+    compositeTypes: PostgresType[]
+  }>(
+    schemas.map((s) => [
+      s.name,
+      { tables: [], views: [], functions: [], enums: [], compositeTypes: [] },
+    ])
+  )
+  for (const table of tables) {
+    if (table.schema in introspectionBySchema) {
+      introspectionBySchema[table.schema].tables.push(table)
+    }
+  }
+  for (const table of foreignTables) {
+    if (table.schema in introspectionBySchema) {
+      introspectionBySchema[table.schema].tables.push(table)
+    }
+  }
+  for (const view of views) {
+    if (view.schema in introspectionBySchema) {
+      introspectionBySchema[view.schema].views.push(view)
+    }
+  }
+  for (const materializedView of materializedViews) {
+    if (materializedView.schema in introspectionBySchema) {
+      introspectionBySchema[materializedView.schema].views.push({
+        ...materializedView,
+        is_updatable: false,
+      })
+    }
+  }
+  for (const func of functions) {
+    if (func.schema in introspectionBySchema) {
+      func.args.sort((a, b) => a.name.localeCompare(b.name))
+      // Either:
+      // 1. All input args are be named, or
+      // 2. There is only one input arg which is unnamed
+      const inArgs = func.args.filter(({ mode }) => VALID_FUNCTION_ARGS_MODE.has(mode))
+
+      if (
+        // Case 1: Function has a single parameter
+        inArgs.length === 1 ||
+        // Case 2: All input args are named
+        !inArgs.some(({ name }) => name === '')
+      ) {
+        introspectionBySchema[func.schema].functions.push({ fn: func, inArgs })
+      }
+    }
+  }
+  for (const type of types) {
+    if (type.schema in introspectionBySchema) {
+      if (type.enums.length > 0) {
+        introspectionBySchema[type.schema].enums.push(type)
+      }
+      if (type.attributes.length > 0) {
+        introspectionBySchema[type.schema].compositeTypes.push(type)
+      }
+    }
+  }
+  for (const schema in introspectionBySchema) {
+    introspectionBySchema[schema].tables.sort((a, b) => a.name.localeCompare(b.name))
+    introspectionBySchema[schema].views.sort((a, b) => a.name.localeCompare(b.name))
+    introspectionBySchema[schema].functions.sort((a, b) => a.fn.name.localeCompare(b.fn.name))
+    introspectionBySchema[schema].enums.sort((a, b) => a.name.localeCompare(b.name))
+    introspectionBySchema[schema].compositeTypes.sort((a, b) => a.name.localeCompare(b.name))
+  }
+
+  // group types by id for quicker lookup
+  const typesById = types.reduce(
+    (acc, type) => {
+      acc[type.id] = type
+      return acc
+    },
+    {} as Record<number, (typeof types)[number]>
+  )
 
   const internal_supabase_schema = postgrestVersion
     ? `// Allows to automatically instantiate createClient with right options
@@ -49,44 +133,15 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 export type Database = {
   ${internal_supabase_schema}
-  ${schemas
-    .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-    .map((schema) => {
-      const schemaTables = [...tables, ...foreignTables]
-        .filter((table) => table.schema === schema.name)
-        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-      const schemaViews = [...views, ...materializedViews]
-        .filter((view) => view.schema === schema.name)
-        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-      const schemaFunctions = functions
-        .filter((func) => {
-          if (func.schema !== schema.name) {
-            return false
-          }
-
-          // Either:
-          // 1. All input args are be named, or
-          // 2. There is only one input arg which is unnamed
-          const inArgs = func.args.filter(({ mode }) => ['in', 'inout', 'variadic'].includes(mode))
-
-          if (!inArgs.some(({ name }) => name === '')) {
-            return true
-          }
-
-          if (inArgs.length === 1) {
-            return true
-          }
-
-          return false
-        })
-        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-      const schemaEnums = types
-        .filter((type) => type.schema === schema.name && type.enums.length > 0)
-        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-      const schemaCompositeTypes = types
-        .filter((type) => type.schema === schema.name && type.attributes.length > 0)
-        .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-      return `${JSON.stringify(schema.name)}: {
+  ${schemas.map((schema) => {
+    const {
+      tables: schemaTables,
+      views: schemaViews,
+      functions: schemaFunctions,
+      enums: schemaEnums,
+      compositeTypes: schemaCompositeTypes,
+    } = introspectionBySchema[schema.name]
+    return `${JSON.stringify(schema.name)}: {
           Tables: {
             ${
               schemaTables.length === 0
@@ -105,9 +160,9 @@ export type Database = {
                           })} ${column.is_nullable ? '| null' : ''}`
                       ),
                       ...schemaFunctions
-                        .filter((fn) => fn.argument_types === table.name)
-                        .map((fn) => {
-                          const type = types.find(({ id }) => id === fn.return_type_id)
+                        .filter(({ fn }) => fn.argument_types === table.name)
+                        .map(({ fn }) => {
+                          const type = typesById[fn.return_type_id]
                           let tsType = 'unknown'
                           if (type) {
                             tsType = pgTypeToTsType(schema, type.name, {
@@ -226,7 +281,7 @@ export type Database = {
                     )}
                   }
                   ${
-                    'is_updatable' in view && view.is_updatable
+                    view.is_updatable
                       ? `Insert: {
                            ${columnsByTableId[view.id].map((column) => {
                              let output = JSON.stringify(column.name)
@@ -306,28 +361,29 @@ export type Database = {
 
               const schemaFunctionsGroupedByName = schemaFunctions.reduce(
                 (acc, curr) => {
-                  acc[curr.name] ??= []
-                  acc[curr.name].push(curr)
+                  acc[curr.fn.name] ??= []
+                  acc[curr.fn.name].push(curr)
                   return acc
                 },
-                {} as Record<string, PostgresFunction[]>
+                {} as Record<string, typeof schemaFunctions>
               )
+              for (const fnName in schemaFunctionsGroupedByName) {
+                schemaFunctionsGroupedByName[fnName].sort((a, b) =>
+                  b.fn.definition.localeCompare(a.fn.definition)
+                )
+              }
 
               return Object.entries(schemaFunctionsGroupedByName).map(
                 ([fnName, fns]) =>
                   `${JSON.stringify(fnName)}: {
                       Args: ${fns
-                        .map(({ args }) => {
-                          const inArgs = args
-                            .toSorted((a, b) => a.name.localeCompare(b.name))
-                            .filter(({ mode }) => mode === 'in')
-
+                        .map(({ inArgs }) => {
                           if (inArgs.length === 0) {
                             return 'Record<PropertyKey, never>'
                           }
 
                           const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
-                            const type = types.find(({ id }) => id === type_id)
+                            const type = typesById[type_id]
                             let tsType = 'unknown'
                             if (type) {
                               tsType = pgTypeToTsType(schema, type.name, {
@@ -346,10 +402,10 @@ export type Database = {
                         .join(' | ')}
                       Returns: ${(() => {
                         // Case 1: `returns table`.
-                        const tableArgs = fns[0].args.filter(({ mode }) => mode === 'table')
+                        const tableArgs = fns[0].fn.args.filter(({ mode }) => mode === 'table')
                         if (tableArgs.length > 0) {
                           const argsNameAndType = tableArgs.map(({ name, type_id }) => {
-                            const type = types.find(({ id }) => id === type_id)
+                            const type = typesById[type_id]
                             let tsType = 'unknown'
                             if (type) {
                               tsType = pgTypeToTsType(schema, type.name, {
@@ -371,7 +427,7 @@ export type Database = {
 
                         // Case 2: returns a relation's row type.
                         const relation = [...tables, ...views].find(
-                          ({ id }) => id === fns[0].return_type_relation_id
+                          ({ id }) => id === fns[0].fn.return_type_relation_id
                         )
                         if (relation) {
                           return `{
@@ -394,7 +450,7 @@ export type Database = {
                         }
 
                         // Case 3: returns base/array/composite/enum type.
-                        const type = types.find(({ id }) => id === fns[0].return_type_id)
+                        const type = typesById[fns[0].fn.return_type_id]
                         if (type) {
                           return pgTypeToTsType(schema, type.name, {
                             types,
@@ -405,7 +461,7 @@ export type Database = {
                         }
 
                         return 'unknown'
-                      })()}${fns[0].is_set_returning_function ? '[]' : ''}
+                      })()}${fns[0].fn.is_set_returning_function ? '[]' : ''}
                     }`
               )
             })()}
@@ -430,7 +486,7 @@ export type Database = {
                     ({ name, attributes }) =>
                       `${JSON.stringify(name)}: {
                         ${attributes.map(({ name, type_id }) => {
-                          const type = types.find(({ id }) => id === type_id)
+                          const type = typesById[type_id]
                           let tsType = 'unknown'
                           if (type) {
                             tsType = `${pgTypeToTsType(schema, type.name, {
@@ -447,7 +503,7 @@ export type Database = {
             }
           }
         }`
-    })}
+  })}
 }
 
 type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>
