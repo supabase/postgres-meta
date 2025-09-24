@@ -36,6 +36,12 @@ export const apply = async ({
   postgrestVersion?: string
 }): Promise<string> => {
   schemas.sort((a, b) => a.name.localeCompare(b.name))
+  relationships.sort(
+    (a, b) =>
+      a.foreign_key_name.localeCompare(b.foreign_key_name) ||
+      a.referenced_relation.localeCompare(b.referenced_relation) ||
+      JSON.stringify(a.referenced_columns).localeCompare(JSON.stringify(b.referenced_columns))
+  )
   const introspectionBySchema = Object.fromEntries<{
     tables: {
       table: Pick<PostgresTable, 'id' | 'name' | 'schema' | 'columns'>
@@ -97,19 +103,12 @@ export const apply = async ({
     GeneratorMetadata['relationships'][number],
     'foreign_key_name' | 'columns' | 'is_one_to_one' | 'referenced_relation' | 'referenced_columns'
   >[] {
-    return relationships
-      .filter(
-        (relationship) =>
-          relationship.schema === object.schema &&
-          relationship.referenced_schema === object.schema &&
-          relationship.relation === object.name
-      )
-      .toSorted(
-        (a, b) =>
-          a.foreign_key_name.localeCompare(b.foreign_key_name) ||
-          a.referenced_relation.localeCompare(b.referenced_relation) ||
-          JSON.stringify(a.referenced_columns).localeCompare(JSON.stringify(b.referenced_columns))
-      )
+    return relationships.filter(
+      (relationship) =>
+        relationship.schema === object.schema &&
+        relationship.referenced_schema === object.schema &&
+        relationship.relation === object.name
+    )
   }
 
   function generateRelationshiptTsDefinition(relationship: TsRelationship): string {
