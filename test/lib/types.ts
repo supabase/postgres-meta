@@ -17,6 +17,7 @@ test('list', async () => {
       "id": Any<Number>,
       "name": "user_status",
       "schema": "public",
+      "type_relation_id": null,
     }
   `
   )
@@ -73,6 +74,7 @@ test('list types with include Table Types', async () => {
       "id": Any<Number>,
       "name": "todos",
       "schema": "public",
+      "type_relation_id": 16402,
     }
   `
   )
@@ -112,6 +114,7 @@ test('composite type attributes', async () => {
       "id": Any<Number>,
       "name": "test_composite",
       "schema": "public",
+      "type_relation_id": 16966,
     }
   `
   )

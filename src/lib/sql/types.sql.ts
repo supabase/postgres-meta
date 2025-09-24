@@ -13,7 +13,8 @@ select
   format_type (t.oid, null) as format,
   coalesce(t_enums.enums, '[]') as enums,
   coalesce(t_attributes.attributes, '[]') as attributes,
-  obj_description (t.oid, 'pg_type') as comment
+  obj_description (t.oid, 'pg_type') as comment,
+  nullif(t.typrelid::int8, 0) as type_relation_id
 from
   pg_type t
   left join pg_namespace n on n.oid = t.typnamespace

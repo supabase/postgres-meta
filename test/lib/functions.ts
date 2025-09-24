@@ -4,21 +4,20 @@ import { pgMeta } from './utils'
 test('list', async () => {
   const res = await pgMeta.functions.list()
   expect(res.data?.find(({ name }) => name === 'add')).toMatchInlineSnapshot(
-    { id: expect.any(Number) }, `
+    { id: expect.any(Number) },
+    `
     {
       "args": [
         {
           "has_default": false,
           "mode": "in",
           "name": "",
-          "table_name": null,
           "type_id": 23,
         },
         {
           "has_default": false,
           "mode": "in",
           "name": "",
-          "table_name": null,
           "type_id": 23,
         },
       ],
@@ -44,7 +43,8 @@ test('list', async () => {
       "schema": "public",
       "security_definer": false,
     }
-  `)
+  `
+  )
 })
 
 test('list set-returning function with single object limit', async () => {
@@ -58,7 +58,6 @@ test('list set-returning function with single object limit', async () => {
               "has_default": false,
               "mode": "in",
               "name": "user_row",
-              "table_name": "users",
               "type_id": 16395,
             },
           ],
@@ -102,7 +101,6 @@ test('list set-returning function with multiples definitions', async () => {
             "has_default": false,
             "mode": "in",
             "name": "user_row",
-            "table_name": "users",
             "type_id": 16395,
           },
         ],
@@ -138,7 +136,6 @@ test('list set-returning function with multiples definitions', async () => {
             "has_default": false,
             "mode": "in",
             "name": "todo_row",
-            "table_name": "todos",
             "type_id": 16404,
           },
         ],
@@ -224,7 +221,8 @@ test('retrieve, create, update, delete', async () => {
     config_params: { search_path: 'hooks, auth', role: 'postgres' },
   })
   expect(res).toMatchInlineSnapshot(
-    { data: { id: expect.any(Number) } }, `
+    { data: { id: expect.any(Number) } },
+    `
     {
       "data": {
         "args": [
@@ -232,14 +230,12 @@ test('retrieve, create, update, delete', async () => {
             "has_default": false,
             "mode": "in",
             "name": "a",
-            "table_name": null,
             "type_id": 21,
           },
           {
             "has_default": false,
             "mode": "in",
             "name": "b",
-            "table_name": null,
             "type_id": 21,
           },
         ],
@@ -272,10 +268,12 @@ test('retrieve, create, update, delete', async () => {
       },
       "error": null,
     }
-  `)
+  `
+  )
   res = await pgMeta.functions.retrieve({ id: res.data!.id })
   expect(res).toMatchInlineSnapshot(
-    { data: { id: expect.any(Number) } }, `
+    { data: { id: expect.any(Number) } },
+    `
     {
       "data": {
         "args": [
@@ -283,14 +281,12 @@ test('retrieve, create, update, delete', async () => {
             "has_default": false,
             "mode": "in",
             "name": "a",
-            "table_name": null,
             "type_id": 21,
           },
           {
             "has_default": false,
             "mode": "in",
             "name": "b",
-            "table_name": null,
             "type_id": 21,
           },
         ],
@@ -323,14 +319,16 @@ test('retrieve, create, update, delete', async () => {
       },
       "error": null,
     }
-  `)
+  `
+  )
   res = await pgMeta.functions.update(res.data!.id, {
     name: 'test_func_renamed',
     schema: 'test_schema',
     definition: 'select b - a',
   })
   expect(res).toMatchInlineSnapshot(
-    { data: { id: expect.any(Number) } }, `
+    { data: { id: expect.any(Number) } },
+    `
     {
       "data": {
         "args": [
@@ -338,14 +336,12 @@ test('retrieve, create, update, delete', async () => {
             "has_default": false,
             "mode": "in",
             "name": "a",
-            "table_name": null,
             "type_id": 21,
           },
           {
             "has_default": false,
             "mode": "in",
             "name": "b",
-            "table_name": null,
             "type_id": 21,
           },
         ],
@@ -378,10 +374,12 @@ test('retrieve, create, update, delete', async () => {
       },
       "error": null,
     }
-  `)
+  `
+  )
   res = await pgMeta.functions.remove(res.data!.id)
   expect(res).toMatchInlineSnapshot(
-    { data: { id: expect.any(Number) } }, `
+    { data: { id: expect.any(Number) } },
+    `
     {
       "data": {
         "args": [
@@ -389,14 +387,12 @@ test('retrieve, create, update, delete', async () => {
             "has_default": false,
             "mode": "in",
             "name": "a",
-            "table_name": null,
             "type_id": 21,
           },
           {
             "has_default": false,
             "mode": "in",
             "name": "b",
-            "table_name": null,
             "type_id": 21,
           },
         ],
@@ -429,7 +425,8 @@ test('retrieve, create, update, delete', async () => {
       },
       "error": null,
     }
-  `)
+  `
+  )
   res = await pgMeta.functions.retrieve({ id: res.data!.id })
   expect(res).toMatchObject({
     data: null,
@@ -452,7 +449,8 @@ test('retrieve set-returning function', async () => {
       id: expect.any(Number),
       return_type_id: expect.any(Number),
       return_type_relation_id: expect.any(Number),
-    }, `
+    },
+    `
     {
       "args": [],
       "argument_types": "",
@@ -481,7 +479,8 @@ test('retrieve set-returning function', async () => {
       "schema": "public",
       "security_definer": false,
     }
-  `)
+  `
+  )
 })
 
 test('retrieve function by args filter - polymorphic function with text argument', async () => {

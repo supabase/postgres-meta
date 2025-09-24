@@ -124,8 +124,7 @@ from
         'mode', mode,
         'name', name,
         'type_id', type_id,
-        'has_default', has_default,
-        'table_name', table_name
+        'has_default', has_default
       )) as args
     from
       (
@@ -134,11 +133,7 @@ from
           t2.mode,
           t1.name,
           t1.type_id,
-          t1.has_default,
-          case
-            when pt.typrelid != 0 then pc.relname
-            else null
-          end as table_name
+          t1.has_default
         from
           (
             select
@@ -161,7 +156,6 @@ from
               end as mode
           ) as t2
           left join pg_type pt on pt.oid = t1.type_id
-          left join pg_class pc on pc.oid = pt.typrelid
           order by t1.name asc
       ) sub
     group by

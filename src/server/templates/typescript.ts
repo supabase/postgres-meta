@@ -39,6 +39,7 @@ export const apply = async ({
 
   const columnsByTableId: Record<number, PostgresColumn[]> = {}
   const tablesNamesByTableId: Record<number, string> = {}
+  const relationTypeByIds = new Map<number, PostgresType>()
   // group types by id for quicker lookup
   const typesById = types.reduce(
     (acc, type) => {
@@ -148,6 +149,10 @@ export const apply = async ({
     }
   }
   for (const type of types) {
+    // Save all the types that are relation types for quicker lookup
+    if (type.type_relation_id) {
+      relationTypeByIds.set(type.id, type)
+    }
     if (type.schema in introspectionBySchema) {
       if (type.enums.length > 0) {
         introspectionBySchema[type.schema].enums.push(type)
@@ -196,10 +201,10 @@ export const apply = async ({
           inArgs[0].name === '' &&
           (VALID_UNNAMED_FUNCTION_ARG_TYPES.has(inArgs[0].type_id) ||
             // OR if the function have a single unnamed args which is another table (embeded function)
-            (inArgs[0].table_name &&
+            (relationTypeByIds.get(inArgs[0].type_id) &&
               getTableNameFromRelationId(func.return_type_relation_id, func.return_type_id)) ||
             // OR if the function takes a table row but doesn't qualify as embedded (for error reporting)
-            (inArgs[0].table_name &&
+            (relationTypeByIds.get(inArgs[0].type_id) &&
               !getTableNameFromRelationId(func.return_type_relation_id, func.return_type_id))))
       ) {
         introspectionBySchema[func.schema].functions.push({ fn: func, inArgs })
@@ -227,7 +232,7 @@ export const apply = async ({
 
     // Only add SetofOptions for functions with table arguments (embedded functions)
     // or specific functions that RETURNS table-name
-    if (fn.args.length === 1 && fn.args[0].table_name) {
+    if (fn.args.length === 1 && relationTypeByIds.get(fn.args[0].type_id)) {
       // Case 1: Standard embedded function with proper setof detection
       if (returnsSetOfTable && returnTableName) {
         setofOptionsInfo = `SetofOptions: {
@@ -337,7 +342,7 @@ export const apply = async ({
     if (
       inArgs.length === 1 &&
       inArgs[0].name === '' &&
-      inArgs[0].table_name &&
+      relationTypeByIds.get(inArgs[0].type_id) &&
       !getTableNameFromRelationId(fn.return_type_relation_id, fn.return_type_id)
     ) {
       return true

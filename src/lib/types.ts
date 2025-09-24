@@ -148,7 +148,6 @@ const postgresFunctionSchema = Type.Object({
       name: Type.String(),
       type_id: Type.Number(),
       has_default: Type.Boolean(),
-      table_name: Type.Union([Type.String(), Type.Null()]),
     })
   ),
   argument_types: Type.String(),
@@ -444,6 +443,7 @@ export const postgresTypeSchema = Type.Object({
   enums: Type.Array(Type.String()),
   attributes: Type.Array(Type.Object({ name: Type.String(), type_id: Type.Integer() })),
   comment: Type.Union([Type.String(), Type.Null()]),
+  type_relation_id: Type.Union([Type.Integer(), Type.Null()]),
 })
 export type PostgresType = Static<typeof postgresTypeSchema>
 
