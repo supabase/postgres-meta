@@ -36,33 +36,6 @@ export const apply = async ({
   postgrestVersion?: string
 }): Promise<string> => {
   schemas.sort((a, b) => a.name.localeCompare(b.name))
-
-  const columnsByTableId: Record<number, PostgresColumn[]> = {}
-  const tablesNamesByTableId: Record<number, string> = {}
-  const relationTypeByIds = new Map<number, PostgresType>()
-  // group types by id for quicker lookup
-  const typesById = types.reduce(
-    (acc, type) => {
-      acc[type.id] = type
-      return acc
-    },
-    {} as Record<number, (typeof types)[number]>
-  )
-  const tablesLike = [...tables, ...foreignTables, ...views, ...materializedViews]
-
-  for (const tableLike of tablesLike) {
-    columnsByTableId[tableLike.id] = []
-    tablesNamesByTableId[tableLike.id] = tableLike.name
-  }
-  for (const column of columns) {
-    if (column.table_id in columnsByTableId) {
-      columnsByTableId[column.table_id].push(column)
-    }
-  }
-  for (const tableId in columnsByTableId) {
-    columnsByTableId[tableId].sort((a, b) => a.name.localeCompare(b.name))
-  }
-
   const introspectionBySchema = Object.fromEntries<{
     tables: {
       table: Pick<PostgresTable, 'id' | 'name' | 'schema' | 'columns'>
@@ -81,6 +54,41 @@ export const apply = async ({
       { tables: [], views: [], functions: [], enums: [], compositeTypes: [] },
     ])
   )
+  const columnsByTableId: Record<number, PostgresColumn[]> = {}
+  const tablesNamesByTableId: Record<number, string> = {}
+  const relationTypeByIds = new Map<number, (typeof types)[number]>()
+  // group types by id for quicker lookup
+  const typesById = new Map<number, (typeof types)[number]>()
+  const tablesLike = [...tables, ...foreignTables, ...views, ...materializedViews]
+
+  for (const tableLike of tablesLike) {
+    columnsByTableId[tableLike.id] = []
+    tablesNamesByTableId[tableLike.id] = tableLike.name
+  }
+  for (const column of columns) {
+    if (column.table_id in columnsByTableId) {
+      columnsByTableId[column.table_id].push(column)
+    }
+  }
+  for (const tableId in columnsByTableId) {
+    columnsByTableId[tableId].sort((a, b) => a.name.localeCompare(b.name))
+  }
+
+  for (const type of types) {
+    typesById.set(type.id, type)
+    // Save all the types that are relation types for quicker lookup
+    if (type.type_relation_id) {
+      relationTypeByIds.set(type.id, type)
+    }
+    if (type.schema in introspectionBySchema) {
+      if (type.enums.length > 0) {
+        introspectionBySchema[type.schema].enums.push(type)
+      }
+      if (type.attributes.length > 0) {
+        introspectionBySchema[type.schema].compositeTypes.push(type)
+      }
+    }
+  }
 
   function getRelationships(
     object: { schema: string; name: string },
@@ -146,20 +154,6 @@ export const apply = async ({
         },
         relationships: getRelationships(materializedView, relationships),
       })
-    }
-  }
-  for (const type of types) {
-    // Save all the types that are relation types for quicker lookup
-    if (type.type_relation_id) {
-      relationTypeByIds.set(type.id, type)
-    }
-    if (type.schema in introspectionBySchema) {
-      if (type.enums.length > 0) {
-        introspectionBySchema[type.schema].enums.push(type)
-      }
-      if (type.attributes.length > 0) {
-        introspectionBySchema[type.schema].compositeTypes.push(type)
-      }
     }
   }
   // Helper function to get table/view name from relation id
@@ -235,7 +229,7 @@ export const apply = async ({
       // Case 1: Standard embedded function with proper setof detection
       if (returnsSetOfTable && returnTableName) {
         setofOptionsInfo = `SetofOptions: {
-          from: ${JSON.stringify(typesById[fn.args[0].type_id].format)}
+          from: ${JSON.stringify(typesById.get(fn.args[0].type_id)?.format)}
           to: ${JSON.stringify(returnTableName)}
           isOneToOne: ${Boolean(!returnsMultipleRows)}
           isSetofReturn: true
@@ -243,7 +237,7 @@ export const apply = async ({
       }
       // Case 2: Handle RETURNS table-name those are always a one to one relationship
       else if (returnTableName && !returnsSetOfTable) {
-        const sourceTable = typesById[fn.args[0].type_id].format
+        const sourceTable = typesById.get(fn.args[0].type_id)?.format
         const targetTable = returnTableName
         setofOptionsInfo = `SetofOptions: {
             from: ${JSON.stringify(sourceTable)}
@@ -273,7 +267,7 @@ export const apply = async ({
     const tableArgs = fn.args.filter(({ mode }) => mode === 'table')
     if (tableArgs.length > 0) {
       const argsNameAndType = tableArgs.map(({ name, type_id }) => {
-        const type = typesById[type_id]
+        const type = typesById.get(type_id)
         let tsType = 'unknown'
         if (type) {
           tsType = pgTypeToTsType(schema, type.name, {
@@ -324,7 +318,7 @@ export const apply = async ({
     }
 
     // Case 3: returns base/array/composite/enum type.
-    const type = typesById[fn.return_type_id]
+    const type = typesById.get(fn.return_type_id)
     if (type) {
       return pgTypeToTsType(schema, type.name, {
         types,
@@ -369,7 +363,7 @@ export const apply = async ({
 
       if (conflictingFns.length > 0) {
         const conflictingFn = conflictingFns[0]
-        const returnTypeName = typesById[conflictingFn.fn.return_type_id]?.name || 'unknown'
+        const returnTypeName = typesById.get(conflictingFn.fn.return_type_id)?.name || 'unknown'
         return `Could not choose the best candidate function between: ${schema.name}.${fn.name}(), ${schema.name}.${fn.name}( => ${returnTypeName}). Try renaming the parameters or the function itself in the database so function overloading can be resolved`
       }
     }
@@ -395,7 +389,7 @@ export const apply = async ({
           })
           .map((f) => {
             const args = f.inArgs
-            return `${schema.name}.${fn.name}(${args.map((a) => `${a.name || ''} => ${typesById[a.type_id]?.name || 'unknown'}`).join(', ')})`
+            return `${schema.name}.${fn.name}(${args.map((a) => `${a.name || ''} => ${typesById.get(a.type_id)?.name || 'unknown'}`).join(', ')})`
           })
           .join(', ')
 
@@ -420,7 +414,7 @@ export const apply = async ({
         if (conflictError) {
           if (inArgs.length > 0) {
             const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
-              const type = typesById[type_id]
+              const type = typesById.get(type_id)
               let tsType = 'unknown'
               if (type) {
                 tsType = pgTypeToTsType(schema, type.name, {
@@ -439,7 +433,7 @@ export const apply = async ({
           // Special case for computed fields returning scalars functions
           if (inArgs.length > 0) {
             const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
-              const type = typesById[type_id]
+              const type = typesById.get(type_id)
               let tsType = 'unknown'
               if (type) {
                 tsType = pgTypeToTsType(schema, type.name, {
@@ -456,7 +450,7 @@ export const apply = async ({
           returnType = `{ error: true } & ${JSON.stringify(`the function ${schema.name}.${fn.name} with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache`)}`
         } else if (inArgs.length > 0) {
           const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
-            const type = typesById[type_id]
+            const type = typesById.get(type_id)
             let tsType = 'unknown'
             if (type) {
               tsType = pgTypeToTsType(schema, type.name, {
@@ -708,7 +702,7 @@ export type Database = {
                     ({ name, attributes }) =>
                       `${JSON.stringify(name)}: {
                         ${attributes.map(({ name, type_id }) => {
-                          const type = typesById[type_id]
+                          const type = typesById.get(type_id)
                           let tsType = 'unknown'
                           if (type) {
                             tsType = `${pgTypeToTsType(schema, type.name, {
