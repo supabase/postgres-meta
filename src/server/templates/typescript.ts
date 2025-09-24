@@ -171,9 +171,8 @@ export const apply = async ({
 
     if (tablesNamesByTableId[relationId]) return tablesNamesByTableId[relationId]
     // if it's a composite type we use the type name as relation name to allow sub-selecting fields of the composite type
-    if (returnTypeId && typesById[returnTypeId] && typesById[returnTypeId].attributes.length > 0)
-      return typesById[returnTypeId].name
-    return null
+    const reltype = returnTypeId ? relationTypeByIds.get(returnTypeId) : null
+    return reltype ? reltype.name : null
   }
 
   for (const func of functions) {
