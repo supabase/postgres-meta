@@ -37,9 +37,22 @@ export const apply = async ({
 }): Promise<string> => {
   schemas.sort((a, b) => a.name.localeCompare(b.name))
 
-  const columnsByTableId = Object.fromEntries<PostgresColumn[]>(
-    [...tables, ...foreignTables, ...views, ...materializedViews].map((t) => [t.id, []])
+  const columnsByTableId: Record<number, PostgresColumn[]> = {}
+  const tablesNamesByTableId: Record<number, string> = {}
+  // group types by id for quicker lookup
+  const typesById = types.reduce(
+    (acc, type) => {
+      acc[type.id] = type
+      return acc
+    },
+    {} as Record<number, (typeof types)[number]>
   )
+  const tablesLike = [...tables, ...foreignTables, ...views, ...materializedViews]
+
+  for (const tableLike of tablesLike) {
+    columnsByTableId[tableLike.id] = []
+    tablesNamesByTableId[tableLike.id] = tableLike.name
+  }
   for (const column of columns) {
     if (column.table_id in columnsByTableId) {
       columnsByTableId[column.table_id].push(column)
@@ -134,6 +147,30 @@ export const apply = async ({
       })
     }
   }
+  for (const type of types) {
+    if (type.schema in introspectionBySchema) {
+      if (type.enums.length > 0) {
+        introspectionBySchema[type.schema].enums.push(type)
+      }
+      if (type.attributes.length > 0) {
+        introspectionBySchema[type.schema].compositeTypes.push(type)
+      }
+    }
+  }
+  // Helper function to get table/view name from relation id
+  const getTableNameFromRelationId = (
+    relationId: number | null,
+    returnTypeId: number | null
+  ): string | null => {
+    if (!relationId) return null
+
+    if (tablesNamesByTableId[relationId]) return tablesNamesByTableId[relationId]
+    // if it's a composite type we use the type name as relation name to allow sub-selecting fields of the composite type
+    if (returnTypeId && typesById[returnTypeId] && typesById[returnTypeId].attributes.length > 0)
+      return typesById[returnTypeId].name
+    return null
+  }
+
   for (const func of functions) {
     if (func.schema in introspectionBySchema) {
       func.args.sort((a, b) => a.name.localeCompare(b.name))
@@ -159,21 +196,13 @@ export const apply = async ({
           inArgs[0].name === '' &&
           (VALID_UNNAMED_FUNCTION_ARG_TYPES.has(inArgs[0].type_id) ||
             // OR if the function have a single unnamed args which is another table (embeded function)
-            (inArgs[0].table_name && func.return_table_name) ||
+            (inArgs[0].table_name &&
+              getTableNameFromRelationId(func.return_type_relation_id, func.return_type_id)) ||
             // OR if the function takes a table row but doesn't qualify as embedded (for error reporting)
-            (inArgs[0].table_name && !func.return_table_name)))
+            (inArgs[0].table_name &&
+              !getTableNameFromRelationId(func.return_type_relation_id, func.return_type_id))))
       ) {
         introspectionBySchema[func.schema].functions.push({ fn: func, inArgs })
-      }
-    }
-  }
-  for (const type of types) {
-    if (type.schema in introspectionBySchema) {
-      if (type.enums.length > 0) {
-        introspectionBySchema[type.schema].enums.push(type)
-      }
-      if (type.attributes.length > 0) {
-        introspectionBySchema[type.schema].compositeTypes.push(type)
       }
     }
   }
@@ -185,35 +214,33 @@ export const apply = async ({
     introspectionBySchema[schema].compositeTypes.sort((a, b) => a.name.localeCompare(b.name))
   }
 
-  // group types by id for quicker lookup
-  const typesById = types.reduce(
-    (acc, type) => {
-      acc[type.id] = type
-      return acc
-    },
-    {} as Record<number, (typeof types)[number]>
-  )
-
   const getFunctionTsReturnType = (fn: PostgresFunction, returnType: string) => {
     // Determine if this function should have SetofOptions
     let setofOptionsInfo = ''
+
+    const returnTableName = getTableNameFromRelationId(
+      fn.return_type_relation_id,
+      fn.return_type_id
+    )
+    const returnsSetOfTable = fn.is_set_returning_function && fn.return_type_relation_id !== null
+    const returnsMultipleRows = fn.prorows !== null && fn.prorows > 1
 
     // Only add SetofOptions for functions with table arguments (embedded functions)
     // or specific functions that RETURNS table-name
     if (fn.args.length === 1 && fn.args[0].table_name) {
       // Case 1: Standard embedded function with proper setof detection
-      if (fn.returns_set_of_table && fn.return_table_name) {
+      if (returnsSetOfTable && returnTableName) {
         setofOptionsInfo = `SetofOptions: {
           from: ${JSON.stringify(typesById[fn.args[0].type_id].format)}
-          to: ${JSON.stringify(fn.return_table_name)}
-          isOneToOne: ${Boolean(!fn.returns_multiple_rows)}
+          to: ${JSON.stringify(returnTableName)}
+          isOneToOne: ${Boolean(!returnsMultipleRows)}
           isSetofReturn: true
         }`
       }
       // Case 2: Handle RETURNS table-name those are always a one to one relationship
-      else if (fn.return_table_name && !fn.returns_set_of_table) {
+      else if (returnTableName && !returnsSetOfTable) {
         const sourceTable = typesById[fn.args[0].type_id].format
-        const targetTable = fn.return_table_name
+        const targetTable = returnTableName
         setofOptionsInfo = `SetofOptions: {
             from: ${JSON.stringify(sourceTable)}
             to: ${JSON.stringify(targetTable)}
@@ -224,16 +251,16 @@ export const apply = async ({
     }
     // Case 3: Special case for functions without table arguments still returning a table
     // Those can be used in rpc to select sub fields of a table
-    else if (fn.return_table_name) {
+    else if (returnTableName) {
       setofOptionsInfo = `SetofOptions: {
         from: "*"
-        to: ${JSON.stringify(fn.return_table_name)}
-        isOneToOne: ${Boolean(!fn.returns_multiple_rows)}
+        to: ${JSON.stringify(returnTableName)}
+        isOneToOne: ${Boolean(!returnsMultipleRows)}
         isSetofReturn: ${fn.is_set_returning_function}
       }`
     }
 
-    return `${returnType}${fn.is_set_returning_function && fn.returns_multiple_rows ? '[]' : ''}
+    return `${returnType}${fn.is_set_returning_function && returnsMultipleRows ? '[]' : ''}
                           ${setofOptionsInfo ? `${setofOptionsInfo}` : ''}`
   }
 
@@ -311,7 +338,7 @@ export const apply = async ({
       inArgs.length === 1 &&
       inArgs[0].name === '' &&
       inArgs[0].table_name &&
-      !fn.return_table_name
+      !getTableNameFromRelationId(fn.return_type_relation_id, fn.return_type_id)
     ) {
       return true
     }
