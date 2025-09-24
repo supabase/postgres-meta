@@ -32,19 +32,12 @@ export const apply = async ({
   postgrestVersion?: string
 }): Promise<string> => {
   schemas.sort((a, b) => a.name.localeCompare(b.name))
-
-  const columnsByTableId = Object.fromEntries<PostgresColumn[]>(
-    [...tables, ...foreignTables, ...views, ...materializedViews].map((t) => [t.id, []])
+  relationships.sort(
+    (a, b) =>
+      a.foreign_key_name.localeCompare(b.foreign_key_name) ||
+      a.referenced_relation.localeCompare(b.referenced_relation) ||
+      JSON.stringify(a.referenced_columns).localeCompare(JSON.stringify(b.referenced_columns))
   )
-  for (const column of columns) {
-    if (column.table_id in columnsByTableId) {
-      columnsByTableId[column.table_id].push(column)
-    }
-  }
-  for (const tableId in columnsByTableId) {
-    columnsByTableId[tableId].sort((a, b) => a.name.localeCompare(b.name))
-  }
-
   const introspectionBySchema = Object.fromEntries<{
     tables: {
       table: Pick<PostgresTable, 'id' | 'name' | 'schema' | 'columns'>
@@ -64,6 +57,33 @@ export const apply = async ({
     ])
   )
 
+  const columnsByTableId = Object.fromEntries<PostgresColumn[]>(
+    [...tables, ...foreignTables, ...views, ...materializedViews].map((t) => [t.id, []])
+  )
+  // group types by id for quicker lookup
+  const typesById = new Map<number, (typeof types)[number]>()
+
+  for (const column of columns) {
+    if (column.table_id in columnsByTableId) {
+      columnsByTableId[column.table_id].push(column)
+    }
+  }
+  for (const tableId in columnsByTableId) {
+    columnsByTableId[tableId].sort((a, b) => a.name.localeCompare(b.name))
+  }
+
+  for (const type of types) {
+    typesById.set(type.id, type)
+    if (type.schema in introspectionBySchema) {
+      if (type.enums.length > 0) {
+        introspectionBySchema[type.schema].enums.push(type)
+      }
+      if (type.attributes.length > 0) {
+        introspectionBySchema[type.schema].compositeTypes.push(type)
+      }
+    }
+  }
+
   function getRelationships(
     object: { schema: string; name: string },
     relationships: GeneratorMetadata['relationships']
@@ -71,19 +91,12 @@ export const apply = async ({
     GeneratorMetadata['relationships'][number],
     'foreign_key_name' | 'columns' | 'is_one_to_one' | 'referenced_relation' | 'referenced_columns'
   >[] {
-    return relationships
-      .filter(
-        (relationship) =>
-          relationship.schema === object.schema &&
-          relationship.referenced_schema === object.schema &&
-          relationship.relation === object.name
-      )
-      .toSorted(
-        (a, b) =>
-          a.foreign_key_name.localeCompare(b.foreign_key_name) ||
-          a.referenced_relation.localeCompare(b.referenced_relation) ||
-          JSON.stringify(a.referenced_columns).localeCompare(JSON.stringify(b.referenced_columns))
-      )
+    return relationships.filter(
+      (relationship) =>
+        relationship.schema === object.schema &&
+        relationship.referenced_schema === object.schema &&
+        relationship.relation === object.name
+    )
   }
 
   function generateRelationshiptTsDefinition(relationship: TsRelationship): string {
@@ -148,16 +161,6 @@ export const apply = async ({
       }
     }
   }
-  for (const type of types) {
-    if (type.schema in introspectionBySchema) {
-      if (type.enums.length > 0) {
-        introspectionBySchema[type.schema].enums.push(type)
-      }
-      if (type.attributes.length > 0) {
-        introspectionBySchema[type.schema].compositeTypes.push(type)
-      }
-    }
-  }
   for (const schema in introspectionBySchema) {
     introspectionBySchema[schema].tables.sort((a, b) => a.table.name.localeCompare(b.table.name))
     introspectionBySchema[schema].views.sort((a, b) => a.view.name.localeCompare(b.view.name))
@@ -165,15 +168,6 @@ export const apply = async ({
     introspectionBySchema[schema].enums.sort((a, b) => a.name.localeCompare(b.name))
     introspectionBySchema[schema].compositeTypes.sort((a, b) => a.name.localeCompare(b.name))
   }
-
-  // group types by id for quicker lookup
-  const typesById = types.reduce(
-    (acc, type) => {
-      acc[type.id] = type
-      return acc
-    },
-    {} as Record<number, (typeof types)[number]>
-  )
 
   const getFunctionTsReturnType = (fn: PostgresFunction, returnType: string) => {
     return `${returnType}${fn.is_set_returning_function ? '[]' : ''}`
@@ -183,7 +177,7 @@ export const apply = async ({
     const tableArgs = fn.args.filter(({ mode }) => mode === 'table')
     if (tableArgs.length > 0) {
       const argsNameAndType = tableArgs.map(({ name, type_id }) => {
-        const type = typesById[type_id]
+        const type = typesById.get(type_id)
         let tsType = 'unknown'
         if (type) {
           tsType = pgTypeToTsType(schema, type.name, {
@@ -224,7 +218,7 @@ export const apply = async ({
     }
 
     // Case 3: returns base/array/composite/enum type.
-    const type = typesById[fn.return_type_id]
+    const type = typesById.get(fn.return_type_id)
     if (type) {
       return pgTypeToTsType(schema, type.name, {
         types,
@@ -247,7 +241,7 @@ export const apply = async ({
           return 'Record<PropertyKey, never>'
         }
         const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
-          const type = typesById[type_id]
+          const type = typesById.get(type_id)
           let tsType = 'unknown'
           if (type) {
             tsType = pgTypeToTsType(schema, type.name, {
@@ -492,7 +486,7 @@ export type Database = {
                     ({ name, attributes }) =>
                       `${JSON.stringify(name)}: {
                         ${attributes.map(({ name, type_id }) => {
-                          const type = typesById[type_id]
+                          const type = typesById.get(type_id)
                           let tsType = 'unknown'
                           if (type) {
                             tsType = `${pgTypeToTsType(schema, type.name, {
