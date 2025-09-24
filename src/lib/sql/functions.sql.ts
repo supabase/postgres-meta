@@ -121,7 +121,7 @@ from
     select
       oid,
       jsonb_agg(jsonb_build_object(
-        'mode', mode,
+        'mode', t2.mode,
         'name', name,
         'type_id', type_id,
         'has_default', has_default
@@ -129,37 +129,26 @@ from
     from
       (
         select
-          t1.oid,
-          t2.mode,
-          t1.name,
-          t1.type_id,
-          t1.has_default
+          oid,
+          unnest(arg_modes) as mode,
+          unnest(arg_names) as name,
+          unnest(arg_types)::int8 as type_id,
+          unnest(arg_has_defaults) as has_default
         from
-          (
-            select
-              oid,
-              unnest(arg_modes) as mode,
-              unnest(arg_names) as name,
-              unnest(arg_types)::int8 as type_id,
-              unnest(arg_has_defaults) as has_default
-            from
-              functions
-          ) as t1
-          cross join lateral (
-            select
-              case
-                when t1.mode = 'i' then 'in'
-                when t1.mode = 'o' then 'out'
-                when t1.mode = 'b' then 'inout'
-                when t1.mode = 'v' then 'variadic'
-                else 'table'
-              end as mode
-          ) as t2
-          left join pg_type pt on pt.oid = t1.type_id
-          order by t1.name asc
-      ) sub
+          functions
+      ) as t1,
+      lateral (
+        select
+          case
+            when t1.mode = 'i' then 'in'
+            when t1.mode = 'o' then 'out'
+            when t1.mode = 'b' then 'inout'
+            when t1.mode = 'v' then 'variadic'
+            else 'table'
+          end as mode
+      ) as t2
     group by
-      oid
+      t1.oid
   ) f_args on f_args.oid = f.oid
 ${props.limit ? `limit ${props.limit}` : ''}
 ${props.offset ? `offset ${props.offset}` : ''}
