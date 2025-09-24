@@ -271,14 +271,22 @@ export const apply = async ({
     if (relation) {
       return `{
               ${columnsByTableId[relation.id]
-                .map(
-                  (column) =>
-                    `${JSON.stringify(column.name)}: ${pgTypeToTsType(schema, column.format, {
+                .map((column) =>
+                  generateColumnTsDefinition(
+                    schema,
+                    {
+                      name: column.name,
+                      format: column.format,
+                      is_nullable: column.is_nullable,
+                      is_optional: false,
+                    },
+                    {
                       types,
                       schemas,
                       tables,
                       views,
-                    })} ${column.is_nullable ? '| null' : ''}`
+                    }
+                  )
                 )
                 .join(',\n')}
             }`
