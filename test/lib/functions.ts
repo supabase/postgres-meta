@@ -4,8 +4,7 @@ import { pgMeta } from './utils'
 test('list', async () => {
   const res = await pgMeta.functions.list()
   expect(res.data?.find(({ name }) => name === 'add')).toMatchInlineSnapshot(
-    { id: expect.any(Number) },
-    `
+    { id: expect.any(Number) }, `
     {
       "args": [
         {
@@ -38,17 +37,14 @@ test('list', async () => {
       "is_set_returning_function": false,
       "language": "sql",
       "name": "add",
-      "return_table_name": null,
+      "prorows": null,
       "return_type": "integer",
       "return_type_id": 23,
       "return_type_relation_id": null,
-      "returns_multiple_rows": false,
-      "returns_set_of_table": false,
       "schema": "public",
       "security_definer": false,
     }
-  `
-  )
+  `)
 })
 
 test('list set-returning function with single object limit', async () => {
@@ -85,12 +81,10 @@ test('list set-returning function with single object limit', async () => {
           "is_set_returning_function": true,
           "language": "sql",
           "name": "get_user_audit_setof_single_row",
-          "return_table_name": "users_audit",
+          "prorows": 1,
           "return_type": "SETOF users_audit",
           "return_type_id": 16418,
           "return_type_relation_id": 16416,
-          "returns_multiple_rows": false,
-          "returns_set_of_table": true,
           "schema": "public",
           "security_definer": false,
         },
@@ -131,12 +125,10 @@ test('list set-returning function with multiples definitions', async () => {
         "is_set_returning_function": true,
         "language": "sql",
         "name": "get_todos_setof_rows",
-        "return_table_name": "todos",
+        "prorows": 1000,
         "return_type": "SETOF todos",
         "return_type_id": 16404,
         "return_type_relation_id": 16402,
-        "returns_multiple_rows": true,
-        "returns_set_of_table": true,
         "schema": "public",
         "security_definer": false,
       },
@@ -169,12 +161,10 @@ test('list set-returning function with multiples definitions', async () => {
         "is_set_returning_function": true,
         "language": "sql",
         "name": "get_todos_setof_rows",
-        "return_table_name": "todos",
+        "prorows": 1000,
         "return_type": "SETOF todos",
         "return_type_id": 16404,
         "return_type_relation_id": 16402,
-        "returns_multiple_rows": true,
-        "returns_set_of_table": true,
         "schema": "public",
         "security_definer": false,
       },
@@ -234,8 +224,7 @@ test('retrieve, create, update, delete', async () => {
     config_params: { search_path: 'hooks, auth', role: 'postgres' },
   })
   expect(res).toMatchInlineSnapshot(
-    { data: { id: expect.any(Number) } },
-    `
+    { data: { id: expect.any(Number) } }, `
     {
       "data": {
         "args": [
@@ -274,23 +263,19 @@ test('retrieve, create, update, delete', async () => {
         "is_set_returning_function": false,
         "language": "sql",
         "name": "test_func",
-        "return_table_name": null,
+        "prorows": null,
         "return_type": "integer",
         "return_type_id": 23,
         "return_type_relation_id": null,
-        "returns_multiple_rows": false,
-        "returns_set_of_table": false,
         "schema": "public",
         "security_definer": true,
       },
       "error": null,
     }
-  `
-  )
+  `)
   res = await pgMeta.functions.retrieve({ id: res.data!.id })
   expect(res).toMatchInlineSnapshot(
-    { data: { id: expect.any(Number) } },
-    `
+    { data: { id: expect.any(Number) } }, `
     {
       "data": {
         "args": [
@@ -329,27 +314,23 @@ test('retrieve, create, update, delete', async () => {
         "is_set_returning_function": false,
         "language": "sql",
         "name": "test_func",
-        "return_table_name": null,
+        "prorows": null,
         "return_type": "integer",
         "return_type_id": 23,
         "return_type_relation_id": null,
-        "returns_multiple_rows": false,
-        "returns_set_of_table": false,
         "schema": "public",
         "security_definer": true,
       },
       "error": null,
     }
-  `
-  )
+  `)
   res = await pgMeta.functions.update(res.data!.id, {
     name: 'test_func_renamed',
     schema: 'test_schema',
     definition: 'select b - a',
   })
   expect(res).toMatchInlineSnapshot(
-    { data: { id: expect.any(Number) } },
-    `
+    { data: { id: expect.any(Number) } }, `
     {
       "data": {
         "args": [
@@ -388,23 +369,19 @@ test('retrieve, create, update, delete', async () => {
         "is_set_returning_function": false,
         "language": "sql",
         "name": "test_func_renamed",
-        "return_table_name": null,
+        "prorows": null,
         "return_type": "integer",
         "return_type_id": 23,
         "return_type_relation_id": null,
-        "returns_multiple_rows": false,
-        "returns_set_of_table": false,
         "schema": "test_schema",
         "security_definer": true,
       },
       "error": null,
     }
-  `
-  )
+  `)
   res = await pgMeta.functions.remove(res.data!.id)
   expect(res).toMatchInlineSnapshot(
-    { data: { id: expect.any(Number) } },
-    `
+    { data: { id: expect.any(Number) } }, `
     {
       "data": {
         "args": [
@@ -443,19 +420,16 @@ test('retrieve, create, update, delete', async () => {
         "is_set_returning_function": false,
         "language": "sql",
         "name": "test_func_renamed",
-        "return_table_name": null,
+        "prorows": null,
         "return_type": "integer",
         "return_type_id": 23,
         "return_type_relation_id": null,
-        "returns_multiple_rows": false,
-        "returns_set_of_table": false,
         "schema": "test_schema",
         "security_definer": true,
       },
       "error": null,
     }
-  `
-  )
+  `)
   res = await pgMeta.functions.retrieve({ id: res.data!.id })
   expect(res).toMatchObject({
     data: null,
@@ -478,8 +452,7 @@ test('retrieve set-returning function', async () => {
       id: expect.any(Number),
       return_type_id: expect.any(Number),
       return_type_relation_id: expect.any(Number),
-    },
-    `
+    }, `
     {
       "args": [],
       "argument_types": "",
@@ -501,17 +474,14 @@ test('retrieve set-returning function', async () => {
       "is_set_returning_function": true,
       "language": "sql",
       "name": "function_returning_set_of_rows",
-      "return_table_name": "users",
+      "prorows": 1000,
       "return_type": "SETOF users",
       "return_type_id": Any<Number>,
       "return_type_relation_id": Any<Number>,
-      "returns_multiple_rows": true,
-      "returns_set_of_table": true,
       "schema": "public",
       "security_definer": false,
     }
-  `
-  )
+  `)
 })
 
 test('retrieve function by args filter - polymorphic function with text argument', async () => {

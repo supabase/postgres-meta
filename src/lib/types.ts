@@ -157,9 +157,7 @@ const postgresFunctionSchema = Type.Object({
   return_type: Type.String(),
   return_type_relation_id: Type.Union([Type.Integer(), Type.Null()]),
   is_set_returning_function: Type.Boolean(),
-  returns_set_of_table: Type.Boolean(),
-  return_table_name: Type.Union([Type.String(), Type.Null()]),
-  returns_multiple_rows: Type.Boolean(),
+  prorows: Type.Union([Type.Number(), Type.Null()]),
   behavior: Type.Union([
     Type.Literal('IMMUTABLE'),
     Type.Literal('STABLE'),

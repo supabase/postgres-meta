@@ -86,24 +86,9 @@ select
   nullif(rt.typrelid::int8, 0) as return_type_relation_id,
   f.proretset as is_set_returning_function,
   case
-    when f.proretset and rt.typrelid != 0 and exists (
-      select 1 from pg_class c
-      where c.oid = rt.typrelid
-      -- exclude custom types relation from what is considered a set of table
-      and c.relkind in ('r', 'p', 'v', 'm', 'f')
-    ) then true
-  else false
-  end as returns_set_of_table,
-  case
-    when rt.typrelid != 0 then
-      (select relname from pg_class where oid = rt.typrelid)
+    when f.proretset then nullif(f.prorows, 0)
     else null
-  end as return_table_name,
-  case
-    when f.proretset then
-      coalesce(f.prorows, 0) > 1
-    else false
-  end as returns_multiple_rows,
+  end as prorows,
   case
     when f.provolatile = 'i' then 'IMMUTABLE'
     when f.provolatile = 's' then 'STABLE'
