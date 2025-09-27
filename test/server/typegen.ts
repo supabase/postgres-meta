@@ -627,12 +627,6 @@ test('typegen: typescript', async () => {
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
-                SetofOptions: {
-                  from: "*"
-                  to: "user_todos_summary_view"
-                  isOneToOne: true
-                  isSetofReturn: true
-                }
               }
           get_todos_from_user:
             | {
@@ -672,12 +666,6 @@ test('typegen: typescript', async () => {
                   id: number
                   "user-id": number
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
               }
           get_todos_setof_rows:
             | {
@@ -778,12 +766,6 @@ test('typegen: typescript', async () => {
                   name: string | null
                   status: Database["public"]["Enums"]["user_status"] | null
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "users"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
               }
             | {
                 Args: { completed: boolean; todo_id: number }
@@ -854,12 +836,6 @@ test('typegen: typescript', async () => {
                   id: number
                   "user-id": number
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
               }
             | {
                 Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
@@ -1704,12 +1680,6 @@ test('typegen w/ one-to-one relationships', async () => {
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
-                SetofOptions: {
-                  from: "*"
-                  to: "user_todos_summary_view"
-                  isOneToOne: true
-                  isSetofReturn: true
-                }
               }
           get_todos_from_user:
             | {
@@ -1749,12 +1719,6 @@ test('typegen w/ one-to-one relationships', async () => {
                   id: number
                   "user-id": number
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
               }
           get_todos_setof_rows:
             | {
@@ -1855,12 +1819,6 @@ test('typegen w/ one-to-one relationships', async () => {
                   name: string | null
                   status: Database["public"]["Enums"]["user_status"] | null
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "users"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
               }
             | {
                 Args: { completed: boolean; todo_id: number }
@@ -1931,12 +1889,6 @@ test('typegen w/ one-to-one relationships', async () => {
                   id: number
                   "user-id": number
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
               }
             | {
                 Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
@@ -2781,12 +2733,6 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
-                SetofOptions: {
-                  from: "*"
-                  to: "user_todos_summary_view"
-                  isOneToOne: true
-                  isSetofReturn: true
-                }
               }
           get_todos_from_user:
             | {
@@ -2826,12 +2772,6 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   id: number
                   "user-id": number
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
               }
           get_todos_setof_rows:
             | {
@@ -2932,12 +2872,6 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   name: string | null
                   status: Database["public"]["Enums"]["user_status"] | null
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "users"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
               }
             | {
                 Args: { completed: boolean; todo_id: number }
@@ -3008,12 +2942,6 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   id: number
                   "user-id": number
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
               }
             | {
                 Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
@@ -3863,12 +3791,6 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
-                SetofOptions: {
-                  from: "*"
-                  to: "user_todos_summary_view"
-                  isOneToOne: true
-                  isSetofReturn: true
-                }
               }
           get_todos_from_user:
             | {
@@ -3908,12 +3830,6 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   id: number
                   "user-id": number
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
               }
           get_todos_setof_rows:
             | {
@@ -4014,12 +3930,6 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   name: string | null
                   status: Database["public"]["Enums"]["user_status"] | null
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "users"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
               }
             | {
                 Args: { completed: boolean; todo_id: number }
@@ -4090,12 +4000,6 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   id: number
                   "user-id": number
                 }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
               }
             | {
                 Args: { "": Database["public"]["Tables"]["todos"]["Row"] }

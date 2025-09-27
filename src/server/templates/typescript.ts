@@ -221,29 +221,32 @@ export const apply = async ({
     )
     const returnsSetOfTable = fn.is_set_returning_function && fn.return_type_relation_id !== null
     const returnsMultipleRows = fn.prorows !== null && fn.prorows > 1
+    if (fn.args.length === 1) {
+      const relationType = relationTypeByIds.get(fn.args[0].type_id)
 
-    // Only add SetofOptions for functions with table arguments (embedded functions)
-    // or specific functions that RETURNS table-name
-    if (fn.args.length === 1 && relationTypeByIds.get(fn.args[0].type_id)) {
-      // Case 1: Standard embedded function with proper setof detection
-      if (returnsSetOfTable && returnTableName) {
-        setofOptionsInfo = `SetofOptions: {
-          from: ${JSON.stringify(typesById.get(fn.args[0].type_id)?.format)}
+      // Only add SetofOptions for functions with table arguments (embedded functions)
+      // or specific functions that RETURNS table-name
+      if (relationType) {
+        const sourceTable = relationType.format
+        // Case 1: Standard embedded function with proper setof detection
+        if (returnsSetOfTable && returnTableName) {
+          setofOptionsInfo = `SetofOptions: {
+          from: ${JSON.stringify(sourceTable)}
           to: ${JSON.stringify(returnTableName)}
           isOneToOne: ${Boolean(!returnsMultipleRows)}
           isSetofReturn: true
         }`
-      }
-      // Case 2: Handle RETURNS table-name those are always a one to one relationship
-      else if (returnTableName && !returnsSetOfTable) {
-        const sourceTable = typesById.get(fn.args[0].type_id)?.format
-        const targetTable = returnTableName
-        setofOptionsInfo = `SetofOptions: {
+        }
+        // Case 2: Handle RETURNS table-name those are always a one to one relationship
+        else if (returnTableName && !returnsSetOfTable) {
+          const targetTable = returnTableName
+          setofOptionsInfo = `SetofOptions: {
             from: ${JSON.stringify(sourceTable)}
             to: ${JSON.stringify(targetTable)}
             isOneToOne: true
             isSetofReturn: false
           }`
+        }
       }
     }
     // Case 3: Special case for functions without table arguments still returning a table
