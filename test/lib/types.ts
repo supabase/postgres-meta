@@ -114,7 +114,7 @@ test('composite type attributes', async () => {
       "id": Any<Number>,
       "name": "test_composite",
       "schema": "public",
-      "type_relation_id": 16964,
+      "type_relation_id": 16966,
     }
   `
   )
