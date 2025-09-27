@@ -95,7 +95,8 @@ test('composite type attributes', async () => {
 
   const res = await pgMeta.types.list()
   expect(res.data?.find(({ name }) => name === 'test_composite')).toMatchInlineSnapshot(
-    { id: expect.any(Number) }, `
+    { id: expect.any(Number) },
+    `
     {
       "attributes": [
         {
@@ -115,7 +116,8 @@ test('composite type attributes', async () => {
       "schema": "public",
       "type_relation_id": 16964,
     }
-  `)
+  `
+  )
 
   await pgMeta.query(`drop type test_composite;`)
 })
