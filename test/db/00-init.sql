@@ -203,6 +203,13 @@ AS $$
   SELECT * FROM public.users_audit WHERE user_id = user_row.id;
 $$;
 
+CREATE OR REPLACE FUNCTION public.get_todos_by_matview(todos_matview)
+RETURNS SETOF todos ROWS 1
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM public.todos LIMIT 1;
+$$;
+
 CREATE OR REPLACE FUNCTION public.get_todos_setof_rows(user_row users)
 RETURNS SETOF todos
 LANGUAGE SQL STABLE

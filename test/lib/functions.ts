@@ -118,7 +118,7 @@ test('list set-returning function with multiples definitions', async () => {
         "definition": "
       SELECT * FROM public.todos WHERE "user-id" = user_row.id;
     ",
-        "id": 16507,
+        "id": 16508,
         "identity_argument_types": "user_row users",
         "is_set_returning_function": true,
         "language": "sql",
@@ -153,7 +153,7 @@ test('list set-returning function with multiples definitions', async () => {
         "definition": "
       SELECT * FROM public.todos WHERE "user-id" = todo_row."user-id";
     ",
-        "id": 16508,
+        "id": 16509,
         "identity_argument_types": "todo_row todos",
         "is_set_returning_function": true,
         "language": "sql",

@@ -306,6 +306,11 @@ test('typegen: typescript', async () => {
               details: string | null
               id: number | null
               "user-id": number | null
+              get_todos_by_matview: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
             }
             Relationships: [
               {
@@ -628,6 +633,20 @@ test('typegen: typescript', async () => {
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
               }
+          get_todos_by_matview: {
+            Args: { "": unknown }
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }
+            SetofOptions: {
+              from: "todos_matview"
+              to: "todos"
+              isOneToOne: true
+              isSetofReturn: true
+            }
+          }
           get_todos_from_user:
             | {
                 Args: {
@@ -1347,6 +1366,11 @@ test('typegen w/ one-to-one relationships', async () => {
               details: string | null
               id: number | null
               "user-id": number | null
+              get_todos_by_matview: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
             }
             Relationships: [
               {
@@ -1681,6 +1705,20 @@ test('typegen w/ one-to-one relationships', async () => {
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
               }
+          get_todos_by_matview: {
+            Args: { "": unknown }
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }
+            SetofOptions: {
+              from: "todos_matview"
+              to: "todos"
+              isOneToOne: true
+              isSetofReturn: true
+            }
+          }
           get_todos_from_user:
             | {
                 Args: {
@@ -2400,6 +2438,11 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               details: string | null
               id: number | null
               "user-id": number | null
+              get_todos_by_matview: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
             }
             Relationships: [
               {
@@ -2734,6 +2777,20 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
               }
+          get_todos_by_matview: {
+            Args: { "": unknown }
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }
+            SetofOptions: {
+              from: "todos_matview"
+              to: "todos"
+              isOneToOne: true
+              isSetofReturn: true
+            }
+          }
           get_todos_from_user:
             | {
                 Args: {
@@ -3458,6 +3515,11 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               details: string | null
               id: number | null
               "user-id": number | null
+              get_todos_by_matview: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
             }
             Relationships: [
               {
@@ -3792,6 +3854,20 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
               }
+          get_todos_by_matview: {
+            Args: { "": unknown }
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }
+            SetofOptions: {
+              from: "todos_matview"
+              to: "todos"
+              isOneToOne: true
+              isSetofReturn: true
+            }
+          }
           get_todos_from_user:
             | {
                 Args: {

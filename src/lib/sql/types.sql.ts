@@ -47,7 +47,7 @@ from
         t.typrelid = 0
         or (
           select
-            c.relkind ${props.includeTableTypes ? `in ('c', 'r', 'v')` : `= 'c'`}
+            c.relkind ${props.includeTableTypes ? `in ('c', 'r', 'v', 'm')` : `= 'c'`}
           from
             pg_class c
           where
