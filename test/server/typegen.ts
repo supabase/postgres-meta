@@ -227,13 +227,13 @@ test('typegen: typescript', async () => {
               status: Database["public"]["Enums"]["user_status"] | null
             }
             Insert: {
-              decimal?: number | null
+              decimal?: number | string | null
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
             }
             Update: {
-              decimal?: number | null
+              decimal?: number | string | null
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
@@ -870,13 +870,13 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               status: Database["public"]["Enums"]["user_status"] | null
             }
             Insert: {
-              decimal?: number | null
+              decimal?: number | string | null
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
             }
             Update: {
-              decimal?: number | null
+              decimal?: number | string | null
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
@@ -1528,13 +1528,13 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               status: Database["public"]["Enums"]["user_status"] | null
             }
             Insert: {
-              decimal?: number | null
+              decimal?: number | string | null
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
             }
             Update: {
-              decimal?: number | null
+              decimal?: number | string | null
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
@@ -1682,7 +1682,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               status: Database["public"]["Enums"]["user_status"] | null
             }
             Insert: {
-              decimal?: number | null
+              decimal?: number | string | null
               id?: number | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
