@@ -221,6 +221,18 @@ export const apply = async ({
     )
     const returnsSetOfTable = fn.is_set_returning_function && fn.return_type_relation_id !== null
     const returnsMultipleRows = fn.prorows !== null && fn.prorows > 1
+    // Case 1: if the function returns a table, we need to add SetofOptions to allow selecting sub fields of the table
+    // Those can be used in rpc to select sub fields of a table
+    if (returnTableName) {
+      setofOptionsInfo = `SetofOptions: {
+        from: "*"
+        to: ${JSON.stringify(returnTableName)}
+        isOneToOne: ${Boolean(!returnsMultipleRows)}
+        isSetofReturn: ${fn.is_set_returning_function}
+      }`
+    }
+    // Case 2: if the function has a single table argument, we need to add SetofOptions to allow selecting sub fields of the table
+    // and set the right "from" and "to" values to allow selecting from a table row
     if (fn.args.length === 1) {
       const relationType = relationTypeByIds.get(fn.args[0].type_id)
 
@@ -248,16 +260,6 @@ export const apply = async ({
           }`
         }
       }
-    }
-    // Case 3: Special case for functions without table arguments still returning a table
-    // Those can be used in rpc to select sub fields of a table
-    else if (returnTableName) {
-      setofOptionsInfo = `SetofOptions: {
-        from: "*"
-        to: ${JSON.stringify(returnTableName)}
-        isOneToOne: ${Boolean(!returnsMultipleRows)}
-        isSetofReturn: ${fn.is_set_returning_function}
-      }`
     }
 
     return `${returnType}${fn.is_set_returning_function && returnsMultipleRows ? '[]' : ''}
