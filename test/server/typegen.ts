@@ -830,6 +830,14 @@ test('typegen: typescript', async () => {
                 } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
               }
             | { Args: never; Returns: undefined }
+          search_todos_by_details: {
+            Args: { search_details: string }
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }[]
+          }
           test_internal_query: { Args: never; Returns: undefined }
           test_unnamed_row_composite: {
             Args: { "": Database["public"]["Tables"]["users"]["Row"] }
@@ -1902,6 +1910,14 @@ test('typegen w/ one-to-one relationships', async () => {
                 } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
               }
             | { Args: never; Returns: undefined }
+          search_todos_by_details: {
+            Args: { search_details: string }
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }[]
+          }
           test_internal_query: { Args: never; Returns: undefined }
           test_unnamed_row_composite: {
             Args: { "": Database["public"]["Tables"]["users"]["Row"] }
@@ -2974,6 +2990,14 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
               }
             | { Args: never; Returns: undefined }
+          search_todos_by_details: {
+            Args: { search_details: string }
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }[]
+          }
           test_internal_query: { Args: never; Returns: undefined }
           test_unnamed_row_composite: {
             Args: { "": Database["public"]["Tables"]["users"]["Row"] }
@@ -4051,6 +4075,14 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
               }
             | { Args: never; Returns: undefined }
+          search_todos_by_details: {
+            Args: { search_details: string }
+            Returns: {
+              details: string | null
+              id: number
+              "user-id": number
+            }[]
+          }
           test_internal_query: { Args: never; Returns: undefined }
           test_unnamed_row_composite: {
             Args: { "": Database["public"]["Tables"]["users"]["Row"] }

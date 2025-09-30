@@ -210,6 +210,13 @@ AS $$
   SELECT * FROM public.todos LIMIT 1;
 $$;
 
+CREATE OR REPLACE FUNCTION public.search_todos_by_details(search_details text)
+RETURNS SETOF todos
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM public.todos WHERE details ilike search_details;
+$$;
+
 CREATE OR REPLACE FUNCTION public.get_todos_setof_rows(user_row users)
 RETURNS SETOF todos
 LANGUAGE SQL STABLE
