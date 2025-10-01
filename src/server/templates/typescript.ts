@@ -484,7 +484,7 @@ export const apply = async ({
 
   function generateNullableUnionTsType(tsType: string, isNullable: boolean) {
     // Only add the null union if the type is not unknown as unknown already includes null
-    if (tsType === 'unknown' || !isNullable) {
+    if (tsType === 'unknown' || tsType === 'any' || !isNullable) {
       return tsType
     }
     return `${tsType} | null`
