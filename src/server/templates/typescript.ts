@@ -482,6 +482,14 @@ export const apply = async ({
   }`
     : ''
 
+  function generateNullableUnionTsType(tsType: string, isNullable: boolean) {
+    // Only add the null union if the type is not unknown as unknown already includes null
+    if (tsType === 'unknown' || tsType === 'any' || !isNullable) {
+      return tsType
+    }
+    return `${tsType} | null`
+  }
+
   function generateColumnTsDefinition(
     schema: PostgresSchema,
     column: {
@@ -497,7 +505,7 @@ export const apply = async ({
       views: PostgresView[]
     }
   ) {
-    return `${JSON.stringify(column.name)}${column.is_optional ? '?' : ''}: ${pgTypeToTsType(schema, column.format, context)} ${column.is_nullable ? '| null' : ''}`
+    return `${JSON.stringify(column.name)}${column.is_optional ? '?' : ''}: ${generateNullableUnionTsType(pgTypeToTsType(schema, column.format, context), column.is_nullable)}`
   }
 
   let output = `
@@ -537,7 +545,7 @@ export type Database = {
                       ...schemaFunctions
                         .filter(({ fn }) => fn.argument_types === table.name)
                         .map(({ fn }) => {
-                          return `${JSON.stringify(fn.name)}: ${getFunctionReturnType(schema, fn)} | null`
+                          return `${JSON.stringify(fn.name)}: ${generateNullableUnionTsType(getFunctionReturnType(schema, fn), true)}`
                         }),
                     ]}
                   }
@@ -610,7 +618,7 @@ export type Database = {
                         .filter(({ fn }) => fn.argument_types === view.name)
                         .map(
                           ({ fn }) =>
-                            `${JSON.stringify(fn.name)}: ${getFunctionReturnType(schema, fn)} | null`
+                            `${JSON.stringify(fn.name)}: ${generateNullableUnionTsType(getFunctionReturnType(schema, fn), true)}`
                         ),
                     ]}
                   }
@@ -709,12 +717,15 @@ export type Database = {
                           const type = typesById.get(type_id)
                           let tsType = 'unknown'
                           if (type) {
-                            tsType = `${pgTypeToTsType(schema, type.name, {
-                              types,
-                              schemas,
-                              tables,
-                              views,
-                            })} | null`
+                            tsType = `${generateNullableUnionTsType(
+                              pgTypeToTsType(schema, type.name, {
+                                types,
+                                schemas,
+                                tables,
+                                views,
+                              }),
+                              true
+                            )}`
                           }
                           return `${JSON.stringify(name)}: ${tsType}`
                         })}
