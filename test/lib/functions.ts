@@ -36,6 +36,7 @@ test('list', async () => {
       "is_set_returning_function": false,
       "language": "sql",
       "name": "add",
+      "prorows": null,
       "return_type": "integer",
       "return_type_id": 23,
       "return_type_relation_id": null,
@@ -44,6 +45,128 @@ test('list', async () => {
     }
   `
   )
+})
+
+test('list set-returning function with single object limit', async () => {
+  const res = await pgMeta.functions.list()
+  expect(res.data?.filter(({ name }) => name === 'get_user_audit_setof_single_row'))
+    .toMatchInlineSnapshot(`
+      [
+        {
+          "args": [
+            {
+              "has_default": false,
+              "mode": "in",
+              "name": "user_row",
+              "type_id": 16395,
+            },
+          ],
+          "argument_types": "user_row users",
+          "behavior": "STABLE",
+          "complete_statement": "CREATE OR REPLACE FUNCTION public.get_user_audit_setof_single_row(user_row users)
+       RETURNS SETOF users_audit
+       LANGUAGE sql
+       STABLE ROWS 1
+      AS $function$
+        SELECT * FROM public.users_audit WHERE user_id = user_row.id;
+      $function$
+      ",
+          "config_params": null,
+          "definition": "
+        SELECT * FROM public.users_audit WHERE user_id = user_row.id;
+      ",
+          "id": 16506,
+          "identity_argument_types": "user_row users",
+          "is_set_returning_function": true,
+          "language": "sql",
+          "name": "get_user_audit_setof_single_row",
+          "prorows": 1,
+          "return_type": "SETOF users_audit",
+          "return_type_id": 16418,
+          "return_type_relation_id": 16416,
+          "schema": "public",
+          "security_definer": false,
+        },
+      ]
+    `)
+})
+
+test('list set-returning function with multiples definitions', async () => {
+  const res = await pgMeta.functions.list()
+  expect(res.data?.filter(({ name }) => name === 'get_todos_setof_rows')).toMatchInlineSnapshot(`
+    [
+      {
+        "args": [
+          {
+            "has_default": false,
+            "mode": "in",
+            "name": "user_row",
+            "type_id": 16395,
+          },
+        ],
+        "argument_types": "user_row users",
+        "behavior": "STABLE",
+        "complete_statement": "CREATE OR REPLACE FUNCTION public.get_todos_setof_rows(user_row users)
+     RETURNS SETOF todos
+     LANGUAGE sql
+     STABLE
+    AS $function$
+      SELECT * FROM public.todos WHERE "user-id" = user_row.id;
+    $function$
+    ",
+        "config_params": null,
+        "definition": "
+      SELECT * FROM public.todos WHERE "user-id" = user_row.id;
+    ",
+        "id": 16509,
+        "identity_argument_types": "user_row users",
+        "is_set_returning_function": true,
+        "language": "sql",
+        "name": "get_todos_setof_rows",
+        "prorows": 1000,
+        "return_type": "SETOF todos",
+        "return_type_id": 16404,
+        "return_type_relation_id": 16402,
+        "schema": "public",
+        "security_definer": false,
+      },
+      {
+        "args": [
+          {
+            "has_default": false,
+            "mode": "in",
+            "name": "todo_row",
+            "type_id": 16404,
+          },
+        ],
+        "argument_types": "todo_row todos",
+        "behavior": "STABLE",
+        "complete_statement": "CREATE OR REPLACE FUNCTION public.get_todos_setof_rows(todo_row todos)
+     RETURNS SETOF todos
+     LANGUAGE sql
+     STABLE
+    AS $function$
+      SELECT * FROM public.todos WHERE "user-id" = todo_row."user-id";
+    $function$
+    ",
+        "config_params": null,
+        "definition": "
+      SELECT * FROM public.todos WHERE "user-id" = todo_row."user-id";
+    ",
+        "id": 16510,
+        "identity_argument_types": "todo_row todos",
+        "is_set_returning_function": true,
+        "language": "sql",
+        "name": "get_todos_setof_rows",
+        "prorows": 1000,
+        "return_type": "SETOF todos",
+        "return_type_id": 16404,
+        "return_type_relation_id": 16402,
+        "schema": "public",
+        "security_definer": false,
+      },
+    ]
+  `)
 })
 
 test('list functions with included schemas', async () => {
@@ -136,6 +259,7 @@ test('retrieve, create, update, delete', async () => {
         "is_set_returning_function": false,
         "language": "sql",
         "name": "test_func",
+        "prorows": null,
         "return_type": "integer",
         "return_type_id": 23,
         "return_type_relation_id": null,
@@ -186,6 +310,7 @@ test('retrieve, create, update, delete', async () => {
         "is_set_returning_function": false,
         "language": "sql",
         "name": "test_func",
+        "prorows": null,
         "return_type": "integer",
         "return_type_id": 23,
         "return_type_relation_id": null,
@@ -240,6 +365,7 @@ test('retrieve, create, update, delete', async () => {
         "is_set_returning_function": false,
         "language": "sql",
         "name": "test_func_renamed",
+        "prorows": null,
         "return_type": "integer",
         "return_type_id": 23,
         "return_type_relation_id": null,
@@ -290,6 +416,7 @@ test('retrieve, create, update, delete', async () => {
         "is_set_returning_function": false,
         "language": "sql",
         "name": "test_func_renamed",
+        "prorows": null,
         "return_type": "integer",
         "return_type_id": 23,
         "return_type_relation_id": null,
@@ -345,6 +472,7 @@ test('retrieve set-returning function', async () => {
       "is_set_returning_function": true,
       "language": "sql",
       "name": "function_returning_set_of_rows",
+      "prorows": 1000,
       "return_type": "SETOF users",
       "return_type_id": Any<Number>,
       "return_type_relation_id": Any<Number>,

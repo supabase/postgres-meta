@@ -56,6 +56,17 @@ $$ language plpgsql;
 CREATE VIEW todos_view AS SELECT * FROM public.todos;
 -- For testing typegen on view-to-view relationships
 create view users_view as select * from public.users;
+-- Create a more complex view for testing
+CREATE VIEW user_todos_summary_view AS
+SELECT
+    u.id as user_id,
+    u.name as user_name,
+    u.status as user_status,
+    COUNT(t.id) as todo_count,
+    array_agg(t.details) FILTER (WHERE t.details IS NOT NULL) as todo_details
+FROM public.users u
+LEFT JOIN public.todos t ON t."user-id" = u.id
+GROUP BY u.id, u.name, u.status;
 
 create materialized view todos_matview as select * from public.todos;
 
@@ -65,6 +76,11 @@ select substring($1.details, 1, 3);
 $$ language sql stable;
 
 create function public.blurb_varchar(public.todos) returns character varying as
+$$
+select substring($1.details, 1, 3);
+$$ language sql stable;
+
+create function public.blurb_varchar(public.todos_view) returns character varying as
 $$
 select substring($1.details, 1, 3);
 $$ language sql stable;
@@ -101,6 +117,15 @@ as $$
   select * from public.users limit 1;
 $$;
 
+create or replace function public.function_returning_single_row(todos public.todos)
+returns public.users
+language sql
+stable
+as $$
+  select * from public.users limit 1;
+$$;
+
+
 create or replace function public.function_returning_set_of_rows()
 returns setof public.users
 language sql
@@ -116,6 +141,15 @@ stable
 as $$
   select id, name from public.users;
 $$;
+
+create or replace function public.function_returning_table_with_args(user_id int)
+returns table (id int, name text)
+language sql
+stable
+as $$
+  select id, name from public.users WHERE id = user_id;
+$$;
+
 
 create or replace function public.polymorphic_function(text) returns void language sql as '';
 create or replace function public.polymorphic_function(bool) returns void language sql as '';
@@ -169,6 +203,20 @@ AS $$
   SELECT * FROM public.users_audit WHERE user_id = user_row.id;
 $$;
 
+CREATE OR REPLACE FUNCTION public.get_todos_by_matview(todos_matview)
+RETURNS SETOF todos ROWS 1
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM public.todos LIMIT 1;
+$$;
+
+CREATE OR REPLACE FUNCTION public.search_todos_by_details(search_details text)
+RETURNS SETOF todos
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM public.todos WHERE details ilike search_details;
+$$;
+
 CREATE OR REPLACE FUNCTION public.get_todos_setof_rows(user_row users)
 RETURNS SETOF todos
 LANGUAGE SQL STABLE
@@ -181,4 +229,203 @@ RETURNS SETOF todos
 LANGUAGE SQL STABLE
 AS $$
   SELECT * FROM public.todos WHERE "user-id" = todo_row."user-id";
+$$;
+
+-- SETOF composite_type - Returns multiple rows of a custom composite type
+CREATE OR REPLACE FUNCTION public.get_composite_type_data()
+RETURNS SETOF composite_type_with_array_attribute
+LANGUAGE SQL STABLE
+AS $$
+  SELECT ROW(ARRAY['hello', 'world']::text[])::composite_type_with_array_attribute
+  UNION ALL
+  SELECT ROW(ARRAY['foo', 'bar']::text[])::composite_type_with_array_attribute;
+$$;
+
+-- SETOF record - Returns multiple rows with structure defined in the function
+CREATE OR REPLACE FUNCTION public.get_user_summary()
+RETURNS SETOF record
+LANGUAGE SQL STABLE
+AS $$
+  SELECT u.id, name, count(t.id) as todo_count
+  FROM public.users u
+  LEFT JOIN public.todos t ON t."user-id" = u.id
+  GROUP BY u.id, u.name;
+$$;
+
+-- SETOF scalar_type - Returns multiple values of a basic type
+CREATE OR REPLACE FUNCTION public.get_user_ids()
+RETURNS SETOF bigint
+LANGUAGE SQL STABLE
+AS $$
+  SELECT id FROM public.users;
+$$;
+
+
+-- Function returning view using scalar as input
+CREATE OR REPLACE FUNCTION public.get_single_user_summary_from_view(search_user_id bigint)
+RETURNS SETOF user_todos_summary_view
+LANGUAGE SQL STABLE
+ROWS 1
+AS $$
+  SELECT * FROM user_todos_summary_view WHERE user_id = search_user_id;
+$$;
+-- Function returning view using table row as input
+CREATE OR REPLACE FUNCTION public.get_single_user_summary_from_view(user_row users)
+RETURNS SETOF user_todos_summary_view
+LANGUAGE SQL STABLE
+ROWS 1
+AS $$
+  SELECT * FROM user_todos_summary_view WHERE user_id = user_row.id;
+$$;
+-- Function returning view using another view row as input
+CREATE OR REPLACE FUNCTION public.get_single_user_summary_from_view(userview_row users_view)
+RETURNS SETOF user_todos_summary_view
+LANGUAGE SQL STABLE
+ROWS 1
+AS $$
+  SELECT * FROM user_todos_summary_view WHERE user_id = userview_row.id;
+$$;
+
+
+-- Function returning view using scalar as input
+CREATE OR REPLACE FUNCTION public.get_todos_from_user(search_user_id bigint)
+RETURNS SETOF todos
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM todos WHERE "user-id" = search_user_id;
+$$;
+-- Function returning view using table row as input
+CREATE OR REPLACE FUNCTION public.get_todos_from_user(user_row users)
+RETURNS SETOF todos
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM todos WHERE "user-id" = user_row.id;
+$$;
+-- Function returning view using another view row as input
+CREATE OR REPLACE FUNCTION public.get_todos_from_user(userview_row users_view)
+RETURNS SETOF todos
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM todos WHERE "user-id" = userview_row.id;
+$$;
+
+-- Valid postgresql function override but that produce an unresolvable postgrest function call
+create function postgrest_unresolvable_function() returns void language sql as '';
+create function postgrest_unresolvable_function(a text) returns int language sql as 'select 1';
+create function postgrest_unresolvable_function(a int) returns text language sql as $$
+    SELECT 'toto'
+$$;
+-- Valid postgresql function override with differents returns types depending of different arguments
+create function postgrest_resolvable_with_override_function() returns void language sql as '';
+create function postgrest_resolvable_with_override_function(a text) returns int language sql as 'select 1';
+create function postgrest_resolvable_with_override_function(b int) returns text language sql as $$
+    SELECT 'toto'
+$$;
+-- Function overrides returning setof tables
+create function postgrest_resolvable_with_override_function(user_id bigint) returns setof users language sql stable as $$
+    SELECT * FROM users WHERE id = user_id;
+$$;
+create function postgrest_resolvable_with_override_function(todo_id bigint, completed boolean) returns setof todos language sql stable as $$
+    SELECT * FROM todos WHERE id = todo_id AND completed = completed;
+$$;
+-- Function override taking a table as argument and returning a setof
+create function postgrest_resolvable_with_override_function(user_row users) returns setof todos language sql stable as $$
+    SELECT * FROM todos WHERE "user-id" = user_row.id;
+$$;
+
+create or replace function public.polymorphic_function_with_different_return(bool) returns int language sql as 'SELECT 1';
+create or replace function public.polymorphic_function_with_different_return(int) returns int language sql as 'SELECT 2';
+create or replace function public.polymorphic_function_with_different_return(text) returns text language sql as $$ SELECT 'foo' $$;
+
+create or replace function public.polymorphic_function_with_no_params_or_unnamed() returns int language sql as 'SELECT 1';
+create or replace function public.polymorphic_function_with_no_params_or_unnamed(bool) returns int language sql as 'SELECT 2';
+create or replace function public.polymorphic_function_with_no_params_or_unnamed(text) returns text language sql as $$ SELECT 'foo' $$;
+-- Function with a single unnamed params that isn't a json/jsonb/text should never appears in the type gen as it won't be in postgrest schema
+create or replace function public.polymorphic_function_with_unnamed_integer(int) returns int language sql as 'SELECT 1';
+create or replace function public.polymorphic_function_with_unnamed_json(json) returns int language sql as 'SELECT 1';
+create or replace function public.polymorphic_function_with_unnamed_jsonb(jsonb) returns int language sql as 'SELECT 1';
+create or replace function public.polymorphic_function_with_unnamed_text(text) returns int language sql as 'SELECT 1';
+
+-- Functions with unnamed parameters that have default values
+create or replace function public.polymorphic_function_with_unnamed_default() returns int language sql as 'SELECT 1';
+create or replace function public.polymorphic_function_with_unnamed_default(int default 42) returns int language sql as 'SELECT 2';
+create or replace function public.polymorphic_function_with_unnamed_default(text default 'default') returns text language sql as $$ SELECT 'foo' $$;
+
+-- Functions with unnamed parameters that have default values and multiple overloads
+create or replace function public.polymorphic_function_with_unnamed_default_overload() returns int language sql as 'SELECT 1';
+create or replace function public.polymorphic_function_with_unnamed_default_overload(int default 42) returns int language sql as 'SELECT 2';
+create or replace function public.polymorphic_function_with_unnamed_default_overload(text default 'default') returns text language sql as $$ SELECT 'foo' $$;
+create or replace function public.polymorphic_function_with_unnamed_default_overload(bool default true) returns int language sql as 'SELECT 3';
+
+-- Test function with unnamed row parameter returning setof
+CREATE OR REPLACE FUNCTION public.test_unnamed_row_setof(todos)
+RETURNS SETOF todos
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM public.todos WHERE "user-id" = $1."user-id";
+$$;
+
+CREATE OR REPLACE FUNCTION public.test_unnamed_row_setof(users)
+RETURNS SETOF todos
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM public.todos WHERE "user-id" = $1."id";
+$$;
+
+
+CREATE OR REPLACE FUNCTION public.test_unnamed_row_setof(user_id bigint)
+RETURNS SETOF todos
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM public.todos WHERE "user-id" = user_id;
+$$;
+
+-- Test function with unnamed row parameter returning scalar
+CREATE OR REPLACE FUNCTION public.test_unnamed_row_scalar(todos)
+RETURNS integer
+LANGUAGE SQL STABLE
+AS $$
+  SELECT COUNT(*) FROM public.todos WHERE "user-id" = $1."user-id";
+$$;
+
+-- Test function with unnamed view row parameter
+CREATE OR REPLACE FUNCTION public.test_unnamed_view_row(todos_view)
+RETURNS SETOF todos
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM public.todos WHERE "user-id" = $1."user-id";
+$$;
+
+-- Test function with multiple unnamed row parameters
+CREATE OR REPLACE FUNCTION public.test_unnamed_multiple_rows(users, todos)
+RETURNS SETOF todos
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM public.todos
+  WHERE "user-id" = $1.id
+  AND id = $2.id;
+$$;
+
+-- Test function with unnamed row parameter returning composite
+CREATE OR REPLACE FUNCTION public.test_unnamed_row_composite(users)
+RETURNS composite_type_with_array_attribute
+LANGUAGE SQL STABLE
+AS $$
+  SELECT ROW(ARRAY[$1.name])::composite_type_with_array_attribute;
+$$;
+
+-- Function that returns a single element
+CREATE OR REPLACE FUNCTION public.function_using_table_returns(user_row users)
+RETURNS todos
+LANGUAGE SQL STABLE
+AS $$
+  SELECT * FROM public.todos WHERE todos."user-id" = user_row.id LIMIT 1;
+$$;
+
+CREATE OR REPLACE FUNCTION public.function_using_setof_rows_one(user_row users)
+RETURNS SETOF todos
+LANGUAGE SQL STABLE
+ROWS 1
+AS $$
+  SELECT * FROM public.todos WHERE todos."user-id" = user_row.id LIMIT 1;
 $$;
