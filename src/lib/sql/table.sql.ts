@@ -32,29 +32,26 @@ FROM
   JOIN pg_class c ON nc.oid = c.relnamespace
   left join (
     select
-      table_id,
-      jsonb_agg(_pk.*) as primary_keys
-    from (
-      select
-        n.nspname as schema,
-        c.relname as table_name,
-        a.attname as name,
-        c.oid :: int8 as table_id
-      from
-        pg_index i,
-        pg_class c,
-        pg_attribute a,
-        pg_namespace n
-      where
-        ${props.schemaFilter ? `n.nspname ${props.schemaFilter} AND` : ''}
-        ${props.tableIdentifierFilter ? `n.nspname || '.' || c.relname ${props.tableIdentifierFilter} AND` : ''}
-        i.indrelid = c.oid
-        and c.relnamespace = n.oid
-        and a.attrelid = c.oid
-        and a.attnum = any (i.indkey)
-        and i.indisprimary
-    ) as _pk
-    group by table_id
+      c.oid::int8 as table_id,
+      jsonb_agg(
+        jsonb_build_object(
+          'table_id', c.oid::int8,
+          'schema', n.nspname,
+          'table_name', c.relname,
+          'name', a.attname
+        )
+        order by array_position(i.indkey, a.attnum)
+      ) as primary_keys
+    from
+      pg_index i
+      join pg_class c on i.indrelid = c.oid
+      join pg_namespace n on c.relnamespace = n.oid
+      join pg_attribute a on a.attrelid = c.oid and a.attnum = any(i.indkey)
+    where
+      ${props.schemaFilter ? `n.nspname ${props.schemaFilter} AND` : ''}
+      ${props.tableIdentifierFilter ? `n.nspname || '.' || c.relname ${props.tableIdentifierFilter} AND` : ''}
+      i.indisprimary
+    group by c.oid
   ) as pk
   on pk.table_id = c.oid
   left join (
