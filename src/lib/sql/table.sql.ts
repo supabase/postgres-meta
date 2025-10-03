@@ -33,7 +33,7 @@ FROM
   left join (
     select
       table_id,
-      jsonb_agg(_pk.*) as primary_keys
+      jsonb_agg(_pk.* order by _pk.key_order) as primary_keys
     from (
       select
         n.nspname as schema,
@@ -45,13 +45,13 @@ FROM
         pg_class c,
         pg_attribute a,
         pg_namespace n
+      join unnest(i.indkey) with ordinality as k(attnum, key_order) on true
       where
         ${props.schemaFilter ? `n.nspname ${props.schemaFilter} AND` : ''}
         ${props.tableIdentifierFilter ? `n.nspname || '.' || c.relname ${props.tableIdentifierFilter} AND` : ''}
         i.indrelid = c.oid
         and c.relnamespace = n.oid
-        and a.attrelid = c.oid
-        and a.attnum = any (i.indkey)
+        and a.attrelid = c.oid and a.attnum = k.attnum
         and i.indisprimary
     ) as _pk
     group by table_id
