@@ -525,3 +525,20 @@ test('primary keys', async () => {
   )
   await pgMeta.tables.remove(res.data!.id)
 })
+
+test('composite primary keys preserve order', async () => {
+  let res = await pgMeta.tables.create({ name: 't_pk_order' })
+  await pgMeta.columns.create({ table_id: res.data!.id, name: 'col_a', type: 'int8' })
+  await pgMeta.columns.create({ table_id: res.data!.id, name: 'col_b', type: 'text' })
+  await pgMeta.columns.create({ table_id: res.data!.id, name: 'col_c', type: 'int4' })
+
+  // Set primary keys in specific order: col_c, col_a, col_b
+  res = await pgMeta.tables.update(res.data!.id, {
+    primary_keys: [{ name: 'col_c' }, { name: 'col_a' }, { name: 'col_b' }],
+  })
+
+  // Verify the order is preserved
+  expect(res.data!.primary_keys.map((pk: any) => pk.name)).toEqual(['col_c', 'col_a', 'col_b'])
+
+  await pgMeta.tables.remove(res.data!.id)
+})
