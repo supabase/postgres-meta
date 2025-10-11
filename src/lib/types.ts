@@ -156,6 +156,7 @@ const postgresFunctionSchema = Type.Object({
   return_type: Type.String(),
   return_type_relation_id: Type.Union([Type.Integer(), Type.Null()]),
   is_set_returning_function: Type.Boolean(),
+  prorows: Type.Union([Type.Number(), Type.Null()]),
   behavior: Type.Union([
     Type.Literal('IMMUTABLE'),
     Type.Literal('STABLE'),
@@ -442,6 +443,7 @@ export const postgresTypeSchema = Type.Object({
   enums: Type.Array(Type.String()),
   attributes: Type.Array(Type.Object({ name: Type.String(), type_id: Type.Integer() })),
   comment: Type.Union([Type.String(), Type.Null()]),
+  type_relation_id: Type.Union([Type.Integer(), Type.Null()]),
 })
 export type PostgresType = Static<typeof postgresTypeSchema>
 
