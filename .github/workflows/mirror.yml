@@ -19,7 +19,7 @@ jobs:
       packages: write
     steps:
       - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.PROD_AWS_ROLE }}
           aws-region: us-east-1
