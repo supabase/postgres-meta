@@ -30,7 +30,7 @@ jobs:
           npm run build
 
       - id: semantic-release
-        uses: cycjimmy/semantic-release-action@v4
+        uses: cycjimmy/semantic-release-action@v5
         with:
           semantic_version: 21
         env:
