@@ -8,7 +8,11 @@ import type {
   PostgresType,
   PostgresView,
 } from '../../lib/index.js'
-import { GENERATE_TYPES_DEFAULT_SCHEMA, VALID_FUNCTION_ARGS_MODE } from '../constants.js'
+import {
+  GENERATE_TYPES_DEFAULT_SCHEMA,
+  VALID_FUNCTION_ARGS_MODE,
+  VALID_UNNAMED_FUNCTION_ARG_TYPES,
+} from '../constants.js'
 
 type TsRelationship = Pick<
   GeneratorMetadata['relationships'][number],
@@ -56,13 +60,17 @@ export const apply = async ({
       { tables: [], views: [], functions: [], enums: [], compositeTypes: [] },
     ])
   )
-
-  const columnsByTableId = Object.fromEntries<PostgresColumn[]>(
-    [...tables, ...foreignTables, ...views, ...materializedViews].map((t) => [t.id, []])
-  )
+  const columnsByTableId: Record<number, PostgresColumn[]> = {}
+  const tablesNamesByTableId: Record<number, string> = {}
+  const relationTypeByIds = new Map<number, (typeof types)[number]>()
   // group types by id for quicker lookup
   const typesById = new Map<number, (typeof types)[number]>()
+  const tablesLike = [...tables, ...foreignTables, ...views, ...materializedViews]
 
+  for (const tableLike of tablesLike) {
+    columnsByTableId[tableLike.id] = []
+    tablesNamesByTableId[tableLike.id] = tableLike.name
+  }
   for (const column of columns) {
     if (column.table_id in columnsByTableId) {
       columnsByTableId[column.table_id].push(column)
@@ -74,6 +82,10 @@ export const apply = async ({
 
   for (const type of types) {
     typesById.set(type.id, type)
+    // Save all the types that are relation types for quicker lookup
+    if (type.type_relation_id) {
+      relationTypeByIds.set(type.id, type)
+    }
     if (type.schema in introspectionBySchema) {
       if (type.enums.length > 0) {
         introspectionBySchema[type.schema].enums.push(type)
@@ -143,19 +155,49 @@ export const apply = async ({
       })
     }
   }
+  // Helper function to get table/view name from relation id
+  const getTableNameFromRelationId = (
+    relationId: number | null,
+    returnTypeId: number | null
+  ): string | null => {
+    if (!relationId) return null
+
+    if (tablesNamesByTableId[relationId]) return tablesNamesByTableId[relationId]
+    // if it's a composite type we use the type name as relation name to allow sub-selecting fields of the composite type
+    const reltype = returnTypeId ? relationTypeByIds.get(returnTypeId) : null
+    return reltype ? reltype.name : null
+  }
+
   for (const func of functions) {
     if (func.schema in introspectionBySchema) {
       func.args.sort((a, b) => a.name.localeCompare(b.name))
-      // Either:
-      // 1. All input args are be named, or
-      // 2. There is only one input arg which is unnamed
+      // Get all input args (in, inout, variadic modes)
       const inArgs = func.args.filter(({ mode }) => VALID_FUNCTION_ARGS_MODE.has(mode))
 
       if (
-        // Case 1: Function has a single parameter
-        inArgs.length === 1 ||
+        // Case 1: Function has no parameters
+        inArgs.length === 0 ||
         // Case 2: All input args are named
-        !inArgs.some(({ name }) => name === '')
+        !inArgs.some(({ name }) => name === '') ||
+        // Case 3: All unnamed args have default values AND are valid types
+        inArgs.every((arg) => {
+          if (arg.name === '') {
+            return arg.has_default && VALID_UNNAMED_FUNCTION_ARG_TYPES.has(arg.type_id)
+          }
+          return true
+        }) ||
+        // Case 4: Single unnamed parameter of valid type (json, jsonb, text)
+        // Exclude all functions definitions that have only one single argument unnamed argument that isn't
+        // a json/jsonb/text as it won't be considered by PostgREST
+        (inArgs.length === 1 &&
+          inArgs[0].name === '' &&
+          (VALID_UNNAMED_FUNCTION_ARG_TYPES.has(inArgs[0].type_id) ||
+            // OR if the function have a single unnamed args which is another table (embeded function)
+            (relationTypeByIds.get(inArgs[0].type_id) &&
+              getTableNameFromRelationId(func.return_type_relation_id, func.return_type_id)) ||
+            // OR if the function takes a table row but doesn't qualify as embedded (for error reporting)
+            (relationTypeByIds.get(inArgs[0].type_id) &&
+              !getTableNameFromRelationId(func.return_type_relation_id, func.return_type_id))))
       ) {
         introspectionBySchema[func.schema].functions.push({ fn: func, inArgs })
       }
@@ -170,10 +212,62 @@ export const apply = async ({
   }
 
   const getFunctionTsReturnType = (fn: PostgresFunction, returnType: string) => {
-    return `${returnType}${fn.is_set_returning_function ? '[]' : ''}`
+    // Determine if this function should have SetofOptions
+    let setofOptionsInfo = ''
+
+    const returnTableName = getTableNameFromRelationId(
+      fn.return_type_relation_id,
+      fn.return_type_id
+    )
+    const returnsSetOfTable = fn.is_set_returning_function && fn.return_type_relation_id !== null
+    const returnsMultipleRows = fn.prorows !== null && fn.prorows > 1
+    // Case 1: if the function returns a table, we need to add SetofOptions to allow selecting sub fields of the table
+    // Those can be used in rpc to select sub fields of a table
+    if (returnTableName) {
+      setofOptionsInfo = `SetofOptions: {
+        from: "*"
+        to: ${JSON.stringify(returnTableName)}
+        isOneToOne: ${Boolean(!returnsMultipleRows)}
+        isSetofReturn: ${fn.is_set_returning_function}
+      }`
+    }
+    // Case 2: if the function has a single table argument, we need to add SetofOptions to allow selecting sub fields of the table
+    // and set the right "from" and "to" values to allow selecting from a table row
+    if (fn.args.length === 1) {
+      const relationType = relationTypeByIds.get(fn.args[0].type_id)
+
+      // Only add SetofOptions for functions with table arguments (embedded functions)
+      // or specific functions that RETURNS table-name
+      if (relationType) {
+        const sourceTable = relationType.format
+        // Case 1: Standard embedded function with proper setof detection
+        if (returnsSetOfTable && returnTableName) {
+          setofOptionsInfo = `SetofOptions: {
+          from: ${JSON.stringify(sourceTable)}
+          to: ${JSON.stringify(returnTableName)}
+          isOneToOne: ${Boolean(!returnsMultipleRows)}
+          isSetofReturn: true
+        }`
+        }
+        // Case 2: Handle RETURNS table-name those are always a one to one relationship
+        else if (returnTableName && !returnsSetOfTable) {
+          const targetTable = returnTableName
+          setofOptionsInfo = `SetofOptions: {
+            from: ${JSON.stringify(sourceTable)}
+            to: ${JSON.stringify(targetTable)}
+            isOneToOne: true
+            isSetofReturn: false
+          }`
+        }
+      }
+    }
+
+    return `${returnType}${fn.is_set_returning_function && returnsMultipleRows ? '[]' : ''}
+                          ${setofOptionsInfo ? `${setofOptionsInfo}` : ''}`
   }
 
   const getFunctionReturnType = (schema: PostgresSchema, fn: PostgresFunction): string => {
+    // Case 1: `returns table`.
     const tableArgs = fn.args.filter(({ mode }) => mode === 'table')
     if (tableArgs.length > 0) {
       const argsNameAndType = tableArgs.map(({ name, type_id }) => {
@@ -205,15 +299,25 @@ export const apply = async ({
       )?.view
     if (relation) {
       return `{
-              ${columnsByTableId[relation.id].map(
-                (column) =>
-                  `${JSON.stringify(column.name)}: ${pgTypeToTsType(schema, column.format, {
-                    types,
-                    schemas,
-                    tables,
-                    views,
-                  })} ${column.is_nullable ? '| null' : ''}`
-              )}
+              ${columnsByTableId[relation.id]
+                .map((column) =>
+                  generateColumnTsDefinition(
+                    schema,
+                    {
+                      name: column.name,
+                      format: column.format,
+                      is_nullable: column.is_nullable,
+                      is_optional: false,
+                    },
+                    {
+                      types,
+                      schemas,
+                      tables,
+                      views,
+                    }
+                  )
+                )
+                .join(',\n')}
             }`
     }
 
@@ -230,35 +334,144 @@ export const apply = async ({
 
     return 'unknown'
   }
+  // Special error case for functions that take table row but don't qualify as embedded functions
+  const hasTableRowError = (fn: PostgresFunction, inArgs: PostgresFunction['args']) => {
+    if (
+      inArgs.length === 1 &&
+      inArgs[0].name === '' &&
+      relationTypeByIds.get(inArgs[0].type_id) &&
+      !getTableNameFromRelationId(fn.return_type_relation_id, fn.return_type_id)
+    ) {
+      return true
+    }
+    return false
+  }
+
+  // Check for generic conflict cases that need error reporting
+  const getConflictError = (
+    schema: PostgresSchema,
+    fns: Array<{ fn: PostgresFunction; inArgs: PostgresFunction['args'] }>,
+    fn: PostgresFunction,
+    inArgs: PostgresFunction['args']
+  ) => {
+    // If there is a single function definition, there is no conflict
+    if (fns.length <= 1) return null
+
+    // Generic conflict detection patterns
+    // Pattern 1: No-args vs default-args conflicts
+    if (inArgs.length === 0) {
+      const conflictingFns = fns.filter(({ fn: otherFn, inArgs: otherInArgs }) => {
+        if (otherFn === fn) return false
+        return otherInArgs.length === 1 && otherInArgs[0].name === '' && otherInArgs[0].has_default
+      })
+
+      if (conflictingFns.length > 0) {
+        const conflictingFn = conflictingFns[0]
+        const returnTypeName = typesById.get(conflictingFn.fn.return_type_id)?.name || 'unknown'
+        return `Could not choose the best candidate function between: ${schema.name}.${fn.name}(), ${schema.name}.${fn.name}( => ${returnTypeName}). Try renaming the parameters or the function itself in the database so function overloading can be resolved`
+      }
+    }
+
+    // Pattern 2: Same parameter name but different types (unresolvable overloads)
+    if (inArgs.length === 1 && inArgs[0].name !== '') {
+      const conflictingFns = fns.filter(({ fn: otherFn, inArgs: otherInArgs }) => {
+        if (otherFn === fn) return false
+        return (
+          otherInArgs.length === 1 &&
+          otherInArgs[0].name === inArgs[0].name &&
+          otherInArgs[0].type_id !== inArgs[0].type_id
+        )
+      })
+
+      if (conflictingFns.length > 0) {
+        const allConflictingFunctions = [{ fn, inArgs }, ...conflictingFns]
+        const conflictList = allConflictingFunctions
+          .sort((a, b) => {
+            const aArgs = a.inArgs
+            const bArgs = b.inArgs
+            return (aArgs[0]?.type_id || 0) - (bArgs[0]?.type_id || 0)
+          })
+          .map((f) => {
+            const args = f.inArgs
+            return `${schema.name}.${fn.name}(${args.map((a) => `${a.name || ''} => ${typesById.get(a.type_id)?.name || 'unknown'}`).join(', ')})`
+          })
+          .join(', ')
+
+        return `Could not choose the best candidate function between: ${conflictList}. Try renaming the parameters or the function itself in the database so function overloading can be resolved`
+      }
+    }
+
+    return null
+  }
 
   const getFunctionSignatures = (
     schema: PostgresSchema,
     fns: Array<{ fn: PostgresFunction; inArgs: PostgresFunction['args'] }>
   ) => {
-    const args = fns
-      .map(({ inArgs }) => {
-        if (inArgs.length === 0) {
-          return 'Record<PropertyKey, never>'
-        }
-        const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
-          const type = typesById.get(type_id)
-          let tsType = 'unknown'
-          if (type) {
-            tsType = pgTypeToTsType(schema, type.name, {
-              types,
-              schemas,
-              tables,
-              views,
+    return fns
+      .map(({ fn, inArgs }) => {
+        let argsType = 'never'
+        let returnType = getFunctionReturnType(schema, fn)
+
+        // Check for specific error cases
+        const conflictError = getConflictError(schema, fns, fn, inArgs)
+        if (conflictError) {
+          if (inArgs.length > 0) {
+            const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
+              const type = typesById.get(type_id)
+              let tsType = 'unknown'
+              if (type) {
+                tsType = pgTypeToTsType(schema, type.name, {
+                  types,
+                  schemas,
+                  tables,
+                  views,
+                })
+              }
+              return { name, type: tsType, has_default }
             })
+            argsType = `{ ${argsNameAndType.map(({ name, type, has_default }) => `${JSON.stringify(name)}${has_default ? '?' : ''}: ${type}`)} }`
           }
-          return { name, type: tsType, has_default }
-        })
-        return `{ ${argsNameAndType.map(({ name, type, has_default }) => `${JSON.stringify(name)}${has_default ? '?' : ''}: ${type}`)} }`
+          returnType = `{ error: true } & ${JSON.stringify(conflictError)}`
+        } else if (hasTableRowError(fn, inArgs)) {
+          // Special case for computed fields returning scalars functions
+          if (inArgs.length > 0) {
+            const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
+              const type = typesById.get(type_id)
+              let tsType = 'unknown'
+              if (type) {
+                tsType = pgTypeToTsType(schema, type.name, {
+                  types,
+                  schemas,
+                  tables,
+                  views,
+                })
+              }
+              return { name, type: tsType, has_default }
+            })
+            argsType = `{ ${argsNameAndType.map(({ name, type, has_default }) => `${JSON.stringify(name)}${has_default ? '?' : ''}: ${type}`)} }`
+          }
+          returnType = `{ error: true } & ${JSON.stringify(`the function ${schema.name}.${fn.name} with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache`)}`
+        } else if (inArgs.length > 0) {
+          const argsNameAndType = inArgs.map(({ name, type_id, has_default }) => {
+            const type = typesById.get(type_id)
+            let tsType = 'unknown'
+            if (type) {
+              tsType = pgTypeToTsType(schema, type.name, {
+                types,
+                schemas,
+                tables,
+                views,
+              })
+            }
+            return { name, type: tsType, has_default }
+          })
+          argsType = `{ ${argsNameAndType.map(({ name, type, has_default }) => `${JSON.stringify(name)}${has_default ? '?' : ''}: ${type}`)} }`
+        }
+
+        return `{ Args: ${argsType}; Returns: ${getFunctionTsReturnType(fn, returnType)} }`
       })
-      .toSorted()
-      // A function can have multiples definitions with differents args, but will always return the same type
-      .join(' | ')
-    return `{\nArgs: ${args}\n Returns: ${getFunctionTsReturnType(fns[0].fn, getFunctionReturnType(schema, fns[0].fn))}\n}`
+      .join(' |\n')
   }
 
   const internal_supabase_schema = postgrestVersion
@@ -268,6 +481,14 @@ export const apply = async ({
     PostgrestVersion: '${postgrestVersion}'
   }`
     : ''
+
+  function generateNullableUnionTsType(tsType: string, isNullable: boolean) {
+    // Only add the null union if the type is not unknown as unknown already includes null
+    if (tsType === 'unknown' || tsType === 'any' || !isNullable) {
+      return tsType
+    }
+    return `${tsType} | null`
+  }
 
   function generateColumnTsDefinition(
     schema: PostgresSchema,
@@ -284,7 +505,7 @@ export const apply = async ({
       views: PostgresView[]
     }
   ) {
-    return `${JSON.stringify(column.name)}${column.is_optional ? '?' : ''}: ${pgTypeToTsType(schema, column.format, context)} ${column.is_nullable ? '| null' : ''}`
+    return `${JSON.stringify(column.name)}${column.is_optional ? '?' : ''}: ${generateNullableUnionTsType(pgTypeToTsType(schema, column.format, context), column.is_nullable)}`
   }
 
   let output = `
@@ -324,7 +545,7 @@ export type Database = {
                       ...schemaFunctions
                         .filter(({ fn }) => fn.argument_types === table.name)
                         .map(({ fn }) => {
-                          return `${JSON.stringify(fn.name)}: ${getFunctionReturnType(schema, fn)} | null`
+                          return `${JSON.stringify(fn.name)}: ${generateNullableUnionTsType(getFunctionReturnType(schema, fn), true)}`
                         }),
                     ]}
                   }
@@ -380,18 +601,26 @@ export type Database = {
                 : schemaViews.map(
                     ({ view, relationships }) => `${JSON.stringify(view.name)}: {
                   Row: {
-                    ${columnsByTableId[view.id].map((column) =>
-                      generateColumnTsDefinition(
-                        schema,
-                        {
-                          name: column.name,
-                          format: column.format,
-                          is_nullable: column.is_nullable,
-                          is_optional: false,
-                        },
-                        { types, schemas, tables, views }
-                      )
-                    )}
+                    ${[
+                      ...columnsByTableId[view.id].map((column) =>
+                        generateColumnTsDefinition(
+                          schema,
+                          {
+                            name: column.name,
+                            format: column.format,
+                            is_nullable: column.is_nullable,
+                            is_optional: false,
+                          },
+                          { types, schemas, tables, views }
+                        )
+                      ),
+                      ...schemaFunctions
+                        .filter(({ fn }) => fn.argument_types === view.name)
+                        .map(
+                          ({ fn }) =>
+                            `${JSON.stringify(fn.name)}: ${generateNullableUnionTsType(getFunctionReturnType(schema, fn), true)}`
+                        ),
+                    ]}
                   }
                   ${
                     view.is_updatable
@@ -443,7 +672,6 @@ export type Database = {
               if (schemaFunctions.length === 0) {
                 return '[_ in never]: never'
               }
-
               const schemaFunctionsGroupedByName = schemaFunctions.reduce(
                 (acc, curr) => {
                   acc[curr.fn.name] ??= []
@@ -489,12 +717,15 @@ export type Database = {
                           const type = typesById.get(type_id)
                           let tsType = 'unknown'
                           if (type) {
-                            tsType = `${pgTypeToTsType(schema, type.name, {
-                              types,
-                              schemas,
-                              tables,
-                              views,
-                            })} | null`
+                            tsType = `${generateNullableUnionTsType(
+                              pgTypeToTsType(schema, type.name, {
+                                types,
+                                schemas,
+                                tables,
+                                views,
+                              }),
+                              true
+                            )}`
                           }
                           return `${JSON.stringify(name)}: ${tsType}`
                         })}

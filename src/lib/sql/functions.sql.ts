@@ -86,6 +86,10 @@ select
   nullif(rt.typrelid::int8, 0) as return_type_relation_id,
   f.proretset as is_set_returning_function,
   case
+    when f.proretset then nullif(f.prorows, 0)
+    else null
+  end as prorows,
+  case
     when f.provolatile = 'i' then 'IMMUTABLE'
     when f.provolatile = 's' then 'STABLE'
     when f.provolatile = 'v' then 'VOLATILE'
