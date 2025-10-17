@@ -16,7 +16,7 @@ const errorOnEmptyQuery = (request: FastifyRequest) => {
 export default async (fastify: FastifyInstance) => {
   fastify.post<{
     Headers: { pg: string; 'x-pg-application-name'?: string }
-    Body: { query: string; parameters?: any[] }
+    Body: { query: string; parameters?: unknown[] }
     Querystring: { statementTimeoutSecs?: number }
   }>('/', async (request, reply) => {
     const statementTimeoutSecs = request.query.statementTimeoutSecs
