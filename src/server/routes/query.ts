@@ -16,12 +16,8 @@ const errorOnEmptyQuery = (request: FastifyRequest) => {
 export default async (fastify: FastifyInstance) => {
   fastify.post<{
     Headers: { pg: string; 'x-pg-application-name'?: string }
-    Body: {
-      query: string
-    }
-    Querystring: {
-      statementTimeoutSecs?: number
-    }
+    Body: { query: string; parameters?: any[] }
+    Querystring: { statementTimeoutSecs?: number }
   }>('/', async (request, reply) => {
     const statementTimeoutSecs = request.query.statementTimeoutSecs
     errorOnEmptyQuery(request)
@@ -30,6 +26,7 @@ export default async (fastify: FastifyInstance) => {
     const { data, error } = await pgMeta.query(request.body.query, {
       trackQueryInSentry: true,
       statementQueryTimeout: statementTimeoutSecs,
+      parameters: request.body.parameters,
     })
     await pgMeta.end()
     if (error) {
@@ -43,9 +40,7 @@ export default async (fastify: FastifyInstance) => {
 
   fastify.post<{
     Headers: { pg: string; 'x-pg-application-name'?: string }
-    Body: {
-      query: string
-    }
+    Body: { query: string }
   }>('/format', async (request, reply) => {
     errorOnEmptyQuery(request)
     const { data, error } = await Parser.Format(request.body.query)
@@ -61,9 +56,7 @@ export default async (fastify: FastifyInstance) => {
 
   fastify.post<{
     Headers: { pg: string; 'x-pg-application-name'?: string }
-    Body: {
-      query: string
-    }
+    Body: { query: string }
   }>('/parse', async (request, reply) => {
     errorOnEmptyQuery(request)
     const { data, error } = Parser.Parse(request.body.query)
@@ -79,9 +72,7 @@ export default async (fastify: FastifyInstance) => {
 
   fastify.post<{
     Headers: { pg: string; 'x-pg-application-name'?: string }
-    Body: {
-      ast: object
-    }
+    Body: { ast: object }
   }>('/deparse', async (request, reply) => {
     const { data, error } = Parser.Deparse(request.body.ast)
 
