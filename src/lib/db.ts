@@ -23,7 +23,11 @@ pg.types.setTypeParser(1017, (x) => x) // _point
 
 // Ensure any query will have an appropriate error handler on the pool to prevent connections errors
 // to bubble up all the stack eventually killing the server
-const poolerQueryHandleError = (pgpool: pg.Pool, sql: string): Promise<pg.QueryResult<any>> => {
+const poolerQueryHandleError = (
+  pgpool: pg.Pool,
+  sql: string,
+  parameters?: unknown[]
+): Promise<pg.QueryResult<any>> => {
   return Sentry.startSpan(
     { op: 'db', name: 'poolerQuery' },
     () =>
@@ -44,7 +48,7 @@ const poolerQueryHandleError = (pgpool: pg.Pool, sql: string): Promise<pg.QueryR
         // such as parse or RESULT_SIZE_EXCEEDED errors instead, handle the error gracefully by bubbling in up to the caller
         pgpool.once('error', connectionErrorHandler)
         pgpool
-          .query(sql)
+          .query(sql, parameters)
           .then((results: pg.QueryResult<any>) => {
             if (!rejected) {
               return resolve(results)
@@ -64,7 +68,7 @@ const poolerQueryHandleError = (pgpool: pg.Pool, sql: string): Promise<pg.QueryR
 export const init: (config: PoolConfig) => {
   query: (
     sql: string,
-    opts?: { statementQueryTimeout?: number; trackQueryInSentry?: boolean }
+    opts?: { statementQueryTimeout?: number; trackQueryInSentry?: boolean; parameters?: unknown[] }
   ) => Promise<PostgresMetaResult<any>>
   end: () => Promise<void>
 } = (config) => {
@@ -108,7 +112,7 @@ export const init: (config: PoolConfig) => {
     return {
       async query(
         sql,
-        { statementQueryTimeout, trackQueryInSentry } = { trackQueryInSentry: true }
+        { statementQueryTimeout, trackQueryInSentry, parameters } = { trackQueryInSentry: true }
       ) {
         return Sentry.startSpan(
           // For metrics purposes, log the query that will be run if it's not an user provided query (with possibly sentitives infos)
@@ -131,7 +135,7 @@ export const init: (config: PoolConfig) => {
             try {
               if (!pool) {
                 const pool = new pg.Pool(config)
-                let res = await poolerQueryHandleError(pool, sqlWithStatementTimeout)
+                let res = await poolerQueryHandleError(pool, sqlWithStatementTimeout, parameters)
                 if (Array.isArray(res)) {
                   res = res.reverse().find((x) => x.rows.length !== 0) ?? { rows: [] }
                 }
@@ -139,7 +143,7 @@ export const init: (config: PoolConfig) => {
                 return { data: res.rows, error: null }
               }
 
-              let res = await poolerQueryHandleError(pool, sqlWithStatementTimeout)
+              let res = await poolerQueryHandleError(pool, sqlWithStatementTimeout, parameters)
               if (Array.isArray(res)) {
                 res = res.reverse().find((x) => x.rows.length !== 0) ?? { rows: [] }
               }

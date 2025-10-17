@@ -547,9 +547,7 @@ test('return interval as string', async () => {
   const res = await app.inject({
     method: 'POST',
     path: '/query',
-    payload: {
-      query: `SELECT '1 day 1 hour 45 minutes'::interval`,
-    },
+    payload: { query: `SELECT '1 day 1 hour 45 minutes'::interval` },
   })
   expect(res.json()).toMatchInlineSnapshot(`
     [
@@ -703,9 +701,7 @@ test('error with internalQuery property', async () => {
   const res = await app.inject({
     method: 'POST',
     path: '/query',
-    payload: {
-      query: 'SELECT test_internal_query();',
-    },
+    payload: { query: 'SELECT test_internal_query();' },
   })
 
   expect(res.json()).toMatchInlineSnapshot(`
@@ -737,12 +733,8 @@ test('custom application_name', async () => {
   const res = await app.inject({
     method: 'POST',
     path: '/query',
-    headers: {
-      'x-pg-application-name': 'test',
-    },
-    payload: {
-      query: 'SHOW application_name;',
-    },
+    headers: { 'x-pg-application-name': 'test' },
+    payload: { query: 'SHOW application_name;' },
   })
 
   expect(res.json()).toMatchInlineSnapshot(`
@@ -752,4 +744,96 @@ test('custom application_name', async () => {
       },
     ]
   `)
+})
+
+test('parameter binding with positional parameters', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: 'SELECT * FROM users WHERE id = $1 AND status = $2',
+      parameters: [1, 'ACTIVE'],
+    },
+  })
+  expect(res.json()).toMatchInlineSnapshot(`
+    [
+      {
+        "decimal": null,
+        "id": 1,
+        "name": "Joe Bloggs",
+        "status": "ACTIVE",
+      },
+    ]
+  `)
+})
+
+test('parameter binding with single parameter', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: { query: 'SELECT name FROM users WHERE id = $1', parameters: [2] },
+  })
+  expect(res.json()).toMatchInlineSnapshot(`
+    [
+      {
+        "name": "Jane Doe",
+      },
+    ]
+  `)
+})
+
+test('parameter binding with no matches', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: { query: 'SELECT * FROM users WHERE id = $1', parameters: [999] },
+  })
+  expect(res.json()).toMatchInlineSnapshot(`[]`)
+})
+
+test('no parameters field', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: { query: 'SELECT COUNT(*) as count FROM users' },
+  })
+  expect(res.json()).toMatchInlineSnapshot(`
+    [
+      {
+        "count": 2,
+      },
+    ]
+  `)
+})
+
+test('parameter binding with empty parameters array', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: { query: 'SELECT COUNT(*) as count FROM users', parameters: [] },
+  })
+  expect(res.json()).toMatchInlineSnapshot(`
+    [
+      {
+        "count": 2,
+      },
+    ]
+  `)
+})
+
+test('parameter binding error - wrong parameter count', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: 'SELECT * FROM users WHERE id = $1 AND status = $2',
+      parameters: [1], // Missing second parameter
+    },
+  })
+  expect(res.statusCode).toBe(400)
+  const json = res.json()
+  expect(json.code).toBe('08P01')
+  expect(json.message).toContain(
+    'bind message supplies 1 parameters, but prepared statement "" requires 2'
+  )
 })
