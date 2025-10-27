@@ -37,6 +37,70 @@ test('typegen: typescript', async () => {
             Update: {}
             Relationships: []
           }
+          events: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+              days_since_event: number | null
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
+          events_2024: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
+          events_2025: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
           foreign_table: {
             Row: {
               id: number
@@ -272,6 +336,7 @@ test('typegen: typescript', async () => {
               id: number
               previous_value: Json | null
               user_id: number | null
+              created_ago: number | null
             }
             Insert: {
               created_at?: string | null
@@ -473,6 +538,18 @@ test('typegen: typescript', async () => {
                   error: true
                 } & "the function public.blurb_varchar with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
               }
+          created_ago: {
+            Args: { "": Database["public"]["Tables"]["users_audit"]["Row"] }
+            Returns: {
+              error: true
+            } & "the function public.created_ago with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+          }
+          days_since_event: {
+            Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+            Returns: {
+              error: true
+            } & "the function public.days_since_event with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+          }
           details_is_long: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: {
@@ -1122,6 +1199,70 @@ test('typegen w/ one-to-one relationships', async () => {
             Update: {}
             Relationships: []
           }
+          events: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+              days_since_event: number | null
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
+          events_2024: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
+          events_2025: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
           foreign_table: {
             Row: {
               id: number
@@ -1370,6 +1511,7 @@ test('typegen w/ one-to-one relationships', async () => {
               id: number
               previous_value: Json | null
               user_id: number | null
+              created_ago: number | null
             }
             Insert: {
               created_at?: string | null
@@ -1583,6 +1725,18 @@ test('typegen w/ one-to-one relationships', async () => {
                   error: true
                 } & "the function public.blurb_varchar with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
               }
+          created_ago: {
+            Args: { "": Database["public"]["Tables"]["users_audit"]["Row"] }
+            Returns: {
+              error: true
+            } & "the function public.created_ago with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+          }
+          days_since_event: {
+            Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+            Returns: {
+              error: true
+            } & "the function public.days_since_event with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+          }
           details_is_long: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: {
@@ -2232,6 +2386,70 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Update: {}
             Relationships: []
           }
+          events: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+              days_since_event: number | null
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
+          events_2024: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
+          events_2025: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
           foreign_table: {
             Row: {
               id: number
@@ -2480,6 +2698,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id: number
               previous_value: Json | null
               user_id: number | null
+              created_ago: number | null
             }
             Insert: {
               created_at?: string | null
@@ -2693,6 +2912,18 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   error: true
                 } & "the function public.blurb_varchar with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
               }
+          created_ago: {
+            Args: { "": Database["public"]["Tables"]["users_audit"]["Row"] }
+            Returns: {
+              error: true
+            } & "the function public.created_ago with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+          }
+          days_since_event: {
+            Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+            Returns: {
+              error: true
+            } & "the function public.days_since_event with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+          }
           details_is_long: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: {
@@ -3347,6 +3578,70 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Update: {}
             Relationships: []
           }
+          events: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+              days_since_event: number | null
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
+          events_2024: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
+          events_2025: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
           foreign_table: {
             Row: {
               id: number
@@ -3595,6 +3890,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               id: number
               previous_value: Json | null
               user_id: number | null
+              created_ago: number | null
             }
             Insert: {
               created_at?: string | null
@@ -3808,6 +4104,18 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   error: true
                 } & "the function public.blurb_varchar with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
               }
+          created_ago: {
+            Args: { "": Database["public"]["Tables"]["users_audit"]["Row"] }
+            Returns: {
+              error: true
+            } & "the function public.created_ago with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+          }
+          days_since_event: {
+            Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+            Returns: {
+              error: true
+            } & "the function public.days_since_event with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+          }
           details_is_long: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: {
@@ -4806,6 +5114,69 @@ test('typegen: go', async () => {
       OtherId *int64  \`json:"other_id"\`
     }
 
+    type PublicEventsSelect struct {
+      CreatedAt string      \`json:"created_at"\`
+      Data      interface{} \`json:"data"\`
+      EventType *string     \`json:"event_type"\`
+      Id        int64       \`json:"id"\`
+    }
+
+    type PublicEventsInsert struct {
+      CreatedAt *string     \`json:"created_at"\`
+      Data      interface{} \`json:"data"\`
+      EventType *string     \`json:"event_type"\`
+      Id        *int64      \`json:"id"\`
+    }
+
+    type PublicEventsUpdate struct {
+      CreatedAt *string     \`json:"created_at"\`
+      Data      interface{} \`json:"data"\`
+      EventType *string     \`json:"event_type"\`
+      Id        *int64      \`json:"id"\`
+    }
+
+    type PublicEvents2024Select struct {
+      CreatedAt string      \`json:"created_at"\`
+      Data      interface{} \`json:"data"\`
+      EventType *string     \`json:"event_type"\`
+      Id        int64       \`json:"id"\`
+    }
+
+    type PublicEvents2024Insert struct {
+      CreatedAt *string     \`json:"created_at"\`
+      Data      interface{} \`json:"data"\`
+      EventType *string     \`json:"event_type"\`
+      Id        int64       \`json:"id"\`
+    }
+
+    type PublicEvents2024Update struct {
+      CreatedAt *string     \`json:"created_at"\`
+      Data      interface{} \`json:"data"\`
+      EventType *string     \`json:"event_type"\`
+      Id        *int64      \`json:"id"\`
+    }
+
+    type PublicEvents2025Select struct {
+      CreatedAt string      \`json:"created_at"\`
+      Data      interface{} \`json:"data"\`
+      EventType *string     \`json:"event_type"\`
+      Id        int64       \`json:"id"\`
+    }
+
+    type PublicEvents2025Insert struct {
+      CreatedAt *string     \`json:"created_at"\`
+      Data      interface{} \`json:"data"\`
+      EventType *string     \`json:"event_type"\`
+      Id        int64       \`json:"id"\`
+    }
+
+    type PublicEvents2025Update struct {
+      CreatedAt *string     \`json:"created_at"\`
+      Data      interface{} \`json:"data"\`
+      EventType *string     \`json:"event_type"\`
+      Id        *int64      \`json:"id"\`
+    }
+
     type PublicCategorySelect struct {
       Id   int32  \`json:"id"\`
       Name string \`json:"name"\`
@@ -4941,6 +5312,114 @@ test('typegen: swift', async () => {
       internal struct EmptyInsert: Codable, Hashable, Sendable {
       }
       internal struct EmptyUpdate: Codable, Hashable, Sendable {
+      }
+      internal struct EventsSelect: Codable, Hashable, Sendable, Identifiable {
+        internal let createdAt: String
+        internal let data: AnyJSON?
+        internal let eventType: String?
+        internal let id: Int64
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      internal struct EventsInsert: Codable, Hashable, Sendable, Identifiable {
+        internal let createdAt: String?
+        internal let data: AnyJSON?
+        internal let eventType: String?
+        internal let id: Int64?
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      internal struct EventsUpdate: Codable, Hashable, Sendable, Identifiable {
+        internal let createdAt: String?
+        internal let data: AnyJSON?
+        internal let eventType: String?
+        internal let id: Int64?
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      internal struct Events2024Select: Codable, Hashable, Sendable {
+        internal let createdAt: String
+        internal let data: AnyJSON?
+        internal let eventType: String?
+        internal let id: Int64
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      internal struct Events2024Insert: Codable, Hashable, Sendable {
+        internal let createdAt: String?
+        internal let data: AnyJSON?
+        internal let eventType: String?
+        internal let id: Int64
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      internal struct Events2024Update: Codable, Hashable, Sendable {
+        internal let createdAt: String?
+        internal let data: AnyJSON?
+        internal let eventType: String?
+        internal let id: Int64?
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      internal struct Events2025Select: Codable, Hashable, Sendable {
+        internal let createdAt: String
+        internal let data: AnyJSON?
+        internal let eventType: String?
+        internal let id: Int64
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      internal struct Events2025Insert: Codable, Hashable, Sendable {
+        internal let createdAt: String?
+        internal let data: AnyJSON?
+        internal let eventType: String?
+        internal let id: Int64
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      internal struct Events2025Update: Codable, Hashable, Sendable {
+        internal let createdAt: String?
+        internal let data: AnyJSON?
+        internal let eventType: String?
+        internal let id: Int64?
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
       }
       internal struct ForeignTableSelect: Codable, Hashable, Sendable {
         internal let id: Int64
@@ -5326,6 +5805,114 @@ test('typegen: swift w/ public access control', async () => {
       public struct EmptyInsert: Codable, Hashable, Sendable {
       }
       public struct EmptyUpdate: Codable, Hashable, Sendable {
+      }
+      public struct EventsSelect: Codable, Hashable, Sendable, Identifiable {
+        public let createdAt: String
+        public let data: AnyJSON?
+        public let eventType: String?
+        public let id: Int64
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      public struct EventsInsert: Codable, Hashable, Sendable, Identifiable {
+        public let createdAt: String?
+        public let data: AnyJSON?
+        public let eventType: String?
+        public let id: Int64?
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      public struct EventsUpdate: Codable, Hashable, Sendable, Identifiable {
+        public let createdAt: String?
+        public let data: AnyJSON?
+        public let eventType: String?
+        public let id: Int64?
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      public struct Events2024Select: Codable, Hashable, Sendable {
+        public let createdAt: String
+        public let data: AnyJSON?
+        public let eventType: String?
+        public let id: Int64
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      public struct Events2024Insert: Codable, Hashable, Sendable {
+        public let createdAt: String?
+        public let data: AnyJSON?
+        public let eventType: String?
+        public let id: Int64
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      public struct Events2024Update: Codable, Hashable, Sendable {
+        public let createdAt: String?
+        public let data: AnyJSON?
+        public let eventType: String?
+        public let id: Int64?
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      public struct Events2025Select: Codable, Hashable, Sendable {
+        public let createdAt: String
+        public let data: AnyJSON?
+        public let eventType: String?
+        public let id: Int64
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      public struct Events2025Insert: Codable, Hashable, Sendable {
+        public let createdAt: String?
+        public let data: AnyJSON?
+        public let eventType: String?
+        public let id: Int64
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      public struct Events2025Update: Codable, Hashable, Sendable {
+        public let createdAt: String?
+        public let data: AnyJSON?
+        public let eventType: String?
+        public let id: Int64?
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
       }
       public struct ForeignTableSelect: Codable, Hashable, Sendable {
         public let id: Int64
