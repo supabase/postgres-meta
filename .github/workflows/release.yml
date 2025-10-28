@@ -18,6 +18,7 @@ jobs:
       new-release-version: ${{ steps.semantic-release.outputs.new_release_version }}
     permissions:
       contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v5
 
@@ -30,12 +31,11 @@ jobs:
           npm run build
 
       - id: semantic-release
-        uses: cycjimmy/semantic-release-action@v4
+        uses: cycjimmy/semantic-release-action@v5
         with:
-          semantic_version: 21
+          semantic_version: 25.0.1 # version with latest npm and support for trusted publishing
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   docker-hub:
     name: Release on Docker Hub
