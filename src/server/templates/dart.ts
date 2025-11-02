@@ -642,6 +642,13 @@ export function sortTypesByDependency(types: PostgresType[]): PostgresType[] {
   )
 }
 
+/**
+ * Find the subset of all the types that are actually used by the columns.
+ *
+ * @param types Array of all the existing PostgreSQL types to choose from
+ * @param types Array of the columns we are going to get the types from
+ * @returns Array of the types that are used by the columns
+ */
 export function getRequiredTypes(
   allTypes: PostgresType[],
   columns: PostgresColumn[]
