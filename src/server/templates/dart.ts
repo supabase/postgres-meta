@@ -311,13 +311,14 @@ class ClassDartConstruct implements Declarable {
 
   constructor(
     rowableName: string,
+    schema: string,
     operations: Operation[],
     columns: PostgresColumn[],
     ptdMap: PostgresToDartMap
   ) {
     this.rowableName = rowableName
-    this.rowClassName = `${formatForDartClassName(rowableName)}Row`
-    this.entityClassName = `${formatForDartClassName(rowableName)}Entity`
+    this.rowClassName = `${formatForDartClassName(schema)}${formatForDartClassName(rowableName)}Row`
+    this.entityClassName = `${formatForDartClassName(schema)}${formatForDartClassName(rowableName)}Entity`
     this.operations = operations
     this.columns = columns
     this.ptdMap = ptdMap
@@ -740,6 +741,7 @@ export const apply = ({ schemas, tables, views, columns, types }: GeneratorMetad
       (table) =>
         new ClassDartConstruct(
           table.name,
+          table.schema,
           ['Select', 'Insert', 'Update'],
           columnsByTableId[table.id],
           ptdMap
@@ -748,7 +750,7 @@ export const apply = ({ schemas, tables, views, columns, types }: GeneratorMetad
 
   const viewClassConstructs = views
     .filter((view) => schemas.some((schema) => schema.name === view.schema))
-    .map((view) => new ClassDartConstruct(view.name, ['Select'], columnsByTableId[view.id], ptdMap))
+    .map((view) => new ClassDartConstruct(view.name, view.schema, ['Select'], columnsByTableId[view.id], ptdMap))
 
   let result = `
 Duration parsePostgresInterval(String interval) {
