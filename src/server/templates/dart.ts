@@ -158,16 +158,16 @@ class MapDartType implements DartType {
 }
 
 class EnumDartConstruct implements DartType, Declarable {
-  originalName: string
+  name: string
   values: string[]
 
-  constructor(name: string, values: string[], comment: string | null) {
-    this.originalName = name
+  constructor(name: string, schema: string, values: string[], comment: string | null) {
+    this.name = `${formatForDartClassName(schema)}${formatForDartClassName(name)}`
     this.values = values
   }
 
   generateType(): string {
-    return formatForDartClassName(this.originalName)
+    return this.name
   }
 
   generateJsonEncoding(): string {
@@ -175,11 +175,11 @@ class EnumDartConstruct implements DartType, Declarable {
   }
 
   generateJsonDecoding(inputParameter: string): string {
-    return `${formatForDartClassName(this.originalName)}.fromJson(${inputParameter})`
+    return `${this.name}.fromJson(${inputParameter})`
   }
 
   generateDeclaration(): string {
-    return `enum ${formatForDartClassName(this.originalName)} {
+    return `enum ${this.name} {
 ${this.values.map((v) => `  ${formatForDartPropertyName(v)}`).join(',\n')};
 
   String toJson() {
@@ -187,20 +187,20 @@ ${this.values.map((v) => `  ${formatForDartPropertyName(v)}`).join(',\n')};
 ${this.values
   .map(
     (v) =>
-      `     case ${formatForDartClassName(this.originalName)}.${formatForDartPropertyName(v)}:
+      `     case ${this.name}.${formatForDartPropertyName(v)}:
         return '${v}';`
   )
   .join('\n')}
     }
   }
 
-  factory ${formatForDartClassName(this.originalName)}.fromJson(String name) {
+  factory ${this.name}.fromJson(String name) {
     switch(name) {
 ${this.values
   .map(
     (v) =>
       `     case '${v}':
-        return ${formatForDartClassName(this.originalName)}.${formatForDartPropertyName(v)};`
+        return ${this.name}.${formatForDartPropertyName(v)};`
   )
   .join('\n')}
     }
@@ -219,7 +219,7 @@ class ClassDartConstructForCompositeType implements DartType, Declarable {
   constructor(postgresType: PostgresType, ptdMap: PostgresToDartMap) {
     this.postgresType = postgresType
     this.ptdMap = ptdMap
-    this.name = `${formatForDartClassName(this.postgresType.name)}`
+    this.name = `${formatForDartClassName(this.postgresType.schema)}${formatForDartClassName(this.postgresType.name)}`
   }
 
   generateType(): string {
@@ -551,6 +551,7 @@ function buildDartTypeFromPostgresType(
   if (postgresType.enums.length > 0) {
     const enumConstruct = new EnumDartConstruct(
       postgresType.name,
+      postgresType.schema,
       postgresType.enums,
       postgresType.comment
     )
