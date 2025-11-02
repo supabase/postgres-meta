@@ -226,14 +226,15 @@ class ClassDartConstruct implements Declarable {
     ptdMap: PostgresToDartMap
   ) {
     this.rowableName = rowableName
-    this.rowClassName = `${formatForDartClassName(schema)}${formatForDartClassName(rowableName)}Row`
+    this.rowClassName = `${formatForDartClassName(schema)}${formatForDartClassName(rowableName)}`
     this.operations = operations
     this.columns = columns
     this.ptdMap = ptdMap
   }
 
-  generateDeclaration(): string {
-    return `class ${this.rowClassName} implements JsonSerializable {
+  generateSelectDeclaration(): string {
+    const className = `${this.rowClassName}Select`
+    return `class ${className} implements JsonSerializable {
   static const tableName = '${this.rowableName}';
   ${this.columns
       .map((column) => {
@@ -242,7 +243,7 @@ class ClassDartConstruct implements Declarable {
       })
       .join('')}
 
-  const ${this.rowClassName}({${this.columns
+  const ${className}({${this.columns
     .map((column) => {
       return `
     ${buildDartTypeFromPostgresColumn(column, this.ptdMap) instanceof NullDartType ? '' : 'required '}this.${formatForDartPropertyName(column.name)}`
@@ -274,8 +275,8 @@ class ClassDartConstruct implements Declarable {
   );
 
   @override
-  factory ${this.rowClassName}.fromJson(Map<String, dynamic> jsonObject) {
-    return ${this.rowClassName}(${this.columns
+  factory ${className}.fromJson(Map<String, dynamic> jsonObject) {
+    return ${className}(${this.columns
       .map((column) => {
         return `
       ${formatForDartPropertyName(column.name)}: ${buildDartTypeFromPostgresColumn(column, this.ptdMap).generateJsonDecoding(`jsonObject['${column.name}']`)}`
@@ -284,14 +285,14 @@ class ClassDartConstruct implements Declarable {
     );
   }
 
-  ${this.rowClassName} copyWith({${this.columns
+  ${className} copyWith({${this.columns
     .map((column) => {
       return `
     ${new NullDartType(buildDartTypeFromPostgresColumn(column, this.ptdMap)).generateType()} ${formatForDartPropertyName(column.name)}`
     })
     .join(',')}
   }) {
-    return ${this.rowClassName}(${this.columns
+    return ${className}(${this.columns
     .map((column) => {
       return `
       ${formatForDartPropertyName(column.name)}: ${formatForDartPropertyName(column.name)} ?? this.${formatForDartPropertyName(column.name)}`
@@ -299,27 +300,160 @@ class ClassDartConstruct implements Declarable {
     .join(',')}
     );
   }
-${
-  this.operations.indexOf('Insert') !== -1
-    ? `
-  static Map<String, dynamic> forInsert({${this.columns
+}
+`
+  }
+
+  generateInsertDeclaration(): string {
+    const className = `${this.rowClassName}Insert`
+    return `class ${className} implements JsonSerializable {
+  static const tableName = '${this.rowableName}';
+  ${this.columns
+      .map((column) => {
+        return `
+  final ${buildDartTypeFromPostgresColumn(column, this.ptdMap, true).generateType()} ${formatForDartPropertyName(column.name)};`
+      })
+      .join('')}
+
+  const ${className}({${this.columns
     .map((column) => {
       return `
-    ${(buildDartTypeFromPostgresColumn(column, this.ptdMap, true) instanceof NullDartType) ? '' : 'required '}${buildDartTypeFromPostgresColumn(column, this.ptdMap, true).generateType()} ${formatForDartPropertyName(column.name)}`
+    ${buildDartTypeFromPostgresColumn(column, this.ptdMap, true) instanceof NullDartType ? '' : 'required '}this.${formatForDartPropertyName(column.name)}`
     })
     .join(',')}
-  }) => _generateMap(${this.columns
+  });
+
+  static Map<String, dynamic> _generateMap({${this.columns
+    .map((column) => {
+      return `
+    ${new NullDartType(buildDartTypeFromPostgresColumn(column, this.ptdMap, true)).generateType()} ${formatForDartPropertyName(column.name)}`
+    })
+    .join(',')}
+  }) => {${this.columns
+    .map((column) => {
+      return `
+    if (${formatForDartPropertyName(column.name)} != null) '${column.name}': ${formatForDartPropertyName(column.name)}${buildDartTypeFromPostgresColumn(column, this.ptdMap, true).generateJsonEncoding()}`
+    })
+    .join(',')}
+  };
+
+  @override
+  Map<String, dynamic> toJson() => _generateMap(${this.columns
     .map((column) => {
       return `
     ${formatForDartPropertyName(column.name)}: ${formatForDartPropertyName(column.name)}`
     })
     .join(',')}
   );
-`
-    : ''
+
+  @override
+  factory ${className}.fromJson(Map<String, dynamic> jsonObject) {
+    return ${className}(${this.columns
+      .map((column) => {
+        return `
+      ${formatForDartPropertyName(column.name)}: ${buildDartTypeFromPostgresColumn(column, this.ptdMap, true).generateJsonDecoding(`jsonObject['${column.name}']`)}`
+      })
+      .join(',')}
+    );
+  }
+
+  ${className} copyWith({${this.columns
+    .map((column) => {
+      return `
+    ${new NullDartType(buildDartTypeFromPostgresColumn(column, this.ptdMap, true)).generateType()} ${formatForDartPropertyName(column.name)}`
+    })
+    .join(',')}
+  }) {
+    return ${className}(${this.columns
+    .map((column) => {
+      return `
+      ${formatForDartPropertyName(column.name)}: ${formatForDartPropertyName(column.name)} ?? this.${formatForDartPropertyName(column.name)}`
+    })
+    .join(',')}
+    );
+  }
 }
+`
+  }
+
+  generateUpdateDeclaration(): string {
+    const className = `${this.rowClassName}Update`
+    return `class ${className} implements JsonSerializable {
+  static const tableName = '${this.rowableName}';
+  ${this.columns
+      .map((column) => {
+        return `
+  final ${new NullDartType(buildDartTypeFromPostgresColumn(column, this.ptdMap, true)).generateType()} ${formatForDartPropertyName(column.name)};`
+      })
+      .join('')}
+
+  const ${className}({${this.columns
+    .map((column) => {
+      return `
+    this.${formatForDartPropertyName(column.name)}`
+    })
+    .join(',')}
+  });
+
+  static Map<String, dynamic> _generateMap({${this.columns
+    .map((column) => {
+      return `
+    ${new NullDartType(new NullDartType(buildDartTypeFromPostgresColumn(column, this.ptdMap, true))).generateType()} ${formatForDartPropertyName(column.name)}`
+    })
+    .join(',')}
+  }) => {${this.columns
+    .map((column) => {
+      return `
+    if (${formatForDartPropertyName(column.name)} != null) '${column.name}': ${formatForDartPropertyName(column.name)}${new NullDartType(buildDartTypeFromPostgresColumn(column, this.ptdMap, true)).generateJsonEncoding()}`
+    })
+    .join(',')}
+  };
+
+  @override
+  Map<String, dynamic> toJson() => _generateMap(${this.columns
+    .map((column) => {
+      return `
+    ${formatForDartPropertyName(column.name)}: ${formatForDartPropertyName(column.name)}`
+    })
+    .join(',')}
+  );
+
+  @override
+  factory ${className}.fromJson(Map<String, dynamic> jsonObject) {
+    return ${className}(${this.columns
+      .map((column) => {
+        return `
+      ${formatForDartPropertyName(column.name)}: ${new NullDartType(buildDartTypeFromPostgresColumn(column, this.ptdMap, true)).generateJsonDecoding(`jsonObject['${column.name}']`)}`
+      })
+      .join(',')}
+    );
+  }
+
+  ${className} copyWith({${this.columns
+    .map((column) => {
+      return `
+    ${new NullDartType(new NullDartType(buildDartTypeFromPostgresColumn(column, this.ptdMap, true))).generateType()} ${formatForDartPropertyName(column.name)}`
+    })
+    .join(',')}
+  }) {
+    return ${className}(${this.columns
+    .map((column) => {
+      return `
+      ${formatForDartPropertyName(column.name)}: ${formatForDartPropertyName(column.name)} ?? this.${formatForDartPropertyName(column.name)}`
+    })
+    .join(',')}
+    );
+  }
 }
 `
+  }
+
+  generateDeclaration(): string {
+    return `${this.operations.indexOf('Select') !== -1 ? this.generateSelectDeclaration() : ''}
+
+${this.operations.indexOf('Insert') !== -1 ? this.generateInsertDeclaration() : ''}
+
+${this.operations.indexOf('Update') !== -1 ? this.generateUpdateDeclaration() : ''}`
   }
 }
 
