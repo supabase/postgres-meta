@@ -74,7 +74,7 @@ export default async (fastify: FastifyInstance) => {
     Headers: { pg: string; 'x-pg-application-name'?: string }
     Body: { ast: object }
   }>('/deparse', async (request, reply) => {
-    const { data, error } = Parser.Deparse(request.body.ast)
+    const { data, error } = await Parser.Deparse(request.body.ast)
 
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
