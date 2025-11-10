@@ -53,7 +53,7 @@
     "pg-connection-string": "^2.7.0",
     "pg-format": "^1.0.4",
     "pg-protocol": "npm:@supabase/pg-protocol@0.0.2",
-    "pgsql-parser": "^13.16.0",
+    "pgsql-parser": "^17.8.2",
     "pino": "^9.5.0",
     "postgres-array": "^3.0.1",
     "prettier": "^3.3.3",
