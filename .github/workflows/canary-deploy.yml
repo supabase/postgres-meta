@@ -40,7 +40,7 @@ jobs:
           echo "PR #${{ github.event.pull_request.number }} from fork: ${{ github.event.pull_request.head.repo.full_name }}"
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
           cache: 'npm'
