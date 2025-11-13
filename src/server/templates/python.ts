@@ -91,6 +91,24 @@ class PythonContext {
     const schema = this.schemas[type.schema];
     return new PythonClass(type.name, schema, attributeEntries);
   }
+
+  viewToClass(view: PostgresView) : PythonClass {
+    const attributes: PythonClassAttribute[] = (this.columns[view.id] ?? [])
+      .map((col) => {
+        const type = new PythonConcreteType(this, col.format, col.is_nullable);
+        return new PythonClassAttribute(col.name, type);
+      });
+    return new PythonClass(view.name, this.schemas[view.schema], attributes)
+  }
+
+  matViewToClass(matview: PostgresMaterializedView) : PythonClass {
+    const attributes: PythonClassAttribute[] = (this.columns[matview.id] ?? [])
+      .map((col) => {
+        const type = new PythonConcreteType(this, col.format, col.is_nullable);
+        return new PythonClassAttribute(col.name, type);
+      });
+    return new PythonClass(matview.name, this.schemas[matview.schema], attributes)
+  }
 }
 
 
@@ -249,8 +267,11 @@ export const apply = ({
   const py_tables = tables
     .filter((table) => schemas.some((schema) => schema.name === table.schema))
     .map((table) => ctx.tableToClass(table));
-  console.log('composite_types');
+
   const composite_types = types.filter((type) => type.attributes.length > 0).map((type) => ctx.typeToClass(type));
+  console.log(views);
+  const py_views = views.map((view) => ctx.viewToClass(view));
+  const py_matviews = materializedViews.map((matview) => ctx.matViewToClass(matview));
 
   let output = `
 import datetime
@@ -260,49 +281,15 @@ from pydantic import BaseModel, Field, Json
 
 ${concatLines(Object.values(ctx.user_enums))}
 
-${concatLines(py_tables)}
-
 ${concatLines(composite_types)}
 
+${concatLines(py_tables)}
+
+${concatLines(py_views)}
+
+${concatLines(py_matviews)}
+
 `.trim()
-
-// ${views
-//   .filter((view) => schemas.some((schema) => schema.name === view.schema))
-//   .flatMap((view) =>
-//     generateTableStructsForOperations(
-//       schemas.find((schema) => schema.name === view.schema)!,
-//       view,
-//       columnsByTableId[view.id],
-//       types,
-//       ['Select']
-//     )
-//   )
-//   .join('\n\n')}
-
-// ${materializedViews
-//   .filter((materializedView) => schemas.some((schema) => schema.name === materializedView.schema))
-//   .flatMap((materializedView) =>
-//     generateTableStructsForOperations(
-//       schemas.find((schema) => schema.name === materializedView.schema)!,
-//       materializedView,
-//       columnsByTableId[materializedView.id],
-//       types,
-//       ['Select']
-//     )
-//   )
-//   .join('\n\n')}
-
-// ${compositeTypes
-//   .filter((compositeType) => schemas.some((schema) => schema.name === compositeType.schema))
-//   .map((compositeType) =>
-//     generateCompositeTypeStruct(
-//       schemas.find((schema) => schema.name === compositeType.schema)!,
-//       compositeType,
-//       types
-//     )
-//   )
-//   .join('\n\n')}
-// `.trim()
 
   return output
 }
