@@ -47,7 +47,9 @@ class PythonContext {
       return PY_TYPE_MAP[name]
     }
     if (name in this.types) {
-      return formatForPyClassName(this.types[name].name);
+      const type = this.types[name];
+      const schema = type!.schema;
+      return `${formatForPyClassName(schema)}${formatForPyClassName(name)}`;
     }
      throw new TypeError(`Unknown row type: ${name}`);
   }
@@ -251,9 +253,10 @@ export const apply = ({
   const composite_types = types.filter((type) => type.attributes.length > 0).map((type) => ctx.typeToClass(type));
 
   let output = `
-from pydantic import BaseModel, Json, Field
-from typing import Any, Annotated, Literal, Optional, TypeAlias
 import datetime
+from typing import Annotated, Any, List, Literal, Optional, TypeAlias
+
+from pydantic import BaseModel, Field, Json
 
 ${concatLines(Object.values(ctx.user_enums))}
 
