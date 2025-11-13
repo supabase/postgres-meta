@@ -7,9 +7,6 @@ import type {
   PostgresView,
 } from '../../lib/index.js'
 import type { GeneratorMetadata } from '../../lib/generators.js'
-import { console } from 'inspector/promises';
-
-type Operation = 'Select' | 'Insert' | 'Update'
 
 interface Serializable {
   serialize(): string
@@ -18,7 +15,7 @@ interface Serializable {
 class PythonContext {
   types: { [k: string]: PostgresType };
   user_enums: { [k: string]: PythonEnum };
-  columns: Record<string, PostgresColumn[]>;
+  columns: Record<number, PostgresColumn[]>;
   schemas: { [k: string]: PostgresSchema };
 
   constructor(types: PostgresType[], columns: PostgresColumn[], schemas: PostgresSchema[]) {
@@ -32,7 +29,7 @@ class PythonContext {
           acc[curr.table_id].push(curr)
           return acc
         },
-        {} as Record<string, PostgresColumn[]>
+        {} as Record<number, PostgresColumn[]>
       );
     this.user_enums = Object.fromEntries(types
       .filter((type) => type.enums.length > 0)
@@ -49,14 +46,15 @@ class PythonContext {
     if (name in this.types) {
       const type = this.types[name];
       const schema = type!.schema;
-      return `${formatForPyClassName(schema)}${formatForPyClassName(name)}`;
+      return `${formatForPyClassName(schema)}${formatForPyClassName(type.name)}`;
     }
-     throw new TypeError(`Unknown row type: ${name}`);
+    console.log(`Unknown recognized row type ${name}`);
+    return 'Any';
   }
 
   parsePgType(pg_type: string) : PythonType {
-    if (pg_type.endsWith('[]')) {
-      const inner_str = pg_type.slice(0, -2);
+    if (pg_type.startsWith('_')) {
+      const inner_str = pg_type.slice(1);
       const inner = this.parsePgType(inner_str);
       return new PythonListType(inner);
     } else {
@@ -65,15 +63,6 @@ class PythonContext {
     }
   }
 
-  tableToClass(table: PostgresTable) : PythonClass {
-    const attributes: PythonClassAttribute[] = (this.columns[table.id] ?? [])
-      .map((col) => {
-        const type = new PythonConcreteType(this, col.format, col.is_nullable);
-        return new PythonClassAttribute(col.name, type);
-      });
-    return new PythonClass(table.name, this.schemas[table.schema], attributes)
-  }
-  
   typeToClass(type: PostgresType) : PythonClass {
     const types = Object.values(this.types);
     const attributes = type.attributes.map((attribute) => {
@@ -85,28 +74,38 @@ class PythonContext {
     });
     const attributeEntries: PythonClassAttribute[] = attributes
       .map((attribute) => {
-        const type = new PythonConcreteType(this, attribute.type!.format, false);
-        return new PythonClassAttribute(attribute.name, type);
+        const type = this.parsePgType(attribute.type!.name);
+        return new PythonClassAttribute(attribute.name, type, false, false, false, false);
       });
     const schema = this.schemas[type.schema];
     return new PythonClass(type.name, schema, attributeEntries);
   }
 
+  columnsToClassAttrs(table_id: number) : PythonClassAttribute[] {
+    const attrs = this.columns[table_id] ?? [];
+    return attrs.map((col) => {
+      const type = this.parsePgType(col.format);
+      return new PythonClassAttribute(col.name, type,
+        col.is_nullable,
+        col.is_updatable,
+        col.is_generated || !!col.default_value,
+        col.is_identity);
+    });
+  }
+
+  tableToClass(table: PostgresTable) : PythonClass {
+    const attributes = this.columnsToClassAttrs(table.id);
+    return new PythonClass(table.name, this.schemas[table.schema], attributes)
+  }
+  
+
   viewToClass(view: PostgresView) : PythonClass {
-    const attributes: PythonClassAttribute[] = (this.columns[view.id] ?? [])
-      .map((col) => {
-        const type = new PythonConcreteType(this, col.format, col.is_nullable);
-        return new PythonClassAttribute(col.name, type);
-      });
+    const attributes = this.columnsToClassAttrs(view.id);
     return new PythonClass(view.name, this.schemas[view.schema], attributes)
   }
 
   matViewToClass(matview: PostgresMaterializedView) : PythonClass {
-    const attributes: PythonClassAttribute[] = (this.columns[matview.id] ?? [])
-      .map((col) => {
-        const type = new PythonConcreteType(this, col.format, col.is_nullable);
-        return new PythonClassAttribute(col.name, type);
-      });
+    const attributes = this.columnsToClassAttrs(matview.id);
     return new PythonClass(matview.name, this.schemas[matview.schema], attributes)
   }
 }
@@ -116,7 +115,7 @@ class PythonEnum implements Serializable {
   name: string;
   variants: string[];
   constructor(type: PostgresType) {
-    this.name = formatForPyClassName(type.name);
+    this.name = `${formatForPyClassName(type.schema)}${formatForPyClassName(type.name)}`;
     this.variants = type.enums.map(formatForPyAttributeName);
   }
   serialize(): string {
@@ -147,58 +146,71 @@ class PythonListType implements Serializable {
   }  
 }
 
-class PythonConcreteType implements Serializable {
-  py_type: PythonType;
-  pg_name: string;
-  nullable: boolean;
-  default_value: string | null;
-  constructor(ctx: PythonContext, pg_name: string, nullable: boolean) {
-    const py_type = ctx.parsePgType(pg_name);
-    
-    this.py_type = py_type;
-    this.pg_name = pg_name;
-    this.nullable = nullable;
-    this.default_value = null;
-  }
-
-  serialize() : string {
-    return this.nullable
-      ? `Optional[${this.py_type.serialize()}]`
-      : this.py_type.serialize();
-  }
-}
-
 class PythonClassAttribute implements Serializable {
   name: string;
   pg_name: string;
-  py_type: PythonConcreteType;
-  constructor(name: string, py_type: PythonConcreteType) {
+  py_type: PythonType;
+  nullable: boolean;
+  mutable: boolean;
+  has_default: boolean;
+  is_identity: boolean;
+
+    
+  constructor(name: string, py_type: PythonType, nullable: boolean, mutable: boolean, has_default: boolean, is_identity: boolean) {
     this.name = formatForPyAttributeName(name);
     this.pg_name = name;
     this.py_type = py_type;
+    this.nullable = nullable;
+    this.mutable = mutable;
+    this.has_default = has_default;
+    this.is_identity = is_identity;
   }
+  
   serialize(): string {
-    return `    ${this.name}: Annotated[${this.py_type.serialize()}, Field(alias="${this.pg_name}")]`
+    const py_type = this.nullable
+      ? `Optional[${this.py_type.serialize()}]`
+      : this.py_type.serialize();
+    return `    ${this.name}: Annotated[${py_type}, Field(alias="${this.pg_name}")]`
   }
+
 }
 
 class PythonClass implements Serializable {
   name: string;
+  table_name: string;
+  parent_class: string;
   schema: PostgresSchema;
   class_attributes: PythonClassAttribute[];
   
-
-  constructor(name: string, schema: PostgresSchema, class_attributes: PythonClassAttribute[]) {
+  constructor(name: string, schema: PostgresSchema, class_attributes: PythonClassAttribute[], parent_class: string="BaseModel") {
     this.schema = schema;
     this.class_attributes = class_attributes;
+    this.table_name = name;
     this.name = `${formatForPyClassName(schema.name)}${formatForPyClassName(name)}`;
+    this.parent_class = parent_class;
   }
   serialize(): string {
     const attributes = this.class_attributes.length > 0
       ? this.class_attributes.map((attr) => attr.serialize()).join('\n')
       : "    pass";
-    return `class ${this.name}(BaseModel):\n${attributes}`.trim();
+    return `class ${this.name}(${this.parent_class}):\n${attributes}`;
   }
+
+  update() : PythonClass {
+    // Converts all attributes to nullable
+    const attrs = this.class_attributes
+      .filter((attr) => attr.mutable || attr.is_identity)
+      .map((attr) => new PythonClassAttribute(attr.name, attr.py_type, true, attr.mutable, attr.has_default, attr.is_identity))
+    return new PythonClass(`${this.table_name}_update`, this.schema, attrs, "TypedDict")
+  }
+
+  insert() : PythonClass {
+    // Converts all attributes that have a default to nullable.
+    const attrs = this.class_attributes
+      .map((attr) => new PythonClassAttribute(attr.name, attr.py_type, attr.has_default || attr.nullable, attr.mutable, attr.has_default, attr.is_identity));
+    return new PythonClass(`${this.table_name}_insert`, this.schema, attrs, "TypedDict")
+  }
+  
 }
 
 function concatLines(items: Serializable[]): string {
@@ -266,28 +278,35 @@ export const apply = ({
   const ctx = new PythonContext(types, columns, schemas);
   const py_tables = tables
     .filter((table) => schemas.some((schema) => schema.name === table.schema))
-    .map((table) => ctx.tableToClass(table));
+    .flatMap((table) => {
+      const py_class = ctx.tableToClass(table);
+      return [py_class, py_class.insert(), py_class.update()];
+    });
 
-  const composite_types = types.filter((type) => type.attributes.length > 0).map((type) => ctx.typeToClass(type));
-  console.log(views);
+  const composite_types = types
+    .filter((type) => type.attributes.length > 0)
+    .map((type) => ctx.typeToClass(type));
+
   const py_views = views.map((view) => ctx.viewToClass(view));
   const py_matviews = materializedViews.map((matview) => ctx.matViewToClass(matview));
 
   let output = `
+from __future__ import annotations
+
 import datetime
-from typing import Annotated, Any, List, Literal, Optional, TypeAlias
+from typing import Annotated, Any, List, Literal, Optional, TypeAlias, TypedDict
 
 from pydantic import BaseModel, Field, Json
 
 ${concatLines(Object.values(ctx.user_enums))}
-
-${concatLines(composite_types)}
 
 ${concatLines(py_tables)}
 
 ${concatLines(py_views)}
 
 ${concatLines(py_matviews)}
+
+${concatLines(composite_types)}
 
 `.trim()
 
@@ -306,7 +325,6 @@ ${concatLines(py_matviews)}
  * ```
  */
 function formatForPyClassName(name: string): string {
-  console.log(name)
   return name
     .split(/[^a-zA-Z0-9]/)
     .map((word) => `${word[0].toUpperCase()}${word.slice(1)}`)
