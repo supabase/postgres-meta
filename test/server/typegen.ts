@@ -6249,7 +6249,6 @@ test('typegen: swift w/ public access control', async () => {
   `)
 })
 
-
 test('typegen: python', async () => {
   const { body } = await app.inject({
     method: 'GET',
@@ -6500,4 +6499,5 @@ class PublicCompositeTypeWithArrayAttribute(BaseModel):
 
 class PublicCompositeTypeWithRecordAttribute(BaseModel):
     todo: PublicTodos = Field(alias="todo")"
-`)})
+`)
+})
