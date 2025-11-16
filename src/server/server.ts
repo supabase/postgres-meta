@@ -203,8 +203,8 @@ if (EXPORT_DOCS) {
       process.exit(1)
     }else{
       if (isRunningInWSL()) {
-          app.log.info(`[WSL Detected] Server is running. Access from your Windows browser at http://localhost:${PG_META_PORT}`);
-          app.log.info(`(Internal address: ${address})`);
+          app.log.info(`[WSL Detected] Server is running. Access from your Windows browser at http://localhost:${PG_META_PORT}`)
+          app.log.info(`(Internal address: ${address})`)
         } 
     }
     const adminPort = PG_META_PORT + 1

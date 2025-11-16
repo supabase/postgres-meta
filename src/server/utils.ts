@@ -54,19 +54,19 @@ export function translateErrorToResponseCode(
 export function isRunningInWSL() {
   // Check for the presence of a specific file that only exists in WSL
   if (fs.existsSync('/proc/sys/fs/binfmt_misc/WSLInterop')) {
-    return true;
+    return true
   }
 
   // Check for environment variables (less reliable as a user could set these manually)
   if (process.env.WSL_DISTRO_NAME || process.env.WSL_INTEROP) {
-    return true;
+    return true
   }
   
   // Check the OS release info (kernel name often contains 'microsoft')
   const osRelease = os.release();
   if (osRelease.includes('microsoft') || osRelease.includes('Microsoft')) {
-    return true;
+    return true
   }
 
-  return false;
+  return false
 }
