@@ -18,6 +18,7 @@ import {
 import { apply as applyTypescriptTemplate } from './templates/typescript.js'
 import { apply as applyGoTemplate } from './templates/go.js'
 import { apply as applySwiftTemplate } from './templates/swift.js'
+import { apply as applyPythonTemplate } from './templates/python.js'
 
 const logger = pino({
   formatters: {
@@ -143,6 +144,8 @@ async function getTypeOutput(): Promise<string | null> {
       })
     case 'go':
       return applyGoTemplate(config)
+    case 'python':
+      return applyPythonTemplate(config)
     default:
       throw new Error(`Unsupported language for GENERATE_TYPES: ${GENERATE_TYPES}`)
   }
