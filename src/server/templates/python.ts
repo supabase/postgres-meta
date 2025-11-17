@@ -24,7 +24,9 @@ export const apply = ({
       return py_class_and_methods
     })
   const composite_types = types
-    .filter((type) => type.attributes.length > 0 && schemas.some((schema) => type.schema == schema.name))
+    .filter(
+      (type) => type.attributes.length > 0 && schemas.some((schema) => type.schema == schema.name)
+    )
     .map((type) => ctx.typeToClass(type))
   const py_views = views
     .filter((view) => schemas.some((schema) => schema.name === view.schema))
