@@ -105,7 +105,6 @@ class PythonContext {
       const schema = type!.schema
       return `${formatForPyClassName(schema)}${formatForPyClassName(type.name)}`
     }
-    console.log(`Unknown recognized row type ${name}`)
     return 'Any'
   }
 
