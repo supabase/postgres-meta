@@ -24,10 +24,14 @@ export const apply = ({
       return py_class_and_methods
     })
   const composite_types = types
-    .filter((type) => type.attributes.length > 0)
+    .filter((type) => type.attributes.length > 0 && schemas.some((schema) => type.schema == schema.name))
     .map((type) => ctx.typeToClass(type))
-  const py_views = views.map((view) => ctx.viewToClass(view))
-  const py_matviews = materializedViews.map((matview) => ctx.matViewToClass(matview))
+  const py_views = views
+    .filter((view) => schemas.some((schema) => schema.name === view.schema))
+    .map((view) => ctx.viewToClass(view))
+  const py_matviews = materializedViews
+    .filter((matview) => schemas.some((schema) => schema.name === matview.schema))
+    .map((matview) => ctx.matViewToClass(matview))
 
   let output = `
 from __future__ import annotations
