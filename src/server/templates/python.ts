@@ -384,13 +384,19 @@ const PY_TYPE_MAP: Record<string, string> = {
  * formatForPyTypeName('pokemon league') // PokemonLeague
  * ```
  */
+
 function formatForPyClassName(name: string): string {
   return name
     .split(/[^a-zA-Z0-9]/)
-    .map((word) => `${word[0].toUpperCase()}${word.slice(1)}`)
+    .map((word) => {
+      if (word) {
+        return `${word[0].toUpperCase()}${word.slice(1)}`
+      } else {
+        return ''
+      }
+    })
     .join('')
 }
-
 /**
  * Converts a Postgres name to snake_case.
  *
