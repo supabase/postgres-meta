@@ -17,23 +17,18 @@ export const apply = ({
   types,
 }: GeneratorMetadata): string => {
   const ctx = new PythonContext(types, columns, schemas)
-  const py_tables = tables
-    .filter((table) => schemas.some((schema) => schema.name === table.schema))
-    .flatMap((table) => {
-      const py_class_and_methods = ctx.tableToClass(table)
-      return py_class_and_methods
-    })
+  // Used for efficient lookup of types by schema name
+  const schemasNames = new Set(schemas.map((schema) => schema.name))
+  const py_tables = tables.flatMap((table) => {
+    const py_class_and_methods = ctx.tableToClass(table)
+    return py_class_and_methods
+  })
   const composite_types = types
-    .filter(
-      (type) => type.attributes.length > 0 && schemas.some((schema) => type.schema == schema.name)
-    )
+    // We always include system schemas, so we need to filter out types that are not in the included schemas
+    .filter((type) => type.attributes.length > 0 && schemasNames.has(type.schema))
     .map((type) => ctx.typeToClass(type))
-  const py_views = views
-    .filter((view) => schemas.some((schema) => schema.name === view.schema))
-    .map((view) => ctx.viewToClass(view))
-  const py_matviews = materializedViews
-    .filter((matview) => schemas.some((schema) => schema.name === matview.schema))
-    .map((matview) => ctx.matViewToClass(matview))
+  const py_views = views.map((view) => ctx.viewToClass(view))
+  const py_matviews = materializedViews.map((matview) => ctx.matViewToClass(matview))
 
   let output = `
 from __future__ import annotations
