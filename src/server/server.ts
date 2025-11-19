@@ -18,7 +18,7 @@ import {
 import { apply as applyTypescriptTemplate } from './templates/typescript.js'
 import { apply as applyGoTemplate } from './templates/go.js'
 import { apply as applySwiftTemplate } from './templates/swift.js'
-
+import { isRunningInWSL } from './utils.js'
 const logger = pino({
   formatters: {
     level(label) {
@@ -197,10 +197,15 @@ if (EXPORT_DOCS) {
     }
   })
 
-  app.listen({ port: PG_META_PORT, host: PG_META_HOST }, (err) => {
+  app.listen({ port: PG_META_PORT, host: PG_META_HOST }, (err,address) => {
     if (err) {
       app.log.error({ err }, 'Uncaught error in app, exit(1)')
       process.exit(1)
+    }else{
+      if (isRunningInWSL()) {
+          app.log.info(`[WSL Detected] Server is running. Access from your Windows browser at http://localhost:${PG_META_PORT}`)
+          app.log.info(`(Internal address: ${address})`)
+        } 
     }
     const adminPort = PG_META_PORT + 1
     adminApp.listen({ port: adminPort, host: PG_META_HOST }, (err) => {
