@@ -6501,3 +6501,77 @@ class PublicCompositeTypeWithRecordAttribute(BaseModel):
     todo: PublicTodos = Field(alias="todo")"
 `)
 })
+
+test('typegen: python w/ excluded/included schemas', async () => {
+  // Create a test schema with some tables
+  await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `
+        CREATE SCHEMA IF NOT EXISTS test_schema;
+        CREATE TABLE IF NOT EXISTS test_schema.test_table (
+          id serial PRIMARY KEY,
+          name text
+        );
+        CREATE TABLE IF NOT EXISTS test_schema.another_table (
+          id serial PRIMARY KEY,
+          value text
+        );
+      `,
+    },
+  })
+
+  try {
+    // Test excluded_schemas - should exclude test_schema
+    const { body: excludedBody } = await app.inject({
+      method: 'GET',
+      path: '/generators/python',
+      query: { access_control: 'public', excluded_schemas: 'test_schema' },
+    })
+    expect(excludedBody).not.toContain('TestSchemaTestTable')
+    expect(excludedBody).not.toContain('TestSchemaAnotherTable')
+    expect(excludedBody).toContain('PublicUsers')
+    expect(excludedBody).toContain('PublicTodos')
+
+    // Test included_schemas - should only include test_schema
+    const { body: includedBody } = await app.inject({
+      method: 'GET',
+      path: '/generators/python',
+      query: { access_control: 'public', included_schemas: 'test_schema' },
+    })
+    expect(includedBody).toContain('TestSchemaTestTable')
+    expect(includedBody).toContain('TestSchemaAnotherTable')
+    expect(includedBody).not.toContain('PublicUsers')
+    expect(includedBody).not.toContain('PublicTodos')
+
+    // Test multiple excluded schemas
+    const { body: multipleExcludedBody } = await app.inject({
+      method: 'GET',
+      path: '/generators/python',
+      query: { access_control: 'public', excluded_schemas: 'test_schema,public' },
+    })
+    expect(multipleExcludedBody).not.toContain('TestSchemaTestTable')
+    expect(multipleExcludedBody).not.toContain('PublicUsers')
+
+    // // Test multiple included schemas
+    const { body: multipleIncludedBody } = await app.inject({
+      method: 'GET',
+      path: '/generators/python',
+      query: { access_control: 'public', included_schemas: 'public,test_schema' },
+    })
+    expect(multipleIncludedBody).toContain('TestSchemaTestTable')
+    expect(multipleIncludedBody).toContain('PublicUsers')
+  } finally {
+    // Clean up test schema
+    await app.inject({
+      method: 'POST',
+      path: '/query',
+      payload: {
+        query: `
+          DROP SCHEMA IF EXISTS test_schema CASCADE;
+        `,
+      },
+    })
+  }
+})
