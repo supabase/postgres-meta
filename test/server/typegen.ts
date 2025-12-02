@@ -6248,3 +6248,330 @@ test('typegen: swift w/ public access control', async () => {
     }"
   `)
 })
+
+test('typegen: python', async () => {
+  const { body } = await app.inject({
+    method: 'GET',
+    path: '/generators/python',
+    query: { access_control: 'public' },
+  })
+  expect(body).toMatchInlineSnapshot(`
+"from __future__ import annotations
+
+import datetime
+from typing import (
+    Annotated,
+    Any,
+    List,
+    Literal,
+    NotRequired,
+    Optional,
+    TypeAlias,
+    TypedDict,
+)
+
+from pydantic import BaseModel, Field, Json
+
+PublicUserStatus: TypeAlias = Literal["ACTIVE", "INACTIVE"]
+
+PublicMemeStatus: TypeAlias = Literal["new", "old", "retired"]
+
+class PublicUsers(BaseModel):
+    decimal: Optional[float] = Field(alias="decimal")
+    id: int = Field(alias="id")
+    name: Optional[str] = Field(alias="name")
+    status: Optional[PublicUserStatus] = Field(alias="status")
+
+class PublicUsersInsert(TypedDict):
+    decimal: NotRequired[Annotated[float, Field(alias="decimal")]]
+    id: NotRequired[Annotated[int, Field(alias="id")]]
+    name: NotRequired[Annotated[str, Field(alias="name")]]
+    status: NotRequired[Annotated[PublicUserStatus, Field(alias="status")]]
+
+class PublicUsersUpdate(TypedDict):
+    decimal: NotRequired[Annotated[float, Field(alias="decimal")]]
+    id: NotRequired[Annotated[int, Field(alias="id")]]
+    name: NotRequired[Annotated[str, Field(alias="name")]]
+    status: NotRequired[Annotated[PublicUserStatus, Field(alias="status")]]
+
+class PublicTodos(BaseModel):
+    details: Optional[str] = Field(alias="details")
+    id: int = Field(alias="id")
+    user_id: int = Field(alias="user-id")
+
+class PublicTodosInsert(TypedDict):
+    details: NotRequired[Annotated[str, Field(alias="details")]]
+    id: NotRequired[Annotated[int, Field(alias="id")]]
+    user_id: Annotated[int, Field(alias="user-id")]
+
+class PublicTodosUpdate(TypedDict):
+    details: NotRequired[Annotated[str, Field(alias="details")]]
+    id: NotRequired[Annotated[int, Field(alias="id")]]
+    user_id: NotRequired[Annotated[int, Field(alias="user-id")]]
+
+class PublicUsersAudit(BaseModel):
+    created_at: Optional[datetime.datetime] = Field(alias="created_at")
+    id: int = Field(alias="id")
+    previous_value: Optional[Json[Any]] = Field(alias="previous_value")
+    user_id: Optional[int] = Field(alias="user_id")
+
+class PublicUsersAuditInsert(TypedDict):
+    created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
+    id: NotRequired[Annotated[int, Field(alias="id")]]
+    previous_value: NotRequired[Annotated[Json[Any], Field(alias="previous_value")]]
+    user_id: NotRequired[Annotated[int, Field(alias="user_id")]]
+
+class PublicUsersAuditUpdate(TypedDict):
+    created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
+    id: NotRequired[Annotated[int, Field(alias="id")]]
+    previous_value: NotRequired[Annotated[Json[Any], Field(alias="previous_value")]]
+    user_id: NotRequired[Annotated[int, Field(alias="user_id")]]
+
+class PublicUserDetails(BaseModel):
+    details: Optional[str] = Field(alias="details")
+    user_id: int = Field(alias="user_id")
+
+class PublicUserDetailsInsert(TypedDict):
+    details: NotRequired[Annotated[str, Field(alias="details")]]
+    user_id: Annotated[int, Field(alias="user_id")]
+
+class PublicUserDetailsUpdate(TypedDict):
+    details: NotRequired[Annotated[str, Field(alias="details")]]
+    user_id: NotRequired[Annotated[int, Field(alias="user_id")]]
+
+class PublicEmpty(BaseModel):
+    pass
+
+class PublicEmptyInsert(TypedDict):
+    pass
+
+class PublicEmptyUpdate(TypedDict):
+    pass
+
+class PublicTableWithOtherTablesRowType(BaseModel):
+    col1: Optional[PublicUserDetails] = Field(alias="col1")
+    col2: Optional[PublicAView] = Field(alias="col2")
+
+class PublicTableWithOtherTablesRowTypeInsert(TypedDict):
+    col1: NotRequired[Annotated[PublicUserDetails, Field(alias="col1")]]
+    col2: NotRequired[Annotated[PublicAView, Field(alias="col2")]]
+
+class PublicTableWithOtherTablesRowTypeUpdate(TypedDict):
+    col1: NotRequired[Annotated[PublicUserDetails, Field(alias="col1")]]
+    col2: NotRequired[Annotated[PublicAView, Field(alias="col2")]]
+
+class PublicTableWithPrimaryKeyOtherThanId(BaseModel):
+    name: Optional[str] = Field(alias="name")
+    other_id: int = Field(alias="other_id")
+
+class PublicTableWithPrimaryKeyOtherThanIdInsert(TypedDict):
+    name: NotRequired[Annotated[str, Field(alias="name")]]
+    other_id: NotRequired[Annotated[int, Field(alias="other_id")]]
+
+class PublicTableWithPrimaryKeyOtherThanIdUpdate(TypedDict):
+    name: NotRequired[Annotated[str, Field(alias="name")]]
+    other_id: NotRequired[Annotated[int, Field(alias="other_id")]]
+
+class PublicEvents(BaseModel):
+    created_at: datetime.datetime = Field(alias="created_at")
+    data: Optional[Json[Any]] = Field(alias="data")
+    event_type: Optional[str] = Field(alias="event_type")
+    id: int = Field(alias="id")
+
+class PublicEventsInsert(TypedDict):
+    created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
+    data: NotRequired[Annotated[Json[Any], Field(alias="data")]]
+    event_type: NotRequired[Annotated[str, Field(alias="event_type")]]
+    id: NotRequired[Annotated[int, Field(alias="id")]]
+
+class PublicEventsUpdate(TypedDict):
+    created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
+    data: NotRequired[Annotated[Json[Any], Field(alias="data")]]
+    event_type: NotRequired[Annotated[str, Field(alias="event_type")]]
+    id: NotRequired[Annotated[int, Field(alias="id")]]
+
+class PublicEvents2024(BaseModel):
+    created_at: datetime.datetime = Field(alias="created_at")
+    data: Optional[Json[Any]] = Field(alias="data")
+    event_type: Optional[str] = Field(alias="event_type")
+    id: int = Field(alias="id")
+
+class PublicEvents2024Insert(TypedDict):
+    created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
+    data: NotRequired[Annotated[Json[Any], Field(alias="data")]]
+    event_type: NotRequired[Annotated[str, Field(alias="event_type")]]
+    id: Annotated[int, Field(alias="id")]
+
+class PublicEvents2024Update(TypedDict):
+    created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
+    data: NotRequired[Annotated[Json[Any], Field(alias="data")]]
+    event_type: NotRequired[Annotated[str, Field(alias="event_type")]]
+    id: NotRequired[Annotated[int, Field(alias="id")]]
+
+class PublicEvents2025(BaseModel):
+    created_at: datetime.datetime = Field(alias="created_at")
+    data: Optional[Json[Any]] = Field(alias="data")
+    event_type: Optional[str] = Field(alias="event_type")
+    id: int = Field(alias="id")
+
+class PublicEvents2025Insert(TypedDict):
+    created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
+    data: NotRequired[Annotated[Json[Any], Field(alias="data")]]
+    event_type: NotRequired[Annotated[str, Field(alias="event_type")]]
+    id: Annotated[int, Field(alias="id")]
+
+class PublicEvents2025Update(TypedDict):
+    created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
+    data: NotRequired[Annotated[Json[Any], Field(alias="data")]]
+    event_type: NotRequired[Annotated[str, Field(alias="event_type")]]
+    id: NotRequired[Annotated[int, Field(alias="id")]]
+
+class PublicCategory(BaseModel):
+    id: int = Field(alias="id")
+    name: str = Field(alias="name")
+
+class PublicCategoryInsert(TypedDict):
+    id: NotRequired[Annotated[int, Field(alias="id")]]
+    name: Annotated[str, Field(alias="name")]
+
+class PublicCategoryUpdate(TypedDict):
+    id: NotRequired[Annotated[int, Field(alias="id")]]
+    name: NotRequired[Annotated[str, Field(alias="name")]]
+
+class PublicMemes(BaseModel):
+    category: Optional[int] = Field(alias="category")
+    created_at: datetime.datetime = Field(alias="created_at")
+    id: int = Field(alias="id")
+    metadata: Optional[Json[Any]] = Field(alias="metadata")
+    name: str = Field(alias="name")
+    status: Optional[PublicMemeStatus] = Field(alias="status")
+
+class PublicMemesInsert(TypedDict):
+    category: NotRequired[Annotated[int, Field(alias="category")]]
+    created_at: Annotated[datetime.datetime, Field(alias="created_at")]
+    id: NotRequired[Annotated[int, Field(alias="id")]]
+    metadata: NotRequired[Annotated[Json[Any], Field(alias="metadata")]]
+    name: Annotated[str, Field(alias="name")]
+    status: NotRequired[Annotated[PublicMemeStatus, Field(alias="status")]]
+
+class PublicMemesUpdate(TypedDict):
+    category: NotRequired[Annotated[int, Field(alias="category")]]
+    created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
+    id: NotRequired[Annotated[int, Field(alias="id")]]
+    metadata: NotRequired[Annotated[Json[Any], Field(alias="metadata")]]
+    name: NotRequired[Annotated[str, Field(alias="name")]]
+    status: NotRequired[Annotated[PublicMemeStatus, Field(alias="status")]]
+
+class PublicAView(BaseModel):
+    id: Optional[int] = Field(alias="id")
+
+class PublicTodosView(BaseModel):
+    details: Optional[str] = Field(alias="details")
+    id: Optional[int] = Field(alias="id")
+    user_id: Optional[int] = Field(alias="user-id")
+
+class PublicUsersView(BaseModel):
+    decimal: Optional[float] = Field(alias="decimal")
+    id: Optional[int] = Field(alias="id")
+    name: Optional[str] = Field(alias="name")
+    status: Optional[PublicUserStatus] = Field(alias="status")
+
+class PublicUserTodosSummaryView(BaseModel):
+    todo_count: Optional[int] = Field(alias="todo_count")
+    todo_details: Optional[List[str]] = Field(alias="todo_details")
+    user_id: Optional[int] = Field(alias="user_id")
+    user_name: Optional[str] = Field(alias="user_name")
+    user_status: Optional[PublicUserStatus] = Field(alias="user_status")
+
+class PublicUsersViewWithMultipleRefsToUsers(BaseModel):
+    initial_id: Optional[int] = Field(alias="initial_id")
+    initial_name: Optional[str] = Field(alias="initial_name")
+    second_id: Optional[int] = Field(alias="second_id")
+    second_name: Optional[str] = Field(alias="second_name")
+
+class PublicTodosMatview(BaseModel):
+    details: Optional[str] = Field(alias="details")
+    id: Optional[int] = Field(alias="id")
+    user_id: Optional[int] = Field(alias="user-id")
+
+class PublicCompositeTypeWithArrayAttribute(BaseModel):
+    my_text_array: List[str] = Field(alias="my_text_array")
+
+class PublicCompositeTypeWithRecordAttribute(BaseModel):
+    todo: PublicTodos = Field(alias="todo")"
+`)
+})
+
+test('typegen: python w/ excluded/included schemas', async () => {
+  // Create a test schema with some tables
+  await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `
+        CREATE SCHEMA IF NOT EXISTS test_schema;
+        CREATE TABLE IF NOT EXISTS test_schema.test_table (
+          id serial PRIMARY KEY,
+          name text
+        );
+        CREATE TABLE IF NOT EXISTS test_schema.another_table (
+          id serial PRIMARY KEY,
+          value text
+        );
+      `,
+    },
+  })
+
+  try {
+    // Test excluded_schemas - should exclude test_schema
+    const { body: excludedBody } = await app.inject({
+      method: 'GET',
+      path: '/generators/python',
+      query: { access_control: 'public', excluded_schemas: 'test_schema' },
+    })
+    expect(excludedBody).not.toContain('TestSchemaTestTable')
+    expect(excludedBody).not.toContain('TestSchemaAnotherTable')
+    expect(excludedBody).toContain('PublicUsers')
+    expect(excludedBody).toContain('PublicTodos')
+
+    // Test included_schemas - should only include test_schema
+    const { body: includedBody } = await app.inject({
+      method: 'GET',
+      path: '/generators/python',
+      query: { access_control: 'public', included_schemas: 'test_schema' },
+    })
+    expect(includedBody).toContain('TestSchemaTestTable')
+    expect(includedBody).toContain('TestSchemaAnotherTable')
+    expect(includedBody).not.toContain('PublicUsers')
+    expect(includedBody).not.toContain('PublicTodos')
+
+    // Test multiple excluded schemas
+    const { body: multipleExcludedBody } = await app.inject({
+      method: 'GET',
+      path: '/generators/python',
+      query: { access_control: 'public', excluded_schemas: 'test_schema,public' },
+    })
+    expect(multipleExcludedBody).not.toContain('TestSchemaTestTable')
+    expect(multipleExcludedBody).not.toContain('PublicUsers')
+
+    // // Test multiple included schemas
+    const { body: multipleIncludedBody } = await app.inject({
+      method: 'GET',
+      path: '/generators/python',
+      query: { access_control: 'public', included_schemas: 'public,test_schema' },
+    })
+    expect(multipleIncludedBody).toContain('TestSchemaTestTable')
+    expect(multipleIncludedBody).toContain('PublicUsers')
+  } finally {
+    // Clean up test schema
+    await app.inject({
+      method: 'POST',
+      path: '/query',
+      payload: {
+        query: `
+          DROP SCHEMA IF EXISTS test_schema CASCADE;
+        `,
+      },
+    })
+  }
+})
