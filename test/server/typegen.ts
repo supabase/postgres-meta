@@ -4992,6 +4992,125 @@ test('typegen: typescript consistent types definitions orders', async () => {
   expect(firstCall).toEqual(secondCall)
 })
 
+test('typegen: typescript function override order stability', async () => {
+  // Helper function to clean up test entities
+  const cleanupTestEntities = async () => {
+    await app.inject({
+      method: 'POST',
+      path: '/query',
+      payload: {
+        query: `
+          -- Drop functions with all possible signatures
+          DROP FUNCTION IF EXISTS test_func_override(integer, text) CASCADE;
+          DROP FUNCTION IF EXISTS test_func_override(text, integer) CASCADE;
+          DROP FUNCTION IF EXISTS test_func_override(boolean, integer, text) CASCADE;
+          DROP FUNCTION IF EXISTS test_func_override(text, boolean) CASCADE;
+        `,
+      },
+    })
+  }
+
+  // Clean up any existing test entities
+  await cleanupTestEntities()
+
+  // === FIRST ROUND: Create function overrides in order 1 ===
+  await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `
+        -- Create function overrides in specific order
+        CREATE FUNCTION test_func_override(param_a integer, param_b text)
+        RETURNS integer AS 'SELECT param_a + 1' LANGUAGE sql IMMUTABLE;
+
+        CREATE FUNCTION test_func_override(param_a text, param_b integer)
+        RETURNS text AS 'SELECT param_a || param_b::text' LANGUAGE sql IMMUTABLE;
+
+        CREATE FUNCTION test_func_override(param_a boolean, param_b integer, param_c text)
+        RETURNS boolean AS 'SELECT param_a' LANGUAGE sql IMMUTABLE;
+
+        CREATE FUNCTION test_func_override(param_a text, param_b boolean)
+        RETURNS text AS 'SELECT CASE WHEN param_b THEN param_a ELSE '''' END' LANGUAGE sql IMMUTABLE;
+      `,
+    },
+  })
+
+  // Generate types for first configuration
+  const { body: firstCall } = await app.inject({
+    method: 'GET',
+    path: '/generators/typescript',
+    query: { detect_one_to_one_relationships: 'true', postgrest_version: '13' },
+  })
+
+  // === SECOND ROUND: Modify function definitions without changing signatures ===
+  await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `
+        -- Modify function definitions (using CREATE OR REPLACE)
+        -- This should preserve the order
+        CREATE OR REPLACE FUNCTION test_func_override(param_a integer, param_b text)
+        RETURNS integer AS 'SELECT param_a + 100' LANGUAGE sql IMMUTABLE;
+
+        CREATE OR REPLACE FUNCTION test_func_override(param_a text, param_b integer)
+        RETURNS text AS 'SELECT param_a || ''_'' || param_b::text' LANGUAGE sql IMMUTABLE;
+
+        CREATE OR REPLACE FUNCTION test_func_override(param_a boolean, param_b integer, param_c text)
+        RETURNS boolean AS 'SELECT NOT param_a' LANGUAGE sql IMMUTABLE;
+
+        CREATE OR REPLACE FUNCTION test_func_override(param_a text, param_b boolean)
+        RETURNS text AS 'SELECT CASE WHEN param_b THEN param_a || ''_true'' ELSE ''false'' END' LANGUAGE sql IMMUTABLE;
+      `,
+    },
+  })
+
+  // Generate types for second configuration (after modifying definitions)
+  const { body: secondCall } = await app.inject({
+    method: 'GET',
+    path: '/generators/typescript',
+    query: { detect_one_to_one_relationships: 'true', postgrest_version: '13' },
+  })
+
+  // === THIRD ROUND: Drop and recreate in different order ===
+  await cleanupTestEntities()
+
+  // Create functions in reverse order
+  await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `
+        -- Create function overrides in reverse order
+        CREATE FUNCTION test_func_override(param_a text, param_b boolean)
+        RETURNS text AS 'SELECT CASE WHEN param_b THEN param_a ELSE '''' END' LANGUAGE sql IMMUTABLE;
+
+        CREATE FUNCTION test_func_override(param_a boolean, param_b integer, param_c text)
+        RETURNS boolean AS 'SELECT param_a' LANGUAGE sql IMMUTABLE;
+
+        CREATE FUNCTION test_func_override(param_a text, param_b integer)
+        RETURNS text AS 'SELECT param_a || param_b::text' LANGUAGE sql IMMUTABLE;
+
+        CREATE FUNCTION test_func_override(param_a integer, param_b text)
+        RETURNS integer AS 'SELECT param_a + 1' LANGUAGE sql IMMUTABLE;
+      `,
+    },
+  })
+
+  // Generate types for third configuration (recreated in different order)
+  const { body: thirdCall } = await app.inject({
+    method: 'GET',
+    path: '/generators/typescript',
+    query: { detect_one_to_one_relationships: 'true', postgrest_version: '13' },
+  })
+
+  // Clean up test entities
+  await cleanupTestEntities()
+
+  expect(firstCall).toEqual(secondCall)
+  expect(secondCall).toEqual(thirdCall)
+})
+
 test('typegen: go', async () => {
   const { body } = await app.inject({ method: 'GET', path: '/generators/go' })
   expect(body).toMatchInlineSnapshot(`
