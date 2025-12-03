@@ -4992,6 +4992,67 @@ test('typegen: typescript consistent types definitions orders', async () => {
   expect(firstCall).toEqual(secondCall)
 })
 
+test('typegen: typescript consistent function overload union type order', async () => {
+  const cleanup = async () => {
+    await app.inject({
+      method: 'POST',
+      path: '/query',
+      payload: {
+        query: `
+          DROP FUNCTION IF EXISTS test_overloaded_fn(text);
+          DROP FUNCTION IF EXISTS test_overloaded_fn(integer);
+          DROP FUNCTION IF EXISTS test_overloaded_fn(boolean);
+        `,
+      },
+    })
+  }
+
+  await cleanup()
+
+  // Overload function in order: text, integer, boolean
+  await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `
+        CREATE FUNCTION test_overloaded_fn(param text) RETURNS text LANGUAGE sql AS 'SELECT param';
+        CREATE FUNCTION test_overloaded_fn(param integer) RETURNS integer LANGUAGE sql AS 'SELECT param';
+        CREATE FUNCTION test_overloaded_fn(param boolean) RETURNS boolean LANGUAGE sql AS 'SELECT param';
+      `,
+    },
+  })
+
+  const { body: firstCall } = await app.inject({
+    method: 'GET',
+    path: '/generators/typescript',
+  })
+
+  await cleanup()
+
+  // Overload function in different order: boolean, text, integer
+  await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `
+        CREATE FUNCTION test_overloaded_fn(param boolean) RETURNS boolean LANGUAGE sql AS 'SELECT param';
+        CREATE FUNCTION test_overloaded_fn(param text) RETURNS text LANGUAGE sql AS 'SELECT param';
+        CREATE FUNCTION test_overloaded_fn(param integer) RETURNS integer LANGUAGE sql AS 'SELECT param';
+      `,
+    },
+  })
+
+  const { body: secondCall } = await app.inject({
+    method: 'GET',
+    path: '/generators/typescript',
+  })
+
+  await cleanup()
+
+  // Union type members should be ordered identically regardless of creation order
+  expect(firstCall).toEqual(secondCall)
+})
+
 test('typegen: go', async () => {
   const { body } = await app.inject({ method: 'GET', path: '/generators/go' })
   expect(body).toMatchInlineSnapshot(`
