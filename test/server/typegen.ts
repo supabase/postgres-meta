@@ -667,9 +667,7 @@ test('typegen: typescript', async () => {
           }
           get_single_user_summary_from_view:
             | {
-                Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
-                }
+                Args: { search_user_id: number }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -678,7 +676,7 @@ test('typegen: typescript', async () => {
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
                 SetofOptions: {
-                  from: "users_view"
+                  from: "*"
                   to: "user_todos_summary_view"
                   isOneToOne: true
                   isSetofReturn: true
@@ -701,7 +699,9 @@ test('typegen: typescript', async () => {
                 }
               }
             | {
-                Args: { search_user_id: number }
+                Args: {
+                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -710,7 +710,7 @@ test('typegen: typescript', async () => {
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
                 SetofOptions: {
-                  from: "*"
+                  from: "users_view"
                   to: "user_todos_summary_view"
                   isOneToOne: true
                   isSetofReturn: true
@@ -732,6 +732,34 @@ test('typegen: typescript', async () => {
           }
           get_todos_from_user:
             | {
+                Args: { search_user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
                 Args: {
                   userview_row: Database["public"]["Views"]["users_view"]["Row"]
                 }
@@ -747,49 +775,7 @@ test('typegen: typescript', async () => {
                   isSetofReturn: true
                 }
               }
-            | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "users"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
-            | {
-                Args: { search_user_id: number }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
           get_todos_setof_rows:
-            | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "users"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
             | {
                 Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
@@ -799,6 +785,20 @@ test('typegen: typescript', async () => {
                 }[]
                 SetofOptions: {
                   from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
                   to: "todos"
                   isOneToOne: false
                   isSetofReturn: true
@@ -865,7 +865,23 @@ test('typegen: typescript', async () => {
           }
           postgres_fdw_handler: { Args: never; Returns: unknown }
           postgrest_resolvable_with_override_function:
+            | { Args: never; Returns: undefined }
             | { Args: { a: string }; Returns: number }
+            | { Args: { b: number }; Returns: string }
+            | {
+                Args: { completed: boolean; todo_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
             | {
                 Args: { user_id: number }
                 Returns: {
@@ -877,20 +893,6 @@ test('typegen: typescript', async () => {
                 SetofOptions: {
                   from: "*"
                   to: "users"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
-            | {
-                Args: { completed: boolean; todo_id: number }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
                   isOneToOne: false
                   isSetofReturn: true
                 }
@@ -909,22 +911,20 @@ test('typegen: typescript', async () => {
                   isSetofReturn: true
                 }
               }
-            | { Args: { b: number }; Returns: string }
-            | { Args: never; Returns: undefined }
           postgrest_unresolvable_function:
-            | {
-                Args: { a: string }
-                Returns: {
-                  error: true
-                } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
-              }
+            | { Args: never; Returns: undefined }
             | {
                 Args: { a: number }
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
               }
-            | { Args: never; Returns: undefined }
+            | {
+                Args: { a: string }
+                Returns: {
+                  error: true
+                } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+              }
           search_todos_by_details: {
             Args: { search_details: string }
             Returns: {
@@ -958,20 +958,6 @@ test('typegen: typescript', async () => {
           }
           test_unnamed_row_setof:
             | {
-                Args: { user_id: number }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
-            | {
                 Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
                   details: string | null
@@ -980,6 +966,20 @@ test('typegen: typescript', async () => {
                 }[]
                 SetofOptions: {
                   from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
                   to: "todos"
                   isOneToOne: false
                   isSetofReturn: true
@@ -1854,9 +1854,7 @@ test('typegen w/ one-to-one relationships', async () => {
           }
           get_single_user_summary_from_view:
             | {
-                Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
-                }
+                Args: { search_user_id: number }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -1865,7 +1863,7 @@ test('typegen w/ one-to-one relationships', async () => {
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
                 SetofOptions: {
-                  from: "users_view"
+                  from: "*"
                   to: "user_todos_summary_view"
                   isOneToOne: true
                   isSetofReturn: true
@@ -1888,7 +1886,9 @@ test('typegen w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { search_user_id: number }
+                Args: {
+                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -1897,7 +1897,7 @@ test('typegen w/ one-to-one relationships', async () => {
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
                 SetofOptions: {
-                  from: "*"
+                  from: "users_view"
                   to: "user_todos_summary_view"
                   isOneToOne: true
                   isSetofReturn: true
@@ -1919,6 +1919,34 @@ test('typegen w/ one-to-one relationships', async () => {
           }
           get_todos_from_user:
             | {
+                Args: { search_user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
                 Args: {
                   userview_row: Database["public"]["Views"]["users_view"]["Row"]
                 }
@@ -1934,49 +1962,7 @@ test('typegen w/ one-to-one relationships', async () => {
                   isSetofReturn: true
                 }
               }
-            | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "users"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
-            | {
-                Args: { search_user_id: number }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
           get_todos_setof_rows:
-            | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "users"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
             | {
                 Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
@@ -1986,6 +1972,20 @@ test('typegen w/ one-to-one relationships', async () => {
                 }[]
                 SetofOptions: {
                   from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
                   to: "todos"
                   isOneToOne: false
                   isSetofReturn: true
@@ -2052,7 +2052,23 @@ test('typegen w/ one-to-one relationships', async () => {
           }
           postgres_fdw_handler: { Args: never; Returns: unknown }
           postgrest_resolvable_with_override_function:
+            | { Args: never; Returns: undefined }
             | { Args: { a: string }; Returns: number }
+            | { Args: { b: number }; Returns: string }
+            | {
+                Args: { completed: boolean; todo_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
             | {
                 Args: { user_id: number }
                 Returns: {
@@ -2064,20 +2080,6 @@ test('typegen w/ one-to-one relationships', async () => {
                 SetofOptions: {
                   from: "*"
                   to: "users"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
-            | {
-                Args: { completed: boolean; todo_id: number }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
                   isOneToOne: false
                   isSetofReturn: true
                 }
@@ -2096,22 +2098,20 @@ test('typegen w/ one-to-one relationships', async () => {
                   isSetofReturn: true
                 }
               }
-            | { Args: { b: number }; Returns: string }
-            | { Args: never; Returns: undefined }
           postgrest_unresolvable_function:
-            | {
-                Args: { a: string }
-                Returns: {
-                  error: true
-                } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
-              }
+            | { Args: never; Returns: undefined }
             | {
                 Args: { a: number }
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
               }
-            | { Args: never; Returns: undefined }
+            | {
+                Args: { a: string }
+                Returns: {
+                  error: true
+                } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+              }
           search_todos_by_details: {
             Args: { search_details: string }
             Returns: {
@@ -2145,20 +2145,6 @@ test('typegen w/ one-to-one relationships', async () => {
           }
           test_unnamed_row_setof:
             | {
-                Args: { user_id: number }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
-            | {
                 Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
                   details: string | null
@@ -2167,6 +2153,20 @@ test('typegen w/ one-to-one relationships', async () => {
                 }[]
                 SetofOptions: {
                   from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
                   to: "todos"
                   isOneToOne: false
                   isSetofReturn: true
@@ -3041,9 +3041,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
           get_single_user_summary_from_view:
             | {
-                Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
-                }
+                Args: { search_user_id: number }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -3052,7 +3050,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
                 SetofOptions: {
-                  from: "users_view"
+                  from: "*"
                   to: "user_todos_summary_view"
                   isOneToOne: true
                   isSetofReturn: true
@@ -3075,7 +3073,9 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { search_user_id: number }
+                Args: {
+                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -3084,7 +3084,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
                 SetofOptions: {
-                  from: "*"
+                  from: "users_view"
                   to: "user_todos_summary_view"
                   isOneToOne: true
                   isSetofReturn: true
@@ -3106,6 +3106,34 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
           get_todos_from_user:
             | {
+                Args: { search_user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
                 Args: {
                   userview_row: Database["public"]["Views"]["users_view"]["Row"]
                 }
@@ -3121,49 +3149,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   isSetofReturn: true
                 }
               }
-            | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "users"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
-            | {
-                Args: { search_user_id: number }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
           get_todos_setof_rows:
-            | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "users"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
             | {
                 Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
@@ -3173,6 +3159,20 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 }[]
                 SetofOptions: {
                   from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
                   to: "todos"
                   isOneToOne: false
                   isSetofReturn: true
@@ -3239,7 +3239,23 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
           postgres_fdw_handler: { Args: never; Returns: unknown }
           postgrest_resolvable_with_override_function:
+            | { Args: never; Returns: undefined }
             | { Args: { a: string }; Returns: number }
+            | { Args: { b: number }; Returns: string }
+            | {
+                Args: { completed: boolean; todo_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
             | {
                 Args: { user_id: number }
                 Returns: {
@@ -3251,20 +3267,6 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 SetofOptions: {
                   from: "*"
                   to: "users"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
-            | {
-                Args: { completed: boolean; todo_id: number }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
                   isOneToOne: false
                   isSetofReturn: true
                 }
@@ -3283,22 +3285,20 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   isSetofReturn: true
                 }
               }
-            | { Args: { b: number }; Returns: string }
-            | { Args: never; Returns: undefined }
           postgrest_unresolvable_function:
-            | {
-                Args: { a: string }
-                Returns: {
-                  error: true
-                } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
-              }
+            | { Args: never; Returns: undefined }
             | {
                 Args: { a: number }
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
               }
-            | { Args: never; Returns: undefined }
+            | {
+                Args: { a: string }
+                Returns: {
+                  error: true
+                } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+              }
           search_todos_by_details: {
             Args: { search_details: string }
             Returns: {
@@ -3332,20 +3332,6 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
           test_unnamed_row_setof:
             | {
-                Args: { user_id: number }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
-            | {
                 Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
                   details: string | null
@@ -3354,6 +3340,20 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 }[]
                 SetofOptions: {
                   from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
                   to: "todos"
                   isOneToOne: false
                   isSetofReturn: true
@@ -4233,9 +4233,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
           get_single_user_summary_from_view:
             | {
-                Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
-                }
+                Args: { search_user_id: number }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -4244,7 +4242,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
                 SetofOptions: {
-                  from: "users_view"
+                  from: "*"
                   to: "user_todos_summary_view"
                   isOneToOne: true
                   isSetofReturn: true
@@ -4267,7 +4265,9 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 }
               }
             | {
-                Args: { search_user_id: number }
+                Args: {
+                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -4276,7 +4276,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
                 SetofOptions: {
-                  from: "*"
+                  from: "users_view"
                   to: "user_todos_summary_view"
                   isOneToOne: true
                   isSetofReturn: true
@@ -4298,6 +4298,34 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
           get_todos_from_user:
             | {
+                Args: { search_user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
                 Args: {
                   userview_row: Database["public"]["Views"]["users_view"]["Row"]
                 }
@@ -4313,49 +4341,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   isSetofReturn: true
                 }
               }
-            | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "users"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
-            | {
-                Args: { search_user_id: number }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
           get_todos_setof_rows:
-            | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "users"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
             | {
                 Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
@@ -4365,6 +4351,20 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 }[]
                 SetofOptions: {
                   from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
                   to: "todos"
                   isOneToOne: false
                   isSetofReturn: true
@@ -4431,7 +4431,23 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
           postgres_fdw_handler: { Args: never; Returns: unknown }
           postgrest_resolvable_with_override_function:
+            | { Args: never; Returns: undefined }
             | { Args: { a: string }; Returns: number }
+            | { Args: { b: number }; Returns: string }
+            | {
+                Args: { completed: boolean; todo_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
             | {
                 Args: { user_id: number }
                 Returns: {
@@ -4443,20 +4459,6 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 SetofOptions: {
                   from: "*"
                   to: "users"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
-            | {
-                Args: { completed: boolean; todo_id: number }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
                   isOneToOne: false
                   isSetofReturn: true
                 }
@@ -4475,22 +4477,20 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   isSetofReturn: true
                 }
               }
-            | { Args: { b: number }; Returns: string }
-            | { Args: never; Returns: undefined }
           postgrest_unresolvable_function:
-            | {
-                Args: { a: string }
-                Returns: {
-                  error: true
-                } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
-              }
+            | { Args: never; Returns: undefined }
             | {
                 Args: { a: number }
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
               }
-            | { Args: never; Returns: undefined }
+            | {
+                Args: { a: string }
+                Returns: {
+                  error: true
+                } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+              }
           search_todos_by_details: {
             Args: { search_details: string }
             Returns: {
@@ -4524,20 +4524,6 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
           test_unnamed_row_setof:
             | {
-                Args: { user_id: number }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
-            | {
                 Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
                   details: string | null
@@ -4546,6 +4532,20 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 }[]
                 SetofOptions: {
                   from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
                   to: "todos"
                   isOneToOne: false
                   isSetofReturn: true
@@ -4990,6 +4990,125 @@ test('typegen: typescript consistent types definitions orders', async () => {
   // 2. Property declaration order (columns, function parameters)
   // 3. Enum value order
   expect(firstCall).toEqual(secondCall)
+})
+
+test('typegen: typescript function override order stability', async () => {
+  // Helper function to clean up test entities
+  const cleanupTestEntities = async () => {
+    await app.inject({
+      method: 'POST',
+      path: '/query',
+      payload: {
+        query: `
+          -- Drop functions with all possible signatures
+          DROP FUNCTION IF EXISTS test_func_override(integer, text) CASCADE;
+          DROP FUNCTION IF EXISTS test_func_override(text, integer) CASCADE;
+          DROP FUNCTION IF EXISTS test_func_override(boolean, integer, text) CASCADE;
+          DROP FUNCTION IF EXISTS test_func_override(text, boolean) CASCADE;
+        `,
+      },
+    })
+  }
+
+  // Clean up any existing test entities
+  await cleanupTestEntities()
+
+  // === FIRST ROUND: Create function overrides in order 1 ===
+  await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `
+        -- Create function overrides in specific order
+        CREATE FUNCTION test_func_override(param_a integer, param_b text)
+        RETURNS integer AS 'SELECT param_a + 1' LANGUAGE sql IMMUTABLE;
+
+        CREATE FUNCTION test_func_override(param_a text, param_b integer)
+        RETURNS text AS 'SELECT param_a || param_b::text' LANGUAGE sql IMMUTABLE;
+
+        CREATE FUNCTION test_func_override(param_a boolean, param_b integer, param_c text)
+        RETURNS boolean AS 'SELECT param_a' LANGUAGE sql IMMUTABLE;
+
+        CREATE FUNCTION test_func_override(param_a text, param_b boolean)
+        RETURNS text AS 'SELECT CASE WHEN param_b THEN param_a ELSE '''' END' LANGUAGE sql IMMUTABLE;
+      `,
+    },
+  })
+
+  // Generate types for first configuration
+  const { body: firstCall } = await app.inject({
+    method: 'GET',
+    path: '/generators/typescript',
+    query: { detect_one_to_one_relationships: 'true', postgrest_version: '13' },
+  })
+
+  // === SECOND ROUND: Modify function definitions without changing signatures ===
+  await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `
+        -- Modify function definitions (using CREATE OR REPLACE)
+        -- This should preserve the order
+        CREATE OR REPLACE FUNCTION test_func_override(param_a integer, param_b text)
+        RETURNS integer AS 'SELECT param_a + 100' LANGUAGE sql IMMUTABLE;
+
+        CREATE OR REPLACE FUNCTION test_func_override(param_a text, param_b integer)
+        RETURNS text AS 'SELECT param_a || ''_'' || param_b::text' LANGUAGE sql IMMUTABLE;
+
+        CREATE OR REPLACE FUNCTION test_func_override(param_a boolean, param_b integer, param_c text)
+        RETURNS boolean AS 'SELECT NOT param_a' LANGUAGE sql IMMUTABLE;
+
+        CREATE OR REPLACE FUNCTION test_func_override(param_a text, param_b boolean)
+        RETURNS text AS 'SELECT CASE WHEN param_b THEN param_a || ''_true'' ELSE ''false'' END' LANGUAGE sql IMMUTABLE;
+      `,
+    },
+  })
+
+  // Generate types for second configuration (after modifying definitions)
+  const { body: secondCall } = await app.inject({
+    method: 'GET',
+    path: '/generators/typescript',
+    query: { detect_one_to_one_relationships: 'true', postgrest_version: '13' },
+  })
+
+  // === THIRD ROUND: Drop and recreate in different order ===
+  await cleanupTestEntities()
+
+  // Create functions in reverse order
+  await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `
+        -- Create function overrides in reverse order
+        CREATE FUNCTION test_func_override(param_a text, param_b boolean)
+        RETURNS text AS 'SELECT CASE WHEN param_b THEN param_a ELSE '''' END' LANGUAGE sql IMMUTABLE;
+
+        CREATE FUNCTION test_func_override(param_a boolean, param_b integer, param_c text)
+        RETURNS boolean AS 'SELECT param_a' LANGUAGE sql IMMUTABLE;
+
+        CREATE FUNCTION test_func_override(param_a text, param_b integer)
+        RETURNS text AS 'SELECT param_a || param_b::text' LANGUAGE sql IMMUTABLE;
+
+        CREATE FUNCTION test_func_override(param_a integer, param_b text)
+        RETURNS integer AS 'SELECT param_a + 1' LANGUAGE sql IMMUTABLE;
+      `,
+    },
+  })
+
+  // Generate types for third configuration (recreated in different order)
+  const { body: thirdCall } = await app.inject({
+    method: 'GET',
+    path: '/generators/typescript',
+    query: { detect_one_to_one_relationships: 'true', postgrest_version: '13' },
+  })
+
+  // Clean up test entities
+  await cleanupTestEntities()
+
+  expect(firstCall).toEqual(secondCall)
+  expect(secondCall).toEqual(thirdCall)
 })
 
 test('typegen: go', async () => {

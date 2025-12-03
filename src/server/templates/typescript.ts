@@ -681,8 +681,10 @@ export type Database = {
                 {} as Record<string, typeof schemaFunctions>
               )
               for (const fnName in schemaFunctionsGroupedByName) {
-                schemaFunctionsGroupedByName[fnName].sort((a, b) =>
-                  b.fn.definition.localeCompare(a.fn.definition)
+                schemaFunctionsGroupedByName[fnName].sort(
+                  (a, b) =>
+                    a.fn.argument_types.localeCompare(b.fn.argument_types) ||
+                    a.fn.return_type.localeCompare(b.fn.return_type)
                 )
               }
 
