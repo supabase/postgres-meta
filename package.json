@@ -15,7 +15,9 @@
   "imports": {
     "#package.json": "./package.json"
   },
-  "repository": "supabase/postgres-meta",
+  "repository": {
+    "url": "git+https://github.com/supabase/postgres-meta.git"
+  },
   "scripts": {
     "check": "tsc -p tsconfig.json --noEmit",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
