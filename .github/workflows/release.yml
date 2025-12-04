@@ -9,7 +9,7 @@ on:
 jobs:
   semantic-release:
     name: Release
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       new-release-published: ${{ steps.semantic-release.outputs.new_release_published }}
       new-release-version: ${{ steps.semantic-release.outputs.new_release_version }}
@@ -22,6 +22,9 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
+
+      - name: Update npm
+        run: npm install -g npm@latest
 
       - run: |
           npm clean-install
