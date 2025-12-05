@@ -84,5 +84,6 @@ export default async (fastify: FastifyInstance) => {
   fastify.register(TypeScriptTypeGenRoute, { prefix: '/generators/typescript' })
   fastify.register(GoTypeGenRoute, { prefix: '/generators/go' })
   fastify.register(SwiftTypeGenRoute, { prefix: '/generators/swift' })
+  fastify.register(PythonTypeGenRoute, { prefix: '/generators/python' })
   fastify.register(DartTypeGenRoute, { prefix: '/generators/dart' })
 }
