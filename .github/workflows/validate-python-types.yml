@@ -33,7 +33,7 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          pip install pydantic typing-extensions
+          pip install pydantic mypy
 
       - name: Start test database
         working-directory: test/db
@@ -57,46 +57,13 @@ jobs:
           echo "Generated Python types (first 30 lines):"
           head -30 generated_types.py
 
-      - name: Validate Python types syntax
+      - name: Validate Python types runtime
         run: |
-          python -m py_compile generated_types.py
-          echo "✓ Python syntax is valid"
+          python -c "import generated_types; print('✓ Generated Python types are valid and can be imported')"
 
-      - name: Validate Python types imports
+      - name: Validate Python types with mypy
         run: |
-          python << 'EOF'
-          import sys
-          import importlib.util
-
-          try:
-              # Load the module from file
-              spec = importlib.util.spec_from_file_location("generated_types", "generated_types.py")
-              if spec is None or spec.loader is None:
-                  print("✗ Failed to create module spec")
-                  sys.exit(1)
-              
-              module = importlib.util.module_from_spec(spec)
-              spec.loader.exec_module(module)
-              
-              print("✓ All imports are valid")
-              print("✓ Generated types can be imported successfully")
-              print(f"✓ Module loaded: {module.__name__}")
-          except ImportError as e:
-              print(f"✗ Import error: {e}")
-              import traceback
-              traceback.print_exc()
-              sys.exit(1)
-          except SyntaxError as e:
-              print(f"✗ Syntax error: {e}")
-              import traceback
-              traceback.print_exc()
-              sys.exit(1)
-          except Exception as e:
-              print(f"✗ Unexpected error: {e}")
-              import traceback
-              traceback.print_exc()
-              sys.exit(1)
-          EOF
+          mypy generated_types.py --strict
 
       - name: Cleanup
         if: always()

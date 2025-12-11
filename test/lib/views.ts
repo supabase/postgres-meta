@@ -4,7 +4,8 @@ import { pgMeta } from './utils'
 test('list', async () => {
   const res = await pgMeta.views.list()
   expect(res.data?.find(({ name }) => name === 'todos_view')).toMatchInlineSnapshot(
-    { id: expect.any(Number) }, `
+    { id: expect.any(Number) },
+    `
     {
       "columns": [
         {
@@ -74,7 +75,8 @@ test('list', async () => {
       "name": "todos_view",
       "schema": "public",
     }
-  `)
+  `
+  )
 })
 
 test('list without columns', async () => {
@@ -98,7 +100,8 @@ test('list without columns', async () => {
 test('retrieve', async () => {
   const res = await pgMeta.views.retrieve({ schema: 'public', name: 'todos_view' })
   expect(res).toMatchInlineSnapshot(
-    { data: { id: expect.any(Number) } }, `
+    { data: { id: expect.any(Number) } },
+    `
     {
       "data": {
         "columns": [
@@ -171,5 +174,6 @@ test('retrieve', async () => {
       },
       "error": null,
     }
-  `)
+  `
+  )
 })

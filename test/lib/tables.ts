@@ -37,7 +37,8 @@ test('list', async () => {
       id: expect.any(Number),
       live_rows_estimate: expect.any(Number),
       size: expect.any(String),
-    }, `
+    },
+    `
     {
       "bytes": Any<Number>,
       "columns": [
@@ -173,7 +174,8 @@ test('list', async () => {
       "schema": "public",
       "size": Any<String>,
     }
-  `)
+  `
+  )
 })
 
 test('list without columns', async () => {
