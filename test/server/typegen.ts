@@ -6437,18 +6437,18 @@ test('typegen: python', async () => {
   expect(body).toMatchInlineSnapshot(`
     "from __future__ import annotations
 
-import datetime
-import uuid
-from typing import (
-    Annotated,
-    Any,
-    List,
-    Literal,
-    NotRequired,
-    Optional,
-    TypeAlias,
-    TypedDict,
-)
+    import datetime
+    import uuid
+    from typing import (
+        Annotated,
+        Any,
+        List,
+        Literal,
+        NotRequired,
+        Optional,
+        TypeAlias,
+        TypedDict,
+    )
 
     from pydantic import BaseModel, Field, Json
 
