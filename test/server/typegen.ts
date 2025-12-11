@@ -6378,6 +6378,7 @@ test('typegen: python', async () => {
 "from __future__ import annotations
 
 import datetime
+import uuid
 from typing import (
     Annotated,
     Any,
