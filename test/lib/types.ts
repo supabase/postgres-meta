@@ -64,8 +64,7 @@ test('list types with include Table Types', async () => {
   })
 
   expect(res.data?.find(({ name }) => name === 'todos')).toMatchInlineSnapshot(
-    { id: expect.any(Number) },
-    `
+    { id: expect.any(Number) }, `
     {
       "attributes": [],
       "comment": null,
@@ -74,10 +73,9 @@ test('list types with include Table Types', async () => {
       "id": Any<Number>,
       "name": "todos",
       "schema": "public",
-      "type_relation_id": 16402,
+      "type_relation_id": 16403,
     }
-  `
-  )
+  `)
 })
 
 test('list types without Table Types', async () => {

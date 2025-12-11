@@ -14,12 +14,14 @@ test('query', async () => {
         "id": 1,
         "name": "Joe Bloggs",
         "status": "ACTIVE",
+        "user_uuid": "0db4bf5e-98df-4ecf-aa2c-a077323c53b1",
       },
       {
         "decimal": null,
         "id": 2,
         "name": "Jane Doe",
         "status": "ACTIVE",
+        "user_uuid": "eda00f72-451f-419e-8ede-b7873ad6890c",
       },
     ]
   `)
@@ -765,6 +767,7 @@ test('parameter binding with positional parameters', async () => {
         "id": 1,
         "name": "Joe Bloggs",
         "status": "ACTIVE",
+        "user_uuid": "0db4bf5e-98df-4ecf-aa2c-a077323c53b1",
       },
     ]
   `)

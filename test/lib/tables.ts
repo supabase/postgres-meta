@@ -37,8 +37,7 @@ test('list', async () => {
       id: expect.any(Number),
       live_rows_estimate: expect.any(Number),
       size: expect.any(String),
-    },
-    `
+    }, `
     {
       "bytes": Any<Number>,
       "columns": [
@@ -117,6 +116,24 @@ test('list', async () => {
           "schema": "public",
           "table": "users",
         },
+        {
+          "check": null,
+          "comment": null,
+          "data_type": "uuid",
+          "default_value": "gen_random_uuid()",
+          "enums": [],
+          "format": "uuid",
+          "identity_generation": null,
+          "is_generated": false,
+          "is_identity": false,
+          "is_nullable": true,
+          "is_unique": false,
+          "is_updatable": true,
+          "name": "user_uuid",
+          "ordinal_position": 5,
+          "schema": "public",
+          "table": "users",
+        },
       ],
       "comment": null,
       "dead_rows_estimate": Any<Number>,
@@ -156,8 +173,7 @@ test('list', async () => {
       "schema": "public",
       "size": Any<String>,
     }
-  `
-  )
+  `)
 })
 
 test('list without columns', async () => {
