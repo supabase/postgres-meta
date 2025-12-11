@@ -2,17 +2,9 @@ name: Validate Python Type Generation
 
 on:
   push:
-    branches: [master, main]
-    paths:
-      - 'src/server/templates/python.ts'
-      - 'src/lib/**'
-      - 'test/**'
+    branches: [master]
   pull_request:
-    branches: [master, main]
-    paths:
-      - 'src/server/templates/python.ts'
-      - 'src/lib/**'
-      - 'test/**'
+    branches: [master]
 
 jobs:
   validate-python-types:
