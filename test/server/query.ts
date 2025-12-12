@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { app } from './utils'
+import { app, normalizeUuids } from './utils'
 
 test('query', async () => {
   const res = await app.inject({
@@ -7,19 +7,21 @@ test('query', async () => {
     path: '/query',
     payload: { query: 'SELECT * FROM users' },
   })
-  expect(res.json()).toMatchInlineSnapshot(`
+  expect(normalizeUuids(res.json())).toMatchInlineSnapshot(`
     [
       {
         "decimal": null,
         "id": 1,
         "name": "Joe Bloggs",
         "status": "ACTIVE",
+        "user_uuid": "00000000-0000-0000-0000-000000000000",
       },
       {
         "decimal": null,
         "id": 2,
         "name": "Jane Doe",
         "status": "ACTIVE",
+        "user_uuid": "00000000-0000-0000-0000-000000000000",
       },
     ]
   `)
@@ -758,13 +760,14 @@ test('parameter binding with positional parameters', async () => {
       parameters: [1, 'ACTIVE'],
     },
   })
-  expect(res.json()).toMatchInlineSnapshot(`
+  expect(normalizeUuids(res.json())).toMatchInlineSnapshot(`
     [
       {
         "decimal": null,
         "id": 1,
         "name": "Joe Bloggs",
         "status": "ACTIVE",
+        "user_uuid": "00000000-0000-0000-0000-000000000000",
       },
     ]
   `)
