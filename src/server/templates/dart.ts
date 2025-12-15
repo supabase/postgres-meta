@@ -992,8 +992,16 @@ export const apply = ({ schemas, tables, views, columns, types }: GeneratorMetad
   const viewClassConstructs = views
     .filter((view) => schemas.some((schema) => schema.name === view.schema))
     .map(
-      (view) =>
-        new ClassDartConstruct(view.name, view.schema, ['Select'], columnsByTableId[view.id])
+      (view) => {
+        const construct = new ClassDartConstruct(view.name, view.schema, ['Select'], columnsByTableId[view.id])
+        const viewType = types.find((t) => t.type_relation_id == view.id)
+        if (viewType !== undefined) {
+          ptdMap.set(viewType.id, [viewType, construct])
+          ptdMap.set(viewType.format, [viewType, construct])
+          ptdMap.set(`_${viewType.format}`, [undefined, new ListDartType(construct)])
+        }
+        return construct
+      }
     )
 
   let result = `abstract class JsonSerializable {
