@@ -143,6 +143,20 @@ class DatetimeDartType implements DartType {
   }
 }
 
+class DateDartType implements DartType {
+  generateType(): string {
+    return 'DateTime'
+  }
+
+  generateJsonEncoding(): string {
+    return '.toString().substring(0,10)'
+  }
+
+  generateJsonDecoding(inputParameter: string): string {
+    return `DateTime.parse(${inputParameter})`
+  }
+}
+
 class DurationDartType implements DartType {
   generateType(): string {
     return 'Duration'
@@ -276,28 +290,34 @@ ${this.values
   }
 }
 
-class ClassDartConstruct implements Declarable {
+class ClassDartConstruct implements DartType, Declarable {
   rowableName: string
   rowClassName: string
   operations: Operation[]
   columns: PostgresColumn[]
-  ptdMap: PostgresToDartMap
 
   constructor(
-    id: number,
     rowableName: string,
     schema: string,
     operations: Operation[],
-    columns: PostgresColumn[],
-    ptdMap: PostgresToDartMap
+    columns: PostgresColumn[]
   ) {
     this.rowableName = rowableName
     this.rowClassName = `${formatForDartClassName(schema)}${formatForDartClassName(rowableName)}`
     this.operations = operations
     this.columns = columns
-    this.ptdMap = ptdMap
-    this.ptdMap[id] = [undefined, new BuiltinDartType('dynamic')]
-    this.ptdMap[rowableName] = [undefined, new BuiltinDartType('dynamic')]
+  }
+
+  generateType(): string {
+    return `${this.rowClassName}Select`
+  }
+
+  generateJsonEncoding(): string {
+    return '.toJson()'
+  }
+
+  generateJsonDecoding(inputParameter: string): string {
+    return `${this.rowClassName}Select.fromJson(${inputParameter})`
   }
 
   generateSelectDeclaration(): string {
@@ -307,7 +327,7 @@ class ClassDartConstruct implements Declarable {
   ${this.columns
     .map((column) => {
       return `
-  final ${buildDartTypeFromPostgresColumn(column, this.ptdMap).generateType()} ${formatForDartPropertyName(column.name)};`
+  final ${buildDartTypeFromPostgresColumn(column).generateType()} ${formatForDartPropertyName(column.name)};`
     })
     .join('')}
 
@@ -316,7 +336,7 @@ class ClassDartConstruct implements Declarable {
       ? `{${this.columns
           .map((column) => {
             return `
-    ${buildDartTypeFromPostgresColumn(column, this.ptdMap) instanceof NullDartType ? '' : 'required '}this.${formatForDartPropertyName(column.name)}`
+    ${buildDartTypeFromPostgresColumn(column) instanceof NullDartType ? '' : 'required '}this.${formatForDartPropertyName(column.name)}`
           })
           .join(',')}
   }`
@@ -328,7 +348,7 @@ class ClassDartConstruct implements Declarable {
       ? `{${this.columns
           .map((column) => {
             return `
-    ${new NullDartType(buildDartTypeFromPostgresColumn(column, this.ptdMap)).generateType()} ${formatForDartPropertyName(column.name)}`
+    ${new NullDartType(buildDartTypeFromPostgresColumn(column)).generateType()} ${formatForDartPropertyName(column.name)}`
           })
           .join(',')}
   }`
@@ -336,7 +356,7 @@ class ClassDartConstruct implements Declarable {
   }) => {${this.columns
     .map((column) => {
       return `
-    if (${formatForDartPropertyName(column.name)} != null) '${column.name}': ${formatForDartPropertyName(column.name)}${buildDartTypeFromPostgresColumn(column, this.ptdMap).generateJsonEncoding()}`
+    if (${formatForDartPropertyName(column.name)} != null) '${column.name}': ${formatForDartPropertyName(column.name)}${buildDartTypeFromPostgresColumn(column).generateJsonEncoding()}`
     })
     .join(',')}
   };
@@ -355,7 +375,7 @@ class ClassDartConstruct implements Declarable {
     return ${className}(${this.columns
       .map((column) => {
         return `
-      ${formatForDartPropertyName(column.name)}: ${buildDartTypeFromPostgresColumn(column, this.ptdMap).generateJsonDecoding(`jsonObject['${column.name}']`)}`
+      ${formatForDartPropertyName(column.name)}: ${buildDartTypeFromPostgresColumn(column).generateJsonDecoding(`jsonObject['${column.name}']`)}`
       })
       .join(',')}
     );
@@ -366,7 +386,7 @@ class ClassDartConstruct implements Declarable {
       ? `{${this.columns
           .map((column) => {
             return `
-    ${new NullDartType(buildDartTypeFromPostgresColumn(column, this.ptdMap)).generateType()} ${formatForDartPropertyName(column.name)}`
+    ${new NullDartType(buildDartTypeFromPostgresColumn(column)).generateType()} ${formatForDartPropertyName(column.name)}`
           })
           .join(',')}
   }`
@@ -394,7 +414,7 @@ class ClassDartConstruct implements Declarable {
   ${this.columns
     .map((column) => {
       return `
-  final ${buildDartTypeFromPostgresColumn(column, this.ptdMap, true).generateType()} ${formatForDartPropertyName(column.name)};`
+  final ${buildDartTypeFromPostgresColumn(column, true).generateType()} ${formatForDartPropertyName(column.name)};`
     })
     .join('')}
 
@@ -403,7 +423,7 @@ class ClassDartConstruct implements Declarable {
       ? `{${this.columns
           .map((column) => {
             return `
-    ${buildDartTypeFromPostgresColumn(column, this.ptdMap, true) instanceof NullDartType ? '' : 'required '}this.${formatForDartPropertyName(column.name)}`
+    ${buildDartTypeFromPostgresColumn(column, true) instanceof NullDartType ? '' : 'required '}this.${formatForDartPropertyName(column.name)}`
           })
           .join(',')}
   }`
@@ -415,7 +435,7 @@ class ClassDartConstruct implements Declarable {
       ? `{${this.columns
           .map((column) => {
             return `
-    ${new NullDartType(buildDartTypeFromPostgresColumn(column, this.ptdMap, true)).generateType()} ${formatForDartPropertyName(column.name)}`
+    ${new NullDartType(buildDartTypeFromPostgresColumn(column, true)).generateType()} ${formatForDartPropertyName(column.name)}`
           })
           .join(',')}
   }`
@@ -423,7 +443,7 @@ class ClassDartConstruct implements Declarable {
   }) => {${this.columns
     .map((column) => {
       return `
-    if (${formatForDartPropertyName(column.name)} != null) '${column.name}': ${formatForDartPropertyName(column.name)}${buildDartTypeFromPostgresColumn(column, this.ptdMap, true).generateJsonEncoding()}`
+    if (${formatForDartPropertyName(column.name)} != null) '${column.name}': ${formatForDartPropertyName(column.name)}${buildDartTypeFromPostgresColumn(column, true).generateJsonEncoding()}`
     })
     .join(',')}
   };
@@ -442,7 +462,7 @@ class ClassDartConstruct implements Declarable {
     return ${className}(${this.columns
       .map((column) => {
         return `
-      ${formatForDartPropertyName(column.name)}: ${buildDartTypeFromPostgresColumn(column, this.ptdMap, true).generateJsonDecoding(`jsonObject['${column.name}']`)}`
+      ${formatForDartPropertyName(column.name)}: ${buildDartTypeFromPostgresColumn(column, true).generateJsonDecoding(`jsonObject['${column.name}']`)}`
       })
       .join(',')}
     );
@@ -453,7 +473,7 @@ class ClassDartConstruct implements Declarable {
       ? `{${this.columns
           .map((column) => {
             return `
-    ${new NullDartType(buildDartTypeFromPostgresColumn(column, this.ptdMap, true)).generateType()} ${formatForDartPropertyName(column.name)}`
+    ${new NullDartType(buildDartTypeFromPostgresColumn(column, true)).generateType()} ${formatForDartPropertyName(column.name)}`
           })
           .join(',')}
   }`
@@ -481,7 +501,7 @@ class ClassDartConstruct implements Declarable {
   ${this.columns
     .map((column) => {
       return `
-  final ${new NullDartType(buildDartTypeFromPostgresColumn(column, this.ptdMap, true)).generateType()} ${formatForDartPropertyName(column.name)};`
+  final ${new NullDartType(buildDartTypeFromPostgresColumn(column, true)).generateType()} ${formatForDartPropertyName(column.name)};`
     })
     .join('')}
 
@@ -502,7 +522,7 @@ class ClassDartConstruct implements Declarable {
       ? `{${this.columns
           .map((column) => {
             return `
-    ${new NullDartType(new NullDartType(buildDartTypeFromPostgresColumn(column, this.ptdMap, true))).generateType()} ${formatForDartPropertyName(column.name)}`
+    ${new NullDartType(new NullDartType(buildDartTypeFromPostgresColumn(column, true))).generateType()} ${formatForDartPropertyName(column.name)}`
           })
           .join(',')}
   }`
@@ -510,7 +530,7 @@ class ClassDartConstruct implements Declarable {
   }) => {${this.columns
     .map((column) => {
       return `
-    if (${formatForDartPropertyName(column.name)} != null) '${column.name}': ${formatForDartPropertyName(column.name)}${new NullDartType(buildDartTypeFromPostgresColumn(column, this.ptdMap, true)).generateJsonEncoding()}`
+    if (${formatForDartPropertyName(column.name)} != null) '${column.name}': ${formatForDartPropertyName(column.name)}${new NullDartType(buildDartTypeFromPostgresColumn(column, true)).generateJsonEncoding()}`
     })
     .join(',')}
   };
@@ -529,7 +549,7 @@ class ClassDartConstruct implements Declarable {
     return ${className}(${this.columns
       .map((column) => {
         return `
-      ${formatForDartPropertyName(column.name)}: ${new NullDartType(buildDartTypeFromPostgresColumn(column, this.ptdMap, true)).generateJsonDecoding(`jsonObject['${column.name}']`)}`
+      ${formatForDartPropertyName(column.name)}: ${new NullDartType(buildDartTypeFromPostgresColumn(column, true)).generateJsonDecoding(`jsonObject['${column.name}']`)}`
       })
       .join(',')}
     );
@@ -540,7 +560,7 @@ class ClassDartConstruct implements Declarable {
       ? `{${this.columns
           .map((column) => {
             return `
-    ${new NullDartType(new NullDartType(buildDartTypeFromPostgresColumn(column, this.ptdMap, true))).generateType()} ${formatForDartPropertyName(column.name)}`
+    ${new NullDartType(new NullDartType(buildDartTypeFromPostgresColumn(column, true))).generateType()} ${formatForDartPropertyName(column.name)}`
           })
           .join(',')}
   }`
@@ -570,12 +590,10 @@ ${this.operations.indexOf('Update') !== -1 ? this.generateUpdateDeclaration() : 
 
 class ClassDartConstructForCompositeType implements DartType, Declarable {
   postgresType: PostgresType
-  ptdMap: PostgresToDartMap
   name: string
 
-  constructor(postgresType: PostgresType, ptdMap: PostgresToDartMap) {
+  constructor(postgresType: PostgresType) {
     this.postgresType = postgresType
-    this.ptdMap = ptdMap
     this.name = `${formatForDartClassName(this.postgresType.schema)}${formatForDartClassName(this.postgresType.name)}`
   }
 
@@ -584,10 +602,11 @@ class ClassDartConstructForCompositeType implements DartType, Declarable {
   }
 
   generateDeclaration(): string {
+    const ptdMap = PostgresToDartMapSingleton.getInstance()
     return `class ${this.name} implements JsonSerializable {${this.postgresType.attributes
       .map(
         (attr) => `
-  final ${new NullDartType(this.ptdMap[attr.type_id][1]).generateType()} ${formatForDartPropertyName(attr.name)};`
+  final ${new NullDartType(ptdMap.get(attr.type_id)![1]).generateType()} ${formatForDartPropertyName(attr.name)};`
       )
       .join('')}
 
@@ -602,13 +621,13 @@ class ClassDartConstructForCompositeType implements DartType, Declarable {
   static Map<String, dynamic> _generateMap({${this.postgresType.attributes
     .map((attr) => {
       return `
-    ${new NullDartType(this.ptdMap[attr.type_id][1]).generateType()} ${formatForDartPropertyName(attr.name)}`
+    ${new NullDartType(ptdMap.get(attr.type_id)![1]).generateType()} ${formatForDartPropertyName(attr.name)}`
     })
     .join(',')}
   }) => {${this.postgresType.attributes
     .map((attr) => {
       return `
-    if (${formatForDartPropertyName(attr.name)} != null) '${attr.name}': ${formatForDartPropertyName(attr.name)}${this.ptdMap[attr.type_id][1].generateJsonEncoding()}`
+    if (${formatForDartPropertyName(attr.name)} != null) '${attr.name}': ${formatForDartPropertyName(attr.name)}${ptdMap.get(attr.type_id)![1].generateJsonEncoding()}`
     })
     .join(',')}
   };
@@ -625,7 +644,7 @@ class ClassDartConstructForCompositeType implements DartType, Declarable {
   ${this.name} copyWith({${this.postgresType.attributes
     .map((attr) => {
       return `
-    ${new NullDartType(this.ptdMap[attr.type_id][1]).generateType()} ${formatForDartPropertyName(attr.name)}`
+    ${new NullDartType(ptdMap.get(attr.type_id)![1]).generateType()} ${formatForDartPropertyName(attr.name)}`
     })
     .join(',')}
   }) {
@@ -643,7 +662,7 @@ class ClassDartConstructForCompositeType implements DartType, Declarable {
     return ${this.name}(${this.postgresType.attributes
       .map((attr) => {
         return `
-      ${formatForDartPropertyName(attr.name)}: ${new NullDartType(this.ptdMap[attr.type_id][1]).generateJsonDecoding(`jsonObject['${attr.name}']`)}`
+      ${formatForDartPropertyName(attr.name)}: ${new NullDartType(ptdMap.get(attr.type_id)![1]).generateJsonDecoding(`jsonObject['${attr.name}']`)}`
       })
       .join(',')}
     );
@@ -662,6 +681,36 @@ class ClassDartConstructForCompositeType implements DartType, Declarable {
 
 type PostgresToDartMap = Record<number | string, [PostgresType | undefined, DartType]>
 
+class PostgresToDartMapSingleton {
+  private static instance: PostgresToDartMapSingleton
+  private map: PostgresToDartMap = {}
+
+  private constructor() {}
+
+  static getInstance(): PostgresToDartMapSingleton {
+    if (!PostgresToDartMapSingleton.instance) {
+      PostgresToDartMapSingleton.instance = new PostgresToDartMapSingleton()
+    }
+    return PostgresToDartMapSingleton.instance
+  }
+
+  get(key: number | string): [PostgresType | undefined, DartType] | undefined {
+    return this.map[key]
+  }
+
+  set(key: number | string, value: [PostgresType | undefined, DartType]): void {
+    this.map[key] = value
+  }
+
+  has(key: number | string): boolean {
+    return key in this.map
+  }
+
+  clear(): void {
+    this.map = {}
+  }
+}
+
 const PGTYPE_TO_DARTTYPE_MAP: Record<string, DartType> = {
   // Bool
   bool: new BuiltinDartType('bool'),
@@ -679,8 +728,10 @@ const PGTYPE_TO_DARTTYPE_MAP: Record<string, DartType> = {
   timetz: new DatetimeDartType(),
   timestamp: new DatetimeDartType(),
   timestamptz: new DatetimeDartType(),
-  date: new DatetimeDartType(),
   interval: new DurationDartType(),
+
+  // Date
+  date: new DateDartType(),
 
   uuid: new BuiltinDartType('String'),
   text: new BuiltinDartType('String'),
@@ -692,12 +743,12 @@ const PGTYPE_TO_DARTTYPE_MAP: Record<string, DartType> = {
 
 function buildDartTypeFromPostgresColumn(
   postgresColumn: PostgresColumn,
-  ptdMap: PostgresToDartMap,
   forInsert: boolean = false
 ): DartType {
-  let dartType = ptdMap[postgresColumn.format][1]
-  if (postgresColumn.format === 'jsonb' && postgresColumn.name in ptdMap) {
-    dartType = ptdMap[postgresColumn.name][1]
+  const ptdMap = PostgresToDartMapSingleton.getInstance()
+  let dartType = ptdMap.get(postgresColumn.format)![1]
+  if (postgresColumn.format === 'jsonb' && ptdMap.has(postgresColumn.name)) {
+    dartType = ptdMap.get(postgresColumn.name)![1]
   }
   if (
     postgresColumn.is_nullable ||
@@ -711,22 +762,21 @@ function buildDartTypeFromPostgresColumn(
   return dartType
 }
 
-function buildDartTypeFromPostgresType(
-  postgresType: PostgresType,
-  ptdMap: PostgresToDartMap
-): DartType {
+function buildDartTypeFromPostgresType(postgresType: PostgresType): DartType {
+  const ptdMap = PostgresToDartMapSingleton.getInstance()
   const sanitizedTypeName = postgresType.name.startsWith('_')
     ? postgresType.name.slice(1)
     : postgresType.name
 
   if (postgresType.name.startsWith('_')) {
-    const existingDartType = ptdMap[sanitizedTypeName] ? ptdMap[sanitizedTypeName][1] : undefined
+    const existingDartType = ptdMap.has(sanitizedTypeName)
+      ? ptdMap.get(sanitizedTypeName)![1]
+      : undefined
     if (existingDartType) {
       return new ListDartType(existingDartType)
     }
   }
 
-  // Builtin type
   const dartTypeFromStaticMap = PGTYPE_TO_DARTTYPE_MAP[sanitizedTypeName]
   if (dartTypeFromStaticMap) {
     return postgresType.name.startsWith('_')
@@ -734,7 +784,6 @@ function buildDartTypeFromPostgresType(
       : dartTypeFromStaticMap
   }
 
-  // Enum
   if (postgresType.enums.length > 0) {
     const enumConstruct = new EnumDartConstruct(
       postgresType.name,
@@ -745,9 +794,8 @@ function buildDartTypeFromPostgresType(
     return postgresType.name.startsWith('_') ? new ListDartType(enumConstruct) : enumConstruct
   }
 
-  // Composite type
   if (postgresType.attributes.length > 0) {
-    const compositeType = new ClassDartConstructForCompositeType(postgresType, ptdMap)
+    const compositeType = new ClassDartConstructForCompositeType(postgresType)
     return postgresType.name.startsWith('_') ? new ListDartType(compositeType) : compositeType
   }
 
@@ -895,6 +943,9 @@ export function getRequiredTypes(
 }
 
 export const apply = ({ schemas, tables, views, columns, types }: GeneratorMetadata): string => {
+  const ptdMap = PostgresToDartMapSingleton.getInstance()
+  ptdMap.clear()
+
   const columnsByTableId = columns
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
     .reduce(
@@ -908,11 +959,10 @@ export const apply = ({ schemas, tables, views, columns, types }: GeneratorMetad
 
   let declarableTypes: Declarable[] = []
   const requiredTypes = getRequiredTypes(types, columns)
-  let ptdMap: PostgresToDartMap = {}
   for (const t of requiredTypes) {
-    const newDartType = buildDartTypeFromPostgresType(t, ptdMap)
-    ptdMap[t.id] = [t, newDartType]
-    ptdMap[t.name] = [t, newDartType]
+    const newDartType = buildDartTypeFromPostgresType(t)
+    ptdMap.set(t.id, [t, newDartType])
+    ptdMap.set(t.name, [t, newDartType])
     if (
       newDartType instanceof EnumDartConstruct ||
       newDartType instanceof ClassDartConstructForCompositeType
@@ -923,30 +973,27 @@ export const apply = ({ schemas, tables, views, columns, types }: GeneratorMetad
 
   const tableClassConstructs = tables
     .filter((table) => schemas.some((schema) => schema.name === table.schema))
-    .map(
-      (table) =>
-        new ClassDartConstruct(
-          table.id,
-          table.name,
-          table.schema,
-          ['Select', 'Insert', 'Update'],
-          columnsByTableId[table.id] ?? [],
-          ptdMap
-        )
-    )
+    .map((table) => {
+      const construct = new ClassDartConstruct(
+        table.name,
+        table.schema,
+        ['Select', 'Insert', 'Update'],
+        columnsByTableId[table.id] ?? []
+      )
+      const tableType = types.find((t) => t.type_relation_id == table.id)
+      if (tableType !== undefined) {
+        ptdMap.set(tableType.id, [tableType, construct])
+        ptdMap.set(tableType.format, [tableType, construct])
+        ptdMap.set(`_${tableType.format}`, [undefined, new ListDartType(construct)])
+      }
+      return construct
+    })
 
   const viewClassConstructs = views
     .filter((view) => schemas.some((schema) => schema.name === view.schema))
     .map(
       (view) =>
-        new ClassDartConstruct(
-          view.id,
-          view.name,
-          view.schema,
-          ['Select'],
-          columnsByTableId[view.id],
-          ptdMap
-        )
+        new ClassDartConstruct(view.name, view.schema, ['Select'], columnsByTableId[view.id])
     )
 
   let result = `abstract class JsonSerializable {
