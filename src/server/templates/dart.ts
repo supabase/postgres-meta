@@ -129,6 +129,20 @@ class BuiltinDartType implements DartType {
   }
 }
 
+class DoubleDartType implements DartType {
+  generateType(): string {
+    return 'double'
+  }
+
+  generateJsonEncoding(): string {
+    return ''
+  }
+
+  generateJsonDecoding(inputParameter: string): string {
+    return `(${inputParameter} as num).toDouble()`
+  }
+}
+
 class DatetimeDartType implements DartType {
   generateType(): string {
     return 'DateTime'
@@ -719,9 +733,9 @@ const PGTYPE_TO_DARTTYPE_MAP: Record<string, DartType> = {
   int2: new BuiltinDartType('int'),
   int4: new BuiltinDartType('int'),
   int8: new BuiltinDartType('int'),
-  float4: new BuiltinDartType('double'),
-  float8: new BuiltinDartType('double'),
-  numeric: new BuiltinDartType('double'),
+  float4: new DoubleDartType(),
+  float8: new DoubleDartType(),
+  numeric: new DoubleDartType(),
 
   // Time
   time: new DatetimeDartType(),
