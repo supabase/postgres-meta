@@ -1,6 +1,7 @@
 import { expect, test, describe } from 'vitest'
 import { build } from '../src/server/app.js'
 import { TEST_CONNECTION_STRING } from './lib/utils.js'
+import { pgTypeToTsType } from '../src/server/templates/typescript'
 
 describe('server/routes/types', () => {
   test('should list types', async () => {
@@ -43,4 +44,19 @@ describe('server/routes/types', () => {
     expect(response.statusCode).toBe(404)
     await app.close()
   })
+
+  test('nullable interval column maps to string | null', () => {
+  const result = pgTypeToTsType(
+    { name: 'public' } as any,
+    'interval',
+    {
+      types: [],
+      schemas: [],
+      tables: [],
+      views: [],
+    }
+  )
+
+  expect(result).toBe('string')
+});
 })
