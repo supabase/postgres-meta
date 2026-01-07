@@ -46,17 +46,13 @@ describe('server/routes/types', () => {
   })
 
   test('nullable interval column maps to string | null', () => {
-  const result = pgTypeToTsType(
-    { name: 'public' } as any,
-    'interval',
-    {
+    const result = pgTypeToTsType({ name: 'public' } as any, 'interval', {
       types: [],
       schemas: [],
       tables: [],
       views: [],
-    }
-  )
+    })
 
-  expect(result).toBe('string')
-});
+    expect(result).toBe('string')
+  })
 })
