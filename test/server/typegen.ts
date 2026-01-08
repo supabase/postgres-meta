@@ -6800,18 +6800,18 @@ test('typegen: python', async () => {
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
     class PublicIntervalTest(BaseModel):
-        duration_optional: Optional[PgCatalogInterval] = Field(alias="duration_optional")
-        duration_required: PgCatalogInterval = Field(alias="duration_required")
+        duration_optional: Optional[str] = Field(alias="duration_optional")
+        duration_required: str = Field(alias="duration_required")
         id: int = Field(alias="id")
 
     class PublicIntervalTestInsert(TypedDict):
-        duration_optional: NotRequired[Annotated[PgCatalogInterval, Field(alias="duration_optional")]]
-        duration_required: Annotated[PgCatalogInterval, Field(alias="duration_required")]
+        duration_optional: NotRequired[Annotated[str, Field(alias="duration_optional")]]
+        duration_required: Annotated[str, Field(alias="duration_required")]
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
     class PublicIntervalTestUpdate(TypedDict):
-        duration_optional: NotRequired[Annotated[PgCatalogInterval, Field(alias="duration_optional")]]
-        duration_required: NotRequired[Annotated[PgCatalogInterval, Field(alias="duration_required")]]
+        duration_optional: NotRequired[Annotated[str, Field(alias="duration_optional")]]
+        duration_required: NotRequired[Annotated[str, Field(alias="duration_required")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
     class PublicCategory(BaseModel):
