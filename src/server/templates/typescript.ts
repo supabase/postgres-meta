@@ -869,7 +869,7 @@ export const Constants = {
 }
 
 // TODO: Make this more robust. Currently doesn't handle range types - returns them as unknown.
-const pgTypeToTsType = (
+export const pgTypeToTsType = (
   schema: PostgresSchema,
   pgType: string,
   {
@@ -902,6 +902,7 @@ const pgTypeToTsType = (
       'timestamptz',
       'uuid',
       'vector',
+      'interval',
     ].includes(pgType)
   ) {
     return 'string'

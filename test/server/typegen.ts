@@ -119,6 +119,24 @@ test('typegen: typescript', async () => {
             }
             Relationships: []
           }
+          interval_test: {
+            Row: {
+              duration_optional: string | null
+              duration_required: string
+              id: number
+            }
+            Insert: {
+              duration_optional?: string | null
+              duration_required: string
+              id?: number
+            }
+            Update: {
+              duration_optional?: string | null
+              duration_required?: string
+              id?: number
+            }
+            Relationships: []
+          }
           memes: {
             Row: {
               category: number | null
@@ -525,6 +543,10 @@ test('typegen: typescript', async () => {
           }
         }
         Functions: {
+          add_interval_to_duration: {
+            Args: { additional_interval: string; base_duration: string }
+            Returns: string
+          }
           blurb: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: {
@@ -573,6 +595,12 @@ test('typegen: typescript', async () => {
             Returns: {
               error: true
             } & "the function public.details_words with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+          }
+          double_duration: {
+            Args: {
+              interval_test_row: Database["public"]["Tables"]["interval_test"]["Row"]
+            }
+            Returns: string
           }
           function_returning_row: {
             Args: never
@@ -1291,6 +1319,24 @@ test('typegen w/ one-to-one relationships', async () => {
             }
             Relationships: []
           }
+          interval_test: {
+            Row: {
+              duration_optional: string | null
+              duration_required: string
+              id: number
+            }
+            Insert: {
+              duration_optional?: string | null
+              duration_required: string
+              id?: number
+            }
+            Update: {
+              duration_optional?: string | null
+              duration_required?: string
+              id?: number
+            }
+            Relationships: []
+          }
           memes: {
             Row: {
               category: number | null
@@ -1722,6 +1768,10 @@ test('typegen w/ one-to-one relationships', async () => {
           }
         }
         Functions: {
+          add_interval_to_duration: {
+            Args: { additional_interval: string; base_duration: string }
+            Returns: string
+          }
           blurb: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: {
@@ -1770,6 +1820,12 @@ test('typegen w/ one-to-one relationships', async () => {
             Returns: {
               error: true
             } & "the function public.details_words with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+          }
+          double_duration: {
+            Args: {
+              interval_test_row: Database["public"]["Tables"]["interval_test"]["Row"]
+            }
+            Returns: string
           }
           function_returning_row: {
             Args: never
@@ -2488,6 +2544,24 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             }
             Relationships: []
           }
+          interval_test: {
+            Row: {
+              duration_optional: string | null
+              duration_required: string
+              id: number
+            }
+            Insert: {
+              duration_optional?: string | null
+              duration_required: string
+              id?: number
+            }
+            Update: {
+              duration_optional?: string | null
+              duration_required?: string
+              id?: number
+            }
+            Relationships: []
+          }
           memes: {
             Row: {
               category: number | null
@@ -2919,6 +2993,10 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
         }
         Functions: {
+          add_interval_to_duration: {
+            Args: { additional_interval: string; base_duration: string }
+            Returns: string
+          }
           blurb: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: {
@@ -2967,6 +3045,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Returns: {
               error: true
             } & "the function public.details_words with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+          }
+          double_duration: {
+            Args: {
+              interval_test_row: Database["public"]["Tables"]["interval_test"]["Row"]
+            }
+            Returns: string
           }
           function_returning_row: {
             Args: never
@@ -3690,6 +3774,24 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             }
             Relationships: []
           }
+          interval_test: {
+            Row: {
+              duration_optional: string | null
+              duration_required: string
+              id: number
+            }
+            Insert: {
+              duration_optional?: string | null
+              duration_required: string
+              id?: number
+            }
+            Update: {
+              duration_optional?: string | null
+              duration_required?: string
+              id?: number
+            }
+            Relationships: []
+          }
           memes: {
             Row: {
               category: number | null
@@ -4121,6 +4223,10 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
         }
         Functions: {
+          add_interval_to_duration: {
+            Args: { additional_interval: string; base_duration: string }
+            Returns: string
+          }
           blurb: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: {
@@ -4169,6 +4275,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Returns: {
               error: true
             } & "the function public.details_words with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+          }
+          double_duration: {
+            Args: {
+              interval_test_row: Database["public"]["Tables"]["interval_test"]["Row"]
+            }
+            Returns: string
           }
           function_returning_row: {
             Args: never
@@ -5339,6 +5451,24 @@ test('typegen: go', async () => {
       Id        *int64      \`json:"id"\`
     }
 
+    type PublicIntervalTestSelect struct {
+      DurationOptional interface{} \`json:"duration_optional"\`
+      DurationRequired interface{} \`json:"duration_required"\`
+      Id               int64       \`json:"id"\`
+    }
+
+    type PublicIntervalTestInsert struct {
+      DurationOptional interface{} \`json:"duration_optional"\`
+      DurationRequired interface{} \`json:"duration_required"\`
+      Id               *int64      \`json:"id"\`
+    }
+
+    type PublicIntervalTestUpdate struct {
+      DurationOptional interface{} \`json:"duration_optional"\`
+      DurationRequired interface{} \`json:"duration_required"\`
+      Id               *int64      \`json:"id"\`
+    }
+
     type PublicCategorySelect struct {
       Id   int32  \`json:"id"\`
       Name string \`json:"name"\`
@@ -5612,6 +5742,36 @@ test('typegen: swift', async () => {
           case id = "id"
           case name = "name"
           case status = "status"
+        }
+      }
+      internal struct IntervalTestSelect: Codable, Hashable, Sendable, Identifiable {
+        internal let durationOptional: IntervalSelect?
+        internal let durationRequired: IntervalSelect
+        internal let id: Int64
+        internal enum CodingKeys: String, CodingKey {
+          case durationOptional = "duration_optional"
+          case durationRequired = "duration_required"
+          case id = "id"
+        }
+      }
+      internal struct IntervalTestInsert: Codable, Hashable, Sendable, Identifiable {
+        internal let durationOptional: IntervalSelect?
+        internal let durationRequired: IntervalSelect
+        internal let id: Int64?
+        internal enum CodingKeys: String, CodingKey {
+          case durationOptional = "duration_optional"
+          case durationRequired = "duration_required"
+          case id = "id"
+        }
+      }
+      internal struct IntervalTestUpdate: Codable, Hashable, Sendable, Identifiable {
+        internal let durationOptional: IntervalSelect?
+        internal let durationRequired: IntervalSelect?
+        internal let id: Int64?
+        internal enum CodingKeys: String, CodingKey {
+          case durationOptional = "duration_optional"
+          case durationRequired = "duration_required"
+          case id = "id"
         }
       }
       internal struct MemesSelect: Codable, Hashable, Sendable {
@@ -6115,6 +6275,36 @@ test('typegen: swift w/ public access control', async () => {
           case status = "status"
         }
       }
+      public struct IntervalTestSelect: Codable, Hashable, Sendable, Identifiable {
+        public let durationOptional: IntervalSelect?
+        public let durationRequired: IntervalSelect
+        public let id: Int64
+        public enum CodingKeys: String, CodingKey {
+          case durationOptional = "duration_optional"
+          case durationRequired = "duration_required"
+          case id = "id"
+        }
+      }
+      public struct IntervalTestInsert: Codable, Hashable, Sendable, Identifiable {
+        public let durationOptional: IntervalSelect?
+        public let durationRequired: IntervalSelect
+        public let id: Int64?
+        public enum CodingKeys: String, CodingKey {
+          case durationOptional = "duration_optional"
+          case durationRequired = "duration_required"
+          case id = "id"
+        }
+      }
+      public struct IntervalTestUpdate: Codable, Hashable, Sendable, Identifiable {
+        public let durationOptional: IntervalSelect?
+        public let durationRequired: IntervalSelect?
+        public let id: Int64?
+        public enum CodingKeys: String, CodingKey {
+          case durationOptional = "duration_optional"
+          case durationRequired = "duration_required"
+          case id = "id"
+        }
+      }
       public struct MemesSelect: Codable, Hashable, Sendable {
         public let category: Int32?
         public let createdAt: String
@@ -6607,6 +6797,21 @@ test('typegen: python', async () => {
         created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
         data: NotRequired[Annotated[Json[Any], Field(alias="data")]]
         event_type: NotRequired[Annotated[str, Field(alias="event_type")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+
+    class PublicIntervalTest(BaseModel):
+        duration_optional: Optional[str] = Field(alias="duration_optional")
+        duration_required: str = Field(alias="duration_required")
+        id: int = Field(alias="id")
+
+    class PublicIntervalTestInsert(TypedDict):
+        duration_optional: NotRequired[Annotated[str, Field(alias="duration_optional")]]
+        duration_required: Annotated[str, Field(alias="duration_required")]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+
+    class PublicIntervalTestUpdate(TypedDict):
+        duration_optional: NotRequired[Annotated[str, Field(alias="duration_optional")]]
+        duration_required: NotRequired[Annotated[str, Field(alias="duration_required")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
     class PublicCategory(BaseModel):

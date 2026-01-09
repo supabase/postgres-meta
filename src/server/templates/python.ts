@@ -345,6 +345,7 @@ const PY_TYPE_MAP: Record<string, string> = {
   timestamptz: 'datetime.datetime',
   uuid: 'uuid.UUID',
   vector: 'list[Any]',
+  interval: 'str',
 
   // JSON
   json: 'Json[Any]',
