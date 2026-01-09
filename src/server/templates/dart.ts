@@ -1007,7 +1007,7 @@ export const apply = ({ schemas, tables, views, columns, types }: GeneratorMetad
     .filter((view) => schemas.some((schema) => schema.name === view.schema))
     .map(
       (view) => {
-        const construct = new ClassDartConstruct(view.name, view.schema, ['Select'], columnsByTableId[view.id])
+        const construct = new ClassDartConstruct(view.name, view.schema, ['Select', 'Update'], columnsByTableId[view.id])
         const viewType = types.find((t) => t.type_relation_id == view.id)
         if (viewType !== undefined) {
           ptdMap.set(viewType.id, [viewType, construct])
