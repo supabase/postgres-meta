@@ -13,12 +13,12 @@ jobs:
     # Must match glibc verison in node:20
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           repository: 'pyramation/libpg-query-node'
           ref: 'v15'
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
 
