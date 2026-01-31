@@ -1,6 +1,6 @@
 # TypeScript Type Generator
 
-Generates TypeScript type definitions from your PostgreSQL database schema. The output is designed for use with the [Supabase client libraries](https://github.com/supabase/supabase-js) and produces a single `Database` type containing all schemas, tables, views, functions, enums, and composite types.
+Generates TypeScript type definitions from your PostgreSQL database schema. The output produces a single `Database` type containing all schemas, tables, views, functions, enums, and composite types. While designed to work with the [Supabase client libraries](https://github.com/supabase/supabase-js), the generated types are framework-agnostic and can be used with any TypeScript project that interacts with PostgreSQL.
 
 ## Endpoint
 
