@@ -1,13 +1,13 @@
-# Zod Type Generator
+# TypeScript Zod Type Generator
 
-Generates [Zod](https://zod.dev/) schema definitions from your PostgreSQL database schema. Unlike the [TypeScript generator](typescript.md) which produces static types only, the Zod generator produces runtime validation schemas that can parse and validate data at runtime.
+Generates [Zod](https://zod.dev/) schema definitions from your PostgreSQL database schema. Unlike the [TypeScript generator](typescript.md) which produces static types only, this generator produces runtime validation schemas that can parse and validate data at runtime.
 
 **Status:** Planned (not yet implemented)
 
 ## Endpoint
 
 ```
-GET /generators/zod
+GET /generators/typescript-zod
 ```
 
 ## Query parameters
@@ -22,10 +22,10 @@ GET /generators/zod
 
 ```bash
 # Using the dev server (npm run dev must be running)
-npm run gen:types:zod
+npm run gen:types:typescript-zod
 
 # With a custom database
-PG_META_DB_URL=postgresql://user:pass@host:5432/db npm run gen:types:zod
+PG_META_DB_URL=postgresql://user:pass@host:5432/db npm run gen:types:typescript-zod
 ```
 
 ## Output structure

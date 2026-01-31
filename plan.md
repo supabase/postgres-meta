@@ -166,8 +166,8 @@ Use `prettier` for formatting (same as the existing TypeScript generator).
 
 | Action | File |
 |---|---|
-| **Create** | `src/server/templates/zod.ts` |
-| **Create** | `src/server/routes/generators/zod.ts` |
+| **Create** | `src/server/templates/typescript-zod.ts` |
+| **Create** | `src/server/routes/generators/typescript-zod.ts` |
 | Modify | `src/server/routes/index.ts` — register route |
 | Modify | `src/server/server.ts` — add CLI case |
 | Modify | `package.json` — add `gen:types:zod` script |
@@ -325,11 +325,11 @@ Output is `JSON.stringify(schema, null, 2)` — no external formatter needed.
 ### `src/server/routes/index.ts`
 
 ```ts
-import ZodTypeGenRoute from './generators/zod.js'
+import TypeScriptZodTypeGenRoute from './generators/typescript-zod.js'
 import JsonSchemaTypeGenRoute from './generators/jsonschema.js'
 
 // inside registration:
-fastify.register(ZodTypeGenRoute, { prefix: '/generators/zod' })
+fastify.register(TypeScriptZodTypeGenRoute, { prefix: '/generators/typescript-zod' })
 fastify.register(JsonSchemaTypeGenRoute, { prefix: '/generators/jsonschema' })
 ```
 
@@ -338,8 +338,8 @@ fastify.register(JsonSchemaTypeGenRoute, { prefix: '/generators/jsonschema' })
 Add two new template imports and two new cases in the `getTypeOutput()` switch:
 
 ```ts
-case 'zod':
-  return applyZodTemplate({ ...generatorMeta })
+case 'typescript-zod':
+  return applyTypeScriptZodTemplate({ ...generatorMeta })
 case 'jsonschema':
   return applyJsonSchemaTemplate({ ...generatorMeta })
 ```
@@ -347,7 +347,7 @@ case 'jsonschema':
 ### `package.json`
 
 ```json
-"gen:types:zod": "PG_META_GENERATE_TYPES=zod ...",
+"gen:types:typescript-zod": "PG_META_GENERATE_TYPES=typescript-zod ...",
 "gen:types:jsonschema": "PG_META_GENERATE_TYPES=jsonschema ..."
 ```
 
@@ -357,7 +357,7 @@ case 'jsonschema':
 
 Add to `test/server/typegen.ts`:
 
-- **`test('typegen: zod')`** — Inline snapshot test validating Zod output for the test database (enums, tables, views, composite types, functions, nullable fields, arrays, identity columns, defaults).
+- **`test('typegen: typescript-zod')`** — Inline snapshot test validating Zod output for the test database (enums, tables, views, composite types, functions, nullable fields, arrays, identity columns, defaults).
 - **`test('typegen: jsonschema')`** — Inline snapshot test validating JSON Schema output structure, `$defs`, `$ref` usage, `required` arrays, and nullable handling.
 
 Both tests use the same `app.inject()` pattern as existing tests.
@@ -368,8 +368,8 @@ Both tests use the same `app.inject()` pattern as existing tests.
 
 | Step | Task | Depends on |
 |---|---|---|
-| 1 | Create `src/server/templates/zod.ts` | — |
-| 2 | Create `src/server/routes/generators/zod.ts` | Step 1 |
+| 1 | Create `src/server/templates/typescript-zod.ts` | — |
+| 2 | Create `src/server/routes/generators/typescript-zod.ts` | Step 1 |
 | 3 | Create `src/server/templates/jsonschema.ts` | — |
 | 4 | Create `src/server/routes/generators/jsonschema.ts` | Step 3 |
 | 5 | Modify `src/server/routes/index.ts` (register both routes) | Steps 2, 4 |
