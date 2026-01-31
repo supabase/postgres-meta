@@ -4,7 +4,7 @@ Generates Go struct definitions from your PostgreSQL database schema. Produces `
 
 ## Usage
 
-Save the generated output to a file (e.g., `database.go`) in your project, then use the structs in your code.
+Save the generated output to a file (e.g., `database/types.go`) in your project, then import the package and use the structs in your code.
 
 ### Reading rows
 

@@ -6,13 +6,13 @@ Generates a [JSON Schema](https://json-schema.org/) (Draft 2020-12) document fro
 
 ## Usage
 
-Save the generated output to a file (e.g., `database-schema.json`) in your project. JSON Schema is language-agnostic, so it can be used with any JSON Schema validator in any language.
+Save the generated output to a file (e.g., `database/schema.json`) in your project. JSON Schema is language-agnostic, so it can be used with any JSON Schema validator in any language.
 
 ### Validating data in JavaScript/TypeScript
 
 ```ts
 import Ajv from "ajv";
-import schema from "./database-schema.json";
+import schema from "./database/schema.json";
 
 const ajv = new Ajv();
 const validate = ajv.compile(
@@ -31,7 +31,7 @@ if (!valid) {
 import json
 from jsonschema import validate
 
-with open("database-schema.json") as f:
+with open("database/schema.json") as f:
     schema = json.load(f)
 
 row_schema = schema["properties"]["public"]["properties"]["Tables"] \
@@ -46,10 +46,10 @@ JSON Schema can be used as an input to code generators for languages that don't 
 
 ```bash
 # Generate TypeScript types from JSON Schema
-npx json-schema-to-typescript database-schema.json > types.ts
+npx json-schema-to-typescript database/schema.json > types.ts
 
 # Generate Rust types
-typify database-schema.json > types.rs
+typify database/schema.json > types.rs
 ```
 
 ### API documentation
@@ -61,7 +61,7 @@ The schema can be embedded in OpenAPI specs or used to document your database st
 components:
   schemas:
     User:
-      $ref: "database-schema.json#/properties/public/properties/Tables/properties/users/properties/Row"
+      $ref: "database/schema.json#/properties/public/properties/Tables/properties/users/properties/Row"
 ```
 
 ## Endpoint

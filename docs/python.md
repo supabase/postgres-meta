@@ -4,12 +4,12 @@ Generates Python type definitions from your PostgreSQL database schema using [Py
 
 ## Usage
 
-Save the generated output to a file (e.g., `database_types.py`) in your project, then import the types.
+Save the generated output to a file (e.g., `database/types.py`) in your project, then import the types.
 
 ### Validating query results
 
 ```python
-from database_types import Users
+from database.types import Users
 
 # Pydantic BaseModel validates and parses data
 user = Users.model_validate(row_dict)
@@ -20,7 +20,7 @@ print(user.created_at)  # datetime.datetime
 ### Typing inserts
 
 ```python
-from database_types import UsersInsert
+from database.types import UsersInsert
 
 # TypedDict gives you type checking without runtime validation
 new_user: UsersInsert = {
@@ -33,7 +33,7 @@ new_user: UsersInsert = {
 ### Typing updates
 
 ```python
-from database_types import UsersUpdate
+from database.types import UsersUpdate
 
 # All fields are NotRequired for partial updates
 update: UsersUpdate = {
@@ -45,7 +45,7 @@ update: UsersUpdate = {
 
 ```python
 from fastapi import FastAPI
-from database_types import Users, UsersInsert
+from database.types import Users, UsersInsert
 
 app = FastAPI()
 
@@ -63,7 +63,7 @@ async def create_user(user: UsersInsert):
 ### Using enums
 
 ```python
-from database_types import UserStatus
+from database.types import UserStatus
 
 # UserStatus is a Literal type alias
 def check_status(status: UserStatus):

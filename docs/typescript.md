@@ -4,12 +4,12 @@ Generates TypeScript type definitions from your PostgreSQL database schema. The 
 
 ## Usage
 
-Save the generated output to a file (e.g., `database.types.ts`) in your project, then import the types.
+Save the generated output to a file (e.g., `database/types.ts`) in your project, then import the types.
 
 ### Typing database queries
 
 ```ts
-import { Database } from "./database.types";
+import { Database } from "@/database/types";
 
 type User = Database["public"]["Tables"]["users"]["Row"];
 
@@ -22,7 +22,7 @@ function getUser(row: unknown): User {
 ### Typing inserts and updates
 
 ```ts
-import { Database } from "./database.types";
+import { Database } from "@/database/types";
 
 type NewUser = Database["public"]["Tables"]["users"]["Insert"];
 type UserUpdate = Database["public"]["Tables"]["users"]["Update"];
@@ -42,7 +42,7 @@ function updateUser(id: number, changes: UserUpdate) {
 The generated output includes shorthand helper types:
 
 ```ts
-import { Tables, TablesInsert, TablesUpdate, Enums } from "./database.types";
+import { Tables, TablesInsert, TablesUpdate, Enums } from "@/database/types";
 
 type User = Tables<"users">;
 type NewUser = TablesInsert<"users">;
@@ -54,7 +54,7 @@ type UserStatus = Enums<"user_status">;
 
 ```ts
 import { createClient } from "@supabase/supabase-js";
-import { Database } from "./database.types";
+import { Database } from "@/database/types";
 
 const supabase = createClient<Database>(url, key);
 

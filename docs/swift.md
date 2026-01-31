@@ -4,7 +4,7 @@ Generates Swift struct and enum definitions from your PostgreSQL database schema
 
 ## Usage
 
-Save the generated output to a file (e.g., `Database.swift`) in your project, then use the structs in your code.
+Save the generated output to a file (e.g., `Database/Types.swift`) in your project, then use the structs in your code.
 
 ### Decoding query results
 

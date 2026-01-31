@@ -6,12 +6,12 @@ Generates [Zod](https://zod.dev/) schema definitions from your PostgreSQL databa
 
 ## Usage
 
-Save the generated output to a file (e.g., `db-schemas.ts`) in your project, then import schemas to validate data at runtime.
+Save the generated output to a file (e.g., `database/zod.ts`) in your project, then import schemas to validate data at runtime.
 
 ### Validating query results
 
 ```ts
-import { schemas } from "./db-schemas";
+import { schemas } from "@/database/zod";
 
 const { Row: UserRow } = schemas.public.Tables.users;
 
@@ -31,7 +31,7 @@ if (result.success) {
 ### Validating data before inserting
 
 ```ts
-import { schemas } from "./db-schemas";
+import { schemas } from "@/database/zod";
 
 const { Insert: UserInsert } = schemas.public.Tables.users;
 
@@ -46,7 +46,7 @@ const newUser = UserInsert.parse({
 ### Validating API request bodies
 
 ```ts
-import { schemas } from "./db-schemas";
+import { schemas } from "@/database/zod";
 
 const { Update: UserUpdate } = schemas.public.Tables.users;
 
@@ -63,7 +63,7 @@ You don't need both the TypeScript generator and the Zod generator. Zod schemas 
 
 ```ts
 import { z } from "zod";
-import { schemas } from "./db-schemas";
+import { schemas } from "@/database/zod";
 
 type UserRow = z.infer<typeof schemas.public.Tables.users.Row>;
 //   ^ { id: number; name: string; email: string; status: ...; ... }
