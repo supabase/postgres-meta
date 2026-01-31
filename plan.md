@@ -17,7 +17,7 @@ Both generators consume the existing `GeneratorMetadata` type from `src/lib/gene
 
 TypeScript source code that imports from `zod` and exports schema objects for every table, view, enum, composite type, and function in the database.
 
-Example output:
+Example output (`db_driver_type=postgrest`, the default):
 
 ```ts
 import { z } from "zod";
@@ -29,7 +29,7 @@ export const usersRowSchema = z.object({
   name: z.string(),
   email: z.string(),
   status: userStatusSchema,
-  created_at: z.string().datetime(),
+  created_at: z.string().datetime(),  // string in postgrest mode
   metadata: z.unknown().nullable(),
 });
 
@@ -45,19 +45,27 @@ export const usersInsertSchema = z.object({
 export const usersUpdateSchema = usersRowSchema.partial();
 ```
 
+With `db_driver_type=direct`, `created_at` would instead be `z.coerce.date()` (since `node-postgres` returns `Date` objects for timestamp columns).
+
 ### Type mapping (`PG_TYPE_TO_ZOD_MAP`)
+
+These generators support two output modes, controlled by a `db_driver_type` query parameter:
+
+- **`postgrest`** (default) — Types reflect PostgREST serialization behavior (e.g., timestamps and dates are returned as strings, `int8` as string).
+- **`direct`** — Types reflect what a direct PostgreSQL driver like `node-postgres` returns (e.g., timestamps as `Date`, `int8` as `string` by default in pg).
+
+The base type map is shared; only the types that differ between modes are listed below.
+
+#### Base types (same in both modes)
 
 | PostgreSQL type | Zod validator |
 |---|---|
 | `bool` | `z.boolean()` |
 | `int2`, `int4` | `z.number().int()` |
-| `int8` | `z.number().int()` |
 | `float4`, `float8`, `numeric` | `z.number()` |
 | `text`, `varchar`, `char`, `name`, `bpchar` | `z.string()` |
 | `uuid` | `z.string().uuid()` |
 | `json`, `jsonb` | `z.unknown()` |
-| `timestamptz`, `timestamp` | `z.string().datetime()` |
-| `date` | `z.string().date()` |
 | `time`, `timetz` | `z.string()` |
 | `bytea` | `z.string()` |
 | `inet`, `cidr` | `z.string()` |
@@ -69,6 +77,14 @@ export const usersUpdateSchema = usersRowSchema.partial();
 | Enum types | Reference to generated enum schema |
 | Composite types | Reference to generated composite schema |
 | Unknown/unmapped | `z.unknown()` |
+
+#### Types that differ by mode
+
+| PostgreSQL type | `postgrest` mode | `direct` mode |
+|---|---|---|
+| `int8` | `z.string()` (PostgREST returns bigints as strings) | `z.string()` (node-postgres also returns bigint as string by default) |
+| `timestamptz`, `timestamp` | `z.string().datetime()` | `z.coerce.date()` |
+| `date` | `z.string().date()` | `z.coerce.date()` |
 
 **Nullable handling:** Append `.nullable()` when the column is nullable.
 
@@ -95,6 +111,7 @@ Use `prettier` for formatting (same as the existing TypeScript generator).
 |---|---|
 | `included_schemas` | Comma-separated schema whitelist |
 | `excluded_schemas` | Comma-separated schema blacklist |
+| `db_driver_type` | `postgrest` (default) or `direct` — controls type mappings for driver-sensitive types |
 
 ### Files
 
@@ -184,10 +201,14 @@ Example output:
 
 ### Type mapping (`PG_TYPE_TO_JSON_SCHEMA_MAP`)
 
+Like the Zod generator, the JSON Schema generator supports a `db_driver_type` query parameter (`postgrest` or `direct`). JSON Schema is language-agnostic, so the differences are smaller — mainly around whether `int8` is represented as a string or integer.
+
+#### Base types (same in both modes)
+
 | PostgreSQL type | JSON Schema |
 |---|---|
 | `bool` | `{ "type": "boolean" }` |
-| `int2`, `int4`, `int8` | `{ "type": "integer" }` |
+| `int2`, `int4` | `{ "type": "integer" }` |
 | `float4`, `float8`, `numeric` | `{ "type": "number" }` |
 | `text`, `varchar`, `char`, `name`, `bpchar` | `{ "type": "string" }` |
 | `uuid` | `{ "type": "string", "format": "uuid" }` |
@@ -204,6 +225,14 @@ Example output:
 | Enum types | `{ "$ref": "#/$defs/schema.enum_name" }` |
 | Composite types | `{ "$ref": "#/$defs/schema.composite_name" }` |
 | Unknown/unmapped | `{}` |
+
+#### Types that differ by mode
+
+| PostgreSQL type | `postgrest` mode | `direct` mode |
+|---|---|---|
+| `int8` | `{ "type": "string" }` (PostgREST serializes bigints as strings) | `{ "type": "integer" }` |
+
+Note: `timestamp`/`date` use `"format": "date-time"` / `"format": "date"` in both modes. JSON Schema `format` is a hint, not a type constraint — the consumer decides whether to interpret the value as a string or a Date object.
 
 **Nullable handling:** Wrap with `{ "oneOf": [typeSchema, { "type": "null" }] }`
 
@@ -227,6 +256,7 @@ Output is `JSON.stringify(schema, null, 2)` — no external formatter needed.
 |---|---|
 | `included_schemas` | Comma-separated schema whitelist |
 | `excluded_schemas` | Comma-separated schema blacklist |
+| `db_driver_type` | `postgrest` (default) or `direct` — controls type mappings for driver-sensitive types |
 
 ### Files
 
@@ -307,5 +337,5 @@ Both tests use the same `app.inject()` pattern as existing tests.
 - **No new dependencies.** Zod output is plain TypeScript source code — users install `zod` themselves. JSON Schema is a plain JSON object built with standard library.
 - **Reuse `GeneratorMetadata` as-is.** Both generators consume the same metadata interface, requiring zero changes to `src/lib/generators.ts`.
 - **Follow existing patterns exactly.** Route handler structure, template `apply()` signature, error handling, and test approach all mirror existing generators.
-- **PostgREST-aware types.** Since data comes through PostgREST (which serializes timestamps, dates, ranges, etc. as JSON strings), both generators map these types to string representations rather than language-native Date/Range objects.
+- **Driver-aware type modes.** Both generators accept a `db_driver_type` query parameter (`postgrest` or `direct`). The default is `postgrest` (matching Supabase's primary use case), but users connecting directly to PostgreSQL via `node-postgres` or similar drivers can use `direct` mode to get native type mappings (e.g., `Date` instead of datetime strings for timestamps). This avoids forcing a single serialization assumption on all users.
 - **JSON Schema uses `$ref` for reusability.** Enums and composite types are placed in `$defs` and referenced via `$ref`, keeping the output DRY and composable.
