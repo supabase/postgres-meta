@@ -4,6 +4,66 @@ Generates a [JSON Schema](https://json-schema.org/) (Draft 2020-12) document fro
 
 **Status:** Planned (not yet implemented)
 
+## Usage
+
+Save the generated output to a file (e.g., `database-schema.json`) in your project. JSON Schema is language-agnostic, so it can be used with any JSON Schema validator in any language.
+
+### Validating data in JavaScript/TypeScript
+
+```ts
+import Ajv from "ajv";
+import schema from "./database-schema.json";
+
+const ajv = new Ajv();
+const validate = ajv.compile(
+  schema.properties.public.properties.Tables.properties.users.properties.Row
+);
+
+const valid = validate(row);
+if (!valid) {
+  console.error(validate.errors);
+}
+```
+
+### Validating data in Python
+
+```python
+import json
+from jsonschema import validate
+
+with open("database-schema.json") as f:
+    schema = json.load(f)
+
+row_schema = schema["properties"]["public"]["properties"]["Tables"] \
+    ["properties"]["users"]["properties"]["Row"]
+
+validate(instance=row_data, schema=row_schema)
+```
+
+### Generating types from JSON Schema
+
+JSON Schema can be used as an input to code generators for languages that don't have a dedicated generator:
+
+```bash
+# Generate TypeScript types from JSON Schema
+npx json-schema-to-typescript database-schema.json > types.ts
+
+# Generate Rust types
+typify database-schema.json > types.rs
+```
+
+### API documentation
+
+The schema can be embedded in OpenAPI specs or used to document your database structure:
+
+```yaml
+# openapi.yaml
+components:
+  schemas:
+    User:
+      $ref: "database-schema.json#/properties/public/properties/Tables/properties/users/properties/Row"
+```
+
 ## Endpoint
 
 ```

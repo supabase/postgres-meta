@@ -2,6 +2,75 @@
 
 Generates Python type definitions from your PostgreSQL database schema using [Pydantic](https://docs.pydantic.dev/) `BaseModel` classes for row types and `TypedDict` classes for insert and update types.
 
+## Usage
+
+Save the generated output to a file (e.g., `database_types.py`) in your project, then import the types.
+
+### Validating query results
+
+```python
+from database_types import Users
+
+# Pydantic BaseModel validates and parses data
+user = Users.model_validate(row_dict)
+print(user.name)        # str
+print(user.created_at)  # datetime.datetime
+```
+
+### Typing inserts
+
+```python
+from database_types import UsersInsert
+
+# TypedDict gives you type checking without runtime validation
+new_user: UsersInsert = {
+    "name": "Alice",
+    "email": "alice@example.com",
+    # id, status, created_at are NotRequired — they have defaults
+}
+```
+
+### Typing updates
+
+```python
+from database_types import UsersUpdate
+
+# All fields are NotRequired for partial updates
+update: UsersUpdate = {
+    "name": "Bob",
+}
+```
+
+### Using with FastAPI
+
+```python
+from fastapi import FastAPI
+from database_types import Users, UsersInsert
+
+app = FastAPI()
+
+@app.get("/users/{user_id}", response_model=Users)
+async def get_user(user_id: int):
+    row = await db.fetch_one("SELECT * FROM users WHERE id = $1", user_id)
+    return Users.model_validate(dict(row))
+
+@app.post("/users", response_model=Users)
+async def create_user(user: UsersInsert):
+    # Pydantic validates the request body automatically
+    ...
+```
+
+### Using enums
+
+```python
+from database_types import UserStatus
+
+# UserStatus is a Literal type alias
+def check_status(status: UserStatus):
+    if status == "active":
+        ...
+```
+
 ## Endpoint
 
 ```

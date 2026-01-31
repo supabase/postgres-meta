@@ -4,6 +4,74 @@ Generates [Zod](https://zod.dev/) schema definitions from your PostgreSQL databa
 
 **Status:** Planned (not yet implemented)
 
+## Usage
+
+Save the generated output to a file (e.g., `db-schemas.ts`) in your project, then import schemas to validate data at runtime.
+
+### Validating query results
+
+```ts
+import { schemas } from "./db-schemas";
+
+const { Row: UserRow } = schemas.public.Tables.users;
+
+// Parse validates and returns typed data — throws on invalid input
+const user = UserRow.parse(row);
+//    ^ typed as { id: number; name: string; email: string; ... }
+
+// safeParse returns a result object instead of throwing
+const result = UserRow.safeParse(row);
+if (result.success) {
+  console.log(result.data.name);
+} else {
+  console.error(result.error.issues);
+}
+```
+
+### Validating data before inserting
+
+```ts
+import { schemas } from "./db-schemas";
+
+const { Insert: UserInsert } = schemas.public.Tables.users;
+
+// Validate user input before sending to the database
+const newUser = UserInsert.parse({
+  name: "Alice",
+  email: "alice@example.com",
+  // id, status, created_at are optional (have defaults)
+});
+```
+
+### Validating API request bodies
+
+```ts
+import { schemas } from "./db-schemas";
+
+const { Update: UserUpdate } = schemas.public.Tables.users;
+
+app.patch("/users/:id", (req, res) => {
+  // All fields are optional for updates — rejects unknown fields
+  const body = UserUpdate.parse(req.body);
+  // ...update the database with validated data
+});
+```
+
+### Deriving static types from schemas
+
+You don't need both the TypeScript generator and the Zod generator. Zod schemas can produce static types directly:
+
+```ts
+import { z } from "zod";
+import { schemas } from "./db-schemas";
+
+type UserRow = z.infer<typeof schemas.public.Tables.users.Row>;
+//   ^ { id: number; name: string; email: string; status: ...; ... }
+
+type UserInsert = z.infer<typeof schemas.public.Tables.users.Insert>;
+//   ^ { name: string; email: string; id?: number; status?: ...; ... }
+```
+
 ## Endpoint
 
 ```
@@ -85,74 +153,6 @@ Each table produces three schemas:
 - **Update** — All fields are `.partial()` (all optional).
 
 Views and materialized views produce a Row schema only (unless the view is updatable).
-
-## Usage
-
-Save the generated output to a file (e.g., `db-schemas.ts`) in your project, then import schemas to validate data at runtime.
-
-### Validating query results
-
-```ts
-import { schemas } from "./db-schemas";
-
-const { Row: UserRow } = schemas.public.Tables.users;
-
-// Parse validates and returns typed data — throws on invalid input
-const user = UserRow.parse(row);
-//    ^ typed as { id: number; name: string; email: string; ... }
-
-// safeParse returns a result object instead of throwing
-const result = UserRow.safeParse(row);
-if (result.success) {
-  console.log(result.data.name);
-} else {
-  console.error(result.error.issues);
-}
-```
-
-### Validating data before inserting
-
-```ts
-import { schemas } from "./db-schemas";
-
-const { Insert: UserInsert } = schemas.public.Tables.users;
-
-// Validate user input before sending to the database
-const newUser = UserInsert.parse({
-  name: "Alice",
-  email: "alice@example.com",
-  // id, status, created_at are optional (have defaults)
-});
-```
-
-### Validating API request bodies
-
-```ts
-import { schemas } from "./db-schemas";
-
-const { Update: UserUpdate } = schemas.public.Tables.users;
-
-app.patch("/users/:id", (req, res) => {
-  // All fields are optional for updates — rejects unknown fields
-  const body = UserUpdate.parse(req.body);
-  // ...update the database with validated data
-});
-```
-
-### Deriving static types from schemas
-
-You don't need both the TypeScript generator and the Zod generator. Zod schemas can produce static types directly:
-
-```ts
-import { z } from "zod";
-import { schemas } from "./db-schemas";
-
-type UserRow = z.infer<typeof schemas.public.Tables.users.Row>;
-//   ^ { id: number; name: string; email: string; status: ...; ... }
-
-type UserInsert = z.infer<typeof schemas.public.Tables.users.Insert>;
-//   ^ { name: string; email: string; id?: number; status?: ...; ... }
-```
 
 ## Driver modes
 

@@ -2,6 +2,67 @@
 
 Generates TypeScript type definitions from your PostgreSQL database schema. The output produces a single `Database` type containing all schemas, tables, views, functions, enums, and composite types. While designed to work with the [Supabase client libraries](https://github.com/supabase/supabase-js), the generated types are framework-agnostic and can be used with any TypeScript project that interacts with PostgreSQL.
 
+## Usage
+
+Save the generated output to a file (e.g., `database.types.ts`) in your project, then import the types.
+
+### Typing database queries
+
+```ts
+import { Database } from "./database.types";
+
+type User = Database["public"]["Tables"]["users"]["Row"];
+
+// Use with any PostgreSQL client
+function getUser(row: unknown): User {
+  return row as User;
+}
+```
+
+### Typing inserts and updates
+
+```ts
+import { Database } from "./database.types";
+
+type NewUser = Database["public"]["Tables"]["users"]["Insert"];
+type UserUpdate = Database["public"]["Tables"]["users"]["Update"];
+
+function createUser(user: NewUser) {
+  // id, created_at are optional — they have defaults
+  // name, email are required
+}
+
+function updateUser(id: number, changes: UserUpdate) {
+  // All fields are optional
+}
+```
+
+### Using helper utility types
+
+The generated output includes shorthand helper types:
+
+```ts
+import { Tables, TablesInsert, TablesUpdate, Enums } from "./database.types";
+
+type User = Tables<"users">;
+type NewUser = TablesInsert<"users">;
+type UserUpdate = TablesUpdate<"users">;
+type UserStatus = Enums<"user_status">;
+```
+
+### With Supabase client
+
+```ts
+import { createClient } from "@supabase/supabase-js";
+import { Database } from "./database.types";
+
+const supabase = createClient<Database>(url, key);
+
+// Queries are now fully typed
+const { data } = await supabase.from("users").select("*");
+//     ^ typed as Database["public"]["Tables"]["users"]["Row"][]
+```
+
 ## Endpoint
 
 ```

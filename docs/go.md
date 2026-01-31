@@ -2,6 +2,53 @@
 
 Generates Go struct definitions from your PostgreSQL database schema. Produces `Select`, `Insert`, and `Update` structs for each table, with JSON struct tags for serialization.
 
+## Usage
+
+Save the generated output to a file (e.g., `database.go`) in your project, then use the structs in your code.
+
+### Reading rows
+
+```go
+package main
+
+import (
+    "database/sql"
+    "encoding/json"
+
+    db "myproject/database"
+)
+
+func GetUser(row *sql.Row) (db.PublicUsersSelect, error) {
+    var user db.PublicUsersSelect
+    err := row.Scan(&user.Id, &user.Name, &user.Email, &user.CreatedAt, &user.Metadata)
+    return user, err
+}
+```
+
+### Inserting rows
+
+```go
+newUser := db.PublicUsersInsert{
+    Name:  "Alice",
+    Email: "alice@example.com",
+}
+
+// Marshal to JSON for an API request
+body, _ := json.Marshal(newUser)
+```
+
+### Partial updates
+
+```go
+// Update structs use pointers so you can distinguish
+// between "not set" (nil) and "set to zero value"
+name := "Bob"
+update := db.PublicUsersUpdate{
+    Name: &name,
+    // other fields are nil — won't be included
+}
+```
+
 ## Endpoint
 
 ```

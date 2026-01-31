@@ -2,6 +2,65 @@
 
 Generates Swift struct and enum definitions from your PostgreSQL database schema. Structs conform to `Codable`, `Hashable`, and `Sendable` protocols, and include `CodingKeys` enums for JSON serialization.
 
+## Usage
+
+Save the generated output to a file (e.g., `Database.swift`) in your project, then use the structs in your code.
+
+### Decoding query results
+
+```swift
+import Foundation
+
+let data = // ... JSON data from your API
+let decoder = JSONDecoder()
+let users = try decoder.decode([PublicSchema.UsersSelect].self, from: data)
+
+for user in users {
+    print(user.name)       // String
+    print(user.createdAt)  // String (mapped from created_at via CodingKeys)
+}
+```
+
+### Encoding data for inserts
+
+```swift
+let newUser = PublicSchema.UsersInsert(
+    id: nil,        // optional — has default
+    name: "Alice",
+    email: "alice@example.com",
+    status: nil,    // optional — has default
+    createdAt: nil  // optional — has default
+)
+
+let encoder = JSONEncoder()
+let body = try encoder.encode(newUser)
+```
+
+### Partial updates
+
+```swift
+let update = PublicSchema.UsersUpdate(
+    id: nil,
+    name: "Bob",      // only update the name
+    email: nil,
+    status: nil,
+    createdAt: nil
+)
+```
+
+### Using enums
+
+```swift
+let status: PublicSchema.UserStatus = .active
+
+switch status {
+case .active:
+    print("User is active")
+case .inactive:
+    print("User is inactive")
+}
+```
+
 ## Endpoint
 
 ```
