@@ -23,4 +23,7 @@ export {
   PostgresType,
   PostgresVersion,
   PostgresView,
+  DependencyGraphNode,
+  DependencyGraphEdge,
+  DependencyGraph,
 } from './types.js'
