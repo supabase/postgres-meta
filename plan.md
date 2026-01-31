@@ -17,7 +17,7 @@ Both generators consume the existing `GeneratorMetadata` type from `src/lib/gene
 
 TypeScript source code that imports from `zod` and exports schema objects for every table, view, enum, composite type, and function in the database.
 
-Example output (`db_driver_type=postgrest`, the default):
+Example output (`db_driver_type=direct`, the default):
 
 ```ts
 import { z } from "zod";
@@ -29,7 +29,7 @@ export const usersRowSchema = z.object({
   name: z.string(),
   email: z.string(),
   status: userStatusSchema,
-  created_at: z.string().datetime(),  // string in postgrest mode
+  created_at: z.coerce.date(),  // Date object in direct mode
   metadata: z.unknown().nullable(),
 });
 
@@ -38,21 +38,21 @@ export const usersInsertSchema = z.object({
   name: z.string(),
   email: z.string(),
   status: userStatusSchema.optional(),     // has default
-  created_at: z.string().datetime().optional(),
+  created_at: z.coerce.date().optional(),
   metadata: z.unknown().nullable().optional(),
 });
 
 export const usersUpdateSchema = usersRowSchema.partial();
 ```
 
-With `db_driver_type=direct`, `created_at` would instead be `z.coerce.date()` (since `node-postgres` returns `Date` objects for timestamp columns).
+With `db_driver_type=postgrest`, `created_at` would instead be `z.string().datetime()` (since PostgREST serializes timestamps as ISO strings).
 
 ### Type mapping (`PG_TYPE_TO_ZOD_MAP`)
 
 These generators support two output modes, controlled by a `db_driver_type` query parameter:
 
-- **`postgrest`** (default) — Types reflect PostgREST serialization behavior (e.g., timestamps and dates are returned as strings, `int8` as string).
-- **`direct`** — Types reflect what a direct PostgreSQL driver like `node-postgres` returns (e.g., timestamps as `Date`, `int8` as `string` by default in pg).
+- **`direct`** (default) — Types reflect what a direct PostgreSQL driver like `node-postgres` returns (e.g., timestamps as `Date`, `int8` as `string` by default in pg).
+- **`postgrest`** — Types reflect PostgREST serialization behavior (e.g., timestamps and dates are returned as strings, `int8` as string).
 
 The base type map is shared; only the types that differ between modes are listed below.
 
@@ -111,7 +111,7 @@ Use `prettier` for formatting (same as the existing TypeScript generator).
 |---|---|
 | `included_schemas` | Comma-separated schema whitelist |
 | `excluded_schemas` | Comma-separated schema blacklist |
-| `db_driver_type` | `postgrest` (default) or `direct` — controls type mappings for driver-sensitive types |
+| `db_driver_type` | `direct` (default) or `postgrest` — controls type mappings for driver-sensitive types |
 
 ### Files
 
@@ -201,7 +201,7 @@ Example output:
 
 ### Type mapping (`PG_TYPE_TO_JSON_SCHEMA_MAP`)
 
-Like the Zod generator, the JSON Schema generator supports a `db_driver_type` query parameter (`postgrest` or `direct`). JSON Schema is language-agnostic, so the differences are smaller — mainly around whether `int8` is represented as a string or integer.
+Like the Zod generator, the JSON Schema generator supports a `db_driver_type` query parameter (`direct` or `postgrest`). JSON Schema is language-agnostic, so the differences are smaller — mainly around whether `int8` is represented as a string or integer.
 
 #### Base types (same in both modes)
 
@@ -256,7 +256,7 @@ Output is `JSON.stringify(schema, null, 2)` — no external formatter needed.
 |---|---|
 | `included_schemas` | Comma-separated schema whitelist |
 | `excluded_schemas` | Comma-separated schema blacklist |
-| `db_driver_type` | `postgrest` (default) or `direct` — controls type mappings for driver-sensitive types |
+| `db_driver_type` | `direct` (default) or `postgrest` — controls type mappings for driver-sensitive types |
 
 ### Files
 
@@ -337,5 +337,5 @@ Both tests use the same `app.inject()` pattern as existing tests.
 - **No new dependencies.** Zod output is plain TypeScript source code — users install `zod` themselves. JSON Schema is a plain JSON object built with standard library.
 - **Reuse `GeneratorMetadata` as-is.** Both generators consume the same metadata interface, requiring zero changes to `src/lib/generators.ts`.
 - **Follow existing patterns exactly.** Route handler structure, template `apply()` signature, error handling, and test approach all mirror existing generators.
-- **Driver-aware type modes.** Both generators accept a `db_driver_type` query parameter (`postgrest` or `direct`). The default is `postgrest` (matching Supabase's primary use case), but users connecting directly to PostgreSQL via `node-postgres` or similar drivers can use `direct` mode to get native type mappings (e.g., `Date` instead of datetime strings for timestamps). This avoids forcing a single serialization assumption on all users.
+- **Driver-aware type modes.** Both generators accept a `db_driver_type` query parameter (`direct` or `postgrest`). The default is `direct`, producing types that match what a standard PostgreSQL driver returns (e.g., `Date` for timestamps). Users going through PostgREST can pass `db_driver_type=postgrest` to get string-based types matching PostgREST's JSON serialization. This avoids forcing a single serialization assumption on all users.
 - **JSON Schema uses `$ref` for reusability.** Enums and composite types are placed in `$defs` and referenced via `$ref`, keeping the output DRY and composable.
