@@ -3,6 +3,7 @@ import { FastifyInstance } from 'fastify'
 import ColumnPrivilegesRoute from './column-privileges.js'
 import ColumnRoute from './columns.js'
 import ConfigRoute from './config.js'
+import DependencyGraphRoute from './dependency-graph.js'
 import ExtensionsRoute from './extensions.js'
 import ForeignTablesRoute from './foreign-tables.js'
 import FunctionsRoute from './functions.js'
@@ -65,6 +66,7 @@ export default async (fastify: FastifyInstance) => {
   fastify.register(ColumnPrivilegesRoute, { prefix: '/column-privileges' })
   fastify.register(ColumnRoute, { prefix: '/columns' })
   fastify.register(ConfigRoute, { prefix: '/config' })
+  fastify.register(DependencyGraphRoute, { prefix: '/dependency-graph' })
   fastify.register(ExtensionsRoute, { prefix: '/extensions' })
   fastify.register(ForeignTablesRoute, { prefix: '/foreign-tables' })
   fastify.register(FunctionsRoute, { prefix: '/functions' })

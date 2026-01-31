@@ -592,3 +592,47 @@ export type PostgresColumnPrivilegesRevoke = Static<typeof postgresColumnPrivile
 export interface PoolConfig extends PgPoolConfig {
   maxResultSize?: number
 }
+
+// Dependency Graph types
+export const dependencyGraphNodeSchema = Type.Object({
+  id: Type.Integer(),
+  name: Type.String(),
+  schema: Type.String(),
+  type: Type.Union([
+    Type.Literal('table'),
+    Type.Literal('view'),
+    Type.Literal('materialized_view'),
+    Type.Literal('function'),
+    Type.Literal('trigger'),
+    Type.Literal('policy'),
+    Type.Literal('index'),
+    Type.Literal('sequence'),
+    Type.Literal('type'),
+  ]),
+  comment: Type.Union([Type.String(), Type.Null()]),
+})
+export type DependencyGraphNode = Static<typeof dependencyGraphNodeSchema>
+
+export const dependencyGraphEdgeSchema = Type.Object({
+  id: Type.String(),
+  source: Type.Integer(),
+  target: Type.Integer(),
+  type: Type.Union([
+    Type.Literal('fk'),
+    Type.Literal('trigger_table'),
+    Type.Literal('trigger_function'),
+    Type.Literal('policy'),
+    Type.Literal('index'),
+    Type.Literal('view_dependency'),
+    Type.Literal('function_table'),
+    Type.Literal('sequence_owned'),
+  ]),
+  label: Type.Union([Type.String(), Type.Null()]),
+})
+export type DependencyGraphEdge = Static<typeof dependencyGraphEdgeSchema>
+
+export const dependencyGraphSchema = Type.Object({
+  nodes: Type.Array(dependencyGraphNodeSchema),
+  edges: Type.Array(dependencyGraphEdgeSchema),
+})
+export type DependencyGraph = Static<typeof dependencyGraphSchema>
