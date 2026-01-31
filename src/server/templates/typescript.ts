@@ -410,7 +410,7 @@ export const apply = async ({
   ) => {
     return fns
       .map(({ fn, inArgs }) => {
-        let argsType = 'never'
+        let argsType = 'Record<PropertyKey, never>'
         let returnType = getFunctionReturnType(schema, fn)
 
         // Check for specific error cases
