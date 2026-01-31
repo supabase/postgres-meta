@@ -17,14 +17,45 @@ Both generators consume the existing `GeneratorMetadata` type from `src/lib/gene
 
 TypeScript source code that imports from `zod` and exports schema objects for every table, view, enum, composite type, and function in the database.
 
-Example output (`db_driver_type=direct`, the default):
+#### Schema namespacing
+
+PostgreSQL allows the same table name in different schemas (e.g., `public.users` and `auth.users`). To avoid export name collisions, the Zod generator nests all schemas under a per-schema namespace object — mirroring the structure of the existing TypeScript generator:
 
 ```ts
 import { z } from "zod";
 
-export const userStatusSchema = z.enum(["active", "inactive"]);
+const publicSchema = {
+  Tables: {
+    users: { Row: z.object({ ... }), Insert: z.object({ ... }), Update: z.object({ ... }) },
+  },
+  Views: { ... },
+  Enums: {
+    user_status: z.enum(["active", "inactive"]),
+  },
+  CompositeTypes: { ... },
+  Functions: { ... },
+};
 
-export const usersRowSchema = z.object({
+const authSchema = {
+  Tables: {
+    users: { Row: z.object({ ... }), Insert: z.object({ ... }), Update: z.object({ ... }) },
+  },
+  // ...
+};
+
+export const schemas = { public: publicSchema, auth: authSchema };
+```
+
+This way, consumers access schemas via `schemas.public.Tables.users.Row` — no ambiguity, and the structure is consistent with how the TypeScript generator organizes its `Database` type.
+
+#### Full example output (`db_driver_type=direct`, the default):
+
+```ts
+import { z } from "zod";
+
+const userStatusSchema = z.enum(["active", "inactive"]);
+
+const usersRowSchema = z.object({
   id: z.number().int(),
   name: z.string(),
   email: z.string(),
@@ -33,7 +64,7 @@ export const usersRowSchema = z.object({
   metadata: z.unknown().nullable(),
 });
 
-export const usersInsertSchema = z.object({
+const usersInsertSchema = z.object({
   id: z.number().int().optional(),        // has default (identity)
   name: z.string(),
   email: z.string(),
@@ -42,7 +73,25 @@ export const usersInsertSchema = z.object({
   metadata: z.unknown().nullable().optional(),
 });
 
-export const usersUpdateSchema = usersRowSchema.partial();
+const usersUpdateSchema = usersRowSchema.partial();
+
+export const schemas = {
+  public: {
+    Tables: {
+      users: {
+        Row: usersRowSchema,
+        Insert: usersInsertSchema,
+        Update: usersUpdateSchema,
+      },
+    },
+    Views: {},
+    Enums: {
+      user_status: userStatusSchema,
+    },
+    CompositeTypes: {},
+    Functions: {},
+  },
+};
 ```
 
 With `db_driver_type=postgrest`, `created_at` would instead be `z.string().datetime()` (since PostgREST serializes timestamps as ISO strings).
