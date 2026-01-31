@@ -161,6 +161,17 @@ export default async (fastify: FastifyInstance) => {
       return { error: 'table, expression, and context are required' }
     }
 
+    // Basic input validation
+    if (typeof expression !== 'string' || expression.length > 10000) {
+      reply.code(400)
+      return { error: 'Invalid expression: must be a string under 10000 characters' }
+    }
+
+    if (!context.role || typeof context.role !== 'string') {
+      reply.code(400)
+      return { error: 'context.role must be a non-empty string' }
+    }
+
     const pgMeta = new PostgresMeta(config)
     const rlsPlayground = new PostgresMetaRLSPlayground(pgMeta.query)
 

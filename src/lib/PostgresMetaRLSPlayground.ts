@@ -3,6 +3,61 @@ import { PostgresMetaResult, PostgresPolicy } from './types.js'
 import { POLICIES_SQL } from './sql/policies.sql.js'
 import { filterByList } from './helpers.js'
 
+/**
+ * Validate that an expression is safe for RLS policy evaluation.
+ * Rejects expressions containing dangerous SQL patterns.
+ */
+function validateRLSExpression(expression: string): { valid: boolean; error?: string } {
+  if (!expression || typeof expression !== 'string') {
+    return { valid: false, error: 'Expression must be a non-empty string' }
+  }
+
+  // Normalize for checking (case-insensitive)
+  const normalized = expression.toUpperCase().replace(/\s+/g, ' ')
+
+  // List of dangerous patterns that should never appear in RLS policy expressions
+  const dangerousPatterns = [
+    // DDL statements
+    /\b(CREATE|DROP|ALTER|TRUNCATE|RENAME)\b/i,
+    // DML that modifies data
+    /\b(INSERT|UPDATE|DELETE)\b/i,
+    // Transaction control
+    /\b(COMMIT|ROLLBACK|SAVEPOINT|BEGIN)\b/i,
+    // Security-sensitive commands
+    /\b(GRANT|REVOKE|SET\s+ROLE|RESET\s+ROLE|SET\s+SESSION)\b/i,
+    // Dangerous functions
+    /\b(pg_read_file|pg_read_binary_file|pg_write_file|pg_terminate_backend|pg_cancel_backend)\s*\(/i,
+    /\b(lo_import|lo_export|lo_unlink)\s*\(/i,
+    /\b(pg_execute_server_program|pg_file_write|copy)\s*\(/i,
+    // System info functions that could leak data
+    /\b(pg_ls_dir|pg_stat_file)\s*\(/i,
+    // Extension manipulation
+    /\b(CREATE\s+EXTENSION|DROP\s+EXTENSION)\b/i,
+    // COPY command
+    /\bCOPY\b/i,
+    // DO blocks (arbitrary code execution)
+    /\bDO\s*\$/i,
+    // EXECUTE for dynamic SQL
+    /\bEXECUTE\b/i,
+    // Comment injection attempts  
+    /--/,
+    /\/\*/,
+  ]
+
+  for (const pattern of dangerousPatterns) {
+    if (pattern.test(expression)) {
+      return { valid: false, error: `Expression contains forbidden SQL pattern: ${pattern.source}` }
+    }
+  }
+
+  // Check for semicolons (statement separators) which could indicate SQL injection
+  if (expression.includes(';')) {
+    return { valid: false, error: 'Expression must not contain semicolons' }
+  }
+
+  return { valid: true }
+}
+
 export interface RLSSimulationContext {
   role: string
   jwtClaims?: Record<string, any>
@@ -269,13 +324,30 @@ export default class PostgresMetaRLSPlayground {
     limit: number
   }): string {
     const tableRef = `${ident(schema)}.${ident(table)}`
+    // Sanitize limit to ensure it's a positive integer
+    const safeLimit = Math.max(1, Math.min(Math.floor(Number(limit) || 100), 10000))
     
     // Build policy evaluation expressions
+    // Policy definitions come from pg_policy table (database-stored policies)
+    // We validate them to ensure they don't contain dangerous patterns
     const policyEvalCases = relevantPolicies.map((policy) => {
       if (!policy.definition) return null
+      // Validate policy expression (policies from DB should be safe, but defense in depth)
+      const validation = validateRLSExpression(policy.definition)
+      if (!validation.valid) {
+        // Return a safe fallback that indicates validation failure
+        return `
+          jsonb_build_object(
+            'policy_id', ${literal(policy.id)},
+            'policy_name', ${literal(policy.name)},
+            'passed', false,
+            'error', ${literal(`Policy expression validation failed: ${validation.error}`)}
+          )
+        `
+      }
       return `
         jsonb_build_object(
-          'policy_id', ${policy.id},
+          'policy_id', ${literal(policy.id)},
           'policy_name', ${literal(policy.name)},
           'passed', CASE WHEN (${policy.definition}) THEN true ELSE false END
         )
@@ -286,14 +358,14 @@ export default class PostgresMetaRLSPlayground {
       ? `ARRAY[${policyEvalCases.join(', ')}]::jsonb[]`
       : `ARRAY[]::jsonb[]`
 
+    // Execute in a read-only transaction that always rolls back
     return `
-      DO $$
-      BEGIN
-        -- Set the simulated context
-        PERFORM set_config('role', ${literal(context.role)}, true);
-        PERFORM set_config('request.jwt.claims', ${literal(jwtClaimsJson)}, true);
-        ${context.userId ? `PERFORM set_config('request.jwt.claim.sub', ${literal(context.userId)}, true);` : ''}
-      END $$;
+      BEGIN TRANSACTION READ ONLY;
+      
+      -- Set the simulated context
+      SET LOCAL role = ${literal(context.role)};
+      SET LOCAL "request.jwt.claims" = ${literal(jwtClaimsJson)};
+      ${context.userId ? `SET LOCAL "request.jwt.claim.sub" = ${literal(context.userId)};` : ''}
 
       WITH 
       -- Get total count without RLS (as superuser context we're in)
@@ -306,7 +378,7 @@ export default class PostgresMetaRLSPlayground {
           row_to_json(t.*) as row_data,
           ${policyEvalArray} as policy_evals
         FROM ${tableRef} t
-        LIMIT ${limit}
+        LIMIT ${safeLimit}
       )
       SELECT 
         jsonb_build_object(
@@ -328,6 +400,8 @@ export default class PostgresMetaRLSPlayground {
             ) numbered
           )
         ) as result;
+      
+      ROLLBACK;
     `
   }
 
@@ -349,27 +423,42 @@ export default class PostgresMetaRLSPlayground {
     const tableRef = `${ident(schema)}.${ident(table)}`
     
     // Build WITH CHECK evaluation for INSERT policies
+    // Validate policy check expressions (defense in depth)
     const checkPolicies = relevantPolicies.filter((p) => p.check)
-    const checkEvals = checkPolicies.map((policy) => `
-      jsonb_build_object(
-        'policy_id', ${policy.id},
-        'policy_name', ${literal(policy.name)},
-        'passed', CASE WHEN (${policy.check}) THEN true ELSE false END
-      )
-    `)
+    const checkEvals = checkPolicies.map((policy) => {
+      const validation = validateRLSExpression(policy.check!)
+      if (!validation.valid) {
+        return `
+          jsonb_build_object(
+            'policy_id', ${literal(policy.id)},
+            'policy_name', ${literal(policy.name)},
+            'passed', false,
+            'error', ${literal(`Policy check validation failed: ${validation.error}`)}
+          )
+        `
+      }
+      return `
+        jsonb_build_object(
+          'policy_id', ${literal(policy.id)},
+          'policy_name', ${literal(policy.name)},
+          'passed', CASE WHEN (${policy.check}) THEN true ELSE false END
+        )
+      `
+    })
 
     const columns = Object.keys(testData)
     const values = Object.values(testData).map((v) => literal(v))
 
-    return `
-      DO $$
-      BEGIN
-        PERFORM set_config('role', ${literal(context.role)}, true);
-        PERFORM set_config('request.jwt.claims', ${literal(jwtClaimsJson)}, true);
-        ${context.userId ? `PERFORM set_config('request.jwt.claim.sub', ${literal(context.userId)}, true);` : ''}
-      END $$;
+    // Escape testData for safe JSON embedding
+    const safeTestDataJson = literal(JSON.stringify(testData))
 
+    return `
       BEGIN;
+      
+      -- Set the simulated context
+      SET LOCAL role = ${literal(context.role)};
+      SET LOCAL "request.jwt.claims" = ${literal(jwtClaimsJson)};
+      ${context.userId ? `SET LOCAL "request.jwt.claim.sub" = ${literal(context.userId)};` : ''}
       
       -- Try the insert in a savepoint
       SAVEPOINT test_insert;
@@ -383,7 +472,7 @@ export default class PostgresMetaRLSPlayground {
       -- Return policy evaluation results
       SELECT jsonb_build_object(
         'total_count', 1,
-        'accessible_rows', jsonb_build_array(${literal(JSON.stringify(testData))}::jsonb),
+        'accessible_rows', jsonb_build_array(${safeTestDataJson}::jsonb),
         'policy_evaluations', jsonb_build_array(
           jsonb_build_object(
             'row_index', 0,
@@ -398,7 +487,8 @@ export default class PostgresMetaRLSPlayground {
   }
 
   /**
-   * Evaluate a single policy expression against test data
+   * Evaluate a single policy expression against test data.
+   * The expression is validated to prevent SQL injection.
    */
   async evaluateExpression({
     schema = 'public',
@@ -413,6 +503,15 @@ export default class PostgresMetaRLSPlayground {
     context: RLSSimulationContext
     testRow?: Record<string, any>
   }): Promise<PostgresMetaResult<{ result: boolean; error?: string }>> {
+    // Validate the expression to prevent SQL injection
+    const validation = validateRLSExpression(expression)
+    if (!validation.valid) {
+      return { 
+        data: { result: false, error: validation.error }, 
+        error: null 
+      }
+    }
+
     const tableRef = `${ident(schema)}.${ident(table)}`
     const jwtClaimsJson = context.jwtClaims ? JSON.stringify(context.jwtClaims) : '{}'
 
@@ -423,17 +522,19 @@ export default class PostgresMetaRLSPlayground {
           .join(', ')}) t`
       : `(SELECT * FROM ${tableRef} LIMIT 1) t`
 
+    // Execute in a read-only transaction that always rolls back
     const sql = `
-      DO $$
-      BEGIN
-        PERFORM set_config('role', ${literal(context.role)}, true);
-        PERFORM set_config('request.jwt.claims', ${literal(jwtClaimsJson)}, true);
-        ${context.userId ? `PERFORM set_config('request.jwt.claim.sub', ${literal(context.userId)}, true);` : ''}
-      END $$;
+      BEGIN TRANSACTION READ ONLY;
+      
+      SET LOCAL role = ${literal(context.role)};
+      SET LOCAL "request.jwt.claims" = ${literal(jwtClaimsJson)};
+      ${context.userId ? `SET LOCAL "request.jwt.claim.sub" = ${literal(context.userId)};` : ''}
 
       SELECT 
         CASE WHEN (${expression}) THEN true ELSE false END as result
       FROM ${rowSource};
+      
+      ROLLBACK;
     `
 
     const { data, error } = await this.query(sql)
