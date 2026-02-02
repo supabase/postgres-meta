@@ -1,6 +1,6 @@
 # TypeScript Zod Type Generator
 
-Generates [Zod](https://zod.dev/) schema definitions from your PostgreSQL database schema. Unlike the [TypeScript generator](typescript.md) which produces static types only, this generator produces runtime validation schemas that can parse and validate data at runtime.
+Generates [Zod v4](https://zod.dev/v4) schema definitions from your PostgreSQL database schema. Unlike the [TypeScript generator](typescript.md) which produces static types only, this generator produces runtime validation schemas that can parse and validate data at runtime.
 
 **Status:** Planned (not yet implemented)
 

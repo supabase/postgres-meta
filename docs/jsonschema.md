@@ -210,7 +210,7 @@ Nullable columns are wrapped with `{ "oneOf": [typeSchema, { "type": "null" }] }
 
 ## Features
 
-- Standard JSON Schema Draft 2020-12 output
+- Targets JSON Schema Draft 2020-12 (the current stable specification)
 - `$defs` and `$ref` for reusable enum and composite type definitions
 - `required` arrays reflect column defaults and identity columns
 - Driver-aware type mappings (`direct` vs `postgrest`)

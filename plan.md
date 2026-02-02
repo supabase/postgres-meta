@@ -4,8 +4,8 @@
 
 The `postgres-meta` project has an established pattern for type generators. Each language has a route handler, a template, and tests, plus registration in shared files. We'll follow this exact pattern to add two new generators:
 
-1. **Zod** — Generates TypeScript code using the `zod` library for runtime validation (unlike the existing TypeScript generator which only produces static types).
-2. **JSON Schema** — Generates a language-agnostic [JSON Schema](https://json-schema.org/) (Draft 2020-12) document describing the database schema.
+1. **Zod** — Generates TypeScript code targeting [Zod v4](https://zod.dev/v4) for runtime validation (unlike the existing TypeScript generator which only produces static types).
+2. **JSON Schema** — Generates a language-agnostic [JSON Schema Draft 2020-12](https://json-schema.org/draft/2020-12) document describing the database schema (the current stable specification).
 
 Both generators consume the existing `GeneratorMetadata` type from `src/lib/generators.ts` — no changes to the core introspection layer are needed.
 
