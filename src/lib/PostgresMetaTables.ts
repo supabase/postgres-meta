@@ -78,7 +78,6 @@ export default class PostgresMetaTables {
     if (id) {
       const idsFilter = filterByValue([id])
       const sql = generateEnrichedTablesSql({
-        schemaFilter,
         includeColumns: true,
         idsFilter,
       })
