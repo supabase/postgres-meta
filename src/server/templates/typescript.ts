@@ -63,6 +63,7 @@ export const apply = async ({
   const columnsByTableId: Record<number, PostgresColumn[]> = {}
   const tablesNamesByTableId: Record<number, string> = {}
   const relationTypeByIds = new Map<number, (typeof types)[number]>()
+  // group types by id for quicker lookup
   const typesById = new Map<number, (typeof types)[number]>()
   const tablesLike = [...tables, ...foreignTables, ...views, ...materializedViews]
   const tableAndViewNames = new Set<string>()
