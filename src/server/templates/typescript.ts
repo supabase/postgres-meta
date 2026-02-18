@@ -193,11 +193,7 @@ export const apply = async ({
           inArgs[0].name === '' &&
           (VALID_UNNAMED_FUNCTION_ARG_TYPES.has(inArgs[0].type_id) ||
             // OR if the function have a single unnamed args which is another table (embeded function)
-            (relationTypeByIds.get(inArgs[0].type_id) &&
-              getTableNameFromRelationId(func.return_type_relation_id, func.return_type_id)) ||
-            // OR if the function takes a table row but doesn't qualify as embedded (for error reporting)
-            (relationTypeByIds.get(inArgs[0].type_id) &&
-              !getTableNameFromRelationId(func.return_type_relation_id, func.return_type_id))))
+            relationTypeByIds.get(inArgs[0].type_id)))
       ) {
         introspectionBySchema[func.schema].functions.push({ fn: func, inArgs })
       }
@@ -300,24 +296,24 @@ export const apply = async ({
     if (relation) {
       return `{
               ${columnsByTableId[relation.id]
-                .map((column) =>
-                  generateColumnTsDefinition(
-                    schema,
-                    {
-                      name: column.name,
-                      format: column.format,
-                      is_nullable: column.is_nullable,
-                      is_optional: false,
-                    },
-                    {
-                      types,
-                      schemas,
-                      tables,
-                      views,
-                    }
-                  )
-                )
-                .join(',\n')}
+          .map((column) =>
+            generateColumnTsDefinition(
+              schema,
+              {
+                name: column.name,
+                format: column.format,
+                is_nullable: column.is_nullable,
+                is_optional: false,
+              },
+              {
+                types,
+                schemas,
+                tables,
+                views,
+              }
+            )
+          )
+          .join(',\n')}
             }`
     }
 
@@ -340,7 +336,8 @@ export const apply = async ({
       inArgs.length === 1 &&
       inArgs[0].name === '' &&
       relationTypeByIds.get(inArgs[0].type_id) &&
-      !getTableNameFromRelationId(fn.return_type_relation_id, fn.return_type_id)
+      !getTableNameFromRelationId(fn.return_type_relation_id, fn.return_type_id) &&
+      !typesById.get(fn.return_type_id)
     ) {
       return true
     }
@@ -410,7 +407,7 @@ export const apply = async ({
   ) => {
     return fns
       .map(({ fn, inArgs }) => {
-        let argsType = 'never'
+        let argsType = 'Record<PropertyKey, never>'
         let returnType = getFunctionReturnType(schema, fn)
 
         // Check for specific error cases
@@ -523,217 +520,212 @@ export type Database = {
     } = introspectionBySchema[schema.name]
     return `${JSON.stringify(schema.name)}: {
           Tables: {
-            ${
-              schemaTables.length === 0
-                ? '[_ in never]: never'
-                : schemaTables.map(
-                    ({ table, relationships }) => `${JSON.stringify(table.name)}: {
+            ${schemaTables.length === 0
+        ? '[_ in never]: never'
+        : schemaTables.map(
+          ({ table, relationships }) => `${JSON.stringify(table.name)}: {
                   Row: {
                     ${[
-                      ...columnsByTableId[table.id].map((column) =>
-                        generateColumnTsDefinition(
-                          schema,
-                          {
-                            name: column.name,
-                            format: column.format,
-                            is_nullable: column.is_nullable,
-                            is_optional: false,
-                          },
-                          { types, schemas, tables, views }
-                        )
-                      ),
-                      ...schemaFunctions
-                        .filter(({ fn }) => fn.argument_types === table.name)
-                        .map(({ fn }) => {
-                          return `${JSON.stringify(fn.name)}: ${generateNullableUnionTsType(getFunctionReturnType(schema, fn), true)}`
-                        }),
-                    ]}
+              ...columnsByTableId[table.id].map((column) =>
+                generateColumnTsDefinition(
+                  schema,
+                  {
+                    name: column.name,
+                    format: column.format,
+                    is_nullable: column.is_nullable,
+                    is_optional: false,
+                  },
+                  { types, schemas, tables, views }
+                )
+              ),
+              ...schemaFunctions
+                .filter(({ fn }) => fn.argument_types === table.name)
+                .map(({ fn }) => {
+                  return `${JSON.stringify(fn.name)}: ${generateNullableUnionTsType(getFunctionReturnType(schema, fn), true)}`
+                }),
+            ]}
                   }
                   Insert: {
                     ${columnsByTableId[table.id].map((column) => {
-                      if (column.identity_generation === 'ALWAYS') {
-                        return `${JSON.stringify(column.name)}?: never`
-                      }
-                      return generateColumnTsDefinition(
-                        schema,
-                        {
-                          name: column.name,
-                          format: column.format,
-                          is_nullable: column.is_nullable,
-                          is_optional:
-                            column.is_nullable ||
-                            column.is_identity ||
-                            column.default_value !== null,
-                        },
-                        { types, schemas, tables, views }
-                      )
-                    })}
+              if (column.identity_generation === 'ALWAYS') {
+                return `${JSON.stringify(column.name)}?: never`
+              }
+              return generateColumnTsDefinition(
+                schema,
+                {
+                  name: column.name,
+                  format: column.format,
+                  is_nullable: column.is_nullable,
+                  is_optional:
+                    column.is_nullable ||
+                    column.is_identity ||
+                    column.default_value !== null,
+                },
+                { types, schemas, tables, views }
+              )
+            })}
                   }
                   Update: {
                     ${columnsByTableId[table.id].map((column) => {
-                      if (column.identity_generation === 'ALWAYS') {
-                        return `${JSON.stringify(column.name)}?: never`
-                      }
+              if (column.identity_generation === 'ALWAYS') {
+                return `${JSON.stringify(column.name)}?: never`
+              }
 
-                      return generateColumnTsDefinition(
-                        schema,
-                        {
-                          name: column.name,
-                          format: column.format,
-                          is_nullable: column.is_nullable,
-                          is_optional: true,
-                        },
-                        { types, schemas, tables, views }
-                      )
-                    })}
+              return generateColumnTsDefinition(
+                schema,
+                {
+                  name: column.name,
+                  format: column.format,
+                  is_nullable: column.is_nullable,
+                  is_optional: true,
+                },
+                { types, schemas, tables, views }
+              )
+            })}
                   }
                   Relationships: [
                     ${relationships.map(generateRelationshiptTsDefinition)}
                   ]
                 }`
-                  )
-            }
+        )
+      }
           }
           Views: {
-            ${
-              schemaViews.length === 0
-                ? '[_ in never]: never'
-                : schemaViews.map(
-                    ({ view, relationships }) => `${JSON.stringify(view.name)}: {
+            ${schemaViews.length === 0
+        ? '[_ in never]: never'
+        : schemaViews.map(
+          ({ view, relationships }) => `${JSON.stringify(view.name)}: {
                   Row: {
                     ${[
-                      ...columnsByTableId[view.id].map((column) =>
-                        generateColumnTsDefinition(
-                          schema,
-                          {
-                            name: column.name,
-                            format: column.format,
-                            is_nullable: column.is_nullable,
-                            is_optional: false,
-                          },
-                          { types, schemas, tables, views }
-                        )
-                      ),
-                      ...schemaFunctions
-                        .filter(({ fn }) => fn.argument_types === view.name)
-                        .map(
-                          ({ fn }) =>
-                            `${JSON.stringify(fn.name)}: ${generateNullableUnionTsType(getFunctionReturnType(schema, fn), true)}`
-                        ),
-                    ]}
+              ...columnsByTableId[view.id].map((column) =>
+                generateColumnTsDefinition(
+                  schema,
+                  {
+                    name: column.name,
+                    format: column.format,
+                    is_nullable: column.is_nullable,
+                    is_optional: false,
+                  },
+                  { types, schemas, tables, views }
+                )
+              ),
+              ...schemaFunctions
+                .filter(({ fn }) => fn.argument_types === view.name)
+                .map(
+                  ({ fn }) =>
+                    `${JSON.stringify(fn.name)}: ${generateNullableUnionTsType(getFunctionReturnType(schema, fn), true)}`
+                ),
+            ]}
                   }
-                  ${
-                    view.is_updatable
-                      ? `Insert: {
+                  ${view.is_updatable
+              ? `Insert: {
                            ${columnsByTableId[view.id].map((column) => {
-                             if (!column.is_updatable) {
-                               return `${JSON.stringify(column.name)}?: never`
-                             }
-                             return generateColumnTsDefinition(
-                               schema,
-                               {
-                                 name: column.name,
-                                 format: column.format,
-                                 is_nullable: true,
-                                 is_optional: true,
-                               },
-                               { types, schemas, tables, views }
-                             )
-                           })}
+                if (!column.is_updatable) {
+                  return `${JSON.stringify(column.name)}?: never`
+                }
+                return generateColumnTsDefinition(
+                  schema,
+                  {
+                    name: column.name,
+                    format: column.format,
+                    is_nullable: true,
+                    is_optional: true,
+                  },
+                  { types, schemas, tables, views }
+                )
+              })}
                          }
                          Update: {
                            ${columnsByTableId[view.id].map((column) => {
-                             if (!column.is_updatable) {
-                               return `${JSON.stringify(column.name)}?: never`
-                             }
-                             return generateColumnTsDefinition(
-                               schema,
-                               {
-                                 name: column.name,
-                                 format: column.format,
-                                 is_nullable: true,
-                                 is_optional: true,
-                               },
-                               { types, schemas, tables, views }
-                             )
-                           })}
+                if (!column.is_updatable) {
+                  return `${JSON.stringify(column.name)}?: never`
+                }
+                return generateColumnTsDefinition(
+                  schema,
+                  {
+                    name: column.name,
+                    format: column.format,
+                    is_nullable: true,
+                    is_optional: true,
+                  },
+                  { types, schemas, tables, views }
+                )
+              })}
                          }
                         `
-                      : ''
-                  }Relationships: [
+              : ''
+            }Relationships: [
                     ${relationships.map(generateRelationshiptTsDefinition)}
                   ]
                 }`
-                  )
-            }
+        )
+      }
           }
           Functions: {
             ${(() => {
-              if (schemaFunctions.length === 0) {
-                return '[_ in never]: never'
-              }
-              const schemaFunctionsGroupedByName = schemaFunctions.reduce(
-                (acc, curr) => {
-                  acc[curr.fn.name] ??= []
-                  acc[curr.fn.name].push(curr)
-                  return acc
-                },
-                {} as Record<string, typeof schemaFunctions>
-              )
-              for (const fnName in schemaFunctionsGroupedByName) {
-                schemaFunctionsGroupedByName[fnName].sort(
-                  (a, b) =>
-                    a.fn.argument_types.localeCompare(b.fn.argument_types) ||
-                    a.fn.return_type.localeCompare(b.fn.return_type)
-                )
-              }
+        if (schemaFunctions.length === 0) {
+          return '[_ in never]: never'
+        }
+        const schemaFunctionsGroupedByName = schemaFunctions.reduce(
+          (acc, curr) => {
+            acc[curr.fn.name] ??= []
+            acc[curr.fn.name].push(curr)
+            return acc
+          },
+          {} as Record<string, typeof schemaFunctions>
+        )
+        for (const fnName in schemaFunctionsGroupedByName) {
+          schemaFunctionsGroupedByName[fnName].sort(
+            (a, b) =>
+              a.fn.argument_types.localeCompare(b.fn.argument_types) ||
+              a.fn.return_type.localeCompare(b.fn.return_type)
+          )
+        }
 
-              return Object.entries(schemaFunctionsGroupedByName)
-                .map(([fnName, fns]) => {
-                  const functionSignatures = getFunctionSignatures(schema, fns)
-                  return `${JSON.stringify(fnName)}:\n${functionSignatures}`
-                })
-                .join(',\n')
-            })()}
+        return Object.entries(schemaFunctionsGroupedByName)
+          .map(([fnName, fns]) => {
+            const functionSignatures = getFunctionSignatures(schema, fns)
+            return `${JSON.stringify(fnName)}:\n${functionSignatures}`
+          })
+          .join(',\n')
+      })()}
           }
           Enums: {
-            ${
-              schemaEnums.length === 0
-                ? '[_ in never]: never'
-                : schemaEnums.map(
-                    (enum_) =>
-                      `${JSON.stringify(enum_.name)}: ${enum_.enums
-                        .map((variant) => JSON.stringify(variant))
-                        .join('|')}`
-                  )
-            }
+            ${schemaEnums.length === 0
+        ? '[_ in never]: never'
+        : schemaEnums.map(
+          (enum_) =>
+            `${JSON.stringify(enum_.name)}: ${enum_.enums
+              .map((variant) => JSON.stringify(variant))
+              .join('|')}`
+        )
+      }
           }
           CompositeTypes: {
-            ${
-              schemaCompositeTypes.length === 0
-                ? '[_ in never]: never'
-                : schemaCompositeTypes.map(
-                    ({ name, attributes }) =>
-                      `${JSON.stringify(name)}: {
+            ${schemaCompositeTypes.length === 0
+        ? '[_ in never]: never'
+        : schemaCompositeTypes.map(
+          ({ name, attributes }) =>
+            `${JSON.stringify(name)}: {
                         ${attributes.map(({ name, type_id }) => {
-                          const type = typesById.get(type_id)
-                          let tsType = 'unknown'
-                          if (type) {
-                            tsType = `${generateNullableUnionTsType(
-                              pgTypeToTsType(schema, type.name, {
-                                types,
-                                schemas,
-                                tables,
-                                views,
-                              }),
-                              true
-                            )}`
-                          }
-                          return `${JSON.stringify(name)}: ${tsType}`
-                        })}
+              const type = typesById.get(type_id)
+              let tsType = 'unknown'
+              if (type) {
+                tsType = `${generateNullableUnionTsType(
+                  pgTypeToTsType(schema, type.name, {
+                    types,
+                    schemas,
+                    tables,
+                    views,
+                  }),
+                  true
+                )}`
+              }
+              return `${JSON.stringify(name)}: ${tsType}`
+            })}
                       }`
-                  )
-            }
+        )
+      }
           }
         }`
   })}
@@ -850,11 +842,11 @@ export const Constants = {
     return `${JSON.stringify(schema.name)}: {
           Enums: {
             ${schemaEnums.map(
-              (enum_) =>
-                `${JSON.stringify(enum_.name)}: [${enum_.enums
-                  .map((variant) => JSON.stringify(variant))
-                  .join(', ')}]`
-            )}
+      (enum_) =>
+        `${JSON.stringify(enum_.name)}: [${enum_.enums
+          .map((variant) => JSON.stringify(variant))
+          .join(', ')}]`
+    )}
           }
         }`
   })}
