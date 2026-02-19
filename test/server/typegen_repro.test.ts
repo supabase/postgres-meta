@@ -1,10 +1,9 @@
 
 import { test, expect } from 'vitest'
 import { apply } from '../../src/server/templates/typescript'
-import { GeneratorMetadata } from '../../src/lib/generators'
 
 test('repro: typescript generation issues', async () => {
-    const metadata: GeneratorMetadata = {
+    const metadata = {
         schemas: [{ id: 1, name: 'public', owner: 'postgres' }],
         tables: [
             {
@@ -192,7 +191,8 @@ test('repro: typescript generation issues', async () => {
     const tableRowRegex = /["']?products["']?: \{\s*Row: \{[\s\S]*?["']?name_translated["']?: string \| null/
     expect(output).toMatch(tableRowRegex)
 
-    // 3. Check function with single unnamed table arg in Functions
+    // 3. Check function with single unnamed table arg in 
+    // Functions
     // Use flexible regex to handle formatting
     const fnRegex = /["']?fn_with_single_unnamed_table_arg["']?:\s*\{\s*Args:\s*\{\s*""\s*:\s*Database\["public"\]\["Tables"\]\["products"\]\["Row"\]\s*\}\s*Returns:\s*string\s*\}/
     expect(output).toMatch(fnRegex)
