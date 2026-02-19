@@ -549,52 +549,36 @@ test('typegen: typescript', async () => {
           }
           blurb: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: {
-              error: true
-            } & "the function public.blurb with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+            Returns: string
           }
           blurb_varchar:
             | {
                 Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-                Returns: {
-                  error: true
-                } & "the function public.blurb_varchar with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+                Returns: string
               }
             | {
                 Args: { "": Database["public"]["Views"]["todos_view"]["Row"] }
-                Returns: {
-                  error: true
-                } & "the function public.blurb_varchar with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+                Returns: string
               }
           created_ago: {
             Args: { "": Database["public"]["Tables"]["users_audit"]["Row"] }
-            Returns: {
-              error: true
-            } & "the function public.created_ago with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+            Returns: number
           }
           days_since_event: {
             Args: { "": Database["public"]["Tables"]["events"]["Row"] }
-            Returns: {
-              error: true
-            } & "the function public.days_since_event with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+            Returns: number
           }
           details_is_long: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: {
-              error: true
-            } & "the function public.details_is_long with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+            Returns: boolean
           }
           details_length: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: {
-              error: true
-            } & "the function public.details_length with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+            Returns: number
           }
           details_words: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: {
-              error: true
-            } & "the function public.details_words with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+            Returns: string[]
           }
           double_duration: {
             Args: {
@@ -2999,52 +2983,36 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
           blurb: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: {
-              error: true
-            } & "the function public.blurb with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+            Returns: string
           }
           blurb_varchar:
             | {
                 Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-                Returns: {
-                  error: true
-                } & "the function public.blurb_varchar with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+                Returns: string
               }
             | {
                 Args: { "": Database["public"]["Views"]["todos_view"]["Row"] }
-                Returns: {
-                  error: true
-                } & "the function public.blurb_varchar with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+                Returns: string
               }
           created_ago: {
             Args: { "": Database["public"]["Tables"]["users_audit"]["Row"] }
-            Returns: {
-              error: true
-            } & "the function public.created_ago with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+            Returns: number
           }
           days_since_event: {
             Args: { "": Database["public"]["Tables"]["events"]["Row"] }
-            Returns: {
-              error: true
-            } & "the function public.days_since_event with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+            Returns: number
           }
           details_is_long: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: {
-              error: true
-            } & "the function public.details_is_long with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+            Returns: boolean
           }
           details_length: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: {
-              error: true
-            } & "the function public.details_length with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+            Returns: number
           }
           details_words: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: {
-              error: true
-            } & "the function public.details_words with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+            Returns: string[]
           }
           double_duration: {
             Args: {
@@ -4229,52 +4197,36 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
           blurb: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: {
-              error: true
-            } & "the function public.blurb with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+            Returns: string
           }
           blurb_varchar:
             | {
                 Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-                Returns: {
-                  error: true
-                } & "the function public.blurb_varchar with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+                Returns: string
               }
             | {
                 Args: { "": Database["public"]["Views"]["todos_view"]["Row"] }
-                Returns: {
-                  error: true
-                } & "the function public.blurb_varchar with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+                Returns: string
               }
           created_ago: {
             Args: { "": Database["public"]["Tables"]["users_audit"]["Row"] }
-            Returns: {
-              error: true
-            } & "the function public.created_ago with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+            Returns: number
           }
           days_since_event: {
             Args: { "": Database["public"]["Tables"]["events"]["Row"] }
-            Returns: {
-              error: true
-            } & "the function public.days_since_event with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+            Returns: number
           }
           details_is_long: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: {
-              error: true
-            } & "the function public.details_is_long with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+            Returns: boolean
           }
           details_length: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: {
-              error: true
-            } & "the function public.details_length with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+            Returns: number
           }
           details_words: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
-            Returns: {
-              error: true
-            } & "the function public.details_words with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+            Returns: string[]
           }
           double_duration: {
             Args: {
