@@ -603,7 +603,7 @@ test('typegen: typescript', async () => {
             Returns: string
           }
           function_returning_row: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               decimal: number | null
               id: number
@@ -619,7 +619,7 @@ test('typegen: typescript', async () => {
             }
           }
           function_returning_set_of_rows: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               decimal: number | null
               id: number
@@ -651,7 +651,7 @@ test('typegen: typescript', async () => {
             }
           }
           function_returning_table: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               id: number
               name: string
@@ -693,7 +693,7 @@ test('typegen: typescript', async () => {
             }
           }
           get_composite_type_data: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"][]
             SetofOptions: {
               from: "*"
@@ -856,19 +856,19 @@ test('typegen: typescript', async () => {
               isSetofReturn: true
             }
           }
-          get_user_ids: { Args: never; Returns: number[] }
-          get_user_summary: { Args: never; Returns: Record<string, unknown>[] }
+          get_user_ids: { Args: Record<PropertyKey, never>; Returns: number[] }
+          get_user_summary: { Args: Record<PropertyKey, never>; Returns: Record<string, unknown>[] }
           polymorphic_function: { Args: { "": string }; Returns: undefined }
           polymorphic_function_with_different_return: {
             Args: { "": string }
             Returns: string
           }
           polymorphic_function_with_no_params_or_unnamed:
-            | { Args: never; Returns: number }
+            | { Args: Record<PropertyKey, never>; Returns: number }
             | { Args: { "": string }; Returns: string }
           polymorphic_function_with_unnamed_default:
             | {
-                Args: never
+                Args: Record<PropertyKey, never>
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.polymorphic_function_with_unnamed_default(), public.polymorphic_function_with_unnamed_default( => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
@@ -876,7 +876,7 @@ test('typegen: typescript', async () => {
             | { Args: { ""?: string }; Returns: string }
           polymorphic_function_with_unnamed_default_overload:
             | {
-                Args: never
+                Args: Record<PropertyKey, never>
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.polymorphic_function_with_unnamed_default_overload(), public.polymorphic_function_with_unnamed_default_overload( => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
@@ -895,14 +895,14 @@ test('typegen: typescript', async () => {
             Returns: number
           }
           postgres_fdw_disconnect: { Args: { "": string }; Returns: boolean }
-          postgres_fdw_disconnect_all: { Args: never; Returns: boolean }
+          postgres_fdw_disconnect_all: { Args: Record<PropertyKey, never>; Returns: boolean }
           postgres_fdw_get_connections: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: Record<string, unknown>[]
           }
-          postgres_fdw_handler: { Args: never; Returns: unknown }
+          postgres_fdw_handler: { Args: Record<PropertyKey, never>; Returns: unknown }
           postgrest_resolvable_with_override_function:
-            | { Args: never; Returns: undefined }
+            | { Args: Record<PropertyKey, never>; Returns: undefined }
             | { Args: { a: string }; Returns: number }
             | { Args: { b: number }; Returns: string }
             | {
@@ -950,7 +950,7 @@ test('typegen: typescript', async () => {
                 }
               }
           postgrest_unresolvable_function:
-            | { Args: never; Returns: undefined }
+            | { Args: Record<PropertyKey, never>; Returns: undefined }
             | {
                 Args: { a: number }
                 Returns: {
@@ -977,7 +977,7 @@ test('typegen: typescript', async () => {
               isSetofReturn: true
             }
           }
-          test_internal_query: { Args: never; Returns: undefined }
+          test_internal_query: { Args: Record<PropertyKey, never>; Returns: undefined }
           test_unnamed_row_composite: {
             Args: { "": Database["public"]["Tables"]["users"]["Row"] }
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
@@ -1828,7 +1828,7 @@ test('typegen w/ one-to-one relationships', async () => {
             Returns: string
           }
           function_returning_row: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               decimal: number | null
               id: number
@@ -1844,7 +1844,7 @@ test('typegen w/ one-to-one relationships', async () => {
             }
           }
           function_returning_set_of_rows: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               decimal: number | null
               id: number
@@ -1876,7 +1876,7 @@ test('typegen w/ one-to-one relationships', async () => {
             }
           }
           function_returning_table: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               id: number
               name: string
@@ -1918,7 +1918,7 @@ test('typegen w/ one-to-one relationships', async () => {
             }
           }
           get_composite_type_data: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"][]
             SetofOptions: {
               from: "*"
@@ -2081,19 +2081,19 @@ test('typegen w/ one-to-one relationships', async () => {
               isSetofReturn: true
             }
           }
-          get_user_ids: { Args: never; Returns: number[] }
-          get_user_summary: { Args: never; Returns: Record<string, unknown>[] }
+          get_user_ids: { Args: Record<PropertyKey, never>; Returns: number[] }
+          get_user_summary: { Args: Record<PropertyKey, never>; Returns: Record<string, unknown>[] }
           polymorphic_function: { Args: { "": string }; Returns: undefined }
           polymorphic_function_with_different_return: {
             Args: { "": string }
             Returns: string
           }
           polymorphic_function_with_no_params_or_unnamed:
-            | { Args: never; Returns: number }
+            | { Args: Record<PropertyKey, never>; Returns: number }
             | { Args: { "": string }; Returns: string }
           polymorphic_function_with_unnamed_default:
             | {
-                Args: never
+                Args: Record<PropertyKey, never>
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.polymorphic_function_with_unnamed_default(), public.polymorphic_function_with_unnamed_default( => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
@@ -2101,7 +2101,7 @@ test('typegen w/ one-to-one relationships', async () => {
             | { Args: { ""?: string }; Returns: string }
           polymorphic_function_with_unnamed_default_overload:
             | {
-                Args: never
+                Args: Record<PropertyKey, never>
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.polymorphic_function_with_unnamed_default_overload(), public.polymorphic_function_with_unnamed_default_overload( => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
@@ -2120,14 +2120,14 @@ test('typegen w/ one-to-one relationships', async () => {
             Returns: number
           }
           postgres_fdw_disconnect: { Args: { "": string }; Returns: boolean }
-          postgres_fdw_disconnect_all: { Args: never; Returns: boolean }
+          postgres_fdw_disconnect_all: { Args: Record<PropertyKey, never>; Returns: boolean }
           postgres_fdw_get_connections: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: Record<string, unknown>[]
           }
-          postgres_fdw_handler: { Args: never; Returns: unknown }
+          postgres_fdw_handler: { Args: Record<PropertyKey, never>; Returns: unknown }
           postgrest_resolvable_with_override_function:
-            | { Args: never; Returns: undefined }
+            | { Args: Record<PropertyKey, never>; Returns: undefined }
             | { Args: { a: string }; Returns: number }
             | { Args: { b: number }; Returns: string }
             | {
@@ -2175,7 +2175,7 @@ test('typegen w/ one-to-one relationships', async () => {
                 }
               }
           postgrest_unresolvable_function:
-            | { Args: never; Returns: undefined }
+            | { Args: Record<PropertyKey, never>; Returns: undefined }
             | {
                 Args: { a: number }
                 Returns: {
@@ -2202,7 +2202,7 @@ test('typegen w/ one-to-one relationships', async () => {
               isSetofReturn: true
             }
           }
-          test_internal_query: { Args: never; Returns: undefined }
+          test_internal_query: { Args: Record<PropertyKey, never>; Returns: undefined }
           test_unnamed_row_composite: {
             Args: { "": Database["public"]["Tables"]["users"]["Row"] }
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
@@ -3053,7 +3053,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Returns: string
           }
           function_returning_row: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               decimal: number | null
               id: number
@@ -3069,7 +3069,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             }
           }
           function_returning_set_of_rows: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               decimal: number | null
               id: number
@@ -3101,7 +3101,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             }
           }
           function_returning_table: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               id: number
               name: string
@@ -3143,7 +3143,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             }
           }
           get_composite_type_data: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"][]
             SetofOptions: {
               from: "*"
@@ -3306,19 +3306,19 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               isSetofReturn: true
             }
           }
-          get_user_ids: { Args: never; Returns: number[] }
-          get_user_summary: { Args: never; Returns: Record<string, unknown>[] }
+          get_user_ids: { Args: Record<PropertyKey, never>; Returns: number[] }
+          get_user_summary: { Args: Record<PropertyKey, never>; Returns: Record<string, unknown>[] }
           polymorphic_function: { Args: { "": string }; Returns: undefined }
           polymorphic_function_with_different_return: {
             Args: { "": string }
             Returns: string
           }
           polymorphic_function_with_no_params_or_unnamed:
-            | { Args: never; Returns: number }
+            | { Args: Record<PropertyKey, never>; Returns: number }
             | { Args: { "": string }; Returns: string }
           polymorphic_function_with_unnamed_default:
             | {
-                Args: never
+                Args: Record<PropertyKey, never>
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.polymorphic_function_with_unnamed_default(), public.polymorphic_function_with_unnamed_default( => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
@@ -3326,7 +3326,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             | { Args: { ""?: string }; Returns: string }
           polymorphic_function_with_unnamed_default_overload:
             | {
-                Args: never
+                Args: Record<PropertyKey, never>
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.polymorphic_function_with_unnamed_default_overload(), public.polymorphic_function_with_unnamed_default_overload( => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
@@ -3345,14 +3345,14 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Returns: number
           }
           postgres_fdw_disconnect: { Args: { "": string }; Returns: boolean }
-          postgres_fdw_disconnect_all: { Args: never; Returns: boolean }
+          postgres_fdw_disconnect_all: { Args: Record<PropertyKey, never>; Returns: boolean }
           postgres_fdw_get_connections: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: Record<string, unknown>[]
           }
-          postgres_fdw_handler: { Args: never; Returns: unknown }
+          postgres_fdw_handler: { Args: Record<PropertyKey, never>; Returns: unknown }
           postgrest_resolvable_with_override_function:
-            | { Args: never; Returns: undefined }
+            | { Args: Record<PropertyKey, never>; Returns: undefined }
             | { Args: { a: string }; Returns: number }
             | { Args: { b: number }; Returns: string }
             | {
@@ -3400,7 +3400,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 }
               }
           postgrest_unresolvable_function:
-            | { Args: never; Returns: undefined }
+            | { Args: Record<PropertyKey, never>; Returns: undefined }
             | {
                 Args: { a: number }
                 Returns: {
@@ -3427,7 +3427,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               isSetofReturn: true
             }
           }
-          test_internal_query: { Args: never; Returns: undefined }
+          test_internal_query: { Args: Record<PropertyKey, never>; Returns: undefined }
           test_unnamed_row_composite: {
             Args: { "": Database["public"]["Tables"]["users"]["Row"] }
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
@@ -4283,7 +4283,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Returns: string
           }
           function_returning_row: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               decimal: number | null
               id: number
@@ -4299,7 +4299,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             }
           }
           function_returning_set_of_rows: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               decimal: number | null
               id: number
@@ -4331,7 +4331,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             }
           }
           function_returning_table: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               id: number
               name: string
@@ -4373,7 +4373,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             }
           }
           get_composite_type_data: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"][]
             SetofOptions: {
               from: "*"
@@ -4536,19 +4536,19 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               isSetofReturn: true
             }
           }
-          get_user_ids: { Args: never; Returns: number[] }
-          get_user_summary: { Args: never; Returns: Record<string, unknown>[] }
+          get_user_ids: { Args: Record<PropertyKey, never>; Returns: number[] }
+          get_user_summary: { Args: Record<PropertyKey, never>; Returns: Record<string, unknown>[] }
           polymorphic_function: { Args: { "": string }; Returns: undefined }
           polymorphic_function_with_different_return: {
             Args: { "": string }
             Returns: string
           }
           polymorphic_function_with_no_params_or_unnamed:
-            | { Args: never; Returns: number }
+            | { Args: Record<PropertyKey, never>; Returns: number }
             | { Args: { "": string }; Returns: string }
           polymorphic_function_with_unnamed_default:
             | {
-                Args: never
+                Args: Record<PropertyKey, never>
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.polymorphic_function_with_unnamed_default(), public.polymorphic_function_with_unnamed_default( => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
@@ -4556,7 +4556,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             | { Args: { ""?: string }; Returns: string }
           polymorphic_function_with_unnamed_default_overload:
             | {
-                Args: never
+                Args: Record<PropertyKey, never>
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.polymorphic_function_with_unnamed_default_overload(), public.polymorphic_function_with_unnamed_default_overload( => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
@@ -4575,14 +4575,14 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Returns: number
           }
           postgres_fdw_disconnect: { Args: { "": string }; Returns: boolean }
-          postgres_fdw_disconnect_all: { Args: never; Returns: boolean }
+          postgres_fdw_disconnect_all: { Args: Record<PropertyKey, never>; Returns: boolean }
           postgres_fdw_get_connections: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: Record<string, unknown>[]
           }
-          postgres_fdw_handler: { Args: never; Returns: unknown }
+          postgres_fdw_handler: { Args: Record<PropertyKey, never>; Returns: unknown }
           postgrest_resolvable_with_override_function:
-            | { Args: never; Returns: undefined }
+            | { Args: Record<PropertyKey, never>; Returns: undefined }
             | { Args: { a: string }; Returns: number }
             | { Args: { b: number }; Returns: string }
             | {
@@ -4630,7 +4630,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 }
               }
           postgrest_unresolvable_function:
-            | { Args: never; Returns: undefined }
+            | { Args: Record<PropertyKey, never>; Returns: undefined }
             | {
                 Args: { a: number }
                 Returns: {
@@ -4657,7 +4657,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               isSetofReturn: true
             }
           }
-          test_internal_query: { Args: never; Returns: undefined }
+          test_internal_query: { Args: Record<PropertyKey, never>; Returns: undefined }
           test_unnamed_row_composite: {
             Args: { "": Database["public"]["Tables"]["users"]["Row"] }
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
