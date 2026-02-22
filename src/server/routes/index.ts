@@ -42,8 +42,11 @@ export default async (fastify: FastifyInstance) => {
           })
           throw new Error('failed to process upstream connection details')
         }
-      } else {
+      } else if (!request.headers.pg) {
         request.headers.pg = PG_CONNECTION
+      }
+      if (Array.isArray(request.headers.pg)) {
+        request.headers.pg = request.headers.pg[0]
       }
       if (!request.headers.pg) {
         request.log.error({ message: 'failed to get connection string' })
@@ -51,7 +54,7 @@ export default async (fastify: FastifyInstance) => {
       }
       // Ensure the resulting connection string is a valid URL
       try {
-        new URL(request.headers.pg)
+        new URL(request.headers.pg as string)
       } catch (error) {
         request.log.error({ message: 'pg connection string is invalid url' })
         throw new Error('failed to process upstream connection details')

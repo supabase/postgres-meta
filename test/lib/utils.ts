@@ -1,7 +1,7 @@
 import { afterAll } from 'vitest'
 import { PostgresMeta } from '../../src/lib'
 
-export const TEST_CONNECTION_STRING = 'postgresql://postgres:postgres@localhost:5432'
+export const TEST_CONNECTION_STRING = 'postgresql://postgres:postgres@127.0.0.1:5433'
 
 export const pgMeta = new PostgresMeta({
   max: 1,
