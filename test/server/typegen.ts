@@ -42,20 +42,20 @@ test('typegen: typescript', async () => {
               created_at: string
               data: Json | null
               event_type: string | null
-              id: number
+              id: number | bigint
               days_since_event: number | null
             }
             Insert: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id?: number
+              id?: number | bigint
             }
             Update: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id?: number
+              id?: number | bigint
             }
             Relationships: []
           }
@@ -64,19 +64,19 @@ test('typegen: typescript', async () => {
               created_at: string
               data: Json | null
               event_type: string | null
-              id: number
+              id: number | bigint
             }
             Insert: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id: number
+              id: number | bigint
             }
             Update: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id?: number
+              id?: number | bigint
             }
             Relationships: []
           }
@@ -85,35 +85,35 @@ test('typegen: typescript', async () => {
               created_at: string
               data: Json | null
               event_type: string | null
-              id: number
+              id: number | bigint
             }
             Insert: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id: number
+              id: number | bigint
             }
             Update: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id?: number
+              id?: number | bigint
             }
             Relationships: []
           }
           foreign_table: {
             Row: {
-              id: number
+              id: number | bigint
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }
             Insert: {
-              id: number
+              id: number | bigint
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
             }
             Update: {
-              id?: number
+              id?: number | bigint
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
             }
@@ -123,17 +123,17 @@ test('typegen: typescript', async () => {
             Row: {
               duration_optional: string | null
               duration_required: string
-              id: number
+              id: number | bigint
             }
             Insert: {
               duration_optional?: string | null
               duration_required: string
-              id?: number
+              id?: number | bigint
             }
             Update: {
               duration_optional?: string | null
               duration_required?: string
-              id?: number
+              id?: number | bigint
             }
             Relationships: []
           }
@@ -189,23 +189,23 @@ test('typegen: typescript', async () => {
           table_with_primary_key_other_than_id: {
             Row: {
               name: string | null
-              other_id: number
+              other_id: number | bigint
             }
             Insert: {
               name?: string | null
-              other_id?: number
+              other_id?: number | bigint
             }
             Update: {
               name?: string | null
-              other_id?: number
+              other_id?: number | bigint
             }
             Relationships: []
           }
           todos: {
             Row: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
               blurb: string | null
               blurb_varchar: string | null
               details_is_long: boolean | null
@@ -214,19 +214,19 @@ test('typegen: typescript', async () => {
               test_unnamed_row_scalar: number | null
               test_unnamed_row_setof: {
                 details: string | null
-                id: number
-                "user-id": number
+                id: number | bigint
+                "user-id": number | bigint
               } | null
             }
             Insert: {
               details?: string | null
-              id?: number
-              "user-id": number
+              id?: number | bigint
+              "user-id": number | bigint
             }
             Update: {
               details?: string | null
-              id?: number
-              "user-id"?: number
+              id?: number | bigint
+              "user-id"?: number | bigint
             }
             Relationships: [
               {
@@ -270,15 +270,15 @@ test('typegen: typescript', async () => {
           user_details: {
             Row: {
               details: string | null
-              user_id: number
+              user_id: number | bigint
             }
             Insert: {
               details?: string | null
-              user_id: number
+              user_id: number | bigint
             }
             Update: {
               details?: string | null
-              user_id?: number
+              user_id?: number | bigint
             }
             Relationships: [
               {
@@ -322,7 +322,7 @@ test('typegen: typescript', async () => {
           users: {
             Row: {
               decimal: number | null
-              id: number
+              id: number | bigint
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
@@ -331,20 +331,20 @@ test('typegen: typescript', async () => {
                 | null
               test_unnamed_row_setof: {
                 details: string | null
-                id: number
-                "user-id": number
+                id: number | bigint
+                "user-id": number | bigint
               } | null
             }
             Insert: {
               decimal?: number | null
-              id?: number
+              id?: number | bigint
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
               user_uuid?: string | null
             }
             Update: {
               decimal?: number | null
-              id?: number
+              id?: number | bigint
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
               user_uuid?: string | null
@@ -354,22 +354,22 @@ test('typegen: typescript', async () => {
           users_audit: {
             Row: {
               created_at: string | null
-              id: number
+              id: number | bigint
               previous_value: Json | null
-              user_id: number | null
+              user_id: number | bigint | null
               created_ago: number | null
             }
             Insert: {
               created_at?: string | null
-              id?: number
+              id?: number | bigint
               previous_value?: Json | null
-              user_id?: number | null
+              user_id?: number | bigint | null
             }
             Update: {
               created_at?: string | null
-              id?: number
+              id?: number | bigint
               previous_value?: Json | null
-              user_id?: number | null
+              user_id?: number | bigint | null
             }
             Relationships: []
           }
@@ -377,25 +377,25 @@ test('typegen: typescript', async () => {
         Views: {
           a_view: {
             Row: {
-              id: number | null
+              id: number | bigint | null
             }
             Insert: {
-              id?: number | null
+              id?: number | bigint | null
             }
             Update: {
-              id?: number | null
+              id?: number | bigint | null
             }
             Relationships: []
           }
           todos_matview: {
             Row: {
               details: string | null
-              id: number | null
-              "user-id": number | null
+              id: number | bigint | null
+              "user-id": number | bigint | null
               get_todos_by_matview: {
                 details: string | null
-                id: number
-                "user-id": number
+                id: number | bigint
+                "user-id": number | bigint
               } | null
             }
             Relationships: [
@@ -440,24 +440,24 @@ test('typegen: typescript', async () => {
           todos_view: {
             Row: {
               details: string | null
-              id: number | null
-              "user-id": number | null
+              id: number | bigint | null
+              "user-id": number | bigint | null
               blurb_varchar: string | null
               test_unnamed_view_row: {
                 details: string | null
-                id: number
-                "user-id": number
+                id: number | bigint
+                "user-id": number | bigint
               } | null
             }
             Insert: {
               details?: string | null
-              id?: number | null
-              "user-id"?: number | null
+              id?: number | bigint | null
+              "user-id"?: number | bigint | null
             }
             Update: {
               details?: string | null
-              id?: number | null
-              "user-id"?: number | null
+              id?: number | bigint | null
+              "user-id"?: number | bigint | null
             }
             Relationships: [
               {
@@ -500,9 +500,9 @@ test('typegen: typescript', async () => {
           }
           user_todos_summary_view: {
             Row: {
-              todo_count: number | null
+              todo_count: number | bigint | null
               todo_details: string[] | null
-              user_id: number | null
+              user_id: number | bigint | null
               user_name: string | null
               user_status: Database["public"]["Enums"]["user_status"] | null
             }
@@ -511,21 +511,21 @@ test('typegen: typescript', async () => {
           users_view: {
             Row: {
               decimal: number | null
-              id: number | null
+              id: number | bigint | null
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
             }
             Insert: {
               decimal?: number | null
-              id?: number | null
+              id?: number | bigint | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
               user_uuid?: string | null
             }
             Update: {
               decimal?: number | null
-              id?: number | null
+              id?: number | bigint | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
               user_uuid?: string | null
@@ -534,9 +534,9 @@ test('typegen: typescript', async () => {
           }
           users_view_with_multiple_refs_to_users: {
             Row: {
-              initial_id: number | null
+              initial_id: number | bigint | null
               initial_name: string | null
-              second_id: number | null
+              second_id: number | bigint | null
               second_name: string | null
             }
             Relationships: []
@@ -606,7 +606,7 @@ test('typegen: typescript', async () => {
             Args: never
             Returns: {
               decimal: number | null
-              id: number
+              id: number | bigint
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
@@ -622,7 +622,7 @@ test('typegen: typescript', async () => {
             Args: never
             Returns: {
               decimal: number | null
-              id: number
+              id: number | bigint
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
@@ -638,7 +638,7 @@ test('typegen: typescript', async () => {
             Args: { todos: Database["public"]["Tables"]["todos"]["Row"] }
             Returns: {
               decimal: number | null
-              id: number
+              id: number | bigint
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
@@ -668,8 +668,8 @@ test('typegen: typescript', async () => {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
             }
             SetofOptions: {
               from: "users"
@@ -682,8 +682,8 @@ test('typegen: typescript', async () => {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
             }
             SetofOptions: {
               from: "users"
@@ -704,11 +704,11 @@ test('typegen: typescript', async () => {
           }
           get_single_user_summary_from_view:
             | {
-                Args: { search_user_id: number }
+                Args: { search_user_id: number | bigint }
                 Returns: {
-                  todo_count: number | null
+                  todo_count: number | bigint | null
                   todo_details: string[] | null
-                  user_id: number | null
+                  user_id: number | bigint | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
@@ -722,9 +722,9 @@ test('typegen: typescript', async () => {
             | {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
                 Returns: {
-                  todo_count: number | null
+                  todo_count: number | bigint | null
                   todo_details: string[] | null
-                  user_id: number | null
+                  user_id: number | bigint | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
@@ -740,9 +740,9 @@ test('typegen: typescript', async () => {
                   userview_row: Database["public"]["Views"]["users_view"]["Row"]
                 }
                 Returns: {
-                  todo_count: number | null
+                  todo_count: number | bigint | null
                   todo_details: string[] | null
-                  user_id: number | null
+                  user_id: number | bigint | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
@@ -757,8 +757,8 @@ test('typegen: typescript', async () => {
             Args: { "": unknown }
             Returns: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
             }
             SetofOptions: {
               from: "todos_matview"
@@ -769,11 +769,11 @@ test('typegen: typescript', async () => {
           }
           get_todos_from_user:
             | {
-                Args: { search_user_id: number }
+                Args: { search_user_id: number | bigint }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "*"
@@ -786,8 +786,8 @@ test('typegen: typescript', async () => {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "users"
@@ -802,8 +802,8 @@ test('typegen: typescript', async () => {
                 }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "users_view"
@@ -817,8 +817,8 @@ test('typegen: typescript', async () => {
                 Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "todos"
@@ -831,8 +831,8 @@ test('typegen: typescript', async () => {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "users"
@@ -845,9 +845,9 @@ test('typegen: typescript', async () => {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
               created_at: string | null
-              id: number
+              id: number | bigint
               previous_value: Json | null
-              user_id: number | null
+              user_id: number | bigint | null
             }
             SetofOptions: {
               from: "users"
@@ -856,7 +856,7 @@ test('typegen: typescript', async () => {
               isSetofReturn: true
             }
           }
-          get_user_ids: { Args: never; Returns: number[] }
+          get_user_ids: { Args: never; Returns: number | bigint[] }
           get_user_summary: { Args: never; Returns: Record<string, unknown>[] }
           polymorphic_function: { Args: { "": string }; Returns: undefined }
           polymorphic_function_with_different_return: {
@@ -906,11 +906,11 @@ test('typegen: typescript', async () => {
             | { Args: { a: string }; Returns: number }
             | { Args: { b: number }; Returns: string }
             | {
-                Args: { completed: boolean; todo_id: number }
+                Args: { completed: boolean; todo_id: number | bigint }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "*"
@@ -920,10 +920,10 @@ test('typegen: typescript', async () => {
                 }
               }
             | {
-                Args: { user_id: number }
+                Args: { user_id: number | bigint }
                 Returns: {
                   decimal: number | null
-                  id: number
+                  id: number | bigint
                   name: string | null
                   status: Database["public"]["Enums"]["user_status"] | null
                   user_uuid: string | null
@@ -939,8 +939,8 @@ test('typegen: typescript', async () => {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "users"
@@ -967,8 +967,8 @@ test('typegen: typescript', async () => {
             Args: { search_details: string }
             Returns: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
             }[]
             SetofOptions: {
               from: "*"
@@ -999,8 +999,8 @@ test('typegen: typescript', async () => {
                 Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "todos"
@@ -1010,11 +1010,11 @@ test('typegen: typescript', async () => {
                 }
               }
             | {
-                Args: { user_id: number }
+                Args: { user_id: number | bigint }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "*"
@@ -1027,8 +1027,8 @@ test('typegen: typescript', async () => {
                 Args: { "": Database["public"]["Tables"]["users"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "users"
@@ -1041,8 +1041,8 @@ test('typegen: typescript', async () => {
             Args: { "": Database["public"]["Views"]["todos_view"]["Row"] }
             Returns: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
             }[]
             SetofOptions: {
               from: "todos_view"
@@ -1242,20 +1242,20 @@ test('typegen w/ one-to-one relationships', async () => {
               created_at: string
               data: Json | null
               event_type: string | null
-              id: number
+              id: number | bigint
               days_since_event: number | null
             }
             Insert: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id?: number
+              id?: number | bigint
             }
             Update: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id?: number
+              id?: number | bigint
             }
             Relationships: []
           }
@@ -1264,19 +1264,19 @@ test('typegen w/ one-to-one relationships', async () => {
               created_at: string
               data: Json | null
               event_type: string | null
-              id: number
+              id: number | bigint
             }
             Insert: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id: number
+              id: number | bigint
             }
             Update: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id?: number
+              id?: number | bigint
             }
             Relationships: []
           }
@@ -1285,35 +1285,35 @@ test('typegen w/ one-to-one relationships', async () => {
               created_at: string
               data: Json | null
               event_type: string | null
-              id: number
+              id: number | bigint
             }
             Insert: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id: number
+              id: number | bigint
             }
             Update: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id?: number
+              id?: number | bigint
             }
             Relationships: []
           }
           foreign_table: {
             Row: {
-              id: number
+              id: number | bigint
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }
             Insert: {
-              id: number
+              id: number | bigint
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
             }
             Update: {
-              id?: number
+              id?: number | bigint
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
             }
@@ -1323,17 +1323,17 @@ test('typegen w/ one-to-one relationships', async () => {
             Row: {
               duration_optional: string | null
               duration_required: string
-              id: number
+              id: number | bigint
             }
             Insert: {
               duration_optional?: string | null
               duration_required: string
-              id?: number
+              id?: number | bigint
             }
             Update: {
               duration_optional?: string | null
               duration_required?: string
-              id?: number
+              id?: number | bigint
             }
             Relationships: []
           }
@@ -1390,23 +1390,23 @@ test('typegen w/ one-to-one relationships', async () => {
           table_with_primary_key_other_than_id: {
             Row: {
               name: string | null
-              other_id: number
+              other_id: number | bigint
             }
             Insert: {
               name?: string | null
-              other_id?: number
+              other_id?: number | bigint
             }
             Update: {
               name?: string | null
-              other_id?: number
+              other_id?: number | bigint
             }
             Relationships: []
           }
           todos: {
             Row: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
               blurb: string | null
               blurb_varchar: string | null
               details_is_long: boolean | null
@@ -1415,19 +1415,19 @@ test('typegen w/ one-to-one relationships', async () => {
               test_unnamed_row_scalar: number | null
               test_unnamed_row_setof: {
                 details: string | null
-                id: number
-                "user-id": number
+                id: number | bigint
+                "user-id": number | bigint
               } | null
             }
             Insert: {
               details?: string | null
-              id?: number
-              "user-id": number
+              id?: number | bigint
+              "user-id": number | bigint
             }
             Update: {
               details?: string | null
-              id?: number
-              "user-id"?: number
+              id?: number | bigint
+              "user-id"?: number | bigint
             }
             Relationships: [
               {
@@ -1477,15 +1477,15 @@ test('typegen w/ one-to-one relationships', async () => {
           user_details: {
             Row: {
               details: string | null
-              user_id: number
+              user_id: number | bigint
             }
             Insert: {
               details?: string | null
-              user_id: number
+              user_id: number | bigint
             }
             Update: {
               details?: string | null
-              user_id?: number
+              user_id?: number | bigint
             }
             Relationships: [
               {
@@ -1535,7 +1535,7 @@ test('typegen w/ one-to-one relationships', async () => {
           users: {
             Row: {
               decimal: number | null
-              id: number
+              id: number | bigint
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
@@ -1544,20 +1544,20 @@ test('typegen w/ one-to-one relationships', async () => {
                 | null
               test_unnamed_row_setof: {
                 details: string | null
-                id: number
-                "user-id": number
+                id: number | bigint
+                "user-id": number | bigint
               } | null
             }
             Insert: {
               decimal?: number | null
-              id?: number
+              id?: number | bigint
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
               user_uuid?: string | null
             }
             Update: {
               decimal?: number | null
-              id?: number
+              id?: number | bigint
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
               user_uuid?: string | null
@@ -1567,22 +1567,22 @@ test('typegen w/ one-to-one relationships', async () => {
           users_audit: {
             Row: {
               created_at: string | null
-              id: number
+              id: number | bigint
               previous_value: Json | null
-              user_id: number | null
+              user_id: number | bigint | null
               created_ago: number | null
             }
             Insert: {
               created_at?: string | null
-              id?: number
+              id?: number | bigint
               previous_value?: Json | null
-              user_id?: number | null
+              user_id?: number | bigint | null
             }
             Update: {
               created_at?: string | null
-              id?: number
+              id?: number | bigint
               previous_value?: Json | null
-              user_id?: number | null
+              user_id?: number | bigint | null
             }
             Relationships: []
           }
@@ -1590,25 +1590,25 @@ test('typegen w/ one-to-one relationships', async () => {
         Views: {
           a_view: {
             Row: {
-              id: number | null
+              id: number | bigint | null
             }
             Insert: {
-              id?: number | null
+              id?: number | bigint | null
             }
             Update: {
-              id?: number | null
+              id?: number | bigint | null
             }
             Relationships: []
           }
           todos_matview: {
             Row: {
               details: string | null
-              id: number | null
-              "user-id": number | null
+              id: number | bigint | null
+              "user-id": number | bigint | null
               get_todos_by_matview: {
                 details: string | null
-                id: number
-                "user-id": number
+                id: number | bigint
+                "user-id": number | bigint
               } | null
             }
             Relationships: [
@@ -1659,24 +1659,24 @@ test('typegen w/ one-to-one relationships', async () => {
           todos_view: {
             Row: {
               details: string | null
-              id: number | null
-              "user-id": number | null
+              id: number | bigint | null
+              "user-id": number | bigint | null
               blurb_varchar: string | null
               test_unnamed_view_row: {
                 details: string | null
-                id: number
-                "user-id": number
+                id: number | bigint
+                "user-id": number | bigint
               } | null
             }
             Insert: {
               details?: string | null
-              id?: number | null
-              "user-id"?: number | null
+              id?: number | bigint | null
+              "user-id"?: number | bigint | null
             }
             Update: {
               details?: string | null
-              id?: number | null
-              "user-id"?: number | null
+              id?: number | bigint | null
+              "user-id"?: number | bigint | null
             }
             Relationships: [
               {
@@ -1725,9 +1725,9 @@ test('typegen w/ one-to-one relationships', async () => {
           }
           user_todos_summary_view: {
             Row: {
-              todo_count: number | null
+              todo_count: number | bigint | null
               todo_details: string[] | null
-              user_id: number | null
+              user_id: number | bigint | null
               user_name: string | null
               user_status: Database["public"]["Enums"]["user_status"] | null
             }
@@ -1736,21 +1736,21 @@ test('typegen w/ one-to-one relationships', async () => {
           users_view: {
             Row: {
               decimal: number | null
-              id: number | null
+              id: number | bigint | null
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
             }
             Insert: {
               decimal?: number | null
-              id?: number | null
+              id?: number | bigint | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
               user_uuid?: string | null
             }
             Update: {
               decimal?: number | null
-              id?: number | null
+              id?: number | bigint | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
               user_uuid?: string | null
@@ -1759,9 +1759,9 @@ test('typegen w/ one-to-one relationships', async () => {
           }
           users_view_with_multiple_refs_to_users: {
             Row: {
-              initial_id: number | null
+              initial_id: number | bigint | null
               initial_name: string | null
-              second_id: number | null
+              second_id: number | bigint | null
               second_name: string | null
             }
             Relationships: []
@@ -1831,7 +1831,7 @@ test('typegen w/ one-to-one relationships', async () => {
             Args: never
             Returns: {
               decimal: number | null
-              id: number
+              id: number | bigint
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
@@ -1847,7 +1847,7 @@ test('typegen w/ one-to-one relationships', async () => {
             Args: never
             Returns: {
               decimal: number | null
-              id: number
+              id: number | bigint
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
@@ -1863,7 +1863,7 @@ test('typegen w/ one-to-one relationships', async () => {
             Args: { todos: Database["public"]["Tables"]["todos"]["Row"] }
             Returns: {
               decimal: number | null
-              id: number
+              id: number | bigint
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
@@ -1893,8 +1893,8 @@ test('typegen w/ one-to-one relationships', async () => {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
             }
             SetofOptions: {
               from: "users"
@@ -1907,8 +1907,8 @@ test('typegen w/ one-to-one relationships', async () => {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
             }
             SetofOptions: {
               from: "users"
@@ -1929,11 +1929,11 @@ test('typegen w/ one-to-one relationships', async () => {
           }
           get_single_user_summary_from_view:
             | {
-                Args: { search_user_id: number }
+                Args: { search_user_id: number | bigint }
                 Returns: {
-                  todo_count: number | null
+                  todo_count: number | bigint | null
                   todo_details: string[] | null
-                  user_id: number | null
+                  user_id: number | bigint | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
@@ -1947,9 +1947,9 @@ test('typegen w/ one-to-one relationships', async () => {
             | {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
                 Returns: {
-                  todo_count: number | null
+                  todo_count: number | bigint | null
                   todo_details: string[] | null
-                  user_id: number | null
+                  user_id: number | bigint | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
@@ -1965,9 +1965,9 @@ test('typegen w/ one-to-one relationships', async () => {
                   userview_row: Database["public"]["Views"]["users_view"]["Row"]
                 }
                 Returns: {
-                  todo_count: number | null
+                  todo_count: number | bigint | null
                   todo_details: string[] | null
-                  user_id: number | null
+                  user_id: number | bigint | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
@@ -1982,8 +1982,8 @@ test('typegen w/ one-to-one relationships', async () => {
             Args: { "": unknown }
             Returns: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
             }
             SetofOptions: {
               from: "todos_matview"
@@ -1994,11 +1994,11 @@ test('typegen w/ one-to-one relationships', async () => {
           }
           get_todos_from_user:
             | {
-                Args: { search_user_id: number }
+                Args: { search_user_id: number | bigint }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "*"
@@ -2011,8 +2011,8 @@ test('typegen w/ one-to-one relationships', async () => {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "users"
@@ -2027,8 +2027,8 @@ test('typegen w/ one-to-one relationships', async () => {
                 }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "users_view"
@@ -2042,8 +2042,8 @@ test('typegen w/ one-to-one relationships', async () => {
                 Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "todos"
@@ -2056,8 +2056,8 @@ test('typegen w/ one-to-one relationships', async () => {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "users"
@@ -2070,9 +2070,9 @@ test('typegen w/ one-to-one relationships', async () => {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
               created_at: string | null
-              id: number
+              id: number | bigint
               previous_value: Json | null
-              user_id: number | null
+              user_id: number | bigint | null
             }
             SetofOptions: {
               from: "users"
@@ -2081,7 +2081,7 @@ test('typegen w/ one-to-one relationships', async () => {
               isSetofReturn: true
             }
           }
-          get_user_ids: { Args: never; Returns: number[] }
+          get_user_ids: { Args: never; Returns: number | bigint[] }
           get_user_summary: { Args: never; Returns: Record<string, unknown>[] }
           polymorphic_function: { Args: { "": string }; Returns: undefined }
           polymorphic_function_with_different_return: {
@@ -2131,11 +2131,11 @@ test('typegen w/ one-to-one relationships', async () => {
             | { Args: { a: string }; Returns: number }
             | { Args: { b: number }; Returns: string }
             | {
-                Args: { completed: boolean; todo_id: number }
+                Args: { completed: boolean; todo_id: number | bigint }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "*"
@@ -2145,10 +2145,10 @@ test('typegen w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { user_id: number }
+                Args: { user_id: number | bigint }
                 Returns: {
                   decimal: number | null
-                  id: number
+                  id: number | bigint
                   name: string | null
                   status: Database["public"]["Enums"]["user_status"] | null
                   user_uuid: string | null
@@ -2164,8 +2164,8 @@ test('typegen w/ one-to-one relationships', async () => {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "users"
@@ -2192,8 +2192,8 @@ test('typegen w/ one-to-one relationships', async () => {
             Args: { search_details: string }
             Returns: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
             }[]
             SetofOptions: {
               from: "*"
@@ -2224,8 +2224,8 @@ test('typegen w/ one-to-one relationships', async () => {
                 Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "todos"
@@ -2235,11 +2235,11 @@ test('typegen w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { user_id: number }
+                Args: { user_id: number | bigint }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "*"
@@ -2252,8 +2252,8 @@ test('typegen w/ one-to-one relationships', async () => {
                 Args: { "": Database["public"]["Tables"]["users"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "users"
@@ -2266,8 +2266,8 @@ test('typegen w/ one-to-one relationships', async () => {
             Args: { "": Database["public"]["Views"]["todos_view"]["Row"] }
             Returns: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
             }[]
             SetofOptions: {
               from: "todos_view"
@@ -2467,20 +2467,20 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               created_at: string
               data: Json | null
               event_type: string | null
-              id: number
+              id: number | bigint
               days_since_event: number | null
             }
             Insert: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id?: number
+              id?: number | bigint
             }
             Update: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id?: number
+              id?: number | bigint
             }
             Relationships: []
           }
@@ -2489,19 +2489,19 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               created_at: string
               data: Json | null
               event_type: string | null
-              id: number
+              id: number | bigint
             }
             Insert: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id: number
+              id: number | bigint
             }
             Update: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id?: number
+              id?: number | bigint
             }
             Relationships: []
           }
@@ -2510,35 +2510,35 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               created_at: string
               data: Json | null
               event_type: string | null
-              id: number
+              id: number | bigint
             }
             Insert: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id: number
+              id: number | bigint
             }
             Update: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id?: number
+              id?: number | bigint
             }
             Relationships: []
           }
           foreign_table: {
             Row: {
-              id: number
+              id: number | bigint
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }
             Insert: {
-              id: number
+              id: number | bigint
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
             }
             Update: {
-              id?: number
+              id?: number | bigint
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
             }
@@ -2548,17 +2548,17 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Row: {
               duration_optional: string | null
               duration_required: string
-              id: number
+              id: number | bigint
             }
             Insert: {
               duration_optional?: string | null
               duration_required: string
-              id?: number
+              id?: number | bigint
             }
             Update: {
               duration_optional?: string | null
               duration_required?: string
-              id?: number
+              id?: number | bigint
             }
             Relationships: []
           }
@@ -2615,23 +2615,23 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           table_with_primary_key_other_than_id: {
             Row: {
               name: string | null
-              other_id: number
+              other_id: number | bigint
             }
             Insert: {
               name?: string | null
-              other_id?: number
+              other_id?: number | bigint
             }
             Update: {
               name?: string | null
-              other_id?: number
+              other_id?: number | bigint
             }
             Relationships: []
           }
           todos: {
             Row: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
               blurb: string | null
               blurb_varchar: string | null
               details_is_long: boolean | null
@@ -2640,19 +2640,19 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               test_unnamed_row_scalar: number | null
               test_unnamed_row_setof: {
                 details: string | null
-                id: number
-                "user-id": number
+                id: number | bigint
+                "user-id": number | bigint
               } | null
             }
             Insert: {
               details?: string | null
-              id?: number
-              "user-id": number
+              id?: number | bigint
+              "user-id": number | bigint
             }
             Update: {
               details?: string | null
-              id?: number
-              "user-id"?: number
+              id?: number | bigint
+              "user-id"?: number | bigint
             }
             Relationships: [
               {
@@ -2702,15 +2702,15 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           user_details: {
             Row: {
               details: string | null
-              user_id: number
+              user_id: number | bigint
             }
             Insert: {
               details?: string | null
-              user_id: number
+              user_id: number | bigint
             }
             Update: {
               details?: string | null
-              user_id?: number
+              user_id?: number | bigint
             }
             Relationships: [
               {
@@ -2760,7 +2760,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           users: {
             Row: {
               decimal: number | null
-              id: number
+              id: number | bigint
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
@@ -2769,20 +2769,20 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 | null
               test_unnamed_row_setof: {
                 details: string | null
-                id: number
-                "user-id": number
+                id: number | bigint
+                "user-id": number | bigint
               } | null
             }
             Insert: {
               decimal?: number | null
-              id?: number
+              id?: number | bigint
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
               user_uuid?: string | null
             }
             Update: {
               decimal?: number | null
-              id?: number
+              id?: number | bigint
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
               user_uuid?: string | null
@@ -2792,22 +2792,22 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           users_audit: {
             Row: {
               created_at: string | null
-              id: number
+              id: number | bigint
               previous_value: Json | null
-              user_id: number | null
+              user_id: number | bigint | null
               created_ago: number | null
             }
             Insert: {
               created_at?: string | null
-              id?: number
+              id?: number | bigint
               previous_value?: Json | null
-              user_id?: number | null
+              user_id?: number | bigint | null
             }
             Update: {
               created_at?: string | null
-              id?: number
+              id?: number | bigint
               previous_value?: Json | null
-              user_id?: number | null
+              user_id?: number | bigint | null
             }
             Relationships: []
           }
@@ -2815,25 +2815,25 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
         Views: {
           a_view: {
             Row: {
-              id: number | null
+              id: number | bigint | null
             }
             Insert: {
-              id?: number | null
+              id?: number | bigint | null
             }
             Update: {
-              id?: number | null
+              id?: number | bigint | null
             }
             Relationships: []
           }
           todos_matview: {
             Row: {
               details: string | null
-              id: number | null
-              "user-id": number | null
+              id: number | bigint | null
+              "user-id": number | bigint | null
               get_todos_by_matview: {
                 details: string | null
-                id: number
-                "user-id": number
+                id: number | bigint
+                "user-id": number | bigint
               } | null
             }
             Relationships: [
@@ -2884,24 +2884,24 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           todos_view: {
             Row: {
               details: string | null
-              id: number | null
-              "user-id": number | null
+              id: number | bigint | null
+              "user-id": number | bigint | null
               blurb_varchar: string | null
               test_unnamed_view_row: {
                 details: string | null
-                id: number
-                "user-id": number
+                id: number | bigint
+                "user-id": number | bigint
               } | null
             }
             Insert: {
               details?: string | null
-              id?: number | null
-              "user-id"?: number | null
+              id?: number | bigint | null
+              "user-id"?: number | bigint | null
             }
             Update: {
               details?: string | null
-              id?: number | null
-              "user-id"?: number | null
+              id?: number | bigint | null
+              "user-id"?: number | bigint | null
             }
             Relationships: [
               {
@@ -2950,9 +2950,9 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
           user_todos_summary_view: {
             Row: {
-              todo_count: number | null
+              todo_count: number | bigint | null
               todo_details: string[] | null
-              user_id: number | null
+              user_id: number | bigint | null
               user_name: string | null
               user_status: Database["public"]["Enums"]["user_status"] | null
             }
@@ -2961,21 +2961,21 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           users_view: {
             Row: {
               decimal: number | null
-              id: number | null
+              id: number | bigint | null
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
             }
             Insert: {
               decimal?: number | null
-              id?: number | null
+              id?: number | bigint | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
               user_uuid?: string | null
             }
             Update: {
               decimal?: number | null
-              id?: number | null
+              id?: number | bigint | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
               user_uuid?: string | null
@@ -2984,9 +2984,9 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
           users_view_with_multiple_refs_to_users: {
             Row: {
-              initial_id: number | null
+              initial_id: number | bigint | null
               initial_name: string | null
-              second_id: number | null
+              second_id: number | bigint | null
               second_name: string | null
             }
             Relationships: []
@@ -3056,7 +3056,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Args: never
             Returns: {
               decimal: number | null
-              id: number
+              id: number | bigint
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
@@ -3072,7 +3072,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Args: never
             Returns: {
               decimal: number | null
-              id: number
+              id: number | bigint
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
@@ -3088,7 +3088,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Args: { todos: Database["public"]["Tables"]["todos"]["Row"] }
             Returns: {
               decimal: number | null
-              id: number
+              id: number | bigint
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
@@ -3118,8 +3118,8 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
             }
             SetofOptions: {
               from: "users"
@@ -3132,8 +3132,8 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
             }
             SetofOptions: {
               from: "users"
@@ -3154,11 +3154,11 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
           get_single_user_summary_from_view:
             | {
-                Args: { search_user_id: number }
+                Args: { search_user_id: number | bigint }
                 Returns: {
-                  todo_count: number | null
+                  todo_count: number | bigint | null
                   todo_details: string[] | null
-                  user_id: number | null
+                  user_id: number | bigint | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
@@ -3172,9 +3172,9 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             | {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
                 Returns: {
-                  todo_count: number | null
+                  todo_count: number | bigint | null
                   todo_details: string[] | null
-                  user_id: number | null
+                  user_id: number | bigint | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
@@ -3190,9 +3190,9 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   userview_row: Database["public"]["Views"]["users_view"]["Row"]
                 }
                 Returns: {
-                  todo_count: number | null
+                  todo_count: number | bigint | null
                   todo_details: string[] | null
-                  user_id: number | null
+                  user_id: number | bigint | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
@@ -3207,8 +3207,8 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Args: { "": unknown }
             Returns: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
             }
             SetofOptions: {
               from: "todos_matview"
@@ -3219,11 +3219,11 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
           get_todos_from_user:
             | {
-                Args: { search_user_id: number }
+                Args: { search_user_id: number | bigint }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "*"
@@ -3236,8 +3236,8 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "users"
@@ -3252,8 +3252,8 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "users_view"
@@ -3267,8 +3267,8 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "todos"
@@ -3281,8 +3281,8 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "users"
@@ -3295,9 +3295,9 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
               created_at: string | null
-              id: number
+              id: number | bigint
               previous_value: Json | null
-              user_id: number | null
+              user_id: number | bigint | null
             }
             SetofOptions: {
               from: "users"
@@ -3306,7 +3306,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               isSetofReturn: true
             }
           }
-          get_user_ids: { Args: never; Returns: number[] }
+          get_user_ids: { Args: never; Returns: number | bigint[] }
           get_user_summary: { Args: never; Returns: Record<string, unknown>[] }
           polymorphic_function: { Args: { "": string }; Returns: undefined }
           polymorphic_function_with_different_return: {
@@ -3356,11 +3356,11 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             | { Args: { a: string }; Returns: number }
             | { Args: { b: number }; Returns: string }
             | {
-                Args: { completed: boolean; todo_id: number }
+                Args: { completed: boolean; todo_id: number | bigint }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "*"
@@ -3370,10 +3370,10 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { user_id: number }
+                Args: { user_id: number | bigint }
                 Returns: {
                   decimal: number | null
-                  id: number
+                  id: number | bigint
                   name: string | null
                   status: Database["public"]["Enums"]["user_status"] | null
                   user_uuid: string | null
@@ -3389,8 +3389,8 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "users"
@@ -3417,8 +3417,8 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Args: { search_details: string }
             Returns: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
             }[]
             SetofOptions: {
               from: "*"
@@ -3449,8 +3449,8 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "todos"
@@ -3460,11 +3460,11 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { user_id: number }
+                Args: { user_id: number | bigint }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "*"
@@ -3477,8 +3477,8 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 Args: { "": Database["public"]["Tables"]["users"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "users"
@@ -3491,8 +3491,8 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Args: { "": Database["public"]["Views"]["todos_view"]["Row"] }
             Returns: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
             }[]
             SetofOptions: {
               from: "todos_view"
@@ -3697,20 +3697,20 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               created_at: string
               data: Json | null
               event_type: string | null
-              id: number
+              id: number | bigint
               days_since_event: number | null
             }
             Insert: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id?: number
+              id?: number | bigint
             }
             Update: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id?: number
+              id?: number | bigint
             }
             Relationships: []
           }
@@ -3719,19 +3719,19 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               created_at: string
               data: Json | null
               event_type: string | null
-              id: number
+              id: number | bigint
             }
             Insert: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id: number
+              id: number | bigint
             }
             Update: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id?: number
+              id?: number | bigint
             }
             Relationships: []
           }
@@ -3740,35 +3740,35 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               created_at: string
               data: Json | null
               event_type: string | null
-              id: number
+              id: number | bigint
             }
             Insert: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id: number
+              id: number | bigint
             }
             Update: {
               created_at?: string
               data?: Json | null
               event_type?: string | null
-              id?: number
+              id?: number | bigint
             }
             Relationships: []
           }
           foreign_table: {
             Row: {
-              id: number
+              id: number | bigint
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }
             Insert: {
-              id: number
+              id: number | bigint
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
             }
             Update: {
-              id?: number
+              id?: number | bigint
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
             }
@@ -3778,17 +3778,17 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Row: {
               duration_optional: string | null
               duration_required: string
-              id: number
+              id: number | bigint
             }
             Insert: {
               duration_optional?: string | null
               duration_required: string
-              id?: number
+              id?: number | bigint
             }
             Update: {
               duration_optional?: string | null
               duration_required?: string
-              id?: number
+              id?: number | bigint
             }
             Relationships: []
           }
@@ -3845,23 +3845,23 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           table_with_primary_key_other_than_id: {
             Row: {
               name: string | null
-              other_id: number
+              other_id: number | bigint
             }
             Insert: {
               name?: string | null
-              other_id?: number
+              other_id?: number | bigint
             }
             Update: {
               name?: string | null
-              other_id?: number
+              other_id?: number | bigint
             }
             Relationships: []
           }
           todos: {
             Row: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
               blurb: string | null
               blurb_varchar: string | null
               details_is_long: boolean | null
@@ -3870,19 +3870,19 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               test_unnamed_row_scalar: number | null
               test_unnamed_row_setof: {
                 details: string | null
-                id: number
-                "user-id": number
+                id: number | bigint
+                "user-id": number | bigint
               } | null
             }
             Insert: {
               details?: string | null
-              id?: number
-              "user-id": number
+              id?: number | bigint
+              "user-id": number | bigint
             }
             Update: {
               details?: string | null
-              id?: number
-              "user-id"?: number
+              id?: number | bigint
+              "user-id"?: number | bigint
             }
             Relationships: [
               {
@@ -3932,15 +3932,15 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           user_details: {
             Row: {
               details: string | null
-              user_id: number
+              user_id: number | bigint
             }
             Insert: {
               details?: string | null
-              user_id: number
+              user_id: number | bigint
             }
             Update: {
               details?: string | null
-              user_id?: number
+              user_id?: number | bigint
             }
             Relationships: [
               {
@@ -3990,7 +3990,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           users: {
             Row: {
               decimal: number | null
-              id: number
+              id: number | bigint
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
@@ -3999,20 +3999,20 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 | null
               test_unnamed_row_setof: {
                 details: string | null
-                id: number
-                "user-id": number
+                id: number | bigint
+                "user-id": number | bigint
               } | null
             }
             Insert: {
               decimal?: number | null
-              id?: number
+              id?: number | bigint
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
               user_uuid?: string | null
             }
             Update: {
               decimal?: number | null
-              id?: number
+              id?: number | bigint
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
               user_uuid?: string | null
@@ -4022,22 +4022,22 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           users_audit: {
             Row: {
               created_at: string | null
-              id: number
+              id: number | bigint
               previous_value: Json | null
-              user_id: number | null
+              user_id: number | bigint | null
               created_ago: number | null
             }
             Insert: {
               created_at?: string | null
-              id?: number
+              id?: number | bigint
               previous_value?: Json | null
-              user_id?: number | null
+              user_id?: number | bigint | null
             }
             Update: {
               created_at?: string | null
-              id?: number
+              id?: number | bigint
               previous_value?: Json | null
-              user_id?: number | null
+              user_id?: number | bigint | null
             }
             Relationships: []
           }
@@ -4045,25 +4045,25 @@ test('typegen: typescript w/ postgrestVersion', async () => {
         Views: {
           a_view: {
             Row: {
-              id: number | null
+              id: number | bigint | null
             }
             Insert: {
-              id?: number | null
+              id?: number | bigint | null
             }
             Update: {
-              id?: number | null
+              id?: number | bigint | null
             }
             Relationships: []
           }
           todos_matview: {
             Row: {
               details: string | null
-              id: number | null
-              "user-id": number | null
+              id: number | bigint | null
+              "user-id": number | bigint | null
               get_todos_by_matview: {
                 details: string | null
-                id: number
-                "user-id": number
+                id: number | bigint
+                "user-id": number | bigint
               } | null
             }
             Relationships: [
@@ -4114,24 +4114,24 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           todos_view: {
             Row: {
               details: string | null
-              id: number | null
-              "user-id": number | null
+              id: number | bigint | null
+              "user-id": number | bigint | null
               blurb_varchar: string | null
               test_unnamed_view_row: {
                 details: string | null
-                id: number
-                "user-id": number
+                id: number | bigint
+                "user-id": number | bigint
               } | null
             }
             Insert: {
               details?: string | null
-              id?: number | null
-              "user-id"?: number | null
+              id?: number | bigint | null
+              "user-id"?: number | bigint | null
             }
             Update: {
               details?: string | null
-              id?: number | null
-              "user-id"?: number | null
+              id?: number | bigint | null
+              "user-id"?: number | bigint | null
             }
             Relationships: [
               {
@@ -4180,9 +4180,9 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
           user_todos_summary_view: {
             Row: {
-              todo_count: number | null
+              todo_count: number | bigint | null
               todo_details: string[] | null
-              user_id: number | null
+              user_id: number | bigint | null
               user_name: string | null
               user_status: Database["public"]["Enums"]["user_status"] | null
             }
@@ -4191,21 +4191,21 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           users_view: {
             Row: {
               decimal: number | null
-              id: number | null
+              id: number | bigint | null
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
             }
             Insert: {
               decimal?: number | null
-              id?: number | null
+              id?: number | bigint | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
               user_uuid?: string | null
             }
             Update: {
               decimal?: number | null
-              id?: number | null
+              id?: number | bigint | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
               user_uuid?: string | null
@@ -4214,9 +4214,9 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
           users_view_with_multiple_refs_to_users: {
             Row: {
-              initial_id: number | null
+              initial_id: number | bigint | null
               initial_name: string | null
-              second_id: number | null
+              second_id: number | bigint | null
               second_name: string | null
             }
             Relationships: []
@@ -4286,7 +4286,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Args: never
             Returns: {
               decimal: number | null
-              id: number
+              id: number | bigint
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
@@ -4302,7 +4302,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Args: never
             Returns: {
               decimal: number | null
-              id: number
+              id: number | bigint
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
@@ -4318,7 +4318,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Args: { todos: Database["public"]["Tables"]["todos"]["Row"] }
             Returns: {
               decimal: number | null
-              id: number
+              id: number | bigint
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
@@ -4348,8 +4348,8 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
             }
             SetofOptions: {
               from: "users"
@@ -4362,8 +4362,8 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
             }
             SetofOptions: {
               from: "users"
@@ -4384,11 +4384,11 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
           get_single_user_summary_from_view:
             | {
-                Args: { search_user_id: number }
+                Args: { search_user_id: number | bigint }
                 Returns: {
-                  todo_count: number | null
+                  todo_count: number | bigint | null
                   todo_details: string[] | null
-                  user_id: number | null
+                  user_id: number | bigint | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
@@ -4402,9 +4402,9 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             | {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
                 Returns: {
-                  todo_count: number | null
+                  todo_count: number | bigint | null
                   todo_details: string[] | null
-                  user_id: number | null
+                  user_id: number | bigint | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
@@ -4420,9 +4420,9 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   userview_row: Database["public"]["Views"]["users_view"]["Row"]
                 }
                 Returns: {
-                  todo_count: number | null
+                  todo_count: number | bigint | null
                   todo_details: string[] | null
-                  user_id: number | null
+                  user_id: number | bigint | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
@@ -4437,8 +4437,8 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Args: { "": unknown }
             Returns: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
             }
             SetofOptions: {
               from: "todos_matview"
@@ -4449,11 +4449,11 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
           get_todos_from_user:
             | {
-                Args: { search_user_id: number }
+                Args: { search_user_id: number | bigint }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "*"
@@ -4466,8 +4466,8 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "users"
@@ -4482,8 +4482,8 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "users_view"
@@ -4497,8 +4497,8 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "todos"
@@ -4511,8 +4511,8 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "users"
@@ -4525,9 +4525,9 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
               created_at: string | null
-              id: number
+              id: number | bigint
               previous_value: Json | null
-              user_id: number | null
+              user_id: number | bigint | null
             }
             SetofOptions: {
               from: "users"
@@ -4536,7 +4536,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               isSetofReturn: true
             }
           }
-          get_user_ids: { Args: never; Returns: number[] }
+          get_user_ids: { Args: never; Returns: number | bigint[] }
           get_user_summary: { Args: never; Returns: Record<string, unknown>[] }
           polymorphic_function: { Args: { "": string }; Returns: undefined }
           polymorphic_function_with_different_return: {
@@ -4586,11 +4586,11 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             | { Args: { a: string }; Returns: number }
             | { Args: { b: number }; Returns: string }
             | {
-                Args: { completed: boolean; todo_id: number }
+                Args: { completed: boolean; todo_id: number | bigint }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "*"
@@ -4600,10 +4600,10 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 }
               }
             | {
-                Args: { user_id: number }
+                Args: { user_id: number | bigint }
                 Returns: {
                   decimal: number | null
-                  id: number
+                  id: number | bigint
                   name: string | null
                   status: Database["public"]["Enums"]["user_status"] | null
                   user_uuid: string | null
@@ -4619,8 +4619,8 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "users"
@@ -4647,8 +4647,8 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Args: { search_details: string }
             Returns: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
             }[]
             SetofOptions: {
               from: "*"
@@ -4679,8 +4679,8 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "todos"
@@ -4690,11 +4690,11 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 }
               }
             | {
-                Args: { user_id: number }
+                Args: { user_id: number | bigint }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "*"
@@ -4707,8 +4707,8 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 Args: { "": Database["public"]["Tables"]["users"]["Row"] }
                 Returns: {
                   details: string | null
-                  id: number
-                  "user-id": number
+                  id: number | bigint
+                  "user-id": number | bigint
                 }[]
                 SetofOptions: {
                   from: "users"
@@ -4721,8 +4721,8 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Args: { "": Database["public"]["Views"]["todos_view"]["Row"] }
             Returns: {
               details: string | null
-              id: number
-              "user-id": number
+              id: number | bigint
+              "user-id": number | bigint
             }[]
             SetofOptions: {
               from: "todos_view"
