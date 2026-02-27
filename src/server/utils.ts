@@ -23,9 +23,18 @@ export const extractRequestForLogging = (request: FastifyRequest) => {
   }
 }
 
-export function createConnectionConfig(request: FastifyRequest): PoolConfig {
+export function createConnectionConfig(
+  request: FastifyRequest,
+  queryTimeoutSecs?: number
+): PoolConfig {
   const connectionString = request.headers.pg as string
-  const config = { ...DEFAULT_POOL_CONFIG, connectionString }
+  const config = {
+    ...DEFAULT_POOL_CONFIG,
+    connectionString,
+    ...(queryTimeoutSecs !== undefined && {
+      query_timeout: queryTimeoutSecs === 0 ? undefined : queryTimeoutSecs * 1000,
+    }),
+  }
 
   // Override application_name if custom one provided in header
   if (request.headers['x-pg-application-name']) {
