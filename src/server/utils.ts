@@ -25,14 +25,15 @@ export const extractRequestForLogging = (request: FastifyRequest) => {
 
 export function createConnectionConfig(
   request: FastifyRequest,
-  queryTimeoutSecs?: number
+  queryTimeoutSecs?: number | string
 ): PoolConfig {
   const connectionString = request.headers.pg as string
+  const timeout = queryTimeoutSecs !== undefined ? Number(queryTimeoutSecs) : undefined
   const config = {
     ...DEFAULT_POOL_CONFIG,
     connectionString,
-    ...(queryTimeoutSecs !== undefined && {
-      query_timeout: queryTimeoutSecs === 0 ? undefined : queryTimeoutSecs * 1000,
+    ...(timeout !== undefined && {
+      query_timeout: timeout === 0 ? undefined : timeout * 1000,
     }),
   }
 
