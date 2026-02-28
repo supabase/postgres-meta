@@ -278,7 +278,10 @@ class PythonTypedDictAttr implements Serializable {
   }
 
   serialize(): string {
-    const annotation = `Annotated[${this.py_type.serialize()}, Field(alias="${this.pg_name}")]`
+    const py_type = this.nullable
+      ? `Optional[${this.py_type.serialize()}]`
+      : this.py_type.serialize()
+    const annotation = `Annotated[${py_type}, Field(alias="${this.pg_name}")]`
     const rhs = this.not_required ? `NotRequired[${annotation}]` : annotation
     return `    ${this.name}: ${rhs}`
   }
