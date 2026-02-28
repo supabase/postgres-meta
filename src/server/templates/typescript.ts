@@ -901,11 +901,12 @@ export const pgTypeToTsType = (
       'timestamp',
       'timestamptz',
       'uuid',
-      'vector',
       'interval',
     ].includes(pgType)
   ) {
     return 'string'
+  } else if (pgType === 'vector') {
+    return 'number[]'
   } else if (['json', 'jsonb'].includes(pgType)) {
     return 'Json'
   } else if (pgType === 'void') {
