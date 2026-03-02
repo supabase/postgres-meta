@@ -220,9 +220,13 @@ test('multi event', async () => {
 
 test('triggers with the same name on different schemas', async () => {
   await pgMeta.query(`
-create function tr_f() returns trigger language plpgsql as 'begin end';
-create schema s1; create table s1.t(); create trigger tr before insert on s1.t execute function tr_f();
-create schema s2; create table s2.t(); create trigger tr before insert on s2.t execute function tr_f();
+create or replace function tr_f() returns trigger language plpgsql as $$
+begin
+  return new;
+end;
+$$;
+create schema s1; create table s1.t(id int); create trigger tr before insert on s1.t execute function tr_f();
+create schema s2; create table s2.t(id int); create trigger tr before insert on s2.t execute function tr_f();
 `)
 
   const res = await pgMeta.triggers.list()

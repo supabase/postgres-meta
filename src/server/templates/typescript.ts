@@ -886,7 +886,9 @@ export const pgTypeToTsType = (
 ): string => {
   if (pgType === 'bool') {
     return 'boolean'
-  } else if (['int2', 'int4', 'int8', 'float4', 'float8', 'numeric'].includes(pgType)) {
+  } else if (pgType === 'int8') {
+    return 'number | bigint'
+  } else if (['int2', 'int4', 'float4', 'float8', 'numeric'].includes(pgType)) {
     return 'number'
   } else if (
     [
