@@ -6654,18 +6654,18 @@ test('typegen: python', async () => {
         user_uuid: Optional[uuid.UUID] = Field(alias="user_uuid")
 
     class PublicUsersInsert(TypedDict):
-        decimal: NotRequired[Annotated[float, Field(alias="decimal")]]
+        decimal: NotRequired[Annotated[Optional[float], Field(alias="decimal")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
-        name: NotRequired[Annotated[str, Field(alias="name")]]
-        status: NotRequired[Annotated[PublicUserStatus, Field(alias="status")]]
-        user_uuid: NotRequired[Annotated[uuid.UUID, Field(alias="user_uuid")]]
+        name: NotRequired[Annotated[Optional[str], Field(alias="name")]]
+        status: NotRequired[Annotated[Optional[PublicUserStatus], Field(alias="status")]]
+        user_uuid: NotRequired[Annotated[Optional[uuid.UUID], Field(alias="user_uuid")]]
 
     class PublicUsersUpdate(TypedDict):
-        decimal: NotRequired[Annotated[float, Field(alias="decimal")]]
+        decimal: NotRequired[Annotated[Optional[float], Field(alias="decimal")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
-        name: NotRequired[Annotated[str, Field(alias="name")]]
-        status: NotRequired[Annotated[PublicUserStatus, Field(alias="status")]]
-        user_uuid: NotRequired[Annotated[uuid.UUID, Field(alias="user_uuid")]]
+        name: NotRequired[Annotated[Optional[str], Field(alias="name")]]
+        status: NotRequired[Annotated[Optional[PublicUserStatus], Field(alias="status")]]
+        user_uuid: NotRequired[Annotated[Optional[uuid.UUID], Field(alias="user_uuid")]]
 
     class PublicTodos(BaseModel):
         details: Optional[str] = Field(alias="details")
@@ -6673,12 +6673,12 @@ test('typegen: python', async () => {
         user_id: int = Field(alias="user-id")
 
     class PublicTodosInsert(TypedDict):
-        details: NotRequired[Annotated[str, Field(alias="details")]]
+        details: NotRequired[Annotated[Optional[str], Field(alias="details")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
         user_id: Annotated[int, Field(alias="user-id")]
 
     class PublicTodosUpdate(TypedDict):
-        details: NotRequired[Annotated[str, Field(alias="details")]]
+        details: NotRequired[Annotated[Optional[str], Field(alias="details")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
         user_id: NotRequired[Annotated[int, Field(alias="user-id")]]
 
@@ -6689,27 +6689,27 @@ test('typegen: python', async () => {
         user_id: Optional[int] = Field(alias="user_id")
 
     class PublicUsersAuditInsert(TypedDict):
-        created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
+        created_at: NotRequired[Annotated[Optional[datetime.datetime], Field(alias="created_at")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
-        previous_value: NotRequired[Annotated[Json[Any], Field(alias="previous_value")]]
-        user_id: NotRequired[Annotated[int, Field(alias="user_id")]]
+        previous_value: NotRequired[Annotated[Optional[Json[Any]], Field(alias="previous_value")]]
+        user_id: NotRequired[Annotated[Optional[int], Field(alias="user_id")]]
 
     class PublicUsersAuditUpdate(TypedDict):
-        created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
+        created_at: NotRequired[Annotated[Optional[datetime.datetime], Field(alias="created_at")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
-        previous_value: NotRequired[Annotated[Json[Any], Field(alias="previous_value")]]
-        user_id: NotRequired[Annotated[int, Field(alias="user_id")]]
+        previous_value: NotRequired[Annotated[Optional[Json[Any]], Field(alias="previous_value")]]
+        user_id: NotRequired[Annotated[Optional[int], Field(alias="user_id")]]
 
     class PublicUserDetails(BaseModel):
         details: Optional[str] = Field(alias="details")
         user_id: int = Field(alias="user_id")
 
     class PublicUserDetailsInsert(TypedDict):
-        details: NotRequired[Annotated[str, Field(alias="details")]]
+        details: NotRequired[Annotated[Optional[str], Field(alias="details")]]
         user_id: Annotated[int, Field(alias="user_id")]
 
     class PublicUserDetailsUpdate(TypedDict):
-        details: NotRequired[Annotated[str, Field(alias="details")]]
+        details: NotRequired[Annotated[Optional[str], Field(alias="details")]]
         user_id: NotRequired[Annotated[int, Field(alias="user_id")]]
 
     class PublicEmpty(BaseModel):
@@ -6726,23 +6726,23 @@ test('typegen: python', async () => {
         col2: Optional[PublicAView] = Field(alias="col2")
 
     class PublicTableWithOtherTablesRowTypeInsert(TypedDict):
-        col1: NotRequired[Annotated[PublicUserDetails, Field(alias="col1")]]
-        col2: NotRequired[Annotated[PublicAView, Field(alias="col2")]]
+        col1: NotRequired[Annotated[Optional[PublicUserDetails], Field(alias="col1")]]
+        col2: NotRequired[Annotated[Optional[PublicAView], Field(alias="col2")]]
 
     class PublicTableWithOtherTablesRowTypeUpdate(TypedDict):
-        col1: NotRequired[Annotated[PublicUserDetails, Field(alias="col1")]]
-        col2: NotRequired[Annotated[PublicAView, Field(alias="col2")]]
+        col1: NotRequired[Annotated[Optional[PublicUserDetails], Field(alias="col1")]]
+        col2: NotRequired[Annotated[Optional[PublicAView], Field(alias="col2")]]
 
     class PublicTableWithPrimaryKeyOtherThanId(BaseModel):
         name: Optional[str] = Field(alias="name")
         other_id: int = Field(alias="other_id")
 
     class PublicTableWithPrimaryKeyOtherThanIdInsert(TypedDict):
-        name: NotRequired[Annotated[str, Field(alias="name")]]
+        name: NotRequired[Annotated[Optional[str], Field(alias="name")]]
         other_id: NotRequired[Annotated[int, Field(alias="other_id")]]
 
     class PublicTableWithPrimaryKeyOtherThanIdUpdate(TypedDict):
-        name: NotRequired[Annotated[str, Field(alias="name")]]
+        name: NotRequired[Annotated[Optional[str], Field(alias="name")]]
         other_id: NotRequired[Annotated[int, Field(alias="other_id")]]
 
     class PublicEvents(BaseModel):
@@ -6753,14 +6753,14 @@ test('typegen: python', async () => {
 
     class PublicEventsInsert(TypedDict):
         created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
-        data: NotRequired[Annotated[Json[Any], Field(alias="data")]]
-        event_type: NotRequired[Annotated[str, Field(alias="event_type")]]
+        data: NotRequired[Annotated[Optional[Json[Any]], Field(alias="data")]]
+        event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
     class PublicEventsUpdate(TypedDict):
         created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
-        data: NotRequired[Annotated[Json[Any], Field(alias="data")]]
-        event_type: NotRequired[Annotated[str, Field(alias="event_type")]]
+        data: NotRequired[Annotated[Optional[Json[Any]], Field(alias="data")]]
+        event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
     class PublicEvents2024(BaseModel):
@@ -6771,14 +6771,14 @@ test('typegen: python', async () => {
 
     class PublicEvents2024Insert(TypedDict):
         created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
-        data: NotRequired[Annotated[Json[Any], Field(alias="data")]]
-        event_type: NotRequired[Annotated[str, Field(alias="event_type")]]
+        data: NotRequired[Annotated[Optional[Json[Any]], Field(alias="data")]]
+        event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
         id: Annotated[int, Field(alias="id")]
 
     class PublicEvents2024Update(TypedDict):
         created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
-        data: NotRequired[Annotated[Json[Any], Field(alias="data")]]
-        event_type: NotRequired[Annotated[str, Field(alias="event_type")]]
+        data: NotRequired[Annotated[Optional[Json[Any]], Field(alias="data")]]
+        event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
     class PublicEvents2025(BaseModel):
@@ -6789,14 +6789,14 @@ test('typegen: python', async () => {
 
     class PublicEvents2025Insert(TypedDict):
         created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
-        data: NotRequired[Annotated[Json[Any], Field(alias="data")]]
-        event_type: NotRequired[Annotated[str, Field(alias="event_type")]]
+        data: NotRequired[Annotated[Optional[Json[Any]], Field(alias="data")]]
+        event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
         id: Annotated[int, Field(alias="id")]
 
     class PublicEvents2025Update(TypedDict):
         created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
-        data: NotRequired[Annotated[Json[Any], Field(alias="data")]]
-        event_type: NotRequired[Annotated[str, Field(alias="event_type")]]
+        data: NotRequired[Annotated[Optional[Json[Any]], Field(alias="data")]]
+        event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
     class PublicIntervalTest(BaseModel):
@@ -6805,12 +6805,12 @@ test('typegen: python', async () => {
         id: int = Field(alias="id")
 
     class PublicIntervalTestInsert(TypedDict):
-        duration_optional: NotRequired[Annotated[str, Field(alias="duration_optional")]]
+        duration_optional: NotRequired[Annotated[Optional[str], Field(alias="duration_optional")]]
         duration_required: Annotated[str, Field(alias="duration_required")]
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
     class PublicIntervalTestUpdate(TypedDict):
-        duration_optional: NotRequired[Annotated[str, Field(alias="duration_optional")]]
+        duration_optional: NotRequired[Annotated[Optional[str], Field(alias="duration_optional")]]
         duration_required: NotRequired[Annotated[str, Field(alias="duration_required")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
@@ -6835,20 +6835,20 @@ test('typegen: python', async () => {
         status: Optional[PublicMemeStatus] = Field(alias="status")
 
     class PublicMemesInsert(TypedDict):
-        category: NotRequired[Annotated[int, Field(alias="category")]]
+        category: NotRequired[Annotated[Optional[int], Field(alias="category")]]
         created_at: Annotated[datetime.datetime, Field(alias="created_at")]
         id: NotRequired[Annotated[int, Field(alias="id")]]
-        metadata: NotRequired[Annotated[Json[Any], Field(alias="metadata")]]
+        metadata: NotRequired[Annotated[Optional[Json[Any]], Field(alias="metadata")]]
         name: Annotated[str, Field(alias="name")]
-        status: NotRequired[Annotated[PublicMemeStatus, Field(alias="status")]]
+        status: NotRequired[Annotated[Optional[PublicMemeStatus], Field(alias="status")]]
 
     class PublicMemesUpdate(TypedDict):
-        category: NotRequired[Annotated[int, Field(alias="category")]]
+        category: NotRequired[Annotated[Optional[int], Field(alias="category")]]
         created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
-        metadata: NotRequired[Annotated[Json[Any], Field(alias="metadata")]]
+        metadata: NotRequired[Annotated[Optional[Json[Any]], Field(alias="metadata")]]
         name: NotRequired[Annotated[str, Field(alias="name")]]
-        status: NotRequired[Annotated[PublicMemeStatus, Field(alias="status")]]
+        status: NotRequired[Annotated[Optional[PublicMemeStatus], Field(alias="status")]]
 
     class PublicAView(BaseModel):
         id: Optional[int] = Field(alias="id")
