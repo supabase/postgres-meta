@@ -111,6 +111,7 @@ export default class PostgresMetaColumns {
     is_unique = false,
     comment,
     check,
+    noTransaction = false,
   }: {
     table_id: number
     name: string
@@ -124,6 +125,7 @@ export default class PostgresMetaColumns {
     is_unique?: boolean
     comment?: string
     check?: string
+    noTransaction?: boolean
   }): Promise<PostgresMetaResult<PostgresColumn>> {
     const { data, error } = await this.metaTables.retrieve({ id: table_id })
     if (error) {
@@ -163,7 +165,16 @@ export default class PostgresMetaColumns {
         ? ''
         : `COMMENT ON COLUMN ${ident(schema)}.${ident(table)}.${ident(name)} IS ${literal(comment)}`
 
-    const sql = `
+    const sql = noTransaction
+      ? `
+  ALTER TABLE ${ident(schema)}.${ident(table)} ADD COLUMN ${ident(name)} ${typeIdent(type)}
+    ${defaultValueClause}
+    ${isNullableClause}
+    ${isPrimaryKeyClause}
+    ${isUniqueClause}
+    ${checkSql};
+  ${commentSql};`
+      : `
 BEGIN;
   ALTER TABLE ${ident(schema)}.${ident(table)} ADD COLUMN ${ident(name)} ${typeIdent(type)}
     ${defaultValueClause}

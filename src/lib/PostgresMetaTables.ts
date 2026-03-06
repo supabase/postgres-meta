@@ -117,13 +117,16 @@ export default class PostgresMetaTables {
     name,
     schema = 'public',
     comment,
+    noTransaction = false,
   }: PostgresTableCreate): Promise<PostgresMetaResult<PostgresTable>> {
     const tableSql = `CREATE TABLE ${ident(schema)}.${ident(name)} ();`
     const commentSql =
       comment === undefined
         ? ''
         : `COMMENT ON TABLE ${ident(schema)}.${ident(name)} IS ${literal(comment)};`
-    const sql = `BEGIN; ${tableSql} ${commentSql} COMMIT;`
+    const sql = noTransaction
+      ? `${tableSql} ${commentSql}`
+      : `BEGIN; ${tableSql} ${commentSql} COMMIT;`
     const { error } = await this.query(sql)
     if (error) {
       return { data: null, error }
