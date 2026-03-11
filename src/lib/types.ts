@@ -60,6 +60,7 @@ export const postgresColumnCreateSchema = Type.Object({
   is_unique: Type.Optional(Type.Boolean()),
   comment: Type.Optional(Type.String()),
   check: Type.Optional(Type.String()),
+  noTransaction: Type.Optional(Type.Boolean()),
 })
 export type PostgresColumnCreate = Static<typeof postgresColumnCreateSchema>
 
@@ -387,6 +388,7 @@ export const postgresTableCreateSchema = Type.Object({
   name: Type.String(),
   schema: Type.Optional(Type.String()),
   comment: Type.Optional(Type.String()),
+  noTransaction: Type.Optional(Type.Boolean()),
 })
 export type PostgresTableCreate = Static<typeof postgresTableCreateSchema>
 
