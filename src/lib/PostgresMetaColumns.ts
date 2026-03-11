@@ -165,8 +165,7 @@ export default class PostgresMetaColumns {
         ? ''
         : `COMMENT ON COLUMN ${ident(schema)}.${ident(table)}.${ident(name)} IS ${literal(comment)}`
 
-    const sql = noTransaction
-      ? `
+    const columnSql = `
   ALTER TABLE ${ident(schema)}.${ident(table)} ADD COLUMN ${ident(name)} ${typeIdent(type)}
     ${defaultValueClause}
     ${isNullableClause}
@@ -174,16 +173,8 @@ export default class PostgresMetaColumns {
     ${isUniqueClause}
     ${checkSql};
   ${commentSql};`
-      : `
-BEGIN;
-  ALTER TABLE ${ident(schema)}.${ident(table)} ADD COLUMN ${ident(name)} ${typeIdent(type)}
-    ${defaultValueClause}
-    ${isNullableClause}
-    ${isPrimaryKeyClause}
-    ${isUniqueClause}
-    ${checkSql};
-  ${commentSql};
-COMMIT;`
+
+    const sql = noTransaction ? columnSql : `BEGIN;${columnSql}COMMIT;`
     {
       const { error } = await this.query(sql)
       if (error) {
