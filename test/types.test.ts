@@ -55,4 +55,20 @@ describe('server/routes/types', () => {
 
     expect(result).toBe('string')
   })
+
+  test('int8 maps to number | bigint and other numerics stay number', () => {
+    const context = {
+      types: [],
+      schemas: [],
+      tables: [],
+      views: [],
+    }
+
+    expect(pgTypeToTsType({ name: 'public' } as any, 'int8', context)).toBe('number | bigint')
+    expect(pgTypeToTsType({ name: 'public' } as any, 'int2', context)).toBe('number')
+    expect(pgTypeToTsType({ name: 'public' } as any, 'int4', context)).toBe('number')
+    expect(pgTypeToTsType({ name: 'public' } as any, 'float4', context)).toBe('number')
+    expect(pgTypeToTsType({ name: 'public' } as any, 'float8', context)).toBe('number')
+    expect(pgTypeToTsType({ name: 'public' } as any, 'numeric', context)).toBe('number')
+  })
 })

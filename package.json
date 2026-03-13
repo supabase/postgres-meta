@@ -34,8 +34,8 @@
     "test": "run-s db:clean db:run test:run db:clean",
     "db:clean": "cd test/db && docker compose down",
     "db:run": "cd test/db && docker compose up --detach --wait",
-    "test:run": "PG_META_MAX_RESULT_SIZE_MB=20 PG_QUERY_TIMEOUT_SECS=5 PG_CONN_TIMEOUT_SECS=30 vitest run --coverage",
-    "test:update": "run-s db:clean db:run && PG_META_MAX_RESULT_SIZE_MB=20 PG_QUERY_TIMEOUT_SECS=5 PG_CONN_TIMEOUT_SECS=30 vitest run --update && run-s db:clean"
+    "test:run": "node -e \"process.env.PG_META_DB_HOST='127.0.0.1';process.env.PG_META_DB_PORT='5433';process.env.PG_META_MAX_RESULT_SIZE_MB='20';process.env.PG_QUERY_TIMEOUT_SECS='5';process.env.PG_CONN_TIMEOUT_SECS='30';require('node:child_process').execSync('vitest run --coverage',{stdio:'inherit',shell:true})\"",
+    "test:update": "run-s db:clean db:run && node -e \"process.env.PG_META_DB_HOST='127.0.0.1';process.env.PG_META_DB_PORT='5433';process.env.PG_META_MAX_RESULT_SIZE_MB='20';process.env.PG_QUERY_TIMEOUT_SECS='5';process.env.PG_CONN_TIMEOUT_SECS='30';require('node:child_process').execSync('vitest run --update',{stdio:'inherit',shell:true})\" && run-s db:clean"
   },
   "engines": {
     "node": ">=20",
