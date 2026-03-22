@@ -43,7 +43,7 @@ test('typegen: typescript', async () => {
               data: Json | null
               event_type: string | null
               id: number
-              days_since_event: number | null
+              days_since_event?: number | null
             }
             Insert: {
               created_at?: string
@@ -206,13 +206,13 @@ test('typegen: typescript', async () => {
               details: string | null
               id: number
               "user-id": number
-              blurb: string | null
-              blurb_varchar: string | null
-              details_is_long: boolean | null
-              details_length: number | null
-              details_words: string[] | null
-              test_unnamed_row_scalar: number | null
-              test_unnamed_row_setof: {
+              blurb?: string | null
+              blurb_varchar?: string | null
+              details_is_long?: boolean | null
+              details_length?: number | null
+              details_words?: string[] | null
+              test_unnamed_row_scalar?: number | null
+              test_unnamed_row_setof?: {
                 details: string | null
                 id: number
                 "user-id": number
@@ -326,10 +326,10 @@ test('typegen: typescript', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
-              test_unnamed_row_composite:
+              test_unnamed_row_composite?:
                 | Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
                 | null
-              test_unnamed_row_setof: {
+              test_unnamed_row_setof?: {
                 details: string | null
                 id: number
                 "user-id": number
@@ -357,7 +357,7 @@ test('typegen: typescript', async () => {
               id: number
               previous_value: Json | null
               user_id: number | null
-              created_ago: number | null
+              created_ago?: number | null
             }
             Insert: {
               created_at?: string | null
@@ -392,7 +392,7 @@ test('typegen: typescript', async () => {
               details: string | null
               id: number | null
               "user-id": number | null
-              get_todos_by_matview: {
+              get_todos_by_matview?: {
                 details: string | null
                 id: number
                 "user-id": number
@@ -442,8 +442,8 @@ test('typegen: typescript', async () => {
               details: string | null
               id: number | null
               "user-id": number | null
-              blurb_varchar: string | null
-              test_unnamed_view_row: {
+              blurb_varchar?: string | null
+              test_unnamed_view_row?: {
                 details: string | null
                 id: number
                 "user-id": number
@@ -1243,7 +1243,7 @@ test('typegen w/ one-to-one relationships', async () => {
               data: Json | null
               event_type: string | null
               id: number
-              days_since_event: number | null
+              days_since_event?: number | null
             }
             Insert: {
               created_at?: string
@@ -1407,13 +1407,13 @@ test('typegen w/ one-to-one relationships', async () => {
               details: string | null
               id: number
               "user-id": number
-              blurb: string | null
-              blurb_varchar: string | null
-              details_is_long: boolean | null
-              details_length: number | null
-              details_words: string[] | null
-              test_unnamed_row_scalar: number | null
-              test_unnamed_row_setof: {
+              blurb?: string | null
+              blurb_varchar?: string | null
+              details_is_long?: boolean | null
+              details_length?: number | null
+              details_words?: string[] | null
+              test_unnamed_row_scalar?: number | null
+              test_unnamed_row_setof?: {
                 details: string | null
                 id: number
                 "user-id": number
@@ -1539,10 +1539,10 @@ test('typegen w/ one-to-one relationships', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
-              test_unnamed_row_composite:
+              test_unnamed_row_composite?:
                 | Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
                 | null
-              test_unnamed_row_setof: {
+              test_unnamed_row_setof?: {
                 details: string | null
                 id: number
                 "user-id": number
@@ -1570,7 +1570,7 @@ test('typegen w/ one-to-one relationships', async () => {
               id: number
               previous_value: Json | null
               user_id: number | null
-              created_ago: number | null
+              created_ago?: number | null
             }
             Insert: {
               created_at?: string | null
@@ -1605,7 +1605,7 @@ test('typegen w/ one-to-one relationships', async () => {
               details: string | null
               id: number | null
               "user-id": number | null
-              get_todos_by_matview: {
+              get_todos_by_matview?: {
                 details: string | null
                 id: number
                 "user-id": number
@@ -1661,8 +1661,8 @@ test('typegen w/ one-to-one relationships', async () => {
               details: string | null
               id: number | null
               "user-id": number | null
-              blurb_varchar: string | null
-              test_unnamed_view_row: {
+              blurb_varchar?: string | null
+              test_unnamed_view_row?: {
                 details: string | null
                 id: number
                 "user-id": number
@@ -2468,7 +2468,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               data: Json | null
               event_type: string | null
               id: number
-              days_since_event: number | null
+              days_since_event?: number | null
             }
             Insert: {
               created_at?: string
@@ -2632,13 +2632,13 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               details: string | null
               id: number
               "user-id": number
-              blurb: string | null
-              blurb_varchar: string | null
-              details_is_long: boolean | null
-              details_length: number | null
-              details_words: string[] | null
-              test_unnamed_row_scalar: number | null
-              test_unnamed_row_setof: {
+              blurb?: string | null
+              blurb_varchar?: string | null
+              details_is_long?: boolean | null
+              details_length?: number | null
+              details_words?: string[] | null
+              test_unnamed_row_scalar?: number | null
+              test_unnamed_row_setof?: {
                 details: string | null
                 id: number
                 "user-id": number
@@ -2764,10 +2764,10 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
-              test_unnamed_row_composite:
+              test_unnamed_row_composite?:
                 | Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
                 | null
-              test_unnamed_row_setof: {
+              test_unnamed_row_setof?: {
                 details: string | null
                 id: number
                 "user-id": number
@@ -2795,7 +2795,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id: number
               previous_value: Json | null
               user_id: number | null
-              created_ago: number | null
+              created_ago?: number | null
             }
             Insert: {
               created_at?: string | null
@@ -2830,7 +2830,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               details: string | null
               id: number | null
               "user-id": number | null
-              get_todos_by_matview: {
+              get_todos_by_matview?: {
                 details: string | null
                 id: number
                 "user-id": number
@@ -2886,8 +2886,8 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               details: string | null
               id: number | null
               "user-id": number | null
-              blurb_varchar: string | null
-              test_unnamed_view_row: {
+              blurb_varchar?: string | null
+              test_unnamed_view_row?: {
                 details: string | null
                 id: number
                 "user-id": number
@@ -3698,7 +3698,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               data: Json | null
               event_type: string | null
               id: number
-              days_since_event: number | null
+              days_since_event?: number | null
             }
             Insert: {
               created_at?: string
@@ -3862,13 +3862,13 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               details: string | null
               id: number
               "user-id": number
-              blurb: string | null
-              blurb_varchar: string | null
-              details_is_long: boolean | null
-              details_length: number | null
-              details_words: string[] | null
-              test_unnamed_row_scalar: number | null
-              test_unnamed_row_setof: {
+              blurb?: string | null
+              blurb_varchar?: string | null
+              details_is_long?: boolean | null
+              details_length?: number | null
+              details_words?: string[] | null
+              test_unnamed_row_scalar?: number | null
+              test_unnamed_row_setof?: {
                 details: string | null
                 id: number
                 "user-id": number
@@ -3994,10 +3994,10 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
-              test_unnamed_row_composite:
+              test_unnamed_row_composite?:
                 | Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
                 | null
-              test_unnamed_row_setof: {
+              test_unnamed_row_setof?: {
                 details: string | null
                 id: number
                 "user-id": number
@@ -4025,7 +4025,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               id: number
               previous_value: Json | null
               user_id: number | null
-              created_ago: number | null
+              created_ago?: number | null
             }
             Insert: {
               created_at?: string | null
@@ -4060,7 +4060,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               details: string | null
               id: number | null
               "user-id": number | null
-              get_todos_by_matview: {
+              get_todos_by_matview?: {
                 details: string | null
                 id: number
                 "user-id": number
@@ -4116,8 +4116,8 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               details: string | null
               id: number | null
               "user-id": number | null
-              blurb_varchar: string | null
-              test_unnamed_view_row: {
+              blurb_varchar?: string | null
+              test_unnamed_view_row?: {
                 details: string | null
                 id: number
                 "user-id": number

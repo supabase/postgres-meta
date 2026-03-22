@@ -545,7 +545,7 @@ export type Database = {
                       ...schemaFunctions
                         .filter(({ fn }) => fn.argument_types === table.name)
                         .map(({ fn }) => {
-                          return `${JSON.stringify(fn.name)}: ${generateNullableUnionTsType(getFunctionReturnType(schema, fn), true)}`
+                          return `${JSON.stringify(fn.name)}?: ${generateNullableUnionTsType(getFunctionReturnType(schema, fn), true)}`
                         }),
                     ]}
                   }
@@ -618,7 +618,7 @@ export type Database = {
                         .filter(({ fn }) => fn.argument_types === view.name)
                         .map(
                           ({ fn }) =>
-                            `${JSON.stringify(fn.name)}: ${generateNullableUnionTsType(getFunctionReturnType(schema, fn), true)}`
+                            `${JSON.stringify(fn.name)}?: ${generateNullableUnionTsType(getFunctionReturnType(schema, fn), true)}`
                         ),
                     ]}
                   }
