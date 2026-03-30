@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { pgMeta, TEST_CONNECTION_STRING } from './utils'
+import { pgMeta } from './utils'
 
 const cleanNondet = (x: any) => {
   const {
