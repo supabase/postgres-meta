@@ -544,6 +544,23 @@ test('primary keys', async () => {
   await pgMeta.tables.remove(res.data!.id)
 })
 
+test('retrieve table in non-public schema by id', async () => {
+  // Create a custom schema and table
+  await pgMeta.query('CREATE SCHEMA IF NOT EXISTS test_schema')
+  const createRes = await pgMeta.tables.create({ name: 'test_nonpublic', schema: 'test_schema' })
+  const tableId = createRes.data!.id
+
+  // Retrieve by ID (without specifying schema)
+  const res = await pgMeta.tables.retrieve({ id: tableId })
+  expect(res.error).toBeNull()
+  expect(res.data!.name).toBe('test_nonpublic')
+  expect(res.data!.schema).toBe('test_schema')
+
+  // Cleanup
+  await pgMeta.tables.remove(tableId)
+  await pgMeta.query('DROP SCHEMA test_schema')
+})
+
 test('composite primary keys preserve order', async () => {
   let res = await pgMeta.tables.create({ name: 't_pk_order' })
   await pgMeta.columns.create({ table_id: res.data!.id, name: 'col_a', type: 'int8' })
