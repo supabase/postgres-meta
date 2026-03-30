@@ -19,7 +19,7 @@ jobs:
       # Get PR number from the workflow run
       - name: Get PR info
         id: pr-info
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             // Get the workflow run details
@@ -60,7 +60,7 @@ jobs:
       - name: Extract canary info
         if: ${{ steps.pr-info.outputs.found == 'true' && steps.pr-info.outputs.has_canary_label == 'true' && github.event.workflow_run.conclusion == 'success' }}
         id: canary-info
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const workflowRun = context.payload.workflow_run;
@@ -81,7 +81,7 @@ jobs:
       # Find existing comment
       - name: Find existing comment
         if: ${{ steps.pr-info.outputs.found == 'true' && steps.pr-info.outputs.has_canary_label == 'true' }}
-        uses: peter-evans/find-comment@v4
+        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
         id: find-comment
         with:
           issue-number: ${{ steps.pr-info.outputs.pr_number }}
@@ -91,7 +91,7 @@ jobs:
       # Create or update comment based on workflow status
       - name: Create or update canary comment
         if: ${{ steps.pr-info.outputs.found == 'true' && steps.pr-info.outputs.has_canary_label == 'true' }}
-        uses: peter-evans/create-or-update-comment@v5
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           issue-number: ${{ steps.pr-info.outputs.pr_number }}
