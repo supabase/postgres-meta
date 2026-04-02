@@ -25,6 +25,7 @@
     "build": "tsc -p tsconfig.json && cpy 'src/lib/sql/*.sql' dist/lib/sql",
     "docs:export": "PG_META_EXPORT_DOCS=true node --loader ts-node/esm src/server/server.ts > openapi.json",
     "gen:types:typescript": "PG_META_GENERATE_TYPES=typescript node --loader ts-node/esm src/server/server.ts",
+    "gen:types:typescript:local": "node --loader ts-node/esm scripts/generate-typescript-types.ts",
     "gen:types:go": "PG_META_GENERATE_TYPES=go node --loader ts-node/esm src/server/server.ts",
     "gen:types:swift": "PG_META_GENERATE_TYPES=swift node --loader ts-node/esm src/server/server.ts",
     "gen:types:python": "PG_META_GENERATE_TYPES=python node --loader ts-node/esm src/server/server.ts",

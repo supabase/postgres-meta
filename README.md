@@ -112,7 +112,15 @@ where `<lang>` is one of:
 To use your own database connection string instead of the provided test database, run:
 `PG_META_DB_URL=postgresql://postgres:postgres@localhost:5432/postgres npm run gen:types:<lang>`
 
+For local or cross-repo TypeScript validation, use the dedicated generator entrypoint instead of a
+manually started server:
+`npm run gen:types:typescript:local -- --db-url postgresql://postgres:postgres@localhost:5432/postgres --included-schemas public,personal --output /tmp/types.generated.ts`
+
+This is the supported automation surface for validating `supabase-js/postgrest-js` changes against
+the current `postgres-meta` checkout. It also supports
+`--detect-one-to-one-relationships`, `--postgrest-version`, and writing to stdout when `--output`
+is omitted.
+
 ## Licence
 
 Apache 2.0
-

@@ -1,0 +1,117 @@
+name: Validate postgrest-js Integration
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'src/**'
+      - 'scripts/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/validate-postgrest-js.yml'
+  workflow_dispatch:
+    inputs:
+      supabase_js_ref:
+        description: 'Pinned supabase/supabase-js ref to validate when no PR override is supplied'
+        required: false
+        default: 'master'
+        type: string
+      supabase_js_pr:
+        description: 'Optional supabase/supabase-js PR number to validate instead of supabase_js_ref'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  validate-postgrest-js:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout postgres-meta
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install postgres-meta dependencies
+        run: npm clean-install
+
+      - name: Build postgres-meta
+        run: npm run build
+
+      - name: Select supabase-js ref
+        id: select-supabase-js-ref
+        env:
+          SUPABASE_JS_PR: ${{ github.event.inputs.supabase_js_pr }}
+          SUPABASE_JS_REF: ${{ github.event.inputs.supabase_js_ref || 'master' }}
+        run: |
+          if [ -n "$SUPABASE_JS_PR" ]; then
+            echo "ref=refs/pull/$SUPABASE_JS_PR/head" >> "$GITHUB_OUTPUT"
+            echo "target=PR #$SUPABASE_JS_PR" >> "$GITHUB_OUTPUT"
+          else
+            echo "ref=$SUPABASE_JS_REF" >> "$GITHUB_OUTPUT"
+            echo "target=branch $SUPABASE_JS_REF" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout supabase-js
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: supabase/supabase-js
+          ref: ${{ steps.select-supabase-js-ref.outputs.ref }}
+          path: supabase-js
+
+      - name: Log supabase-js target
+        run: echo "Validating against supabase-js ${{ steps.select-supabase-js-ref.outputs.target }}"
+
+      - name: Install supabase-js dependencies
+        working-directory: supabase-js
+        run: npm clean-install
+
+      - name: Start postgrest-js local stack
+        working-directory: supabase-js/packages/core/postgrest-js/test
+        run: |
+          npx supabase --workdir test stop --no-backup || true
+          npx supabase --workdir test start
+
+      - name: Generate postgrest-js fixtures with local postgres-meta
+        env:
+          POSTGREST_DB_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+          POSTGREST_TYPES_FILE: ${{ github.workspace }}/supabase-js/packages/core/postgrest-js/test/types.generated.ts
+          POSTGREST_TYPES_WITH_OPTIONS_FILE: ${{ github.workspace }}/supabase-js/packages/core/postgrest-js/test/types.generated-with-options-postgrest14.ts
+        run: |
+          npm run gen:types:typescript:local -- --db-url "$POSTGREST_DB_URL" --included-schemas public,personal --output "$POSTGREST_TYPES_FILE"
+          node supabase-js/packages/core/postgrest-js/scripts/update-json-type.js
+
+          npm run gen:types:typescript:local -- --db-url "$POSTGREST_DB_URL" --included-schemas public,personal --detect-one-to-one-relationships --postgrest-version 14 --output "$POSTGREST_TYPES_WITH_OPTIONS_FILE"
+
+          node - <<'NODE'
+          const fs = require('fs')
+          const filePath = process.env.POSTGREST_TYPES_WITH_OPTIONS_FILE
+          const content = fs.readFileSync(filePath, 'utf8')
+          const updatedContent = content.replace(
+            /export type Json =[\s\S]*?(?=\n\nexport type Database)/,
+            'export type Json = unknown;'
+          )
+          fs.writeFileSync(filePath, updatedContent, 'utf8')
+          NODE
+
+      - name: Run postgrest-js package checks
+        working-directory: supabase-js/packages/core/postgrest-js
+        run: |
+          npm run type-check:test
+          npm run test:types:ci
+          npm run test:run
+
+      - name: Cleanup postgrest-js local stack
+        if: always()
+        working-directory: supabase-js/packages/core/postgrest-js/test
+        run: npx supabase --workdir test stop --no-backup
