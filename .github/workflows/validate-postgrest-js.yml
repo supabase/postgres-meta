@@ -101,6 +101,9 @@ jobs:
             /export type Json =[\s\S]*?(?=\n\nexport type Database)/,
             'export type Json = unknown;'
           )
+          if (content === updatedContent) {
+            throw new Error(`Expected to update Json type in ${filePath}`)
+          }
           fs.writeFileSync(filePath, updatedContent, 'utf8')
           NODE
 
