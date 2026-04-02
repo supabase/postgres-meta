@@ -36,6 +36,19 @@ function parseBoolean(value?: boolean | string): boolean | undefined {
   throw new Error(`Expected a boolean value, received "${value}"`)
 }
 
+async function writeToStdout(output: string): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    process.stdout.write(output, (error) => {
+      if (error) {
+        reject(error)
+        return
+      }
+
+      resolve()
+    })
+  })
+}
+
 const { values } = parseArgs({
   options: {
     'db-url': { type: 'string' },
@@ -91,7 +104,7 @@ try {
     await mkdir(dirname(outputPath), { recursive: true })
     await writeFile(outputPath, response.body, 'utf8')
   } else {
-    process.stdout.write(response.body)
+    await writeToStdout(response.body)
   }
 } catch (error) {
   console.error('Failed to generate TypeScript types:', error)
