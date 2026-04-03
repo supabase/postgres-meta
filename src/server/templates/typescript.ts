@@ -66,10 +66,12 @@ export const apply = async ({
   // group types by id for quicker lookup
   const typesById = new Map<number, (typeof types)[number]>()
   const tablesLike = [...tables, ...foreignTables, ...views, ...materializedViews]
+  const tableAndViewNames = new Set<string>()
 
   for (const tableLike of tablesLike) {
     columnsByTableId[tableLike.id] = []
     tablesNamesByTableId[tableLike.id] = tableLike.name
+    tableAndViewNames.add(tableLike.name)
   }
   for (const column of columns) {
     if (column.table_id in columnsByTableId) {
@@ -197,7 +199,9 @@ export const apply = async ({
               getTableNameFromRelationId(func.return_type_relation_id, func.return_type_id)) ||
             // OR if the function takes a table row but doesn't qualify as embedded (for error reporting)
             (relationTypeByIds.get(inArgs[0].type_id) &&
-              !getTableNameFromRelationId(func.return_type_relation_id, func.return_type_id))))
+              !getTableNameFromRelationId(func.return_type_relation_id, func.return_type_id)) ||
+            // OR if the function takes a table/view row (computed field)
+            tableAndViewNames.has(func.argument_types)))
       ) {
         introspectionBySchema[func.schema].functions.push({ fn: func, inArgs })
       }
@@ -410,7 +414,7 @@ export const apply = async ({
   ) => {
     return fns
       .map(({ fn, inArgs }) => {
-        let argsType = 'never'
+        let argsType = 'Record<PropertyKey, never>'
         let returnType = getFunctionReturnType(schema, fn)
 
         // Check for specific error cases
