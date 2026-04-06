@@ -5452,21 +5452,21 @@ test('typegen: go', async () => {
     }
 
     type PublicIntervalTestSelect struct {
-      DurationOptional interface{} \`json:"duration_optional"\`
-      DurationRequired interface{} \`json:"duration_required"\`
-      Id               int64       \`json:"id"\`
+      DurationOptional *string \`json:"duration_optional"\`
+      DurationRequired string  \`json:"duration_required"\`
+      Id               int64   \`json:"id"\`
     }
 
     type PublicIntervalTestInsert struct {
-      DurationOptional interface{} \`json:"duration_optional"\`
-      DurationRequired interface{} \`json:"duration_required"\`
-      Id               *int64      \`json:"id"\`
+      DurationOptional *string \`json:"duration_optional"\`
+      DurationRequired string  \`json:"duration_required"\`
+      Id               *int64  \`json:"id"\`
     }
 
     type PublicIntervalTestUpdate struct {
-      DurationOptional interface{} \`json:"duration_optional"\`
-      DurationRequired interface{} \`json:"duration_required"\`
-      Id               *int64      \`json:"id"\`
+      DurationOptional *string \`json:"duration_optional"\`
+      DurationRequired *string \`json:"duration_required"\`
+      Id               *int64  \`json:"id"\`
     }
 
     type PublicCategorySelect struct {
@@ -5745,8 +5745,8 @@ test('typegen: swift', async () => {
         }
       }
       internal struct IntervalTestSelect: Codable, Hashable, Sendable, Identifiable {
-        internal let durationOptional: IntervalSelect?
-        internal let durationRequired: IntervalSelect
+        internal let durationOptional: String?
+        internal let durationRequired: String
         internal let id: Int64
         internal enum CodingKeys: String, CodingKey {
           case durationOptional = "duration_optional"
@@ -5755,8 +5755,8 @@ test('typegen: swift', async () => {
         }
       }
       internal struct IntervalTestInsert: Codable, Hashable, Sendable, Identifiable {
-        internal let durationOptional: IntervalSelect?
-        internal let durationRequired: IntervalSelect
+        internal let durationOptional: String?
+        internal let durationRequired: String
         internal let id: Int64?
         internal enum CodingKeys: String, CodingKey {
           case durationOptional = "duration_optional"
@@ -5765,8 +5765,8 @@ test('typegen: swift', async () => {
         }
       }
       internal struct IntervalTestUpdate: Codable, Hashable, Sendable, Identifiable {
-        internal let durationOptional: IntervalSelect?
-        internal let durationRequired: IntervalSelect?
+        internal let durationOptional: String?
+        internal let durationRequired: String?
         internal let id: Int64?
         internal enum CodingKeys: String, CodingKey {
           case durationOptional = "duration_optional"
@@ -6276,8 +6276,8 @@ test('typegen: swift w/ public access control', async () => {
         }
       }
       public struct IntervalTestSelect: Codable, Hashable, Sendable, Identifiable {
-        public let durationOptional: IntervalSelect?
-        public let durationRequired: IntervalSelect
+        public let durationOptional: String?
+        public let durationRequired: String
         public let id: Int64
         public enum CodingKeys: String, CodingKey {
           case durationOptional = "duration_optional"
@@ -6286,8 +6286,8 @@ test('typegen: swift w/ public access control', async () => {
         }
       }
       public struct IntervalTestInsert: Codable, Hashable, Sendable, Identifiable {
-        public let durationOptional: IntervalSelect?
-        public let durationRequired: IntervalSelect
+        public let durationOptional: String?
+        public let durationRequired: String
         public let id: Int64?
         public enum CodingKeys: String, CodingKey {
           case durationOptional = "duration_optional"
@@ -6296,8 +6296,8 @@ test('typegen: swift w/ public access control', async () => {
         }
       }
       public struct IntervalTestUpdate: Codable, Hashable, Sendable, Identifiable {
-        public let durationOptional: IntervalSelect?
-        public let durationRequired: IntervalSelect?
+        public let durationOptional: String?
+        public let durationRequired: String?
         public let id: Int64?
         public enum CodingKeys: String, CodingKey {
           case durationOptional = "duration_optional"

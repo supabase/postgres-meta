@@ -244,6 +244,7 @@ const GO_TYPE_MAP = {
   timetz: 'string',
   timestamp: 'string',
   timestamptz: 'string',
+  interval: 'string',
   uuid: 'string',
   vector: 'string',
 
