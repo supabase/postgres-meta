@@ -325,6 +325,7 @@ const pgTypeToSwiftType = (
       'timetz',
       'timestamp',
       'timestamptz',
+      'interval',
       'vector',
     ].includes(pgType)
   ) {
