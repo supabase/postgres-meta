@@ -32,9 +32,24 @@ export default async (fastify: FastifyInstance) => {
       const encryptedHeader = request.headers['x-connection-encrypted']?.toString()
       if (encryptedHeader) {
         try {
-          request.headers.pg = CryptoJS.AES.decrypt(encryptedHeader, CRYPTO_KEY)
+          const decrypted = CryptoJS.AES.decrypt(encryptedHeader, CRYPTO_KEY)
             .toString(CryptoJS.enc.Utf8)
             .trim()
+          let resolved = decrypted
+          if (PG_CONNECTION) {
+            try {
+              const decryptedUrl = new URL(decrypted)
+              if (decryptedUrl.hostname === 'db') {
+                const configuredUrl = new URL(PG_CONNECTION)
+                decryptedUrl.hostname = configuredUrl.hostname
+                decryptedUrl.port = configuredUrl.port
+              }
+              resolved = decryptedUrl.toString()
+            } catch {
+              // malformed URL — leave as-is, caught by validation below
+            }
+          }
+          request.headers.pg = resolved
         } catch (e: any) {
           request.log.warn({
             message: 'failed to parse encrypted connstring',
