@@ -230,6 +230,22 @@ create schema s2; create table s2.t(); create trigger tr before insert on s2.t e
   expect(triggers).toMatchInlineSnapshot(`
     [
       {
+        "activation": "INSTEAD OF",
+        "condition": null,
+        "enabled_mode": "ORIGIN",
+        "events": [
+          "INSERT",
+          "UPDATE",
+        ],
+        "function_args": [],
+        "function_name": "profile_view_instead_of_trigger",
+        "function_schema": "public",
+        "name": "profile_view_instead_of_trigger",
+        "orientation": "ROW",
+        "schema": "public",
+        "table": "profile_view",
+      },
+      {
         "activation": "BEFORE",
         "condition": null,
         "enabled_mode": "ORIGIN",
@@ -292,6 +308,22 @@ EXECUTE FUNCTION "MySchema"."my_trigger_function"();
   const triggers = res.data?.map(({ id, table_id, ...trigger }) => trigger)
   expect(triggers).toMatchInlineSnapshot(`
     [
+      {
+        "activation": "INSTEAD OF",
+        "condition": null,
+        "enabled_mode": "ORIGIN",
+        "events": [
+          "INSERT",
+          "UPDATE",
+        ],
+        "function_args": [],
+        "function_name": "profile_view_instead_of_trigger",
+        "function_schema": "public",
+        "name": "profile_view_instead_of_trigger",
+        "orientation": "ROW",
+        "schema": "public",
+        "table": "profile_view",
+      },
       {
         "activation": "BEFORE",
         "condition": null,

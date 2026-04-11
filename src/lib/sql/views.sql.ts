@@ -11,6 +11,50 @@ SELECT
   c.relname AS name,
   -- See definition of information_schema.views
   (pg_relation_is_updatable(c.oid, false) & 20) = 20 AS is_updatable,
+  -- A view supports INSERT if it is auto-updatable OR has an INSTEAD OF INSERT trigger
+  (
+    (pg_relation_is_updatable(c.oid, false) & 8) = 8
+    OR EXISTS (
+      SELECT 1 FROM pg_trigger t
+      WHERE t.tgrelid = c.oid
+        AND t.tgtype & 64 > 0
+        AND t.tgtype & 4 > 0
+        AND NOT t.tgisinternal
+    )
+  ) AS is_insert_enabled,
+  -- A view supports UPDATE if it is auto-updatable OR has an INSTEAD OF UPDATE trigger
+  (
+    (pg_relation_is_updatable(c.oid, false) & 4) = 4
+    OR EXISTS (
+      SELECT 1 FROM pg_trigger t
+      WHERE t.tgrelid = c.oid
+        AND t.tgtype & 64 > 0
+        AND t.tgtype & 16 > 0
+        AND NOT t.tgisinternal
+    )
+  ) AS is_update_enabled,
+  -- A view supports INSERT if it is auto-updatable OR has an INSTEAD OF INSERT trigger
+  (
+    (pg_relation_is_updatable(c.oid, false) & 8) = 8
+    OR EXISTS (
+      SELECT 1 FROM pg_trigger t
+      WHERE t.tgrelid = c.oid
+        AND t.tgtype & (1 << 2) > 0  -- INSTEAD OF
+        AND t.tgtype & (1 << 3) > 0  -- INSERT event
+        AND NOT t.tgisinternal
+    )
+  ) AS is_insert_enabled,
+  -- A view supports UPDATE if it is auto-updatable OR has an INSTEAD OF UPDATE trigger
+  (
+    (pg_relation_is_updatable(c.oid, false) & 4) = 4
+    OR EXISTS (
+      SELECT 1 FROM pg_trigger t
+      WHERE t.tgrelid = c.oid
+        AND t.tgtype & (1 << 2) > 0  -- INSTEAD OF
+        AND t.tgtype & (1 << 4) > 0  -- UPDATE event
+        AND NOT t.tgisinternal
+    )
+  ) AS is_update_enabled,
   obj_description(c.oid) AS comment
 FROM
   pg_class c
