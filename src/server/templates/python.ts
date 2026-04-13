@@ -198,6 +198,20 @@ class PythonEnum implements Serializable {
   }
 }
 
+class PythonDomain implements Serializable {
+  name: string
+  py_type: PythonType
+
+  constructor(name: string, schema: string, py_type: PythonType) {
+    this.name = `${formatForPyClassName(schema)}${formatForPyClassName(name)}`
+    this.py_type = py_type
+  }
+
+  serialize(): string {
+    return `${this.name}: TypeAlias = ${this.py_type.serialize()}`
+  }
+}
+
 type PythonType = PythonListType | PythonSimpleType
 
 class PythonSimpleType implements Serializable {
@@ -327,6 +341,7 @@ const PY_TYPE_MAP: Record<string, string> = {
   bool: 'bool',
 
   // Numbers
+  int: 'int',
   int2: 'int',
   int4: 'int',
   int8: 'int',
