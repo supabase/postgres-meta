@@ -5593,6 +5593,11 @@ test('typegen: go', async () => {
     type PublicCompositeTypeWithDomainAttribute struct {
       Name  string      \`json:"name"\`
       Score interface{} \`json:"score"\`
+    }
+
+    type PublicCompositeTypeWithIntAttribute struct {
+      A interface{} \`json:"a"\`
+      B interface{} \`json:"b"\`
     }"
   `)
 })
@@ -6120,6 +6125,14 @@ test('typegen: swift', async () => {
         internal enum CodingKeys: String, CodingKey {
           case Name = "name"
           case Score = "score"
+        }
+      }
+      internal struct CompositeTypeWithIntAttribute: Codable, Hashable, Sendable {
+        internal let A: AnyJSON
+        internal let B: AnyJSON
+        internal enum CodingKeys: String, CodingKey {
+          case A = "a"
+          case B = "b"
         }
       }
       internal struct CompositeTypeWithRecordAttribute: Codable, Hashable, Sendable {
@@ -6661,6 +6674,14 @@ test('typegen: swift w/ public access control', async () => {
           case Score = "score"
         }
       }
+      public struct CompositeTypeWithIntAttribute: Codable, Hashable, Sendable {
+        public let A: AnyJSON
+        public let B: AnyJSON
+        public enum CodingKeys: String, CodingKey {
+          case A = "a"
+          case B = "b"
+        }
+      }
       public struct CompositeTypeWithRecordAttribute: Codable, Hashable, Sendable {
         public let Todo: TodosSelect
         public enum CodingKeys: String, CodingKey {
@@ -6698,8 +6719,6 @@ test('typegen: python', async () => {
     PublicUserStatus: TypeAlias = Literal["ACTIVE", "INACTIVE"]
 
     PublicMemeStatus: TypeAlias = Literal["new", "old", "retired"]
-
-    PublicOneToTen: TypeAlias = int
 
     class PublicUsers(BaseModel):
         decimal: Optional[float] = Field(alias="decimal")
@@ -6946,7 +6965,11 @@ test('typegen: python', async () => {
 
     class PublicCompositeTypeWithDomainAttribute(BaseModel):
         name: str = Field(alias="name")
-        score: PublicOneToTen = Field(alias="score")"
+        score: PublicOneToTen = Field(alias="score")
+
+    class PublicCompositeTypeWithIntAttribute(BaseModel):
+        a: int = Field(alias="a")
+        b: int = Field(alias="b")"
   `)
 })
 
