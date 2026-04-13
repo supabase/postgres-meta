@@ -1064,6 +1064,10 @@ test('typegen: typescript', async () => {
             name: string | null
             score: unknown | null
           }
+          composite_type_with_int_attribute: {
+            a: number | null
+            b: number | null
+          }
           composite_type_with_record_attribute: {
             todo: Database["public"]["Tables"]["todos"]["Row"] | null
           }
@@ -2293,6 +2297,10 @@ test('typegen w/ one-to-one relationships', async () => {
             name: string | null
             score: unknown | null
           }
+          composite_type_with_int_attribute: {
+            a: number | null
+            b: number | null
+          }
           composite_type_with_record_attribute: {
             todo: Database["public"]["Tables"]["todos"]["Row"] | null
           }
@@ -3521,6 +3529,10 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           composite_type_with_domain_attribute: {
             name: string | null
             score: unknown | null
+          }
+          composite_type_with_int_attribute: {
+            a: number | null
+            b: number | null
           }
           composite_type_with_record_attribute: {
             todo: Database["public"]["Tables"]["todos"]["Row"] | null
@@ -4756,6 +4768,10 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             name: string | null
             score: unknown | null
           }
+          composite_type_with_int_attribute: {
+            a: number | null
+            b: number | null
+          }
           composite_type_with_record_attribute: {
             todo: Database["public"]["Tables"]["todos"]["Row"] | null
           }
@@ -5572,6 +5588,11 @@ test('typegen: go', async () => {
 
     type PublicCompositeTypeWithRecordAttribute struct {
       Todo interface{} \`json:"todo"\`
+    }
+
+    type PublicCompositeTypeWithDomainAttribute struct {
+      Name  string      \`json:"name"\`
+      Score interface{} \`json:"score"\`
     }"
   `)
 })
@@ -6091,6 +6112,14 @@ test('typegen: swift', async () => {
         internal let MyTextArray: AnyJSON
         internal enum CodingKeys: String, CodingKey {
           case MyTextArray = "my_text_array"
+        }
+      }
+      internal struct CompositeTypeWithDomainAttribute: Codable, Hashable, Sendable {
+        internal let Name: String
+        internal let Score: OneToTenSelect
+        internal enum CodingKeys: String, CodingKey {
+          case Name = "name"
+          case Score = "score"
         }
       }
       internal struct CompositeTypeWithRecordAttribute: Codable, Hashable, Sendable {
@@ -6624,6 +6653,14 @@ test('typegen: swift w/ public access control', async () => {
           case MyTextArray = "my_text_array"
         }
       }
+      public struct CompositeTypeWithDomainAttribute: Codable, Hashable, Sendable {
+        public let Name: String
+        public let Score: OneToTenSelect
+        public enum CodingKeys: String, CodingKey {
+          case Name = "name"
+          case Score = "score"
+        }
+      }
       public struct CompositeTypeWithRecordAttribute: Codable, Hashable, Sendable {
         public let Todo: TodosSelect
         public enum CodingKeys: String, CodingKey {
@@ -6661,6 +6698,8 @@ test('typegen: python', async () => {
     PublicUserStatus: TypeAlias = Literal["ACTIVE", "INACTIVE"]
 
     PublicMemeStatus: TypeAlias = Literal["new", "old", "retired"]
+
+    PublicOneToTen: TypeAlias = int
 
     class PublicUsers(BaseModel):
         decimal: Optional[float] = Field(alias="decimal")
@@ -6903,7 +6942,11 @@ test('typegen: python', async () => {
         my_text_array: List[str] = Field(alias="my_text_array")
 
     class PublicCompositeTypeWithRecordAttribute(BaseModel):
-        todo: PublicTodos = Field(alias="todo")"
+        todo: PublicTodos = Field(alias="todo")
+
+    class PublicCompositeTypeWithDomainAttribute(BaseModel):
+        name: str = Field(alias="name")
+        score: PublicOneToTen = Field(alias="score")"
   `)
 })
 
