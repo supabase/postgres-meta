@@ -501,3 +501,9 @@ STABLE
 AS $$
   SELECT interval_test_row.duration_required * 2;
 $$;
+
+CREATE DOMAIN one_to_ten AS int CHECK (VALUE >= 1 AND VALUE <= 10);
+CREATE TYPE composite_type_with_domain_attribute AS (
+  name text,
+  score one_to_ten
+);
