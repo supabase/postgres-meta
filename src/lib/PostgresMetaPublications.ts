@@ -97,9 +97,16 @@ export default class PostgresMetaPublications {
     if (publish_delete) publishOps.push('delete')
     if (publish_truncate) publishOps.push('truncate')
 
+    // When no publish operations are specified, omit the WITH clause entirely.
+    // PostgreSQL does not accept an empty publish list (WITH (publish = '')) and
+    // will return an error. Omitting the clause uses PostgreSQL's default, which
+    // publishes all operations (insert, update, delete, truncate).
+    const publishClause =
+      publishOps.length > 0 ? `WITH (publish = '${publishOps.join(',')}')` : ''
+
     const sql = `
 CREATE PUBLICATION ${ident(name)} ${tableClause}
-  WITH (publish = '${publishOps.join(',')}');`
+  ${publishClause};`
     const { error } = await this.query(sql)
     if (error) {
       return { data: null, error }
