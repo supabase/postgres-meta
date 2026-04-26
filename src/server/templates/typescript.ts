@@ -551,7 +551,7 @@ export type Database = {
                   }
                   Insert: {
                     ${columnsByTableId[table.id].map((column) => {
-                      if (column.identity_generation === 'ALWAYS') {
+                      if (column.identity_generation === 'ALWAYS' || column.is_generated) {
                         return `${JSON.stringify(column.name)}?: never`
                       }
                       return generateColumnTsDefinition(
@@ -571,7 +571,7 @@ export type Database = {
                   }
                   Update: {
                     ${columnsByTableId[table.id].map((column) => {
-                      if (column.identity_generation === 'ALWAYS') {
+                      if (column.identity_generation === 'ALWAYS' || column.is_generated) {
                         return `${JSON.stringify(column.name)}?: never`
                       }
 
