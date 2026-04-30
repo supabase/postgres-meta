@@ -684,7 +684,8 @@ export type Database = {
                 schemaFunctionsGroupedByName[fnName].sort(
                   (a, b) =>
                     a.fn.argument_types.localeCompare(b.fn.argument_types) ||
-                    a.fn.return_type.localeCompare(b.fn.return_type)
+                    a.fn.return_type.localeCompare(b.fn.return_type) ||
+                    a.fn.id - b.fn.id
                 )
               }
 
