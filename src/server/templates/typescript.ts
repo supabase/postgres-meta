@@ -485,6 +485,11 @@ export const apply = async ({
   function generateNullableUnionTsType(tsType: string, isNullable: boolean) {
     // Only add the null union if the type is not unknown as unknown already includes null
     if (tsType === 'unknown' || tsType === 'any' || !isNullable) {
+      // The Json type includes null in its definition, so for non-nullable Json columns
+      // we need to explicitly exclude null using NonNullable<Json>
+      if (!isNullable && tsType === 'Json') {
+        return 'NonNullable<Json>'
+      }
       return tsType
     }
     return `${tsType} | null`

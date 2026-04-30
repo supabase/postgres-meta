@@ -355,6 +355,7 @@ test('typegen: typescript', async () => {
             Row: {
               created_at: string | null
               id: number
+              new_value: NonNullable<Json>
               previous_value: Json | null
               user_id: number | null
               created_ago: number | null
@@ -362,12 +363,14 @@ test('typegen: typescript', async () => {
             Insert: {
               created_at?: string | null
               id?: number
+              new_value?: NonNullable<Json>
               previous_value?: Json | null
               user_id?: number | null
             }
             Update: {
               created_at?: string | null
               id?: number
+              new_value?: NonNullable<Json>
               previous_value?: Json | null
               user_id?: number | null
             }
@@ -846,6 +849,7 @@ test('typegen: typescript', async () => {
             Returns: {
               created_at: string | null
               id: number
+              new_value: NonNullable<Json>
               previous_value: Json | null
               user_id: number | null
             }
@@ -1568,6 +1572,7 @@ test('typegen w/ one-to-one relationships', async () => {
             Row: {
               created_at: string | null
               id: number
+              new_value: NonNullable<Json>
               previous_value: Json | null
               user_id: number | null
               created_ago: number | null
@@ -1575,12 +1580,14 @@ test('typegen w/ one-to-one relationships', async () => {
             Insert: {
               created_at?: string | null
               id?: number
+              new_value?: NonNullable<Json>
               previous_value?: Json | null
               user_id?: number | null
             }
             Update: {
               created_at?: string | null
               id?: number
+              new_value?: NonNullable<Json>
               previous_value?: Json | null
               user_id?: number | null
             }
@@ -2071,6 +2078,7 @@ test('typegen w/ one-to-one relationships', async () => {
             Returns: {
               created_at: string | null
               id: number
+              new_value: NonNullable<Json>
               previous_value: Json | null
               user_id: number | null
             }
@@ -2793,6 +2801,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Row: {
               created_at: string | null
               id: number
+              new_value: NonNullable<Json>
               previous_value: Json | null
               user_id: number | null
               created_ago: number | null
@@ -2800,12 +2809,14 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Insert: {
               created_at?: string | null
               id?: number
+              new_value?: NonNullable<Json>
               previous_value?: Json | null
               user_id?: number | null
             }
             Update: {
               created_at?: string | null
               id?: number
+              new_value?: NonNullable<Json>
               previous_value?: Json | null
               user_id?: number | null
             }
@@ -3296,6 +3307,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Returns: {
               created_at: string | null
               id: number
+              new_value: NonNullable<Json>
               previous_value: Json | null
               user_id: number | null
             }
@@ -4023,6 +4035,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Row: {
               created_at: string | null
               id: number
+              new_value: NonNullable<Json>
               previous_value: Json | null
               user_id: number | null
               created_ago: number | null
@@ -4030,12 +4043,14 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Insert: {
               created_at?: string | null
               id?: number
+              new_value?: NonNullable<Json>
               previous_value?: Json | null
               user_id?: number | null
             }
             Update: {
               created_at?: string | null
               id?: number
+              new_value?: NonNullable<Json>
               previous_value?: Json | null
               user_id?: number | null
             }
@@ -4526,6 +4541,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Returns: {
               created_at: string | null
               id: number
+              new_value: NonNullable<Json>
               previous_value: Json | null
               user_id: number | null
             }
@@ -5313,6 +5329,7 @@ test('typegen: go', async () => {
     type PublicUsersAuditSelect struct {
       CreatedAt     *string     \`json:"created_at"\`
       Id            int64       \`json:"id"\`
+      NewValue      interface{} \`json:"new_value"\`
       PreviousValue interface{} \`json:"previous_value"\`
       UserId        *int64      \`json:"user_id"\`
     }
@@ -5320,6 +5337,7 @@ test('typegen: go', async () => {
     type PublicUsersAuditInsert struct {
       CreatedAt     *string     \`json:"created_at"\`
       Id            *int64      \`json:"id"\`
+      NewValue      interface{} \`json:"new_value"\`
       PreviousValue interface{} \`json:"previous_value"\`
       UserId        *int64      \`json:"user_id"\`
     }
@@ -5327,6 +5345,7 @@ test('typegen: go', async () => {
     type PublicUsersAuditUpdate struct {
       CreatedAt     *string     \`json:"created_at"\`
       Id            *int64      \`json:"id"\`
+      NewValue      interface{} \`json:"new_value"\`
       PreviousValue interface{} \`json:"previous_value"\`
       UserId        *int64      \`json:"user_id"\`
     }
@@ -5972,11 +5991,13 @@ test('typegen: swift', async () => {
       internal struct UsersAuditSelect: Codable, Hashable, Sendable, Identifiable {
         internal let createdAt: String?
         internal let id: Int64
+        internal let newValue: AnyJSON
         internal let previousValue: AnyJSON?
         internal let userId: Int64?
         internal enum CodingKeys: String, CodingKey {
           case createdAt = "created_at"
           case id = "id"
+          case newValue = "new_value"
           case previousValue = "previous_value"
           case userId = "user_id"
         }
@@ -5984,11 +6005,13 @@ test('typegen: swift', async () => {
       internal struct UsersAuditInsert: Codable, Hashable, Sendable, Identifiable {
         internal let createdAt: String?
         internal let id: Int64?
+        internal let newValue: AnyJSON?
         internal let previousValue: AnyJSON?
         internal let userId: Int64?
         internal enum CodingKeys: String, CodingKey {
           case createdAt = "created_at"
           case id = "id"
+          case newValue = "new_value"
           case previousValue = "previous_value"
           case userId = "user_id"
         }
@@ -5996,11 +6019,13 @@ test('typegen: swift', async () => {
       internal struct UsersAuditUpdate: Codable, Hashable, Sendable, Identifiable {
         internal let createdAt: String?
         internal let id: Int64?
+        internal let newValue: AnyJSON?
         internal let previousValue: AnyJSON?
         internal let userId: Int64?
         internal enum CodingKeys: String, CodingKey {
           case createdAt = "created_at"
           case id = "id"
+          case newValue = "new_value"
           case previousValue = "previous_value"
           case userId = "user_id"
         }
@@ -6503,11 +6528,13 @@ test('typegen: swift w/ public access control', async () => {
       public struct UsersAuditSelect: Codable, Hashable, Sendable, Identifiable {
         public let createdAt: String?
         public let id: Int64
+        public let newValue: AnyJSON
         public let previousValue: AnyJSON?
         public let userId: Int64?
         public enum CodingKeys: String, CodingKey {
           case createdAt = "created_at"
           case id = "id"
+          case newValue = "new_value"
           case previousValue = "previous_value"
           case userId = "user_id"
         }
@@ -6515,11 +6542,13 @@ test('typegen: swift w/ public access control', async () => {
       public struct UsersAuditInsert: Codable, Hashable, Sendable, Identifiable {
         public let createdAt: String?
         public let id: Int64?
+        public let newValue: AnyJSON?
         public let previousValue: AnyJSON?
         public let userId: Int64?
         public enum CodingKeys: String, CodingKey {
           case createdAt = "created_at"
           case id = "id"
+          case newValue = "new_value"
           case previousValue = "previous_value"
           case userId = "user_id"
         }
@@ -6527,11 +6556,13 @@ test('typegen: swift w/ public access control', async () => {
       public struct UsersAuditUpdate: Codable, Hashable, Sendable, Identifiable {
         public let createdAt: String?
         public let id: Int64?
+        public let newValue: AnyJSON?
         public let previousValue: AnyJSON?
         public let userId: Int64?
         public enum CodingKeys: String, CodingKey {
           case createdAt = "created_at"
           case id = "id"
+          case newValue = "new_value"
           case previousValue = "previous_value"
           case userId = "user_id"
         }
@@ -6685,18 +6716,21 @@ test('typegen: python', async () => {
     class PublicUsersAudit(BaseModel):
         created_at: Optional[datetime.datetime] = Field(alias="created_at")
         id: int = Field(alias="id")
+        new_value: Json[Any] = Field(alias="new_value")
         previous_value: Optional[Json[Any]] = Field(alias="previous_value")
         user_id: Optional[int] = Field(alias="user_id")
 
     class PublicUsersAuditInsert(TypedDict):
         created_at: NotRequired[Annotated[Optional[datetime.datetime], Field(alias="created_at")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
+        new_value: NotRequired[Annotated[Json[Any], Field(alias="new_value")]]
         previous_value: NotRequired[Annotated[Optional[Json[Any]], Field(alias="previous_value")]]
         user_id: NotRequired[Annotated[Optional[int], Field(alias="user_id")]]
 
     class PublicUsersAuditUpdate(TypedDict):
         created_at: NotRequired[Annotated[Optional[datetime.datetime], Field(alias="created_at")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
+        new_value: NotRequired[Annotated[Json[Any], Field(alias="new_value")]]
         previous_value: NotRequired[Annotated[Optional[Json[Any]], Field(alias="previous_value")]]
         user_id: NotRequired[Annotated[Optional[int], Field(alias="user_id")]]
 
