@@ -71,7 +71,9 @@ test('list', async () => {
       ],
       "comment": null,
       "id": Any<Number>,
+      "is_insert_enabled": true,
       "is_updatable": true,
+      "is_update_enabled": true,
       "name": "todos_view",
       "schema": "public",
     }
@@ -89,7 +91,9 @@ test('list without columns', async () => {
     {
       "comment": null,
       "id": Any<Number>,
+      "is_insert_enabled": true,
       "is_updatable": true,
+      "is_update_enabled": true,
       "name": "todos_view",
       "schema": "public",
     }
@@ -168,7 +172,9 @@ test('retrieve', async () => {
         ],
         "comment": null,
         "id": Any<Number>,
+        "is_insert_enabled": true,
         "is_updatable": true,
+        "is_update_enabled": true,
         "name": "todos_view",
         "schema": "public",
       },
