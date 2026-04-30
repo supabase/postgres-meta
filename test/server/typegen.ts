@@ -6646,7 +6646,7 @@ test('typegen: python', async () => {
 
     PublicMemeStatus: TypeAlias = Literal["new", "old", "retired"]
 
-    class PublicUsers(BaseModel):
+    class PublicUsers(BaseModel, frozen=True):
         decimal: Optional[float] = Field(alias="decimal")
         id: int = Field(alias="id")
         name: Optional[str] = Field(alias="name")
@@ -6667,7 +6667,7 @@ test('typegen: python', async () => {
         status: NotRequired[Annotated[Optional[PublicUserStatus], Field(alias="status")]]
         user_uuid: NotRequired[Annotated[Optional[uuid.UUID], Field(alias="user_uuid")]]
 
-    class PublicTodos(BaseModel):
+    class PublicTodos(BaseModel, frozen=True):
         details: Optional[str] = Field(alias="details")
         id: int = Field(alias="id")
         user_id: int = Field(alias="user-id")
@@ -6682,7 +6682,7 @@ test('typegen: python', async () => {
         id: NotRequired[Annotated[int, Field(alias="id")]]
         user_id: NotRequired[Annotated[int, Field(alias="user-id")]]
 
-    class PublicUsersAudit(BaseModel):
+    class PublicUsersAudit(BaseModel, frozen=True):
         created_at: Optional[datetime.datetime] = Field(alias="created_at")
         id: int = Field(alias="id")
         previous_value: Optional[Json[Any]] = Field(alias="previous_value")
@@ -6700,7 +6700,7 @@ test('typegen: python', async () => {
         previous_value: NotRequired[Annotated[Optional[Json[Any]], Field(alias="previous_value")]]
         user_id: NotRequired[Annotated[Optional[int], Field(alias="user_id")]]
 
-    class PublicUserDetails(BaseModel):
+    class PublicUserDetails(BaseModel, frozen=True):
         details: Optional[str] = Field(alias="details")
         user_id: int = Field(alias="user_id")
 
@@ -6712,7 +6712,7 @@ test('typegen: python', async () => {
         details: NotRequired[Annotated[Optional[str], Field(alias="details")]]
         user_id: NotRequired[Annotated[int, Field(alias="user_id")]]
 
-    class PublicEmpty(BaseModel):
+    class PublicEmpty(BaseModel, frozen=True):
         pass
 
     class PublicEmptyInsert(TypedDict):
@@ -6721,7 +6721,7 @@ test('typegen: python', async () => {
     class PublicEmptyUpdate(TypedDict):
         pass
 
-    class PublicTableWithOtherTablesRowType(BaseModel):
+    class PublicTableWithOtherTablesRowType(BaseModel, frozen=True):
         col1: Optional[PublicUserDetails] = Field(alias="col1")
         col2: Optional[PublicAView] = Field(alias="col2")
 
@@ -6733,7 +6733,7 @@ test('typegen: python', async () => {
         col1: NotRequired[Annotated[Optional[PublicUserDetails], Field(alias="col1")]]
         col2: NotRequired[Annotated[Optional[PublicAView], Field(alias="col2")]]
 
-    class PublicTableWithPrimaryKeyOtherThanId(BaseModel):
+    class PublicTableWithPrimaryKeyOtherThanId(BaseModel, frozen=True):
         name: Optional[str] = Field(alias="name")
         other_id: int = Field(alias="other_id")
 
@@ -6745,7 +6745,7 @@ test('typegen: python', async () => {
         name: NotRequired[Annotated[Optional[str], Field(alias="name")]]
         other_id: NotRequired[Annotated[int, Field(alias="other_id")]]
 
-    class PublicEvents(BaseModel):
+    class PublicEvents(BaseModel, frozen=True):
         created_at: datetime.datetime = Field(alias="created_at")
         data: Optional[Json[Any]] = Field(alias="data")
         event_type: Optional[str] = Field(alias="event_type")
@@ -6763,7 +6763,7 @@ test('typegen: python', async () => {
         event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
-    class PublicEvents2024(BaseModel):
+    class PublicEvents2024(BaseModel, frozen=True):
         created_at: datetime.datetime = Field(alias="created_at")
         data: Optional[Json[Any]] = Field(alias="data")
         event_type: Optional[str] = Field(alias="event_type")
@@ -6781,7 +6781,7 @@ test('typegen: python', async () => {
         event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
-    class PublicEvents2025(BaseModel):
+    class PublicEvents2025(BaseModel, frozen=True):
         created_at: datetime.datetime = Field(alias="created_at")
         data: Optional[Json[Any]] = Field(alias="data")
         event_type: Optional[str] = Field(alias="event_type")
@@ -6799,7 +6799,7 @@ test('typegen: python', async () => {
         event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
-    class PublicIntervalTest(BaseModel):
+    class PublicIntervalTest(BaseModel, frozen=True):
         duration_optional: Optional[str] = Field(alias="duration_optional")
         duration_required: str = Field(alias="duration_required")
         id: int = Field(alias="id")
@@ -6814,7 +6814,7 @@ test('typegen: python', async () => {
         duration_required: NotRequired[Annotated[str, Field(alias="duration_required")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
-    class PublicCategory(BaseModel):
+    class PublicCategory(BaseModel, frozen=True):
         id: int = Field(alias="id")
         name: str = Field(alias="name")
 
@@ -6826,7 +6826,7 @@ test('typegen: python', async () => {
         id: NotRequired[Annotated[int, Field(alias="id")]]
         name: NotRequired[Annotated[str, Field(alias="name")]]
 
-    class PublicMemes(BaseModel):
+    class PublicMemes(BaseModel, frozen=True):
         category: Optional[int] = Field(alias="category")
         created_at: datetime.datetime = Field(alias="created_at")
         id: int = Field(alias="id")
@@ -6850,43 +6850,43 @@ test('typegen: python', async () => {
         name: NotRequired[Annotated[str, Field(alias="name")]]
         status: NotRequired[Annotated[Optional[PublicMemeStatus], Field(alias="status")]]
 
-    class PublicAView(BaseModel):
+    class PublicAView(BaseModel, frozen=True):
         id: Optional[int] = Field(alias="id")
 
-    class PublicTodosView(BaseModel):
+    class PublicTodosView(BaseModel, frozen=True):
         details: Optional[str] = Field(alias="details")
         id: Optional[int] = Field(alias="id")
         user_id: Optional[int] = Field(alias="user-id")
 
-    class PublicUsersView(BaseModel):
+    class PublicUsersView(BaseModel, frozen=True):
         decimal: Optional[float] = Field(alias="decimal")
         id: Optional[int] = Field(alias="id")
         name: Optional[str] = Field(alias="name")
         status: Optional[PublicUserStatus] = Field(alias="status")
         user_uuid: Optional[uuid.UUID] = Field(alias="user_uuid")
 
-    class PublicUserTodosSummaryView(BaseModel):
+    class PublicUserTodosSummaryView(BaseModel, frozen=True):
         todo_count: Optional[int] = Field(alias="todo_count")
         todo_details: Optional[List[str]] = Field(alias="todo_details")
         user_id: Optional[int] = Field(alias="user_id")
         user_name: Optional[str] = Field(alias="user_name")
         user_status: Optional[PublicUserStatus] = Field(alias="user_status")
 
-    class PublicUsersViewWithMultipleRefsToUsers(BaseModel):
+    class PublicUsersViewWithMultipleRefsToUsers(BaseModel, frozen=True):
         initial_id: Optional[int] = Field(alias="initial_id")
         initial_name: Optional[str] = Field(alias="initial_name")
         second_id: Optional[int] = Field(alias="second_id")
         second_name: Optional[str] = Field(alias="second_name")
 
-    class PublicTodosMatview(BaseModel):
+    class PublicTodosMatview(BaseModel, frozen=True):
         details: Optional[str] = Field(alias="details")
         id: Optional[int] = Field(alias="id")
         user_id: Optional[int] = Field(alias="user-id")
 
-    class PublicCompositeTypeWithArrayAttribute(BaseModel):
+    class PublicCompositeTypeWithArrayAttribute(BaseModel, frozen=True):
         my_text_array: List[str] = Field(alias="my_text_array")
 
-    class PublicCompositeTypeWithRecordAttribute(BaseModel):
+    class PublicCompositeTypeWithRecordAttribute(BaseModel, frozen=True):
         todo: PublicTodos = Field(alias="todo")"
   `)
 })
