@@ -242,6 +242,24 @@ test('update no tables -> all tables', async () => {
   await pgMeta.publications.remove(res.data!.id)
 })
 
+test('create with no publish operations uses PostgreSQL defaults', async () => {
+  // Regression test: when no publish_* flags are set, the old code generated
+  // `WITH (publish = '')` which is invalid SQL. The fix omits the WITH clause,
+  // causing PostgreSQL to default to publishing all operations.
+  const res = await pgMeta.publications.create({
+    name: 'pub_no_ops',
+  })
+  expect(res.error).toBeNull()
+  expect(res.data).toMatchObject({
+    name: 'pub_no_ops',
+    publish_insert: true,
+    publish_update: true,
+    publish_delete: true,
+    publish_truncate: true,
+  })
+  await pgMeta.publications.remove(res.data!.id)
+})
+
 test('update all tables -> no tables', async () => {
   const { data } = await pgMeta.publications.create({
     name: 'pub',
