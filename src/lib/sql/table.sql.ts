@@ -1,3 +1,4 @@
+import { literal } from 'pg-format'
 import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './common.js'
 
 export const TABLES_SQL = (
@@ -105,6 +106,6 @@ group by
   c.relreplident,
   nc.nspname,
   pk.primary_keys
-${props.limit ? `limit ${props.limit}` : ''}
-${props.offset ? `offset ${props.offset}` : ''}
+${props.limit ? `limit ${literal(props.limit)}` : ''}
+${props.offset ? `offset ${literal(props.offset)}` : ''}
 `

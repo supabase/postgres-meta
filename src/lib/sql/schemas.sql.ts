@@ -1,3 +1,4 @@
+import { literal } from 'pg-format'
 import type { SQLQueryProps } from './common.js'
 
 export const SCHEMAS_SQL = (
@@ -22,6 +23,6 @@ where
   )
   and not pg_catalog.starts_with(n.nspname, 'pg_temp_')
   and not pg_catalog.starts_with(n.nspname, 'pg_toast_temp_')
-${props.limit ? `limit ${props.limit}` : ''}
-${props.offset ? `offset ${props.offset}` : ''}
+${props.limit ? `limit ${literal(props.limit)}` : ''}
+${props.offset ? `offset ${literal(props.offset)}` : ''}
 `

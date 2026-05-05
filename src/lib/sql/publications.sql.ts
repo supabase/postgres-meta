@@ -1,3 +1,4 @@
+import { literal } from 'pg-format'
 import type { SQLQueryPropsWithIdsFilter } from './common.js'
 
 export const PUBLICATIONS_SQL = (
@@ -42,6 +43,6 @@ FROM
 WHERE
   ${props.idsFilter ? `p.oid ${props.idsFilter}` : 'true'}
   ${props.nameFilter ? `AND p.pubname ${props.nameFilter}` : ''}
-${props.limit ? `limit ${props.limit}` : ''}
-${props.offset ? `offset ${props.offset}` : ''}
+${props.limit ? `limit ${literal(props.limit)}` : ''}
+${props.offset ? `offset ${literal(props.offset)}` : ''}
 `

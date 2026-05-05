@@ -321,7 +321,7 @@ function pgTypeToGoType(pgType: string, nullable: boolean, types: PostgresType[]
 
   // Arrays
   if (pgType.startsWith('_')) {
-    const innerType = pgTypeToGoType(pgType.slice(1), nullable)
+    const innerType = pgTypeToGoType(pgType.slice(1), nullable, types)
     return `[]${innerType} `
   }
 

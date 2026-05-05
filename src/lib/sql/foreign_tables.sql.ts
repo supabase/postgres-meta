@@ -1,3 +1,4 @@
+import { literal } from 'pg-format'
 import type { SQLQueryProps } from './common.js'
 
 export const FOREIGN_TABLES_SQL = (
@@ -20,6 +21,6 @@ WHERE
   ${props.idsFilter ? `c.oid ${props.idsFilter} AND` : ''}
   ${props.tableIdentifierFilter ? `(n.nspname || '.' || c.relname) ${props.tableIdentifierFilter} AND` : ''}
   c.relkind = 'f'
-${props.limit ? `limit ${props.limit}` : ''}
-${props.offset ? `offset ${props.offset}` : ''}
+${props.limit ? `limit ${literal(props.limit)}` : ''}
+${props.offset ? `offset ${literal(props.offset)}` : ''}
 `

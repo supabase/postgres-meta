@@ -1,3 +1,4 @@
+import { literal } from 'pg-format'
 import type { SQLQueryProps } from './common.js'
 
 export const EXTENSIONS_SQL = (props: SQLQueryProps & { nameFilter?: string }) => /* SQL */ `
@@ -14,6 +15,6 @@ FROM
 WHERE
   true
   ${props.nameFilter ? `AND e.name ${props.nameFilter}` : ''}
-${props.limit ? `limit ${props.limit}` : ''}
-${props.offset ? `offset ${props.offset}` : ''}
+${props.limit ? `limit ${literal(props.limit)}` : ''}
+${props.offset ? `offset ${literal(props.offset)}` : ''}
 `
