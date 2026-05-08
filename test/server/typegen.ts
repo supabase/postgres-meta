@@ -6964,3 +6964,2220 @@ test('typegen: python w/ excluded/included schemas', async () => {
     })
   }
 })
+
+test('typegen: dart', async () => {
+  const { body } = await app.inject({ method: 'GET', path: '/generators/dart' })
+  expect(body).toMatchInlineSnapshot(`"abstract class JsonSerializable {
+      Map<String, dynamic> toJson();
+
+      // We can't declare a constructor in an interface, but we can declare
+      // a factory constructor that implementing classes must provide
+      factory JsonSerializable.fromJson(Map<String, dynamic> json) {
+        throw UnimplementedError();
+      }
+    }
+
+    enum PublicUserStatus {
+      active,
+      inactive;
+
+      String toJson() {
+        switch(this) {
+         case PublicUserStatus.active:
+            return 'ACTIVE';
+         case PublicUserStatus.inactive:
+            return 'INACTIVE';
+        }
+      }
+
+      factory PublicUserStatus.fromJson(String name) {
+        switch(name) {
+         case 'ACTIVE':
+            return PublicUserStatus.active;
+         case 'INACTIVE':
+            return PublicUserStatus.inactive;
+        }
+        throw ArgumentError.value(name, "name", "No enum value with that name");
+      }
+    }
+
+
+    enum PublicMemeStatus {
+      _new,
+      old,
+      retired;
+
+      String toJson() {
+        switch(this) {
+         case PublicMemeStatus._new:
+            return 'new';
+         case PublicMemeStatus.old:
+            return 'old';
+         case PublicMemeStatus.retired:
+            return 'retired';
+        }
+      }
+
+      factory PublicMemeStatus.fromJson(String name) {
+        switch(name) {
+         case 'new':
+            return PublicMemeStatus._new;
+         case 'old':
+            return PublicMemeStatus.old;
+         case 'retired':
+            return PublicMemeStatus.retired;
+        }
+        throw ArgumentError.value(name, "name", "No enum value with that name");
+      }
+    }
+
+
+    class PublicUsersSelect implements JsonSerializable {
+      static const tableName = 'users';
+  
+      final double? decimal;
+      final int id;
+      final String? name;
+      final PublicUserStatus? status;
+
+      const PublicUsersSelect({
+        this.decimal,
+        required this.id,
+        this.name,
+        this.status
+      });
+
+      static Map<String, dynamic> _generateMap({
+        double? decimal,
+        int? id,
+        String? name,
+        PublicUserStatus? status
+      }) => {
+        if (decimal != null) 'decimal': decimal,
+        if (id != null) 'id': id,
+        if (name != null) 'name': name,
+        if (status != null) 'status': status.toJson()
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        decimal: decimal,
+        id: id,
+        name: name,
+        status: status
+      );
+
+      @override
+      factory PublicUsersSelect.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicUsersSelect(
+          decimal: jsonObject['decimal'] == null ? null : jsonObject['decimal'] as double,
+          id: jsonObject['id'] as int,
+          name: jsonObject['name'] == null ? null : jsonObject['name'] as String,
+          status: jsonObject['status'] == null ? null : PublicUserStatus.fromJson(jsonObject['status'])
+        );
+      }
+
+      PublicUsersSelect copyWith({
+        double? decimal,
+        int? id,
+        String? name,
+        PublicUserStatus? status
+      }) {
+        return PublicUsersSelect(
+          decimal: decimal ?? this.decimal,
+          id: id ?? this.id,
+          name: name ?? this.name,
+          status: status ?? this.status
+        );
+      }
+    }
+    class PublicUsersInsert implements JsonSerializable {
+      static const tableName = 'users';
+  
+      final double? decimal;
+      final int? id;
+      final String? name;
+      final PublicUserStatus? status;
+
+      const PublicUsersInsert({
+        this.decimal,
+        this.id,
+        this.name,
+        this.status
+      });
+
+      static Map<String, dynamic> _generateMap({
+        double? decimal,
+        int? id,
+        String? name,
+        PublicUserStatus? status
+      }) => {
+        if (decimal != null) 'decimal': decimal,
+        if (id != null) 'id': id,
+        if (name != null) 'name': name,
+        if (status != null) 'status': status.toJson()
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        decimal: decimal,
+        id: id,
+        name: name,
+        status: status
+      );
+
+      @override
+      factory PublicUsersInsert.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicUsersInsert(
+          decimal: jsonObject['decimal'] == null ? null : jsonObject['decimal'] as double,
+          id: jsonObject['id'] == null ? null : jsonObject['id'] as int,
+          name: jsonObject['name'] == null ? null : jsonObject['name'] as String,
+          status: jsonObject['status'] == null ? null : PublicUserStatus.fromJson(jsonObject['status'])
+        );
+      }
+
+      PublicUsersInsert copyWith({
+        double? decimal,
+        int? id,
+        String? name,
+        PublicUserStatus? status
+      }) {
+        return PublicUsersInsert(
+          decimal: decimal ?? this.decimal,
+          id: id ?? this.id,
+          name: name ?? this.name,
+          status: status ?? this.status
+        );
+      }
+    }
+    class PublicUsersUpdate implements JsonSerializable {
+      static const tableName = 'users';
+  
+      final double? decimal;
+      final int? id;
+      final String? name;
+      final PublicUserStatus? status;
+
+      const PublicUsersUpdate({
+        this.decimal,
+        this.id,
+        this.name,
+        this.status
+      });
+
+      static Map<String, dynamic> _generateMap({
+        double? decimal,
+        int? id,
+        String? name,
+        PublicUserStatus? status
+      }) => {
+        if (decimal != null) 'decimal': decimal,
+        if (id != null) 'id': id,
+        if (name != null) 'name': name,
+        if (status != null) 'status': status.toJson()
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        decimal: decimal,
+        id: id,
+        name: name,
+        status: status
+      );
+
+      @override
+      factory PublicUsersUpdate.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicUsersUpdate(
+          decimal: jsonObject['decimal'] == null ? null : jsonObject['decimal'] as double,
+          id: jsonObject['id'] == null ? null : jsonObject['id'] as int,
+          name: jsonObject['name'] == null ? null : jsonObject['name'] as String,
+          status: jsonObject['status'] == null ? null : PublicUserStatus.fromJson(jsonObject['status'])
+        );
+      }
+
+      PublicUsersUpdate copyWith({
+        double? decimal,
+        int? id,
+        String? name,
+        PublicUserStatus? status
+      }) {
+        return PublicUsersUpdate(
+          decimal: decimal ?? this.decimal,
+          id: id ?? this.id,
+          name: name ?? this.name,
+          status: status ?? this.status
+        );
+      }
+    }
+
+    class PublicTodosSelect implements JsonSerializable {
+      static const tableName = 'todos';
+  
+      final String? details;
+      final int id;
+      final int userId;
+
+      const PublicTodosSelect({
+        this.details,
+        required this.id,
+        required this.userId
+      });
+
+      static Map<String, dynamic> _generateMap({
+        String? details,
+        int? id,
+        int? userId
+      }) => {
+        if (details != null) 'details': details,
+        if (id != null) 'id': id,
+        if (userId != null) 'user-id': userId
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        details: details,
+        id: id,
+        userId: userId
+      );
+
+      @override
+      factory PublicTodosSelect.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicTodosSelect(
+          details: jsonObject['details'] == null ? null : jsonObject['details'] as String,
+          id: jsonObject['id'] as int,
+          userId: jsonObject['user-id'] as int
+        );
+      }
+
+      PublicTodosSelect copyWith({
+        String? details,
+        int? id,
+        int? userId
+      }) {
+        return PublicTodosSelect(
+          details: details ?? this.details,
+          id: id ?? this.id,
+          userId: userId ?? this.userId
+        );
+      }
+    }
+    class PublicTodosInsert implements JsonSerializable {
+      static const tableName = 'todos';
+  
+      final String? details;
+      final int? id;
+      final int userId;
+
+      const PublicTodosInsert({
+        this.details,
+        this.id,
+        required this.userId
+      });
+
+      static Map<String, dynamic> _generateMap({
+        String? details,
+        int? id,
+        int? userId
+      }) => {
+        if (details != null) 'details': details,
+        if (id != null) 'id': id,
+        if (userId != null) 'user-id': userId
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        details: details,
+        id: id,
+        userId: userId
+      );
+
+      @override
+      factory PublicTodosInsert.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicTodosInsert(
+          details: jsonObject['details'] == null ? null : jsonObject['details'] as String,
+          id: jsonObject['id'] == null ? null : jsonObject['id'] as int,
+          userId: jsonObject['user-id'] as int
+        );
+      }
+
+      PublicTodosInsert copyWith({
+        String? details,
+        int? id,
+        int? userId
+      }) {
+        return PublicTodosInsert(
+          details: details ?? this.details,
+          id: id ?? this.id,
+          userId: userId ?? this.userId
+        );
+      }
+    }
+    class PublicTodosUpdate implements JsonSerializable {
+      static const tableName = 'todos';
+  
+      final String? details;
+      final int? id;
+      final int? userId;
+
+      const PublicTodosUpdate({
+        this.details,
+        this.id,
+        this.userId
+      });
+
+      static Map<String, dynamic> _generateMap({
+        String? details,
+        int? id,
+        int? userId
+      }) => {
+        if (details != null) 'details': details,
+        if (id != null) 'id': id,
+        if (userId != null) 'user-id': userId
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        details: details,
+        id: id,
+        userId: userId
+      );
+
+      @override
+      factory PublicTodosUpdate.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicTodosUpdate(
+          details: jsonObject['details'] == null ? null : jsonObject['details'] as String,
+          id: jsonObject['id'] == null ? null : jsonObject['id'] as int,
+          userId: jsonObject['user-id'] == null ? null : jsonObject['user-id'] as int
+        );
+      }
+
+      PublicTodosUpdate copyWith({
+        String? details,
+        int? id,
+        int? userId
+      }) {
+        return PublicTodosUpdate(
+          details: details ?? this.details,
+          id: id ?? this.id,
+          userId: userId ?? this.userId
+        );
+      }
+    }
+
+    class PublicUsersAuditSelect implements JsonSerializable {
+      static const tableName = 'users_audit';
+  
+      final DateTime? createdAt;
+      final int id;
+      final Map<String, dynamic>? previousValue;
+      final int? userId;
+
+      const PublicUsersAuditSelect({
+        this.createdAt,
+        required this.id,
+        this.previousValue,
+        this.userId
+      });
+
+      static Map<String, dynamic> _generateMap({
+        DateTime? createdAt,
+        int? id,
+        Map<String, dynamic>? previousValue,
+        int? userId
+      }) => {
+        if (createdAt != null) 'created_at': createdAt.toIso8601String(),
+        if (id != null) 'id': id,
+        if (previousValue != null) 'previous_value': previousValue,
+        if (userId != null) 'user_id': userId
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        createdAt: createdAt,
+        id: id,
+        previousValue: previousValue,
+        userId: userId
+      );
+
+      @override
+      factory PublicUsersAuditSelect.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicUsersAuditSelect(
+          createdAt: jsonObject['created_at'] == null ? null : DateTime.parse(jsonObject['created_at']),
+          id: jsonObject['id'] as int,
+          previousValue: jsonObject['previous_value'] == null ? null : jsonObject['previous_value'] as Map<String, dynamic>,
+          userId: jsonObject['user_id'] == null ? null : jsonObject['user_id'] as int
+        );
+      }
+
+      PublicUsersAuditSelect copyWith({
+        DateTime? createdAt,
+        int? id,
+        Map<String, dynamic>? previousValue,
+        int? userId
+      }) {
+        return PublicUsersAuditSelect(
+          createdAt: createdAt ?? this.createdAt,
+          id: id ?? this.id,
+          previousValue: previousValue ?? this.previousValue,
+          userId: userId ?? this.userId
+        );
+      }
+    }
+    class PublicUsersAuditInsert implements JsonSerializable {
+      static const tableName = 'users_audit';
+  
+      final DateTime? createdAt;
+      final int? id;
+      final Map<String, dynamic>? previousValue;
+      final int? userId;
+
+      const PublicUsersAuditInsert({
+        this.createdAt,
+        this.id,
+        this.previousValue,
+        this.userId
+      });
+
+      static Map<String, dynamic> _generateMap({
+        DateTime? createdAt,
+        int? id,
+        Map<String, dynamic>? previousValue,
+        int? userId
+      }) => {
+        if (createdAt != null) 'created_at': createdAt.toIso8601String(),
+        if (id != null) 'id': id,
+        if (previousValue != null) 'previous_value': previousValue,
+        if (userId != null) 'user_id': userId
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        createdAt: createdAt,
+        id: id,
+        previousValue: previousValue,
+        userId: userId
+      );
+
+      @override
+      factory PublicUsersAuditInsert.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicUsersAuditInsert(
+          createdAt: jsonObject['created_at'] == null ? null : DateTime.parse(jsonObject['created_at']),
+          id: jsonObject['id'] == null ? null : jsonObject['id'] as int,
+          previousValue: jsonObject['previous_value'] == null ? null : jsonObject['previous_value'] as Map<String, dynamic>,
+          userId: jsonObject['user_id'] == null ? null : jsonObject['user_id'] as int
+        );
+      }
+
+      PublicUsersAuditInsert copyWith({
+        DateTime? createdAt,
+        int? id,
+        Map<String, dynamic>? previousValue,
+        int? userId
+      }) {
+        return PublicUsersAuditInsert(
+          createdAt: createdAt ?? this.createdAt,
+          id: id ?? this.id,
+          previousValue: previousValue ?? this.previousValue,
+          userId: userId ?? this.userId
+        );
+      }
+    }
+    class PublicUsersAuditUpdate implements JsonSerializable {
+      static const tableName = 'users_audit';
+  
+      final DateTime? createdAt;
+      final int? id;
+      final Map<String, dynamic>? previousValue;
+      final int? userId;
+
+      const PublicUsersAuditUpdate({
+        this.createdAt,
+        this.id,
+        this.previousValue,
+        this.userId
+      });
+
+      static Map<String, dynamic> _generateMap({
+        DateTime? createdAt,
+        int? id,
+        Map<String, dynamic>? previousValue,
+        int? userId
+      }) => {
+        if (createdAt != null) 'created_at': createdAt.toIso8601String(),
+        if (id != null) 'id': id,
+        if (previousValue != null) 'previous_value': previousValue,
+        if (userId != null) 'user_id': userId
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        createdAt: createdAt,
+        id: id,
+        previousValue: previousValue,
+        userId: userId
+      );
+
+      @override
+      factory PublicUsersAuditUpdate.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicUsersAuditUpdate(
+          createdAt: jsonObject['created_at'] == null ? null : DateTime.parse(jsonObject['created_at']),
+          id: jsonObject['id'] == null ? null : jsonObject['id'] as int,
+          previousValue: jsonObject['previous_value'] == null ? null : jsonObject['previous_value'] as Map<String, dynamic>,
+          userId: jsonObject['user_id'] == null ? null : jsonObject['user_id'] as int
+        );
+      }
+
+      PublicUsersAuditUpdate copyWith({
+        DateTime? createdAt,
+        int? id,
+        Map<String, dynamic>? previousValue,
+        int? userId
+      }) {
+        return PublicUsersAuditUpdate(
+          createdAt: createdAt ?? this.createdAt,
+          id: id ?? this.id,
+          previousValue: previousValue ?? this.previousValue,
+          userId: userId ?? this.userId
+        );
+      }
+    }
+
+    class PublicUserDetailsSelect implements JsonSerializable {
+      static const tableName = 'user_details';
+  
+      final String? details;
+      final int userId;
+
+      const PublicUserDetailsSelect({
+        this.details,
+        required this.userId
+      });
+
+      static Map<String, dynamic> _generateMap({
+        String? details,
+        int? userId
+      }) => {
+        if (details != null) 'details': details,
+        if (userId != null) 'user_id': userId
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        details: details,
+        userId: userId
+      );
+
+      @override
+      factory PublicUserDetailsSelect.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicUserDetailsSelect(
+          details: jsonObject['details'] == null ? null : jsonObject['details'] as String,
+          userId: jsonObject['user_id'] as int
+        );
+      }
+
+      PublicUserDetailsSelect copyWith({
+        String? details,
+        int? userId
+      }) {
+        return PublicUserDetailsSelect(
+          details: details ?? this.details,
+          userId: userId ?? this.userId
+        );
+      }
+    }
+    class PublicUserDetailsInsert implements JsonSerializable {
+      static const tableName = 'user_details';
+  
+      final String? details;
+      final int userId;
+
+      const PublicUserDetailsInsert({
+        this.details,
+        required this.userId
+      });
+
+      static Map<String, dynamic> _generateMap({
+        String? details,
+        int? userId
+      }) => {
+        if (details != null) 'details': details,
+        if (userId != null) 'user_id': userId
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        details: details,
+        userId: userId
+      );
+
+      @override
+      factory PublicUserDetailsInsert.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicUserDetailsInsert(
+          details: jsonObject['details'] == null ? null : jsonObject['details'] as String,
+          userId: jsonObject['user_id'] as int
+        );
+      }
+
+      PublicUserDetailsInsert copyWith({
+        String? details,
+        int? userId
+      }) {
+        return PublicUserDetailsInsert(
+          details: details ?? this.details,
+          userId: userId ?? this.userId
+        );
+      }
+    }
+    class PublicUserDetailsUpdate implements JsonSerializable {
+      static const tableName = 'user_details';
+  
+      final String? details;
+      final int? userId;
+
+      const PublicUserDetailsUpdate({
+        this.details,
+        this.userId
+      });
+
+      static Map<String, dynamic> _generateMap({
+        String? details,
+        int? userId
+      }) => {
+        if (details != null) 'details': details,
+        if (userId != null) 'user_id': userId
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        details: details,
+        userId: userId
+      );
+
+      @override
+      factory PublicUserDetailsUpdate.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicUserDetailsUpdate(
+          details: jsonObject['details'] == null ? null : jsonObject['details'] as String,
+          userId: jsonObject['user_id'] == null ? null : jsonObject['user_id'] as int
+        );
+      }
+
+      PublicUserDetailsUpdate copyWith({
+        String? details,
+        int? userId
+      }) {
+        return PublicUserDetailsUpdate(
+          details: details ?? this.details,
+          userId: userId ?? this.userId
+        );
+      }
+    }
+
+    class PublicEmptySelect implements JsonSerializable {
+      static const tableName = 'empty';
+  
+
+      const PublicEmptySelect();
+
+      static Map<String, dynamic> _generateMap() => {
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+      );
+
+      @override
+      factory PublicEmptySelect.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicEmptySelect(
+        );
+      }
+
+      PublicEmptySelect copyWith() {
+        return PublicEmptySelect(
+        );
+      }
+    }
+    class PublicEmptyInsert implements JsonSerializable {
+      static const tableName = 'empty';
+  
+
+      const PublicEmptyInsert();
+
+      static Map<String, dynamic> _generateMap() => {
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+      );
+
+      @override
+      factory PublicEmptyInsert.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicEmptyInsert(
+        );
+      }
+
+      PublicEmptyInsert copyWith() {
+        return PublicEmptyInsert(
+        );
+      }
+    }
+    class PublicEmptyUpdate implements JsonSerializable {
+      static const tableName = 'empty';
+  
+
+      const PublicEmptyUpdate();
+
+      static Map<String, dynamic> _generateMap() => {
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+      );
+
+      @override
+      factory PublicEmptyUpdate.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicEmptyUpdate(
+        );
+      }
+
+      PublicEmptyUpdate copyWith() {
+        return PublicEmptyUpdate(
+        );
+      }
+    }
+
+    class PublicTableWithOtherTablesRowTypeSelect implements JsonSerializable {
+      static const tableName = 'table_with_other_tables_row_type';
+  
+      final dynamic? col1;
+      final dynamic? col2;
+
+      const PublicTableWithOtherTablesRowTypeSelect({
+        this.col1,
+        this.col2
+      });
+
+      static Map<String, dynamic> _generateMap({
+        dynamic? col1,
+        dynamic? col2
+      }) => {
+        if (col1 != null) 'col1': col1,
+        if (col2 != null) 'col2': col2
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        col1: col1,
+        col2: col2
+      );
+
+      @override
+      factory PublicTableWithOtherTablesRowTypeSelect.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicTableWithOtherTablesRowTypeSelect(
+          col1: jsonObject['col1'] == null ? null : jsonObject['col1'] as dynamic,
+          col2: jsonObject['col2'] == null ? null : jsonObject['col2'] as dynamic
+        );
+      }
+
+      PublicTableWithOtherTablesRowTypeSelect copyWith({
+        dynamic? col1,
+        dynamic? col2
+      }) {
+        return PublicTableWithOtherTablesRowTypeSelect(
+          col1: col1 ?? this.col1,
+          col2: col2 ?? this.col2
+        );
+      }
+    }
+    class PublicTableWithOtherTablesRowTypeInsert implements JsonSerializable {
+      static const tableName = 'table_with_other_tables_row_type';
+  
+      final dynamic? col1;
+      final dynamic? col2;
+
+      const PublicTableWithOtherTablesRowTypeInsert({
+        this.col1,
+        this.col2
+      });
+
+      static Map<String, dynamic> _generateMap({
+        dynamic? col1,
+        dynamic? col2
+      }) => {
+        if (col1 != null) 'col1': col1,
+        if (col2 != null) 'col2': col2
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        col1: col1,
+        col2: col2
+      );
+
+      @override
+      factory PublicTableWithOtherTablesRowTypeInsert.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicTableWithOtherTablesRowTypeInsert(
+          col1: jsonObject['col1'] == null ? null : jsonObject['col1'] as dynamic,
+          col2: jsonObject['col2'] == null ? null : jsonObject['col2'] as dynamic
+        );
+      }
+
+      PublicTableWithOtherTablesRowTypeInsert copyWith({
+        dynamic? col1,
+        dynamic? col2
+      }) {
+        return PublicTableWithOtherTablesRowTypeInsert(
+          col1: col1 ?? this.col1,
+          col2: col2 ?? this.col2
+        );
+      }
+    }
+    class PublicTableWithOtherTablesRowTypeUpdate implements JsonSerializable {
+      static const tableName = 'table_with_other_tables_row_type';
+  
+      final dynamic? col1;
+      final dynamic? col2;
+
+      const PublicTableWithOtherTablesRowTypeUpdate({
+        this.col1,
+        this.col2
+      });
+
+      static Map<String, dynamic> _generateMap({
+        dynamic? col1,
+        dynamic? col2
+      }) => {
+        if (col1 != null) 'col1': col1,
+        if (col2 != null) 'col2': col2
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        col1: col1,
+        col2: col2
+      );
+
+      @override
+      factory PublicTableWithOtherTablesRowTypeUpdate.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicTableWithOtherTablesRowTypeUpdate(
+          col1: jsonObject['col1'] == null ? null : jsonObject['col1'] as dynamic,
+          col2: jsonObject['col2'] == null ? null : jsonObject['col2'] as dynamic
+        );
+      }
+
+      PublicTableWithOtherTablesRowTypeUpdate copyWith({
+        dynamic? col1,
+        dynamic? col2
+      }) {
+        return PublicTableWithOtherTablesRowTypeUpdate(
+          col1: col1 ?? this.col1,
+          col2: col2 ?? this.col2
+        );
+      }
+    }
+
+    class PublicTableWithPrimaryKeyOtherThanIdSelect implements JsonSerializable {
+      static const tableName = 'table_with_primary_key_other_than_id';
+  
+      final String? name;
+      final int otherId;
+
+      const PublicTableWithPrimaryKeyOtherThanIdSelect({
+        this.name,
+        required this.otherId
+      });
+
+      static Map<String, dynamic> _generateMap({
+        String? name,
+        int? otherId
+      }) => {
+        if (name != null) 'name': name,
+        if (otherId != null) 'other_id': otherId
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        name: name,
+        otherId: otherId
+      );
+
+      @override
+      factory PublicTableWithPrimaryKeyOtherThanIdSelect.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicTableWithPrimaryKeyOtherThanIdSelect(
+          name: jsonObject['name'] == null ? null : jsonObject['name'] as String,
+          otherId: jsonObject['other_id'] as int
+        );
+      }
+
+      PublicTableWithPrimaryKeyOtherThanIdSelect copyWith({
+        String? name,
+        int? otherId
+      }) {
+        return PublicTableWithPrimaryKeyOtherThanIdSelect(
+          name: name ?? this.name,
+          otherId: otherId ?? this.otherId
+        );
+      }
+    }
+    class PublicTableWithPrimaryKeyOtherThanIdInsert implements JsonSerializable {
+      static const tableName = 'table_with_primary_key_other_than_id';
+  
+      final String? name;
+      final int? otherId;
+
+      const PublicTableWithPrimaryKeyOtherThanIdInsert({
+        this.name,
+        this.otherId
+      });
+
+      static Map<String, dynamic> _generateMap({
+        String? name,
+        int? otherId
+      }) => {
+        if (name != null) 'name': name,
+        if (otherId != null) 'other_id': otherId
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        name: name,
+        otherId: otherId
+      );
+
+      @override
+      factory PublicTableWithPrimaryKeyOtherThanIdInsert.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicTableWithPrimaryKeyOtherThanIdInsert(
+          name: jsonObject['name'] == null ? null : jsonObject['name'] as String,
+          otherId: jsonObject['other_id'] == null ? null : jsonObject['other_id'] as int
+        );
+      }
+
+      PublicTableWithPrimaryKeyOtherThanIdInsert copyWith({
+        String? name,
+        int? otherId
+      }) {
+        return PublicTableWithPrimaryKeyOtherThanIdInsert(
+          name: name ?? this.name,
+          otherId: otherId ?? this.otherId
+        );
+      }
+    }
+    class PublicTableWithPrimaryKeyOtherThanIdUpdate implements JsonSerializable {
+      static const tableName = 'table_with_primary_key_other_than_id';
+  
+      final String? name;
+      final int? otherId;
+
+      const PublicTableWithPrimaryKeyOtherThanIdUpdate({
+        this.name,
+        this.otherId
+      });
+
+      static Map<String, dynamic> _generateMap({
+        String? name,
+        int? otherId
+      }) => {
+        if (name != null) 'name': name,
+        if (otherId != null) 'other_id': otherId
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        name: name,
+        otherId: otherId
+      );
+
+      @override
+      factory PublicTableWithPrimaryKeyOtherThanIdUpdate.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicTableWithPrimaryKeyOtherThanIdUpdate(
+          name: jsonObject['name'] == null ? null : jsonObject['name'] as String,
+          otherId: jsonObject['other_id'] == null ? null : jsonObject['other_id'] as int
+        );
+      }
+
+      PublicTableWithPrimaryKeyOtherThanIdUpdate copyWith({
+        String? name,
+        int? otherId
+      }) {
+        return PublicTableWithPrimaryKeyOtherThanIdUpdate(
+          name: name ?? this.name,
+          otherId: otherId ?? this.otherId
+        );
+      }
+    }
+
+    class PublicEventsSelect implements JsonSerializable {
+      static const tableName = 'events';
+  
+      final DateTime createdAt;
+      final Map<String, dynamic>? data;
+      final String? eventType;
+      final int id;
+
+      const PublicEventsSelect({
+        required this.createdAt,
+        this.data,
+        this.eventType,
+        required this.id
+      });
+
+      static Map<String, dynamic> _generateMap({
+        DateTime? createdAt,
+        Map<String, dynamic>? data,
+        String? eventType,
+        int? id
+      }) => {
+        if (createdAt != null) 'created_at': createdAt.toIso8601String(),
+        if (data != null) 'data': data,
+        if (eventType != null) 'event_type': eventType,
+        if (id != null) 'id': id
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        createdAt: createdAt,
+        data: data,
+        eventType: eventType,
+        id: id
+      );
+
+      @override
+      factory PublicEventsSelect.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicEventsSelect(
+          createdAt: DateTime.parse(jsonObject['created_at']),
+          data: jsonObject['data'] == null ? null : jsonObject['data'] as Map<String, dynamic>,
+          eventType: jsonObject['event_type'] == null ? null : jsonObject['event_type'] as String,
+          id: jsonObject['id'] as int
+        );
+      }
+
+      PublicEventsSelect copyWith({
+        DateTime? createdAt,
+        Map<String, dynamic>? data,
+        String? eventType,
+        int? id
+      }) {
+        return PublicEventsSelect(
+          createdAt: createdAt ?? this.createdAt,
+          data: data ?? this.data,
+          eventType: eventType ?? this.eventType,
+          id: id ?? this.id
+        );
+      }
+    }
+    class PublicEventsInsert implements JsonSerializable {
+      static const tableName = 'events';
+  
+      final DateTime? createdAt;
+      final Map<String, dynamic>? data;
+      final String? eventType;
+      final int? id;
+
+      const PublicEventsInsert({
+        this.createdAt,
+        this.data,
+        this.eventType,
+        this.id
+      });
+
+      static Map<String, dynamic> _generateMap({
+        DateTime? createdAt,
+        Map<String, dynamic>? data,
+        String? eventType,
+        int? id
+      }) => {
+        if (createdAt != null) 'created_at': createdAt.toIso8601String(),
+        if (data != null) 'data': data,
+        if (eventType != null) 'event_type': eventType,
+        if (id != null) 'id': id
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        createdAt: createdAt,
+        data: data,
+        eventType: eventType,
+        id: id
+      );
+
+      @override
+      factory PublicEventsInsert.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicEventsInsert(
+          createdAt: jsonObject['created_at'] == null ? null : DateTime.parse(jsonObject['created_at']),
+          data: jsonObject['data'] == null ? null : jsonObject['data'] as Map<String, dynamic>,
+          eventType: jsonObject['event_type'] == null ? null : jsonObject['event_type'] as String,
+          id: jsonObject['id'] == null ? null : jsonObject['id'] as int
+        );
+      }
+
+      PublicEventsInsert copyWith({
+        DateTime? createdAt,
+        Map<String, dynamic>? data,
+        String? eventType,
+        int? id
+      }) {
+        return PublicEventsInsert(
+          createdAt: createdAt ?? this.createdAt,
+          data: data ?? this.data,
+          eventType: eventType ?? this.eventType,
+          id: id ?? this.id
+        );
+      }
+    }
+    class PublicEventsUpdate implements JsonSerializable {
+      static const tableName = 'events';
+  
+      final DateTime? createdAt;
+      final Map<String, dynamic>? data;
+      final String? eventType;
+      final int? id;
+
+      const PublicEventsUpdate({
+        this.createdAt,
+        this.data,
+        this.eventType,
+        this.id
+      });
+
+      static Map<String, dynamic> _generateMap({
+        DateTime? createdAt,
+        Map<String, dynamic>? data,
+        String? eventType,
+        int? id
+      }) => {
+        if (createdAt != null) 'created_at': createdAt.toIso8601String(),
+        if (data != null) 'data': data,
+        if (eventType != null) 'event_type': eventType,
+        if (id != null) 'id': id
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        createdAt: createdAt,
+        data: data,
+        eventType: eventType,
+        id: id
+      );
+
+      @override
+      factory PublicEventsUpdate.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicEventsUpdate(
+          createdAt: jsonObject['created_at'] == null ? null : DateTime.parse(jsonObject['created_at']),
+          data: jsonObject['data'] == null ? null : jsonObject['data'] as Map<String, dynamic>,
+          eventType: jsonObject['event_type'] == null ? null : jsonObject['event_type'] as String,
+          id: jsonObject['id'] == null ? null : jsonObject['id'] as int
+        );
+      }
+
+      PublicEventsUpdate copyWith({
+        DateTime? createdAt,
+        Map<String, dynamic>? data,
+        String? eventType,
+        int? id
+      }) {
+        return PublicEventsUpdate(
+          createdAt: createdAt ?? this.createdAt,
+          data: data ?? this.data,
+          eventType: eventType ?? this.eventType,
+          id: id ?? this.id
+        );
+      }
+    }
+
+    class PublicEvents2024Select implements JsonSerializable {
+      static const tableName = 'events_2024';
+  
+      final DateTime createdAt;
+      final Map<String, dynamic>? data;
+      final String? eventType;
+      final int id;
+
+      const PublicEvents2024Select({
+        required this.createdAt,
+        this.data,
+        this.eventType,
+        required this.id
+      });
+
+      static Map<String, dynamic> _generateMap({
+        DateTime? createdAt,
+        Map<String, dynamic>? data,
+        String? eventType,
+        int? id
+      }) => {
+        if (createdAt != null) 'created_at': createdAt.toIso8601String(),
+        if (data != null) 'data': data,
+        if (eventType != null) 'event_type': eventType,
+        if (id != null) 'id': id
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        createdAt: createdAt,
+        data: data,
+        eventType: eventType,
+        id: id
+      );
+
+      @override
+      factory PublicEvents2024Select.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicEvents2024Select(
+          createdAt: DateTime.parse(jsonObject['created_at']),
+          data: jsonObject['data'] == null ? null : jsonObject['data'] as Map<String, dynamic>,
+          eventType: jsonObject['event_type'] == null ? null : jsonObject['event_type'] as String,
+          id: jsonObject['id'] as int
+        );
+      }
+
+      PublicEvents2024Select copyWith({
+        DateTime? createdAt,
+        Map<String, dynamic>? data,
+        String? eventType,
+        int? id
+      }) {
+        return PublicEvents2024Select(
+          createdAt: createdAt ?? this.createdAt,
+          data: data ?? this.data,
+          eventType: eventType ?? this.eventType,
+          id: id ?? this.id
+        );
+      }
+    }
+    class PublicEvents2024Insert implements JsonSerializable {
+      static const tableName = 'events_2024';
+  
+      final DateTime? createdAt;
+      final Map<String, dynamic>? data;
+      final String? eventType;
+      final int id;
+
+      const PublicEvents2024Insert({
+        this.createdAt,
+        this.data,
+        this.eventType,
+        required this.id
+      });
+
+      static Map<String, dynamic> _generateMap({
+        DateTime? createdAt,
+        Map<String, dynamic>? data,
+        String? eventType,
+        int? id
+      }) => {
+        if (createdAt != null) 'created_at': createdAt.toIso8601String(),
+        if (data != null) 'data': data,
+        if (eventType != null) 'event_type': eventType,
+        if (id != null) 'id': id
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        createdAt: createdAt,
+        data: data,
+        eventType: eventType,
+        id: id
+      );
+
+      @override
+      factory PublicEvents2024Insert.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicEvents2024Insert(
+          createdAt: jsonObject['created_at'] == null ? null : DateTime.parse(jsonObject['created_at']),
+          data: jsonObject['data'] == null ? null : jsonObject['data'] as Map<String, dynamic>,
+          eventType: jsonObject['event_type'] == null ? null : jsonObject['event_type'] as String,
+          id: jsonObject['id'] as int
+        );
+      }
+
+      PublicEvents2024Insert copyWith({
+        DateTime? createdAt,
+        Map<String, dynamic>? data,
+        String? eventType,
+        int? id
+      }) {
+        return PublicEvents2024Insert(
+          createdAt: createdAt ?? this.createdAt,
+          data: data ?? this.data,
+          eventType: eventType ?? this.eventType,
+          id: id ?? this.id
+        );
+      }
+    }
+    class PublicEvents2024Update implements JsonSerializable {
+      static const tableName = 'events_2024';
+  
+      final DateTime? createdAt;
+      final Map<String, dynamic>? data;
+      final String? eventType;
+      final int? id;
+
+      const PublicEvents2024Update({
+        this.createdAt,
+        this.data,
+        this.eventType,
+        this.id
+      });
+
+      static Map<String, dynamic> _generateMap({
+        DateTime? createdAt,
+        Map<String, dynamic>? data,
+        String? eventType,
+        int? id
+      }) => {
+        if (createdAt != null) 'created_at': createdAt.toIso8601String(),
+        if (data != null) 'data': data,
+        if (eventType != null) 'event_type': eventType,
+        if (id != null) 'id': id
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        createdAt: createdAt,
+        data: data,
+        eventType: eventType,
+        id: id
+      );
+
+      @override
+      factory PublicEvents2024Update.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicEvents2024Update(
+          createdAt: jsonObject['created_at'] == null ? null : DateTime.parse(jsonObject['created_at']),
+          data: jsonObject['data'] == null ? null : jsonObject['data'] as Map<String, dynamic>,
+          eventType: jsonObject['event_type'] == null ? null : jsonObject['event_type'] as String,
+          id: jsonObject['id'] == null ? null : jsonObject['id'] as int
+        );
+      }
+
+      PublicEvents2024Update copyWith({
+        DateTime? createdAt,
+        Map<String, dynamic>? data,
+        String? eventType,
+        int? id
+      }) {
+        return PublicEvents2024Update(
+          createdAt: createdAt ?? this.createdAt,
+          data: data ?? this.data,
+          eventType: eventType ?? this.eventType,
+          id: id ?? this.id
+        );
+      }
+    }
+
+    class PublicEvents2025Select implements JsonSerializable {
+      static const tableName = 'events_2025';
+  
+      final DateTime createdAt;
+      final Map<String, dynamic>? data;
+      final String? eventType;
+      final int id;
+
+      const PublicEvents2025Select({
+        required this.createdAt,
+        this.data,
+        this.eventType,
+        required this.id
+      });
+
+      static Map<String, dynamic> _generateMap({
+        DateTime? createdAt,
+        Map<String, dynamic>? data,
+        String? eventType,
+        int? id
+      }) => {
+        if (createdAt != null) 'created_at': createdAt.toIso8601String(),
+        if (data != null) 'data': data,
+        if (eventType != null) 'event_type': eventType,
+        if (id != null) 'id': id
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        createdAt: createdAt,
+        data: data,
+        eventType: eventType,
+        id: id
+      );
+
+      @override
+      factory PublicEvents2025Select.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicEvents2025Select(
+          createdAt: DateTime.parse(jsonObject['created_at']),
+          data: jsonObject['data'] == null ? null : jsonObject['data'] as Map<String, dynamic>,
+          eventType: jsonObject['event_type'] == null ? null : jsonObject['event_type'] as String,
+          id: jsonObject['id'] as int
+        );
+      }
+
+      PublicEvents2025Select copyWith({
+        DateTime? createdAt,
+        Map<String, dynamic>? data,
+        String? eventType,
+        int? id
+      }) {
+        return PublicEvents2025Select(
+          createdAt: createdAt ?? this.createdAt,
+          data: data ?? this.data,
+          eventType: eventType ?? this.eventType,
+          id: id ?? this.id
+        );
+      }
+    }
+    class PublicEvents2025Insert implements JsonSerializable {
+      static const tableName = 'events_2025';
+  
+      final DateTime? createdAt;
+      final Map<String, dynamic>? data;
+      final String? eventType;
+      final int id;
+
+      const PublicEvents2025Insert({
+        this.createdAt,
+        this.data,
+        this.eventType,
+        required this.id
+      });
+
+      static Map<String, dynamic> _generateMap({
+        DateTime? createdAt,
+        Map<String, dynamic>? data,
+        String? eventType,
+        int? id
+      }) => {
+        if (createdAt != null) 'created_at': createdAt.toIso8601String(),
+        if (data != null) 'data': data,
+        if (eventType != null) 'event_type': eventType,
+        if (id != null) 'id': id
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        createdAt: createdAt,
+        data: data,
+        eventType: eventType,
+        id: id
+      );
+
+      @override
+      factory PublicEvents2025Insert.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicEvents2025Insert(
+          createdAt: jsonObject['created_at'] == null ? null : DateTime.parse(jsonObject['created_at']),
+          data: jsonObject['data'] == null ? null : jsonObject['data'] as Map<String, dynamic>,
+          eventType: jsonObject['event_type'] == null ? null : jsonObject['event_type'] as String,
+          id: jsonObject['id'] as int
+        );
+      }
+
+      PublicEvents2025Insert copyWith({
+        DateTime? createdAt,
+        Map<String, dynamic>? data,
+        String? eventType,
+        int? id
+      }) {
+        return PublicEvents2025Insert(
+          createdAt: createdAt ?? this.createdAt,
+          data: data ?? this.data,
+          eventType: eventType ?? this.eventType,
+          id: id ?? this.id
+        );
+      }
+    }
+    class PublicEvents2025Update implements JsonSerializable {
+      static const tableName = 'events_2025';
+  
+      final DateTime? createdAt;
+      final Map<String, dynamic>? data;
+      final String? eventType;
+      final int? id;
+
+      const PublicEvents2025Update({
+        this.createdAt,
+        this.data,
+        this.eventType,
+        this.id
+      });
+
+      static Map<String, dynamic> _generateMap({
+        DateTime? createdAt,
+        Map<String, dynamic>? data,
+        String? eventType,
+        int? id
+      }) => {
+        if (createdAt != null) 'created_at': createdAt.toIso8601String(),
+        if (data != null) 'data': data,
+        if (eventType != null) 'event_type': eventType,
+        if (id != null) 'id': id
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        createdAt: createdAt,
+        data: data,
+        eventType: eventType,
+        id: id
+      );
+
+      @override
+      factory PublicEvents2025Update.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicEvents2025Update(
+          createdAt: jsonObject['created_at'] == null ? null : DateTime.parse(jsonObject['created_at']),
+          data: jsonObject['data'] == null ? null : jsonObject['data'] as Map<String, dynamic>,
+          eventType: jsonObject['event_type'] == null ? null : jsonObject['event_type'] as String,
+          id: jsonObject['id'] == null ? null : jsonObject['id'] as int
+        );
+      }
+
+      PublicEvents2025Update copyWith({
+        DateTime? createdAt,
+        Map<String, dynamic>? data,
+        String? eventType,
+        int? id
+      }) {
+        return PublicEvents2025Update(
+          createdAt: createdAt ?? this.createdAt,
+          data: data ?? this.data,
+          eventType: eventType ?? this.eventType,
+          id: id ?? this.id
+        );
+      }
+    }
+
+    class PublicCategorySelect implements JsonSerializable {
+      static const tableName = 'category';
+  
+      final int id;
+      final String name;
+
+      const PublicCategorySelect({
+        required this.id,
+        required this.name
+      });
+
+      static Map<String, dynamic> _generateMap({
+        int? id,
+        String? name
+      }) => {
+        if (id != null) 'id': id,
+        if (name != null) 'name': name
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        id: id,
+        name: name
+      );
+
+      @override
+      factory PublicCategorySelect.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicCategorySelect(
+          id: jsonObject['id'] as int,
+          name: jsonObject['name'] as String
+        );
+      }
+
+      PublicCategorySelect copyWith({
+        int? id,
+        String? name
+      }) {
+        return PublicCategorySelect(
+          id: id ?? this.id,
+          name: name ?? this.name
+        );
+      }
+    }
+    class PublicCategoryInsert implements JsonSerializable {
+      static const tableName = 'category';
+  
+      final int? id;
+      final String name;
+
+      const PublicCategoryInsert({
+        this.id,
+        required this.name
+      });
+
+      static Map<String, dynamic> _generateMap({
+        int? id,
+        String? name
+      }) => {
+        if (id != null) 'id': id,
+        if (name != null) 'name': name
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        id: id,
+        name: name
+      );
+
+      @override
+      factory PublicCategoryInsert.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicCategoryInsert(
+          id: jsonObject['id'] == null ? null : jsonObject['id'] as int,
+          name: jsonObject['name'] as String
+        );
+      }
+
+      PublicCategoryInsert copyWith({
+        int? id,
+        String? name
+      }) {
+        return PublicCategoryInsert(
+          id: id ?? this.id,
+          name: name ?? this.name
+        );
+      }
+    }
+    class PublicCategoryUpdate implements JsonSerializable {
+      static const tableName = 'category';
+  
+      final int? id;
+      final String? name;
+
+      const PublicCategoryUpdate({
+        this.id,
+        this.name
+      });
+
+      static Map<String, dynamic> _generateMap({
+        int? id,
+        String? name
+      }) => {
+        if (id != null) 'id': id,
+        if (name != null) 'name': name
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        id: id,
+        name: name
+      );
+
+      @override
+      factory PublicCategoryUpdate.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicCategoryUpdate(
+          id: jsonObject['id'] == null ? null : jsonObject['id'] as int,
+          name: jsonObject['name'] == null ? null : jsonObject['name'] as String
+        );
+      }
+
+      PublicCategoryUpdate copyWith({
+        int? id,
+        String? name
+      }) {
+        return PublicCategoryUpdate(
+          id: id ?? this.id,
+          name: name ?? this.name
+        );
+      }
+    }
+
+    class PublicMemesSelect implements JsonSerializable {
+      static const tableName = 'memes';
+  
+      final int? category;
+      final DateTime createdAt;
+      final int id;
+      final Map<String, dynamic>? metadata;
+      final String name;
+      final PublicMemeStatus? status;
+
+      const PublicMemesSelect({
+        this.category,
+        required this.createdAt,
+        required this.id,
+        this.metadata,
+        required this.name,
+        this.status
+      });
+
+      static Map<String, dynamic> _generateMap({
+        int? category,
+        DateTime? createdAt,
+        int? id,
+        Map<String, dynamic>? metadata,
+        String? name,
+        PublicMemeStatus? status
+      }) => {
+        if (category != null) 'category': category,
+        if (createdAt != null) 'created_at': createdAt.toIso8601String(),
+        if (id != null) 'id': id,
+        if (metadata != null) 'metadata': metadata,
+        if (name != null) 'name': name,
+        if (status != null) 'status': status.toJson()
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        category: category,
+        createdAt: createdAt,
+        id: id,
+        metadata: metadata,
+        name: name,
+        status: status
+      );
+
+      @override
+      factory PublicMemesSelect.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicMemesSelect(
+          category: jsonObject['category'] == null ? null : jsonObject['category'] as int,
+          createdAt: DateTime.parse(jsonObject['created_at']),
+          id: jsonObject['id'] as int,
+          metadata: jsonObject['metadata'] == null ? null : jsonObject['metadata'] as Map<String, dynamic>,
+          name: jsonObject['name'] as String,
+          status: jsonObject['status'] == null ? null : PublicMemeStatus.fromJson(jsonObject['status'])
+        );
+      }
+
+      PublicMemesSelect copyWith({
+        int? category,
+        DateTime? createdAt,
+        int? id,
+        Map<String, dynamic>? metadata,
+        String? name,
+        PublicMemeStatus? status
+      }) {
+        return PublicMemesSelect(
+          category: category ?? this.category,
+          createdAt: createdAt ?? this.createdAt,
+          id: id ?? this.id,
+          metadata: metadata ?? this.metadata,
+          name: name ?? this.name,
+          status: status ?? this.status
+        );
+      }
+    }
+    class PublicMemesInsert implements JsonSerializable {
+      static const tableName = 'memes';
+  
+      final int? category;
+      final DateTime createdAt;
+      final int? id;
+      final Map<String, dynamic>? metadata;
+      final String name;
+      final PublicMemeStatus? status;
+
+      const PublicMemesInsert({
+        this.category,
+        required this.createdAt,
+        this.id,
+        this.metadata,
+        required this.name,
+        this.status
+      });
+
+      static Map<String, dynamic> _generateMap({
+        int? category,
+        DateTime? createdAt,
+        int? id,
+        Map<String, dynamic>? metadata,
+        String? name,
+        PublicMemeStatus? status
+      }) => {
+        if (category != null) 'category': category,
+        if (createdAt != null) 'created_at': createdAt.toIso8601String(),
+        if (id != null) 'id': id,
+        if (metadata != null) 'metadata': metadata,
+        if (name != null) 'name': name,
+        if (status != null) 'status': status.toJson()
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        category: category,
+        createdAt: createdAt,
+        id: id,
+        metadata: metadata,
+        name: name,
+        status: status
+      );
+
+      @override
+      factory PublicMemesInsert.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicMemesInsert(
+          category: jsonObject['category'] == null ? null : jsonObject['category'] as int,
+          createdAt: DateTime.parse(jsonObject['created_at']),
+          id: jsonObject['id'] == null ? null : jsonObject['id'] as int,
+          metadata: jsonObject['metadata'] == null ? null : jsonObject['metadata'] as Map<String, dynamic>,
+          name: jsonObject['name'] as String,
+          status: jsonObject['status'] == null ? null : PublicMemeStatus.fromJson(jsonObject['status'])
+        );
+      }
+
+      PublicMemesInsert copyWith({
+        int? category,
+        DateTime? createdAt,
+        int? id,
+        Map<String, dynamic>? metadata,
+        String? name,
+        PublicMemeStatus? status
+      }) {
+        return PublicMemesInsert(
+          category: category ?? this.category,
+          createdAt: createdAt ?? this.createdAt,
+          id: id ?? this.id,
+          metadata: metadata ?? this.metadata,
+          name: name ?? this.name,
+          status: status ?? this.status
+        );
+      }
+    }
+    class PublicMemesUpdate implements JsonSerializable {
+      static const tableName = 'memes';
+  
+      final int? category;
+      final DateTime? createdAt;
+      final int? id;
+      final Map<String, dynamic>? metadata;
+      final String? name;
+      final PublicMemeStatus? status;
+
+      const PublicMemesUpdate({
+        this.category,
+        this.createdAt,
+        this.id,
+        this.metadata,
+        this.name,
+        this.status
+      });
+
+      static Map<String, dynamic> _generateMap({
+        int? category,
+        DateTime? createdAt,
+        int? id,
+        Map<String, dynamic>? metadata,
+        String? name,
+        PublicMemeStatus? status
+      }) => {
+        if (category != null) 'category': category,
+        if (createdAt != null) 'created_at': createdAt.toIso8601String(),
+        if (id != null) 'id': id,
+        if (metadata != null) 'metadata': metadata,
+        if (name != null) 'name': name,
+        if (status != null) 'status': status.toJson()
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        category: category,
+        createdAt: createdAt,
+        id: id,
+        metadata: metadata,
+        name: name,
+        status: status
+      );
+
+      @override
+      factory PublicMemesUpdate.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicMemesUpdate(
+          category: jsonObject['category'] == null ? null : jsonObject['category'] as int,
+          createdAt: jsonObject['created_at'] == null ? null : DateTime.parse(jsonObject['created_at']),
+          id: jsonObject['id'] == null ? null : jsonObject['id'] as int,
+          metadata: jsonObject['metadata'] == null ? null : jsonObject['metadata'] as Map<String, dynamic>,
+          name: jsonObject['name'] == null ? null : jsonObject['name'] as String,
+          status: jsonObject['status'] == null ? null : PublicMemeStatus.fromJson(jsonObject['status'])
+        );
+      }
+
+      PublicMemesUpdate copyWith({
+        int? category,
+        DateTime? createdAt,
+        int? id,
+        Map<String, dynamic>? metadata,
+        String? name,
+        PublicMemeStatus? status
+      }) {
+        return PublicMemesUpdate(
+          category: category ?? this.category,
+          createdAt: createdAt ?? this.createdAt,
+          id: id ?? this.id,
+          metadata: metadata ?? this.metadata,
+          name: name ?? this.name,
+          status: status ?? this.status
+        );
+      }
+    }
+
+    class PublicAViewSelect implements JsonSerializable {
+      static const tableName = 'a_view';
+  
+      final int? id;
+
+      const PublicAViewSelect({
+        this.id
+      });
+
+      static Map<String, dynamic> _generateMap({
+        int? id
+      }) => {
+        if (id != null) 'id': id
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        id: id
+      );
+
+      @override
+      factory PublicAViewSelect.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicAViewSelect(
+          id: jsonObject['id'] == null ? null : jsonObject['id'] as int
+        );
+      }
+
+      PublicAViewSelect copyWith({
+        int? id
+      }) {
+        return PublicAViewSelect(
+          id: id ?? this.id
+        );
+      }
+    }
+
+
+
+    class PublicTodosViewSelect implements JsonSerializable {
+      static const tableName = 'todos_view';
+  
+      final String? details;
+      final int? id;
+      final int? userId;
+
+      const PublicTodosViewSelect({
+        this.details,
+        this.id,
+        this.userId
+      });
+
+      static Map<String, dynamic> _generateMap({
+        String? details,
+        int? id,
+        int? userId
+      }) => {
+        if (details != null) 'details': details,
+        if (id != null) 'id': id,
+        if (userId != null) 'user-id': userId
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        details: details,
+        id: id,
+        userId: userId
+      );
+
+      @override
+      factory PublicTodosViewSelect.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicTodosViewSelect(
+          details: jsonObject['details'] == null ? null : jsonObject['details'] as String,
+          id: jsonObject['id'] == null ? null : jsonObject['id'] as int,
+          userId: jsonObject['user-id'] == null ? null : jsonObject['user-id'] as int
+        );
+      }
+
+      PublicTodosViewSelect copyWith({
+        String? details,
+        int? id,
+        int? userId
+      }) {
+        return PublicTodosViewSelect(
+          details: details ?? this.details,
+          id: id ?? this.id,
+          userId: userId ?? this.userId
+        );
+      }
+    }
+
+
+
+    class PublicUsersViewSelect implements JsonSerializable {
+      static const tableName = 'users_view';
+  
+      final double? decimal;
+      final int? id;
+      final String? name;
+      final PublicUserStatus? status;
+
+      const PublicUsersViewSelect({
+        this.decimal,
+        this.id,
+        this.name,
+        this.status
+      });
+
+      static Map<String, dynamic> _generateMap({
+        double? decimal,
+        int? id,
+        String? name,
+        PublicUserStatus? status
+      }) => {
+        if (decimal != null) 'decimal': decimal,
+        if (id != null) 'id': id,
+        if (name != null) 'name': name,
+        if (status != null) 'status': status.toJson()
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        decimal: decimal,
+        id: id,
+        name: name,
+        status: status
+      );
+
+      @override
+      factory PublicUsersViewSelect.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicUsersViewSelect(
+          decimal: jsonObject['decimal'] == null ? null : jsonObject['decimal'] as double,
+          id: jsonObject['id'] == null ? null : jsonObject['id'] as int,
+          name: jsonObject['name'] == null ? null : jsonObject['name'] as String,
+          status: jsonObject['status'] == null ? null : PublicUserStatus.fromJson(jsonObject['status'])
+        );
+      }
+
+      PublicUsersViewSelect copyWith({
+        double? decimal,
+        int? id,
+        String? name,
+        PublicUserStatus? status
+      }) {
+        return PublicUsersViewSelect(
+          decimal: decimal ?? this.decimal,
+          id: id ?? this.id,
+          name: name ?? this.name,
+          status: status ?? this.status
+        );
+      }
+    }
+
+
+
+    class PublicUserTodosSummaryViewSelect implements JsonSerializable {
+      static const tableName = 'user_todos_summary_view';
+  
+      final int? todoCount;
+      final List<String>? todoDetails;
+      final int? userId;
+      final String? userName;
+      final PublicUserStatus? userStatus;
+
+      const PublicUserTodosSummaryViewSelect({
+        this.todoCount,
+        this.todoDetails,
+        this.userId,
+        this.userName,
+        this.userStatus
+      });
+
+      static Map<String, dynamic> _generateMap({
+        int? todoCount,
+        List<String>? todoDetails,
+        int? userId,
+        String? userName,
+        PublicUserStatus? userStatus
+      }) => {
+        if (todoCount != null) 'todo_count': todoCount,
+        if (todoDetails != null) 'todo_details': todoDetails.map((v) => v).toList(),
+        if (userId != null) 'user_id': userId,
+        if (userName != null) 'user_name': userName,
+        if (userStatus != null) 'user_status': userStatus.toJson()
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        todoCount: todoCount,
+        todoDetails: todoDetails,
+        userId: userId,
+        userName: userName,
+        userStatus: userStatus
+      );
+
+      @override
+      factory PublicUserTodosSummaryViewSelect.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicUserTodosSummaryViewSelect(
+          todoCount: jsonObject['todo_count'] == null ? null : jsonObject['todo_count'] as int,
+          todoDetails: jsonObject['todo_details'] == null ? null : (jsonObject['todo_details'] as List<dynamic>).map((v) => v as String).toList(),
+          userId: jsonObject['user_id'] == null ? null : jsonObject['user_id'] as int,
+          userName: jsonObject['user_name'] == null ? null : jsonObject['user_name'] as String,
+          userStatus: jsonObject['user_status'] == null ? null : PublicUserStatus.fromJson(jsonObject['user_status'])
+        );
+      }
+
+      PublicUserTodosSummaryViewSelect copyWith({
+        int? todoCount,
+        List<String>? todoDetails,
+        int? userId,
+        String? userName,
+        PublicUserStatus? userStatus
+      }) {
+        return PublicUserTodosSummaryViewSelect(
+          todoCount: todoCount ?? this.todoCount,
+          todoDetails: todoDetails ?? this.todoDetails,
+          userId: userId ?? this.userId,
+          userName: userName ?? this.userName,
+          userStatus: userStatus ?? this.userStatus
+        );
+      }
+    }
+
+
+
+    class PublicUsersViewWithMultipleRefsToUsersSelect implements JsonSerializable {
+      static const tableName = 'users_view_with_multiple_refs_to_users';
+  
+      final int? initialId;
+      final String? initialName;
+      final int? secondId;
+      final String? secondName;
+
+      const PublicUsersViewWithMultipleRefsToUsersSelect({
+        this.initialId,
+        this.initialName,
+        this.secondId,
+        this.secondName
+      });
+
+      static Map<String, dynamic> _generateMap({
+        int? initialId,
+        String? initialName,
+        int? secondId,
+        String? secondName
+      }) => {
+        if (initialId != null) 'initial_id': initialId,
+        if (initialName != null) 'initial_name': initialName,
+        if (secondId != null) 'second_id': secondId,
+        if (secondName != null) 'second_name': secondName
+      };
+
+      @override
+      Map<String, dynamic> toJson() => _generateMap(
+        initialId: initialId,
+        initialName: initialName,
+        secondId: secondId,
+        secondName: secondName
+      );
+
+      @override
+      factory PublicUsersViewWithMultipleRefsToUsersSelect.fromJson(Map<String, dynamic> jsonObject) {
+        return PublicUsersViewWithMultipleRefsToUsersSelect(
+          initialId: jsonObject['initial_id'] == null ? null : jsonObject['initial_id'] as int,
+          initialName: jsonObject['initial_name'] == null ? null : jsonObject['initial_name'] as String,
+          secondId: jsonObject['second_id'] == null ? null : jsonObject['second_id'] as int,
+          secondName: jsonObject['second_name'] == null ? null : jsonObject['second_name'] as String
+        );
+      }
+
+      PublicUsersViewWithMultipleRefsToUsersSelect copyWith({
+        int? initialId,
+        String? initialName,
+        int? secondId,
+        String? secondName
+      }) {
+        return PublicUsersViewWithMultipleRefsToUsersSelect(
+          initialId: initialId ?? this.initialId,
+          initialName: initialName ?? this.initialName,
+          secondId: secondId ?? this.secondId,
+          secondName: secondName ?? this.secondName
+        );
+      }
+    }
+
+    "`)
+})
