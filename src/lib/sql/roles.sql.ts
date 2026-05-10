@@ -1,3 +1,4 @@
+import { literal } from 'pg-format'
 import type { SQLQueryPropsWithIdsFilter } from './common.js'
 
 export const ROLES_SQL = (
@@ -39,6 +40,6 @@ WHERE
   -- The pg_ prefix is also reserved.
   ${!props.includeDefaultRoles ? `AND NOT pg_catalog.starts_with(rolname, 'pg_')` : ''}
   ${props.nameFilter ? `AND rolname ${props.nameFilter}` : ''}
-${props.limit ? `limit ${props.limit}` : ''}
-${props.offset ? `offset ${props.offset}` : ''}
+${props.limit ? `limit ${literal(props.limit)}` : ''}
+${props.offset ? `offset ${literal(props.offset)}` : ''}
 `

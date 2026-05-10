@@ -1,3 +1,4 @@
+import { literal } from 'pg-format'
 import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './common.js'
 
 export const TRIGGERS_SQL = (
@@ -63,6 +64,6 @@ GROUP BY
   is_t.action_timing,
   pg_p.proname,
   pg_n.nspname
-${props.limit ? `limit ${props.limit}` : ''}
-${props.offset ? `offset ${props.offset}` : ''}
+${props.limit ? `limit ${literal(props.limit)}` : ''}
+${props.offset ? `offset ${literal(props.offset)}` : ''}
 `

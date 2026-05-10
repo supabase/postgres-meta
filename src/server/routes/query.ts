@@ -17,11 +17,11 @@ export default async (fastify: FastifyInstance) => {
   fastify.post<{
     Headers: { pg: string; 'x-pg-application-name'?: string }
     Body: { query: string; parameters?: unknown[] }
-    Querystring: { statementTimeoutSecs?: number }
+    Querystring: { statementTimeoutSecs?: number; queryTimeoutSecs?: number }
   }>('/', async (request, reply) => {
     const statementTimeoutSecs = request.query.statementTimeoutSecs
     errorOnEmptyQuery(request)
-    const config = createConnectionConfig(request)
+    const config = createConnectionConfig(request, request.query.queryTimeoutSecs)
     const pgMeta = new PostgresMeta(config)
     const { data, error } = await pgMeta.query(request.body.query, {
       trackQueryInSentry: true,
@@ -74,7 +74,7 @@ export default async (fastify: FastifyInstance) => {
     Headers: { pg: string; 'x-pg-application-name'?: string }
     Body: { ast: object }
   }>('/deparse', async (request, reply) => {
-    const { data, error } = Parser.Deparse(request.body.ast)
+    const { data, error } = await Parser.Deparse(request.body.ast)
 
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })

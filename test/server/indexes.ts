@@ -22,7 +22,7 @@ test('list indexes', async () => {
         0,
       ],
       "comment": null,
-      "id": 16399,
+      "id": 16400,
       "index_attributes": [
         {
           "attribute_name": "id",
@@ -57,7 +57,7 @@ test('list indexes', async () => {
 })
 
 test('retrieve index', async () => {
-  const res = await app.inject({ method: 'GET', path: '/indexes/16399' })
+  const res = await app.inject({ method: 'GET', path: '/indexes/16400' })
   const index = res.json<PostgresIndex>()
   expect(index).toMatchInlineSnapshot(
     `
@@ -71,7 +71,7 @@ test('retrieve index', async () => {
         0,
       ],
       "comment": null,
-      "id": 16399,
+      "id": 16400,
       "index_attributes": [
         {
           "attribute_name": "id",

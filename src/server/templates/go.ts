@@ -102,7 +102,13 @@ ${compositeTypes
 function formatForGoTypeName(name: string): string {
   return name
     .split(/[^a-zA-Z0-9]/)
-    .map((word) => `${word[0].toUpperCase()}${word.slice(1)}`)
+    .map((word) => {
+      if (word) {
+        return `${word[0].toUpperCase()}${word.slice(1)}`
+      } else {
+        return ''
+      }
+    })
     .join('')
 }
 
@@ -244,6 +250,7 @@ const GO_TYPE_MAP = {
   timetz: 'string',
   timestamp: 'string',
   timestamptz: 'string',
+  interval: 'string',
   uuid: 'string',
   vector: 'string',
 
@@ -314,7 +321,7 @@ function pgTypeToGoType(pgType: string, nullable: boolean, types: PostgresType[]
 
   // Arrays
   if (pgType.startsWith('_')) {
-    const innerType = pgTypeToGoType(pgType.slice(1), nullable)
+    const innerType = pgTypeToGoType(pgType.slice(1), nullable, types)
     return `[]${innerType} `
   }
 

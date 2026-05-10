@@ -117,6 +117,24 @@ test('list', async () => {
           "schema": "public",
           "table": "users",
         },
+        {
+          "check": null,
+          "comment": null,
+          "data_type": "uuid",
+          "default_value": "gen_random_uuid()",
+          "enums": [],
+          "format": "uuid",
+          "identity_generation": null,
+          "is_generated": false,
+          "is_identity": false,
+          "is_nullable": true,
+          "is_unique": false,
+          "is_updatable": true,
+          "name": "user_uuid",
+          "ordinal_position": 5,
+          "schema": "public",
+          "table": "users",
+        },
       ],
       "comment": null,
       "dead_rows_estimate": Any<Number>,
@@ -524,6 +542,23 @@ test('primary keys', async () => {
   `
   )
   await pgMeta.tables.remove(res.data!.id)
+})
+
+test('retrieve table in non-public schema by id', async () => {
+  // Create a custom schema and table
+  await pgMeta.query('CREATE SCHEMA IF NOT EXISTS test_schema')
+  const createRes = await pgMeta.tables.create({ name: 'test_nonpublic', schema: 'test_schema' })
+  const tableId = createRes.data!.id
+
+  // Retrieve by ID (without specifying schema)
+  const res = await pgMeta.tables.retrieve({ id: tableId })
+  expect(res.error).toBeNull()
+  expect(res.data!.name).toBe('test_nonpublic')
+  expect(res.data!.schema).toBe('test_schema')
+
+  // Cleanup
+  await pgMeta.tables.remove(tableId)
+  await pgMeta.query('DROP SCHEMA test_schema')
 })
 
 test('composite primary keys preserve order', async () => {

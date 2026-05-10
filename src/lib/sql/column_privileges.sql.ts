@@ -1,3 +1,4 @@
+import { literal } from 'pg-format'
 import type { SQLQueryPropsWithSchemaFilter } from './common.js'
 
 export const COLUMN_PRIVILEGES_SQL = (
@@ -152,6 +153,6 @@ group by column_id,
          nc.nspname,
          x.relname,
          x.attname
-${props.limit ? `limit ${props.limit}` : ''}
-${props.offset ? `offset ${props.offset}` : ''}
+${props.limit ? `limit ${literal(props.limit)}` : ''}
+${props.offset ? `offset ${literal(props.offset)}` : ''}
 `

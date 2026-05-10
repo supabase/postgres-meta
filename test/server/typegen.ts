@@ -37,6 +37,70 @@ test('typegen: typescript', async () => {
             Update: {}
             Relationships: []
           }
+          events: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+              days_since_event: number | null
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
+          events_2024: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
+          events_2025: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
           foreign_table: {
             Row: {
               id: number
@@ -52,6 +116,24 @@ test('typegen: typescript', async () => {
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+            }
+            Relationships: []
+          }
+          interval_test: {
+            Row: {
+              duration_optional: string | null
+              duration_required: string
+              id: number
+            }
+            Insert: {
+              duration_optional?: string | null
+              duration_required: string
+              id?: number
+            }
+            Update: {
+              duration_optional?: string | null
+              duration_required?: string
+              id?: number
             }
             Relationships: []
           }
@@ -243,6 +325,7 @@ test('typegen: typescript', async () => {
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              user_uuid: string | null
               test_unnamed_row_composite:
                 | Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
                 | null
@@ -257,12 +340,14 @@ test('typegen: typescript', async () => {
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+              user_uuid?: string | null
             }
             Update: {
               decimal?: number | null
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+              user_uuid?: string | null
             }
             Relationships: []
           }
@@ -272,6 +357,7 @@ test('typegen: typescript', async () => {
               id: number
               previous_value: Json | null
               user_id: number | null
+              created_ago: number | null
             }
             Insert: {
               created_at?: string | null
@@ -428,18 +514,21 @@ test('typegen: typescript', async () => {
               id: number | null
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              user_uuid: string | null
             }
             Insert: {
               decimal?: number | null
               id?: number | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+              user_uuid?: string | null
             }
             Update: {
               decimal?: number | null
               id?: number | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+              user_uuid?: string | null
             }
             Relationships: []
           }
@@ -454,6 +543,10 @@ test('typegen: typescript', async () => {
           }
         }
         Functions: {
+          add_interval_to_duration: {
+            Args: { additional_interval: string; base_duration: string }
+            Returns: string
+          }
           blurb: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: {
@@ -473,6 +566,18 @@ test('typegen: typescript', async () => {
                   error: true
                 } & "the function public.blurb_varchar with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
               }
+          created_ago: {
+            Args: { "": Database["public"]["Tables"]["users_audit"]["Row"] }
+            Returns: {
+              error: true
+            } & "the function public.created_ago with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+          }
+          days_since_event: {
+            Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+            Returns: {
+              error: true
+            } & "the function public.days_since_event with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+          }
           details_is_long: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: {
@@ -491,6 +596,12 @@ test('typegen: typescript', async () => {
               error: true
             } & "the function public.details_words with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
           }
+          double_duration: {
+            Args: {
+              interval_test_row: Database["public"]["Tables"]["interval_test"]["Row"]
+            }
+            Returns: string
+          }
           function_returning_row: {
             Args: never
             Returns: {
@@ -498,6 +609,7 @@ test('typegen: typescript', async () => {
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              user_uuid: string | null
             }
             SetofOptions: {
               from: "*"
@@ -513,6 +625,7 @@ test('typegen: typescript', async () => {
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              user_uuid: string | null
             }[]
             SetofOptions: {
               from: "*"
@@ -528,6 +641,7 @@ test('typegen: typescript', async () => {
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              user_uuid: string | null
             }
             SetofOptions: {
               from: "todos"
@@ -590,9 +704,7 @@ test('typegen: typescript', async () => {
           }
           get_single_user_summary_from_view:
             | {
-                Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
-                }
+                Args: { search_user_id: number }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -601,7 +713,7 @@ test('typegen: typescript', async () => {
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
                 SetofOptions: {
-                  from: "users_view"
+                  from: "*"
                   to: "user_todos_summary_view"
                   isOneToOne: true
                   isSetofReturn: true
@@ -624,7 +736,9 @@ test('typegen: typescript', async () => {
                 }
               }
             | {
-                Args: { search_user_id: number }
+                Args: {
+                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -633,7 +747,7 @@ test('typegen: typescript', async () => {
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
                 SetofOptions: {
-                  from: "*"
+                  from: "users_view"
                   to: "user_todos_summary_view"
                   isOneToOne: true
                   isSetofReturn: true
@@ -655,6 +769,34 @@ test('typegen: typescript', async () => {
           }
           get_todos_from_user:
             | {
+                Args: { search_user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
                 Args: {
                   userview_row: Database["public"]["Views"]["users_view"]["Row"]
                 }
@@ -670,49 +812,7 @@ test('typegen: typescript', async () => {
                   isSetofReturn: true
                 }
               }
-            | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "users"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
-            | {
-                Args: { search_user_id: number }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
           get_todos_setof_rows:
-            | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "users"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
             | {
                 Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
@@ -722,6 +822,20 @@ test('typegen: typescript', async () => {
                 }[]
                 SetofOptions: {
                   from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
                   to: "todos"
                   isOneToOne: false
                   isSetofReturn: true
@@ -788,22 +902,9 @@ test('typegen: typescript', async () => {
           }
           postgres_fdw_handler: { Args: never; Returns: unknown }
           postgrest_resolvable_with_override_function:
+            | { Args: never; Returns: undefined }
             | { Args: { a: string }; Returns: number }
-            | {
-                Args: { user_id: number }
-                Returns: {
-                  decimal: number | null
-                  id: number
-                  name: string | null
-                  status: Database["public"]["Enums"]["user_status"] | null
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "users"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
+            | { Args: { b: number }; Returns: string }
             | {
                 Args: { completed: boolean; todo_id: number }
                 Returns: {
@@ -814,6 +915,22 @@ test('typegen: typescript', async () => {
                 SetofOptions: {
                   from: "*"
                   to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_id: number }
+                Returns: {
+                  decimal: number | null
+                  id: number
+                  name: string | null
+                  status: Database["public"]["Enums"]["user_status"] | null
+                  user_uuid: string | null
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "users"
                   isOneToOne: false
                   isSetofReturn: true
                 }
@@ -832,22 +949,20 @@ test('typegen: typescript', async () => {
                   isSetofReturn: true
                 }
               }
-            | { Args: { b: number }; Returns: string }
-            | { Args: never; Returns: undefined }
           postgrest_unresolvable_function:
-            | {
-                Args: { a: string }
-                Returns: {
-                  error: true
-                } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
-              }
+            | { Args: never; Returns: undefined }
             | {
                 Args: { a: number }
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
               }
-            | { Args: never; Returns: undefined }
+            | {
+                Args: { a: string }
+                Returns: {
+                  error: true
+                } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+              }
           search_todos_by_details: {
             Args: { search_details: string }
             Returns: {
@@ -881,20 +996,6 @@ test('typegen: typescript', async () => {
           }
           test_unnamed_row_setof:
             | {
-                Args: { user_id: number }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
-            | {
                 Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
                   details: string | null
@@ -903,6 +1004,20 @@ test('typegen: typescript', async () => {
                 }[]
                 SetofOptions: {
                   from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
                   to: "todos"
                   isOneToOne: false
                   isSetofReturn: true
@@ -1122,6 +1237,70 @@ test('typegen w/ one-to-one relationships', async () => {
             Update: {}
             Relationships: []
           }
+          events: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+              days_since_event: number | null
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
+          events_2024: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
+          events_2025: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
           foreign_table: {
             Row: {
               id: number
@@ -1137,6 +1316,24 @@ test('typegen w/ one-to-one relationships', async () => {
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+            }
+            Relationships: []
+          }
+          interval_test: {
+            Row: {
+              duration_optional: string | null
+              duration_required: string
+              id: number
+            }
+            Insert: {
+              duration_optional?: string | null
+              duration_required: string
+              id?: number
+            }
+            Update: {
+              duration_optional?: string | null
+              duration_required?: string
+              id?: number
             }
             Relationships: []
           }
@@ -1341,6 +1538,7 @@ test('typegen w/ one-to-one relationships', async () => {
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              user_uuid: string | null
               test_unnamed_row_composite:
                 | Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
                 | null
@@ -1355,12 +1553,14 @@ test('typegen w/ one-to-one relationships', async () => {
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+              user_uuid?: string | null
             }
             Update: {
               decimal?: number | null
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+              user_uuid?: string | null
             }
             Relationships: []
           }
@@ -1370,6 +1570,7 @@ test('typegen w/ one-to-one relationships', async () => {
               id: number
               previous_value: Json | null
               user_id: number | null
+              created_ago: number | null
             }
             Insert: {
               created_at?: string | null
@@ -1538,18 +1739,21 @@ test('typegen w/ one-to-one relationships', async () => {
               id: number | null
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              user_uuid: string | null
             }
             Insert: {
               decimal?: number | null
               id?: number | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+              user_uuid?: string | null
             }
             Update: {
               decimal?: number | null
               id?: number | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+              user_uuid?: string | null
             }
             Relationships: []
           }
@@ -1564,6 +1768,10 @@ test('typegen w/ one-to-one relationships', async () => {
           }
         }
         Functions: {
+          add_interval_to_duration: {
+            Args: { additional_interval: string; base_duration: string }
+            Returns: string
+          }
           blurb: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: {
@@ -1583,6 +1791,18 @@ test('typegen w/ one-to-one relationships', async () => {
                   error: true
                 } & "the function public.blurb_varchar with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
               }
+          created_ago: {
+            Args: { "": Database["public"]["Tables"]["users_audit"]["Row"] }
+            Returns: {
+              error: true
+            } & "the function public.created_ago with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+          }
+          days_since_event: {
+            Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+            Returns: {
+              error: true
+            } & "the function public.days_since_event with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+          }
           details_is_long: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: {
@@ -1601,6 +1821,12 @@ test('typegen w/ one-to-one relationships', async () => {
               error: true
             } & "the function public.details_words with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
           }
+          double_duration: {
+            Args: {
+              interval_test_row: Database["public"]["Tables"]["interval_test"]["Row"]
+            }
+            Returns: string
+          }
           function_returning_row: {
             Args: never
             Returns: {
@@ -1608,6 +1834,7 @@ test('typegen w/ one-to-one relationships', async () => {
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              user_uuid: string | null
             }
             SetofOptions: {
               from: "*"
@@ -1623,6 +1850,7 @@ test('typegen w/ one-to-one relationships', async () => {
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              user_uuid: string | null
             }[]
             SetofOptions: {
               from: "*"
@@ -1638,6 +1866,7 @@ test('typegen w/ one-to-one relationships', async () => {
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              user_uuid: string | null
             }
             SetofOptions: {
               from: "todos"
@@ -1700,9 +1929,7 @@ test('typegen w/ one-to-one relationships', async () => {
           }
           get_single_user_summary_from_view:
             | {
-                Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
-                }
+                Args: { search_user_id: number }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -1711,7 +1938,7 @@ test('typegen w/ one-to-one relationships', async () => {
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
                 SetofOptions: {
-                  from: "users_view"
+                  from: "*"
                   to: "user_todos_summary_view"
                   isOneToOne: true
                   isSetofReturn: true
@@ -1734,7 +1961,9 @@ test('typegen w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { search_user_id: number }
+                Args: {
+                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -1743,7 +1972,7 @@ test('typegen w/ one-to-one relationships', async () => {
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
                 SetofOptions: {
-                  from: "*"
+                  from: "users_view"
                   to: "user_todos_summary_view"
                   isOneToOne: true
                   isSetofReturn: true
@@ -1765,6 +1994,34 @@ test('typegen w/ one-to-one relationships', async () => {
           }
           get_todos_from_user:
             | {
+                Args: { search_user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
                 Args: {
                   userview_row: Database["public"]["Views"]["users_view"]["Row"]
                 }
@@ -1780,49 +2037,7 @@ test('typegen w/ one-to-one relationships', async () => {
                   isSetofReturn: true
                 }
               }
-            | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "users"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
-            | {
-                Args: { search_user_id: number }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
           get_todos_setof_rows:
-            | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "users"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
             | {
                 Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
@@ -1832,6 +2047,20 @@ test('typegen w/ one-to-one relationships', async () => {
                 }[]
                 SetofOptions: {
                   from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
                   to: "todos"
                   isOneToOne: false
                   isSetofReturn: true
@@ -1898,22 +2127,9 @@ test('typegen w/ one-to-one relationships', async () => {
           }
           postgres_fdw_handler: { Args: never; Returns: unknown }
           postgrest_resolvable_with_override_function:
+            | { Args: never; Returns: undefined }
             | { Args: { a: string }; Returns: number }
-            | {
-                Args: { user_id: number }
-                Returns: {
-                  decimal: number | null
-                  id: number
-                  name: string | null
-                  status: Database["public"]["Enums"]["user_status"] | null
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "users"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
+            | { Args: { b: number }; Returns: string }
             | {
                 Args: { completed: boolean; todo_id: number }
                 Returns: {
@@ -1924,6 +2140,22 @@ test('typegen w/ one-to-one relationships', async () => {
                 SetofOptions: {
                   from: "*"
                   to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_id: number }
+                Returns: {
+                  decimal: number | null
+                  id: number
+                  name: string | null
+                  status: Database["public"]["Enums"]["user_status"] | null
+                  user_uuid: string | null
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "users"
                   isOneToOne: false
                   isSetofReturn: true
                 }
@@ -1942,22 +2174,20 @@ test('typegen w/ one-to-one relationships', async () => {
                   isSetofReturn: true
                 }
               }
-            | { Args: { b: number }; Returns: string }
-            | { Args: never; Returns: undefined }
           postgrest_unresolvable_function:
-            | {
-                Args: { a: string }
-                Returns: {
-                  error: true
-                } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
-              }
+            | { Args: never; Returns: undefined }
             | {
                 Args: { a: number }
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
               }
-            | { Args: never; Returns: undefined }
+            | {
+                Args: { a: string }
+                Returns: {
+                  error: true
+                } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+              }
           search_todos_by_details: {
             Args: { search_details: string }
             Returns: {
@@ -1991,20 +2221,6 @@ test('typegen w/ one-to-one relationships', async () => {
           }
           test_unnamed_row_setof:
             | {
-                Args: { user_id: number }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
-            | {
                 Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
                   details: string | null
@@ -2013,6 +2229,20 @@ test('typegen w/ one-to-one relationships', async () => {
                 }[]
                 SetofOptions: {
                   from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
                   to: "todos"
                   isOneToOne: false
                   isSetofReturn: true
@@ -2232,6 +2462,70 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Update: {}
             Relationships: []
           }
+          events: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+              days_since_event: number | null
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
+          events_2024: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
+          events_2025: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
           foreign_table: {
             Row: {
               id: number
@@ -2247,6 +2541,24 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+            }
+            Relationships: []
+          }
+          interval_test: {
+            Row: {
+              duration_optional: string | null
+              duration_required: string
+              id: number
+            }
+            Insert: {
+              duration_optional?: string | null
+              duration_required: string
+              id?: number
+            }
+            Update: {
+              duration_optional?: string | null
+              duration_required?: string
+              id?: number
             }
             Relationships: []
           }
@@ -2451,6 +2763,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              user_uuid: string | null
               test_unnamed_row_composite:
                 | Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
                 | null
@@ -2465,12 +2778,14 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+              user_uuid?: string | null
             }
             Update: {
               decimal?: number | null
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+              user_uuid?: string | null
             }
             Relationships: []
           }
@@ -2480,6 +2795,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id: number
               previous_value: Json | null
               user_id: number | null
+              created_ago: number | null
             }
             Insert: {
               created_at?: string | null
@@ -2648,18 +2964,21 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id: number | null
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              user_uuid: string | null
             }
             Insert: {
               decimal?: number | null
               id?: number | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+              user_uuid?: string | null
             }
             Update: {
               decimal?: number | null
               id?: number | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+              user_uuid?: string | null
             }
             Relationships: []
           }
@@ -2674,6 +2993,10 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
         }
         Functions: {
+          add_interval_to_duration: {
+            Args: { additional_interval: string; base_duration: string }
+            Returns: string
+          }
           blurb: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: {
@@ -2693,6 +3016,18 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   error: true
                 } & "the function public.blurb_varchar with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
               }
+          created_ago: {
+            Args: { "": Database["public"]["Tables"]["users_audit"]["Row"] }
+            Returns: {
+              error: true
+            } & "the function public.created_ago with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+          }
+          days_since_event: {
+            Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+            Returns: {
+              error: true
+            } & "the function public.days_since_event with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+          }
           details_is_long: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: {
@@ -2711,6 +3046,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               error: true
             } & "the function public.details_words with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
           }
+          double_duration: {
+            Args: {
+              interval_test_row: Database["public"]["Tables"]["interval_test"]["Row"]
+            }
+            Returns: string
+          }
           function_returning_row: {
             Args: never
             Returns: {
@@ -2718,6 +3059,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              user_uuid: string | null
             }
             SetofOptions: {
               from: "*"
@@ -2733,6 +3075,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              user_uuid: string | null
             }[]
             SetofOptions: {
               from: "*"
@@ -2748,6 +3091,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              user_uuid: string | null
             }
             SetofOptions: {
               from: "todos"
@@ -2810,9 +3154,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
           get_single_user_summary_from_view:
             | {
-                Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
-                }
+                Args: { search_user_id: number }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -2821,7 +3163,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
                 SetofOptions: {
-                  from: "users_view"
+                  from: "*"
                   to: "user_todos_summary_view"
                   isOneToOne: true
                   isSetofReturn: true
@@ -2844,7 +3186,9 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { search_user_id: number }
+                Args: {
+                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -2853,7 +3197,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
                 SetofOptions: {
-                  from: "*"
+                  from: "users_view"
                   to: "user_todos_summary_view"
                   isOneToOne: true
                   isSetofReturn: true
@@ -2875,6 +3219,34 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
           get_todos_from_user:
             | {
+                Args: { search_user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
                 Args: {
                   userview_row: Database["public"]["Views"]["users_view"]["Row"]
                 }
@@ -2890,49 +3262,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   isSetofReturn: true
                 }
               }
-            | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "users"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
-            | {
-                Args: { search_user_id: number }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
           get_todos_setof_rows:
-            | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "users"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
             | {
                 Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
@@ -2942,6 +3272,20 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 }[]
                 SetofOptions: {
                   from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
                   to: "todos"
                   isOneToOne: false
                   isSetofReturn: true
@@ -3008,22 +3352,9 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
           postgres_fdw_handler: { Args: never; Returns: unknown }
           postgrest_resolvable_with_override_function:
+            | { Args: never; Returns: undefined }
             | { Args: { a: string }; Returns: number }
-            | {
-                Args: { user_id: number }
-                Returns: {
-                  decimal: number | null
-                  id: number
-                  name: string | null
-                  status: Database["public"]["Enums"]["user_status"] | null
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "users"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
+            | { Args: { b: number }; Returns: string }
             | {
                 Args: { completed: boolean; todo_id: number }
                 Returns: {
@@ -3034,6 +3365,22 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 SetofOptions: {
                   from: "*"
                   to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_id: number }
+                Returns: {
+                  decimal: number | null
+                  id: number
+                  name: string | null
+                  status: Database["public"]["Enums"]["user_status"] | null
+                  user_uuid: string | null
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "users"
                   isOneToOne: false
                   isSetofReturn: true
                 }
@@ -3052,22 +3399,20 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   isSetofReturn: true
                 }
               }
-            | { Args: { b: number }; Returns: string }
-            | { Args: never; Returns: undefined }
           postgrest_unresolvable_function:
-            | {
-                Args: { a: string }
-                Returns: {
-                  error: true
-                } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
-              }
+            | { Args: never; Returns: undefined }
             | {
                 Args: { a: number }
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
               }
-            | { Args: never; Returns: undefined }
+            | {
+                Args: { a: string }
+                Returns: {
+                  error: true
+                } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+              }
           search_todos_by_details: {
             Args: { search_details: string }
             Returns: {
@@ -3101,20 +3446,6 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
           test_unnamed_row_setof:
             | {
-                Args: { user_id: number }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
-            | {
                 Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
                   details: string | null
@@ -3123,6 +3454,20 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 }[]
                 SetofOptions: {
                   from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
                   to: "todos"
                   isOneToOne: false
                   isSetofReturn: true
@@ -3347,6 +3692,70 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Update: {}
             Relationships: []
           }
+          events: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+              days_since_event: number | null
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
+          events_2024: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
+          events_2025: {
+            Row: {
+              created_at: string
+              data: Json | null
+              event_type: string | null
+              id: number
+            }
+            Insert: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id: number
+            }
+            Update: {
+              created_at?: string
+              data?: Json | null
+              event_type?: string | null
+              id?: number
+            }
+            Relationships: []
+          }
           foreign_table: {
             Row: {
               id: number
@@ -3362,6 +3771,24 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+            }
+            Relationships: []
+          }
+          interval_test: {
+            Row: {
+              duration_optional: string | null
+              duration_required: string
+              id: number
+            }
+            Insert: {
+              duration_optional?: string | null
+              duration_required: string
+              id?: number
+            }
+            Update: {
+              duration_optional?: string | null
+              duration_required?: string
+              id?: number
             }
             Relationships: []
           }
@@ -3566,6 +3993,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              user_uuid: string | null
               test_unnamed_row_composite:
                 | Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
                 | null
@@ -3580,12 +4008,14 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+              user_uuid?: string | null
             }
             Update: {
               decimal?: number | null
               id?: number
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+              user_uuid?: string | null
             }
             Relationships: []
           }
@@ -3595,6 +4025,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               id: number
               previous_value: Json | null
               user_id: number | null
+              created_ago: number | null
             }
             Insert: {
               created_at?: string | null
@@ -3763,18 +4194,21 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               id: number | null
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              user_uuid: string | null
             }
             Insert: {
               decimal?: number | null
               id?: number | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+              user_uuid?: string | null
             }
             Update: {
               decimal?: number | null
               id?: number | null
               name?: string | null
               status?: Database["public"]["Enums"]["user_status"] | null
+              user_uuid?: string | null
             }
             Relationships: []
           }
@@ -3789,6 +4223,10 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
         }
         Functions: {
+          add_interval_to_duration: {
+            Args: { additional_interval: string; base_duration: string }
+            Returns: string
+          }
           blurb: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: {
@@ -3808,6 +4246,18 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   error: true
                 } & "the function public.blurb_varchar with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
               }
+          created_ago: {
+            Args: { "": Database["public"]["Tables"]["users_audit"]["Row"] }
+            Returns: {
+              error: true
+            } & "the function public.created_ago with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+          }
+          days_since_event: {
+            Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+            Returns: {
+              error: true
+            } & "the function public.days_since_event with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+          }
           details_is_long: {
             Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
             Returns: {
@@ -3826,6 +4276,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               error: true
             } & "the function public.details_words with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
           }
+          double_duration: {
+            Args: {
+              interval_test_row: Database["public"]["Tables"]["interval_test"]["Row"]
+            }
+            Returns: string
+          }
           function_returning_row: {
             Args: never
             Returns: {
@@ -3833,6 +4289,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              user_uuid: string | null
             }
             SetofOptions: {
               from: "*"
@@ -3848,6 +4305,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              user_uuid: string | null
             }[]
             SetofOptions: {
               from: "*"
@@ -3863,6 +4321,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               id: number
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
+              user_uuid: string | null
             }
             SetofOptions: {
               from: "todos"
@@ -3925,9 +4384,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
           get_single_user_summary_from_view:
             | {
-                Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
-                }
+                Args: { search_user_id: number }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -3936,7 +4393,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
                 SetofOptions: {
-                  from: "users_view"
+                  from: "*"
                   to: "user_todos_summary_view"
                   isOneToOne: true
                   isSetofReturn: true
@@ -3959,7 +4416,9 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 }
               }
             | {
-                Args: { search_user_id: number }
+                Args: {
+                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -3968,7 +4427,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   user_status: Database["public"]["Enums"]["user_status"] | null
                 }
                 SetofOptions: {
-                  from: "*"
+                  from: "users_view"
                   to: "user_todos_summary_view"
                   isOneToOne: true
                   isSetofReturn: true
@@ -3990,6 +4449,34 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
           get_todos_from_user:
             | {
+                Args: { search_user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
                 Args: {
                   userview_row: Database["public"]["Views"]["users_view"]["Row"]
                 }
@@ -4005,49 +4492,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   isSetofReturn: true
                 }
               }
-            | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "users"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
-            | {
-                Args: { search_user_id: number }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
           get_todos_setof_rows:
-            | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "users"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
             | {
                 Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
@@ -4057,6 +4502,20 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 }[]
                 SetofOptions: {
                   from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "users"
                   to: "todos"
                   isOneToOne: false
                   isSetofReturn: true
@@ -4123,22 +4582,9 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
           postgres_fdw_handler: { Args: never; Returns: unknown }
           postgrest_resolvable_with_override_function:
+            | { Args: never; Returns: undefined }
             | { Args: { a: string }; Returns: number }
-            | {
-                Args: { user_id: number }
-                Returns: {
-                  decimal: number | null
-                  id: number
-                  name: string | null
-                  status: Database["public"]["Enums"]["user_status"] | null
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "users"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
+            | { Args: { b: number }; Returns: string }
             | {
                 Args: { completed: boolean; todo_id: number }
                 Returns: {
@@ -4149,6 +4595,22 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 SetofOptions: {
                   from: "*"
                   to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_id: number }
+                Returns: {
+                  decimal: number | null
+                  id: number
+                  name: string | null
+                  status: Database["public"]["Enums"]["user_status"] | null
+                  user_uuid: string | null
+                }[]
+                SetofOptions: {
+                  from: "*"
+                  to: "users"
                   isOneToOne: false
                   isSetofReturn: true
                 }
@@ -4167,22 +4629,20 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   isSetofReturn: true
                 }
               }
-            | { Args: { b: number }; Returns: string }
-            | { Args: never; Returns: undefined }
           postgrest_unresolvable_function:
-            | {
-                Args: { a: string }
-                Returns: {
-                  error: true
-                } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
-              }
+            | { Args: never; Returns: undefined }
             | {
                 Args: { a: number }
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
               }
-            | { Args: never; Returns: undefined }
+            | {
+                Args: { a: string }
+                Returns: {
+                  error: true
+                } & "Could not choose the best candidate function between: public.postgrest_unresolvable_function(a => int4), public.postgrest_unresolvable_function(a => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+              }
           search_todos_by_details: {
             Args: { search_details: string }
             Returns: {
@@ -4216,20 +4676,6 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
           test_unnamed_row_setof:
             | {
-                Args: { user_id: number }
-                Returns: {
-                  details: string | null
-                  id: number
-                  "user-id": number
-                }[]
-                SetofOptions: {
-                  from: "*"
-                  to: "todos"
-                  isOneToOne: false
-                  isSetofReturn: true
-                }
-              }
-            | {
                 Args: { "": Database["public"]["Tables"]["todos"]["Row"] }
                 Returns: {
                   details: string | null
@@ -4238,6 +4684,20 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 }[]
                 SetofOptions: {
                   from: "todos"
+                  to: "todos"
+                  isOneToOne: false
+                  isSetofReturn: true
+                }
+              }
+            | {
+                Args: { user_id: number }
+                Returns: {
+                  details: string | null
+                  id: number
+                  "user-id": number
+                }[]
+                SetofOptions: {
+                  from: "*"
                   to: "todos"
                   isOneToOne: false
                   isSetofReturn: true
@@ -4684,30 +5144,152 @@ test('typegen: typescript consistent types definitions orders', async () => {
   expect(firstCall).toEqual(secondCall)
 })
 
+test('typegen: typescript function override order stability', async () => {
+  // Helper function to clean up test entities
+  const cleanupTestEntities = async () => {
+    await app.inject({
+      method: 'POST',
+      path: '/query',
+      payload: {
+        query: `
+          -- Drop functions with all possible signatures
+          DROP FUNCTION IF EXISTS test_func_override(integer, text) CASCADE;
+          DROP FUNCTION IF EXISTS test_func_override(text, integer) CASCADE;
+          DROP FUNCTION IF EXISTS test_func_override(boolean, integer, text) CASCADE;
+          DROP FUNCTION IF EXISTS test_func_override(text, boolean) CASCADE;
+        `,
+      },
+    })
+  }
+
+  // Clean up any existing test entities
+  await cleanupTestEntities()
+
+  // === FIRST ROUND: Create function overrides in order 1 ===
+  await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `
+        -- Create function overrides in specific order
+        CREATE FUNCTION test_func_override(param_a integer, param_b text)
+        RETURNS integer AS 'SELECT param_a + 1' LANGUAGE sql IMMUTABLE;
+
+        CREATE FUNCTION test_func_override(param_a text, param_b integer)
+        RETURNS text AS 'SELECT param_a || param_b::text' LANGUAGE sql IMMUTABLE;
+
+        CREATE FUNCTION test_func_override(param_a boolean, param_b integer, param_c text)
+        RETURNS boolean AS 'SELECT param_a' LANGUAGE sql IMMUTABLE;
+
+        CREATE FUNCTION test_func_override(param_a text, param_b boolean)
+        RETURNS text AS 'SELECT CASE WHEN param_b THEN param_a ELSE '''' END' LANGUAGE sql IMMUTABLE;
+      `,
+    },
+  })
+
+  // Generate types for first configuration
+  const { body: firstCall } = await app.inject({
+    method: 'GET',
+    path: '/generators/typescript',
+    query: { detect_one_to_one_relationships: 'true', postgrest_version: '13' },
+  })
+
+  // === SECOND ROUND: Modify function definitions without changing signatures ===
+  await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `
+        -- Modify function definitions (using CREATE OR REPLACE)
+        -- This should preserve the order
+        CREATE OR REPLACE FUNCTION test_func_override(param_a integer, param_b text)
+        RETURNS integer AS 'SELECT param_a + 100' LANGUAGE sql IMMUTABLE;
+
+        CREATE OR REPLACE FUNCTION test_func_override(param_a text, param_b integer)
+        RETURNS text AS 'SELECT param_a || ''_'' || param_b::text' LANGUAGE sql IMMUTABLE;
+
+        CREATE OR REPLACE FUNCTION test_func_override(param_a boolean, param_b integer, param_c text)
+        RETURNS boolean AS 'SELECT NOT param_a' LANGUAGE sql IMMUTABLE;
+
+        CREATE OR REPLACE FUNCTION test_func_override(param_a text, param_b boolean)
+        RETURNS text AS 'SELECT CASE WHEN param_b THEN param_a || ''_true'' ELSE ''false'' END' LANGUAGE sql IMMUTABLE;
+      `,
+    },
+  })
+
+  // Generate types for second configuration (after modifying definitions)
+  const { body: secondCall } = await app.inject({
+    method: 'GET',
+    path: '/generators/typescript',
+    query: { detect_one_to_one_relationships: 'true', postgrest_version: '13' },
+  })
+
+  // === THIRD ROUND: Drop and recreate in different order ===
+  await cleanupTestEntities()
+
+  // Create functions in reverse order
+  await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `
+        -- Create function overrides in reverse order
+        CREATE FUNCTION test_func_override(param_a text, param_b boolean)
+        RETURNS text AS 'SELECT CASE WHEN param_b THEN param_a ELSE '''' END' LANGUAGE sql IMMUTABLE;
+
+        CREATE FUNCTION test_func_override(param_a boolean, param_b integer, param_c text)
+        RETURNS boolean AS 'SELECT param_a' LANGUAGE sql IMMUTABLE;
+
+        CREATE FUNCTION test_func_override(param_a text, param_b integer)
+        RETURNS text AS 'SELECT param_a || param_b::text' LANGUAGE sql IMMUTABLE;
+
+        CREATE FUNCTION test_func_override(param_a integer, param_b text)
+        RETURNS integer AS 'SELECT param_a + 1' LANGUAGE sql IMMUTABLE;
+      `,
+    },
+  })
+
+  // Generate types for third configuration (recreated in different order)
+  const { body: thirdCall } = await app.inject({
+    method: 'GET',
+    path: '/generators/typescript',
+    query: { detect_one_to_one_relationships: 'true', postgrest_version: '13' },
+  })
+
+  // Clean up test entities
+  await cleanupTestEntities()
+
+  expect(firstCall).toEqual(secondCall)
+  expect(secondCall).toEqual(thirdCall)
+})
+
 test('typegen: go', async () => {
   const { body } = await app.inject({ method: 'GET', path: '/generators/go' })
   expect(body).toMatchInlineSnapshot(`
     "package database
 
     type PublicUsersSelect struct {
-      Decimal *float64 \`json:"decimal"\`
-      Id      int64    \`json:"id"\`
-      Name    *string  \`json:"name"\`
-      Status  *string  \`json:"status"\`
+      Decimal  *float64 \`json:"decimal"\`
+      Id       int64    \`json:"id"\`
+      Name     *string  \`json:"name"\`
+      Status   *string  \`json:"status"\`
+      UserUuid *string  \`json:"user_uuid"\`
     }
 
     type PublicUsersInsert struct {
-      Decimal *float64 \`json:"decimal"\`
-      Id      *int64   \`json:"id"\`
-      Name    *string  \`json:"name"\`
-      Status  *string  \`json:"status"\`
+      Decimal  *float64 \`json:"decimal"\`
+      Id       *int64   \`json:"id"\`
+      Name     *string  \`json:"name"\`
+      Status   *string  \`json:"status"\`
+      UserUuid *string  \`json:"user_uuid"\`
     }
 
     type PublicUsersUpdate struct {
-      Decimal *float64 \`json:"decimal"\`
-      Id      *int64   \`json:"id"\`
-      Name    *string  \`json:"name"\`
-      Status  *string  \`json:"status"\`
+      Decimal  *float64 \`json:"decimal"\`
+      Id       *int64   \`json:"id"\`
+      Name     *string  \`json:"name"\`
+      Status   *string  \`json:"status"\`
+      UserUuid *string  \`json:"user_uuid"\`
     }
 
     type PublicTodosSelect struct {
@@ -4806,6 +5388,87 @@ test('typegen: go', async () => {
       OtherId *int64  \`json:"other_id"\`
     }
 
+    type PublicEventsSelect struct {
+      CreatedAt string      \`json:"created_at"\`
+      Data      interface{} \`json:"data"\`
+      EventType *string     \`json:"event_type"\`
+      Id        int64       \`json:"id"\`
+    }
+
+    type PublicEventsInsert struct {
+      CreatedAt *string     \`json:"created_at"\`
+      Data      interface{} \`json:"data"\`
+      EventType *string     \`json:"event_type"\`
+      Id        *int64      \`json:"id"\`
+    }
+
+    type PublicEventsUpdate struct {
+      CreatedAt *string     \`json:"created_at"\`
+      Data      interface{} \`json:"data"\`
+      EventType *string     \`json:"event_type"\`
+      Id        *int64      \`json:"id"\`
+    }
+
+    type PublicEvents2024Select struct {
+      CreatedAt string      \`json:"created_at"\`
+      Data      interface{} \`json:"data"\`
+      EventType *string     \`json:"event_type"\`
+      Id        int64       \`json:"id"\`
+    }
+
+    type PublicEvents2024Insert struct {
+      CreatedAt *string     \`json:"created_at"\`
+      Data      interface{} \`json:"data"\`
+      EventType *string     \`json:"event_type"\`
+      Id        int64       \`json:"id"\`
+    }
+
+    type PublicEvents2024Update struct {
+      CreatedAt *string     \`json:"created_at"\`
+      Data      interface{} \`json:"data"\`
+      EventType *string     \`json:"event_type"\`
+      Id        *int64      \`json:"id"\`
+    }
+
+    type PublicEvents2025Select struct {
+      CreatedAt string      \`json:"created_at"\`
+      Data      interface{} \`json:"data"\`
+      EventType *string     \`json:"event_type"\`
+      Id        int64       \`json:"id"\`
+    }
+
+    type PublicEvents2025Insert struct {
+      CreatedAt *string     \`json:"created_at"\`
+      Data      interface{} \`json:"data"\`
+      EventType *string     \`json:"event_type"\`
+      Id        int64       \`json:"id"\`
+    }
+
+    type PublicEvents2025Update struct {
+      CreatedAt *string     \`json:"created_at"\`
+      Data      interface{} \`json:"data"\`
+      EventType *string     \`json:"event_type"\`
+      Id        *int64      \`json:"id"\`
+    }
+
+    type PublicIntervalTestSelect struct {
+      DurationOptional *string \`json:"duration_optional"\`
+      DurationRequired string  \`json:"duration_required"\`
+      Id               int64   \`json:"id"\`
+    }
+
+    type PublicIntervalTestInsert struct {
+      DurationOptional *string \`json:"duration_optional"\`
+      DurationRequired string  \`json:"duration_required"\`
+      Id               *int64  \`json:"id"\`
+    }
+
+    type PublicIntervalTestUpdate struct {
+      DurationOptional *string \`json:"duration_optional"\`
+      DurationRequired *string \`json:"duration_required"\`
+      Id               *int64  \`json:"id"\`
+    }
+
     type PublicCategorySelect struct {
       Id   int32  \`json:"id"\`
       Name string \`json:"name"\`
@@ -4859,10 +5522,11 @@ test('typegen: go', async () => {
     }
 
     type PublicUsersViewSelect struct {
-      Decimal *float64 \`json:"decimal"\`
-      Id      *int64   \`json:"id"\`
-      Name    *string  \`json:"name"\`
-      Status  *string  \`json:"status"\`
+      Decimal  *float64 \`json:"decimal"\`
+      Id       *int64   \`json:"id"\`
+      Name     *string  \`json:"name"\`
+      Status   *string  \`json:"status"\`
+      UserUuid *string  \`json:"user_uuid"\`
     }
 
     type PublicUserTodosSummaryViewSelect struct {
@@ -4942,6 +5606,114 @@ test('typegen: swift', async () => {
       }
       internal struct EmptyUpdate: Codable, Hashable, Sendable {
       }
+      internal struct EventsSelect: Codable, Hashable, Sendable, Identifiable {
+        internal let createdAt: String
+        internal let data: AnyJSON?
+        internal let eventType: String?
+        internal let id: Int64
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      internal struct EventsInsert: Codable, Hashable, Sendable, Identifiable {
+        internal let createdAt: String?
+        internal let data: AnyJSON?
+        internal let eventType: String?
+        internal let id: Int64?
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      internal struct EventsUpdate: Codable, Hashable, Sendable, Identifiable {
+        internal let createdAt: String?
+        internal let data: AnyJSON?
+        internal let eventType: String?
+        internal let id: Int64?
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      internal struct Events2024Select: Codable, Hashable, Sendable {
+        internal let createdAt: String
+        internal let data: AnyJSON?
+        internal let eventType: String?
+        internal let id: Int64
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      internal struct Events2024Insert: Codable, Hashable, Sendable {
+        internal let createdAt: String?
+        internal let data: AnyJSON?
+        internal let eventType: String?
+        internal let id: Int64
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      internal struct Events2024Update: Codable, Hashable, Sendable {
+        internal let createdAt: String?
+        internal let data: AnyJSON?
+        internal let eventType: String?
+        internal let id: Int64?
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      internal struct Events2025Select: Codable, Hashable, Sendable {
+        internal let createdAt: String
+        internal let data: AnyJSON?
+        internal let eventType: String?
+        internal let id: Int64
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      internal struct Events2025Insert: Codable, Hashable, Sendable {
+        internal let createdAt: String?
+        internal let data: AnyJSON?
+        internal let eventType: String?
+        internal let id: Int64
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      internal struct Events2025Update: Codable, Hashable, Sendable {
+        internal let createdAt: String?
+        internal let data: AnyJSON?
+        internal let eventType: String?
+        internal let id: Int64?
+        internal enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
       internal struct ForeignTableSelect: Codable, Hashable, Sendable {
         internal let id: Int64
         internal let name: String?
@@ -4970,6 +5742,36 @@ test('typegen: swift', async () => {
           case id = "id"
           case name = "name"
           case status = "status"
+        }
+      }
+      internal struct IntervalTestSelect: Codable, Hashable, Sendable, Identifiable {
+        internal let durationOptional: String?
+        internal let durationRequired: String
+        internal let id: Int64
+        internal enum CodingKeys: String, CodingKey {
+          case durationOptional = "duration_optional"
+          case durationRequired = "duration_required"
+          case id = "id"
+        }
+      }
+      internal struct IntervalTestInsert: Codable, Hashable, Sendable, Identifiable {
+        internal let durationOptional: String?
+        internal let durationRequired: String
+        internal let id: Int64?
+        internal enum CodingKeys: String, CodingKey {
+          case durationOptional = "duration_optional"
+          case durationRequired = "duration_required"
+          case id = "id"
+        }
+      }
+      internal struct IntervalTestUpdate: Codable, Hashable, Sendable, Identifiable {
+        internal let durationOptional: String?
+        internal let durationRequired: String?
+        internal let id: Int64?
+        internal enum CodingKeys: String, CodingKey {
+          case durationOptional = "duration_optional"
+          case durationRequired = "duration_required"
+          case id = "id"
         }
       }
       internal struct MemesSelect: Codable, Hashable, Sendable {
@@ -5130,11 +5932,13 @@ test('typegen: swift', async () => {
         internal let id: Int64
         internal let name: String?
         internal let status: UserStatus?
+        internal let userUuid: UUID?
         internal enum CodingKeys: String, CodingKey {
           case decimal = "decimal"
           case id = "id"
           case name = "name"
           case status = "status"
+          case userUuid = "user_uuid"
         }
       }
       internal struct UsersInsert: Codable, Hashable, Sendable, Identifiable {
@@ -5142,11 +5946,13 @@ test('typegen: swift', async () => {
         internal let id: Int64?
         internal let name: String?
         internal let status: UserStatus?
+        internal let userUuid: UUID?
         internal enum CodingKeys: String, CodingKey {
           case decimal = "decimal"
           case id = "id"
           case name = "name"
           case status = "status"
+          case userUuid = "user_uuid"
         }
       }
       internal struct UsersUpdate: Codable, Hashable, Sendable, Identifiable {
@@ -5154,11 +5960,13 @@ test('typegen: swift', async () => {
         internal let id: Int64?
         internal let name: String?
         internal let status: UserStatus?
+        internal let userUuid: UUID?
         internal enum CodingKeys: String, CodingKey {
           case decimal = "decimal"
           case id = "id"
           case name = "name"
           case status = "status"
+          case userUuid = "user_uuid"
         }
       }
       internal struct UsersAuditSelect: Codable, Hashable, Sendable, Identifiable {
@@ -5242,11 +6050,13 @@ test('typegen: swift', async () => {
         internal let id: Int64?
         internal let name: String?
         internal let status: UserStatus?
+        internal let userUuid: UUID?
         internal enum CodingKeys: String, CodingKey {
           case decimal = "decimal"
           case id = "id"
           case name = "name"
           case status = "status"
+          case userUuid = "user_uuid"
         }
       }
       internal struct UsersViewWithMultipleRefsToUsersSelect: Codable, Hashable, Sendable {
@@ -5327,6 +6137,114 @@ test('typegen: swift w/ public access control', async () => {
       }
       public struct EmptyUpdate: Codable, Hashable, Sendable {
       }
+      public struct EventsSelect: Codable, Hashable, Sendable, Identifiable {
+        public let createdAt: String
+        public let data: AnyJSON?
+        public let eventType: String?
+        public let id: Int64
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      public struct EventsInsert: Codable, Hashable, Sendable, Identifiable {
+        public let createdAt: String?
+        public let data: AnyJSON?
+        public let eventType: String?
+        public let id: Int64?
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      public struct EventsUpdate: Codable, Hashable, Sendable, Identifiable {
+        public let createdAt: String?
+        public let data: AnyJSON?
+        public let eventType: String?
+        public let id: Int64?
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      public struct Events2024Select: Codable, Hashable, Sendable {
+        public let createdAt: String
+        public let data: AnyJSON?
+        public let eventType: String?
+        public let id: Int64
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      public struct Events2024Insert: Codable, Hashable, Sendable {
+        public let createdAt: String?
+        public let data: AnyJSON?
+        public let eventType: String?
+        public let id: Int64
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      public struct Events2024Update: Codable, Hashable, Sendable {
+        public let createdAt: String?
+        public let data: AnyJSON?
+        public let eventType: String?
+        public let id: Int64?
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      public struct Events2025Select: Codable, Hashable, Sendable {
+        public let createdAt: String
+        public let data: AnyJSON?
+        public let eventType: String?
+        public let id: Int64
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      public struct Events2025Insert: Codable, Hashable, Sendable {
+        public let createdAt: String?
+        public let data: AnyJSON?
+        public let eventType: String?
+        public let id: Int64
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
+      public struct Events2025Update: Codable, Hashable, Sendable {
+        public let createdAt: String?
+        public let data: AnyJSON?
+        public let eventType: String?
+        public let id: Int64?
+        public enum CodingKeys: String, CodingKey {
+          case createdAt = "created_at"
+          case data = "data"
+          case eventType = "event_type"
+          case id = "id"
+        }
+      }
       public struct ForeignTableSelect: Codable, Hashable, Sendable {
         public let id: Int64
         public let name: String?
@@ -5355,6 +6273,36 @@ test('typegen: swift w/ public access control', async () => {
           case id = "id"
           case name = "name"
           case status = "status"
+        }
+      }
+      public struct IntervalTestSelect: Codable, Hashable, Sendable, Identifiable {
+        public let durationOptional: String?
+        public let durationRequired: String
+        public let id: Int64
+        public enum CodingKeys: String, CodingKey {
+          case durationOptional = "duration_optional"
+          case durationRequired = "duration_required"
+          case id = "id"
+        }
+      }
+      public struct IntervalTestInsert: Codable, Hashable, Sendable, Identifiable {
+        public let durationOptional: String?
+        public let durationRequired: String
+        public let id: Int64?
+        public enum CodingKeys: String, CodingKey {
+          case durationOptional = "duration_optional"
+          case durationRequired = "duration_required"
+          case id = "id"
+        }
+      }
+      public struct IntervalTestUpdate: Codable, Hashable, Sendable, Identifiable {
+        public let durationOptional: String?
+        public let durationRequired: String?
+        public let id: Int64?
+        public enum CodingKeys: String, CodingKey {
+          case durationOptional = "duration_optional"
+          case durationRequired = "duration_required"
+          case id = "id"
         }
       }
       public struct MemesSelect: Codable, Hashable, Sendable {
@@ -5515,11 +6463,13 @@ test('typegen: swift w/ public access control', async () => {
         public let id: Int64
         public let name: String?
         public let status: UserStatus?
+        public let userUuid: UUID?
         public enum CodingKeys: String, CodingKey {
           case decimal = "decimal"
           case id = "id"
           case name = "name"
           case status = "status"
+          case userUuid = "user_uuid"
         }
       }
       public struct UsersInsert: Codable, Hashable, Sendable, Identifiable {
@@ -5527,11 +6477,13 @@ test('typegen: swift w/ public access control', async () => {
         public let id: Int64?
         public let name: String?
         public let status: UserStatus?
+        public let userUuid: UUID?
         public enum CodingKeys: String, CodingKey {
           case decimal = "decimal"
           case id = "id"
           case name = "name"
           case status = "status"
+          case userUuid = "user_uuid"
         }
       }
       public struct UsersUpdate: Codable, Hashable, Sendable, Identifiable {
@@ -5539,11 +6491,13 @@ test('typegen: swift w/ public access control', async () => {
         public let id: Int64?
         public let name: String?
         public let status: UserStatus?
+        public let userUuid: UUID?
         public enum CodingKeys: String, CodingKey {
           case decimal = "decimal"
           case id = "id"
           case name = "name"
           case status = "status"
+          case userUuid = "user_uuid"
         }
       }
       public struct UsersAuditSelect: Codable, Hashable, Sendable, Identifiable {
@@ -5627,11 +6581,13 @@ test('typegen: swift w/ public access control', async () => {
         public let id: Int64?
         public let name: String?
         public let status: UserStatus?
+        public let userUuid: UUID?
         public enum CodingKeys: String, CodingKey {
           case decimal = "decimal"
           case id = "id"
           case name = "name"
           case status = "status"
+          case userUuid = "user_uuid"
         }
       }
       public struct UsersViewWithMultipleRefsToUsersSelect: Codable, Hashable, Sendable {
@@ -5660,4 +6616,351 @@ test('typegen: swift w/ public access control', async () => {
       }
     }"
   `)
+})
+
+test('typegen: python', async () => {
+  const { body } = await app.inject({
+    method: 'GET',
+    path: '/generators/python',
+    query: { access_control: 'public' },
+  })
+  expect(body).toMatchInlineSnapshot(`
+    "from __future__ import annotations
+
+    import datetime
+    import uuid
+    from typing import (
+        Annotated,
+        Any,
+        List,
+        Literal,
+        NotRequired,
+        Optional,
+        TypeAlias,
+        TypedDict,
+    )
+
+    from pydantic import BaseModel, Field, Json
+
+    PublicUserStatus: TypeAlias = Literal["ACTIVE", "INACTIVE"]
+
+    PublicMemeStatus: TypeAlias = Literal["new", "old", "retired"]
+
+    class PublicUsers(BaseModel):
+        decimal: Optional[float] = Field(alias="decimal")
+        id: int = Field(alias="id")
+        name: Optional[str] = Field(alias="name")
+        status: Optional[PublicUserStatus] = Field(alias="status")
+        user_uuid: Optional[uuid.UUID] = Field(alias="user_uuid")
+
+    class PublicUsersInsert(TypedDict):
+        decimal: NotRequired[Annotated[Optional[float], Field(alias="decimal")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+        name: NotRequired[Annotated[Optional[str], Field(alias="name")]]
+        status: NotRequired[Annotated[Optional[PublicUserStatus], Field(alias="status")]]
+        user_uuid: NotRequired[Annotated[Optional[uuid.UUID], Field(alias="user_uuid")]]
+
+    class PublicUsersUpdate(TypedDict):
+        decimal: NotRequired[Annotated[Optional[float], Field(alias="decimal")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+        name: NotRequired[Annotated[Optional[str], Field(alias="name")]]
+        status: NotRequired[Annotated[Optional[PublicUserStatus], Field(alias="status")]]
+        user_uuid: NotRequired[Annotated[Optional[uuid.UUID], Field(alias="user_uuid")]]
+
+    class PublicTodos(BaseModel):
+        details: Optional[str] = Field(alias="details")
+        id: int = Field(alias="id")
+        user_id: int = Field(alias="user-id")
+
+    class PublicTodosInsert(TypedDict):
+        details: NotRequired[Annotated[Optional[str], Field(alias="details")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+        user_id: Annotated[int, Field(alias="user-id")]
+
+    class PublicTodosUpdate(TypedDict):
+        details: NotRequired[Annotated[Optional[str], Field(alias="details")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+        user_id: NotRequired[Annotated[int, Field(alias="user-id")]]
+
+    class PublicUsersAudit(BaseModel):
+        created_at: Optional[datetime.datetime] = Field(alias="created_at")
+        id: int = Field(alias="id")
+        previous_value: Optional[Json[Any]] = Field(alias="previous_value")
+        user_id: Optional[int] = Field(alias="user_id")
+
+    class PublicUsersAuditInsert(TypedDict):
+        created_at: NotRequired[Annotated[Optional[datetime.datetime], Field(alias="created_at")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+        previous_value: NotRequired[Annotated[Optional[Json[Any]], Field(alias="previous_value")]]
+        user_id: NotRequired[Annotated[Optional[int], Field(alias="user_id")]]
+
+    class PublicUsersAuditUpdate(TypedDict):
+        created_at: NotRequired[Annotated[Optional[datetime.datetime], Field(alias="created_at")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+        previous_value: NotRequired[Annotated[Optional[Json[Any]], Field(alias="previous_value")]]
+        user_id: NotRequired[Annotated[Optional[int], Field(alias="user_id")]]
+
+    class PublicUserDetails(BaseModel):
+        details: Optional[str] = Field(alias="details")
+        user_id: int = Field(alias="user_id")
+
+    class PublicUserDetailsInsert(TypedDict):
+        details: NotRequired[Annotated[Optional[str], Field(alias="details")]]
+        user_id: Annotated[int, Field(alias="user_id")]
+
+    class PublicUserDetailsUpdate(TypedDict):
+        details: NotRequired[Annotated[Optional[str], Field(alias="details")]]
+        user_id: NotRequired[Annotated[int, Field(alias="user_id")]]
+
+    class PublicEmpty(BaseModel):
+        pass
+
+    class PublicEmptyInsert(TypedDict):
+        pass
+
+    class PublicEmptyUpdate(TypedDict):
+        pass
+
+    class PublicTableWithOtherTablesRowType(BaseModel):
+        col1: Optional[PublicUserDetails] = Field(alias="col1")
+        col2: Optional[PublicAView] = Field(alias="col2")
+
+    class PublicTableWithOtherTablesRowTypeInsert(TypedDict):
+        col1: NotRequired[Annotated[Optional[PublicUserDetails], Field(alias="col1")]]
+        col2: NotRequired[Annotated[Optional[PublicAView], Field(alias="col2")]]
+
+    class PublicTableWithOtherTablesRowTypeUpdate(TypedDict):
+        col1: NotRequired[Annotated[Optional[PublicUserDetails], Field(alias="col1")]]
+        col2: NotRequired[Annotated[Optional[PublicAView], Field(alias="col2")]]
+
+    class PublicTableWithPrimaryKeyOtherThanId(BaseModel):
+        name: Optional[str] = Field(alias="name")
+        other_id: int = Field(alias="other_id")
+
+    class PublicTableWithPrimaryKeyOtherThanIdInsert(TypedDict):
+        name: NotRequired[Annotated[Optional[str], Field(alias="name")]]
+        other_id: NotRequired[Annotated[int, Field(alias="other_id")]]
+
+    class PublicTableWithPrimaryKeyOtherThanIdUpdate(TypedDict):
+        name: NotRequired[Annotated[Optional[str], Field(alias="name")]]
+        other_id: NotRequired[Annotated[int, Field(alias="other_id")]]
+
+    class PublicEvents(BaseModel):
+        created_at: datetime.datetime = Field(alias="created_at")
+        data: Optional[Json[Any]] = Field(alias="data")
+        event_type: Optional[str] = Field(alias="event_type")
+        id: int = Field(alias="id")
+
+    class PublicEventsInsert(TypedDict):
+        created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
+        data: NotRequired[Annotated[Optional[Json[Any]], Field(alias="data")]]
+        event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+
+    class PublicEventsUpdate(TypedDict):
+        created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
+        data: NotRequired[Annotated[Optional[Json[Any]], Field(alias="data")]]
+        event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+
+    class PublicEvents2024(BaseModel):
+        created_at: datetime.datetime = Field(alias="created_at")
+        data: Optional[Json[Any]] = Field(alias="data")
+        event_type: Optional[str] = Field(alias="event_type")
+        id: int = Field(alias="id")
+
+    class PublicEvents2024Insert(TypedDict):
+        created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
+        data: NotRequired[Annotated[Optional[Json[Any]], Field(alias="data")]]
+        event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
+        id: Annotated[int, Field(alias="id")]
+
+    class PublicEvents2024Update(TypedDict):
+        created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
+        data: NotRequired[Annotated[Optional[Json[Any]], Field(alias="data")]]
+        event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+
+    class PublicEvents2025(BaseModel):
+        created_at: datetime.datetime = Field(alias="created_at")
+        data: Optional[Json[Any]] = Field(alias="data")
+        event_type: Optional[str] = Field(alias="event_type")
+        id: int = Field(alias="id")
+
+    class PublicEvents2025Insert(TypedDict):
+        created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
+        data: NotRequired[Annotated[Optional[Json[Any]], Field(alias="data")]]
+        event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
+        id: Annotated[int, Field(alias="id")]
+
+    class PublicEvents2025Update(TypedDict):
+        created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
+        data: NotRequired[Annotated[Optional[Json[Any]], Field(alias="data")]]
+        event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+
+    class PublicIntervalTest(BaseModel):
+        duration_optional: Optional[str] = Field(alias="duration_optional")
+        duration_required: str = Field(alias="duration_required")
+        id: int = Field(alias="id")
+
+    class PublicIntervalTestInsert(TypedDict):
+        duration_optional: NotRequired[Annotated[Optional[str], Field(alias="duration_optional")]]
+        duration_required: Annotated[str, Field(alias="duration_required")]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+
+    class PublicIntervalTestUpdate(TypedDict):
+        duration_optional: NotRequired[Annotated[Optional[str], Field(alias="duration_optional")]]
+        duration_required: NotRequired[Annotated[str, Field(alias="duration_required")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+
+    class PublicCategory(BaseModel):
+        id: int = Field(alias="id")
+        name: str = Field(alias="name")
+
+    class PublicCategoryInsert(TypedDict):
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+        name: Annotated[str, Field(alias="name")]
+
+    class PublicCategoryUpdate(TypedDict):
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+        name: NotRequired[Annotated[str, Field(alias="name")]]
+
+    class PublicMemes(BaseModel):
+        category: Optional[int] = Field(alias="category")
+        created_at: datetime.datetime = Field(alias="created_at")
+        id: int = Field(alias="id")
+        metadata: Optional[Json[Any]] = Field(alias="metadata")
+        name: str = Field(alias="name")
+        status: Optional[PublicMemeStatus] = Field(alias="status")
+
+    class PublicMemesInsert(TypedDict):
+        category: NotRequired[Annotated[Optional[int], Field(alias="category")]]
+        created_at: Annotated[datetime.datetime, Field(alias="created_at")]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+        metadata: NotRequired[Annotated[Optional[Json[Any]], Field(alias="metadata")]]
+        name: Annotated[str, Field(alias="name")]
+        status: NotRequired[Annotated[Optional[PublicMemeStatus], Field(alias="status")]]
+
+    class PublicMemesUpdate(TypedDict):
+        category: NotRequired[Annotated[Optional[int], Field(alias="category")]]
+        created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+        metadata: NotRequired[Annotated[Optional[Json[Any]], Field(alias="metadata")]]
+        name: NotRequired[Annotated[str, Field(alias="name")]]
+        status: NotRequired[Annotated[Optional[PublicMemeStatus], Field(alias="status")]]
+
+    class PublicAView(BaseModel):
+        id: Optional[int] = Field(alias="id")
+
+    class PublicTodosView(BaseModel):
+        details: Optional[str] = Field(alias="details")
+        id: Optional[int] = Field(alias="id")
+        user_id: Optional[int] = Field(alias="user-id")
+
+    class PublicUsersView(BaseModel):
+        decimal: Optional[float] = Field(alias="decimal")
+        id: Optional[int] = Field(alias="id")
+        name: Optional[str] = Field(alias="name")
+        status: Optional[PublicUserStatus] = Field(alias="status")
+        user_uuid: Optional[uuid.UUID] = Field(alias="user_uuid")
+
+    class PublicUserTodosSummaryView(BaseModel):
+        todo_count: Optional[int] = Field(alias="todo_count")
+        todo_details: Optional[List[str]] = Field(alias="todo_details")
+        user_id: Optional[int] = Field(alias="user_id")
+        user_name: Optional[str] = Field(alias="user_name")
+        user_status: Optional[PublicUserStatus] = Field(alias="user_status")
+
+    class PublicUsersViewWithMultipleRefsToUsers(BaseModel):
+        initial_id: Optional[int] = Field(alias="initial_id")
+        initial_name: Optional[str] = Field(alias="initial_name")
+        second_id: Optional[int] = Field(alias="second_id")
+        second_name: Optional[str] = Field(alias="second_name")
+
+    class PublicTodosMatview(BaseModel):
+        details: Optional[str] = Field(alias="details")
+        id: Optional[int] = Field(alias="id")
+        user_id: Optional[int] = Field(alias="user-id")
+
+    class PublicCompositeTypeWithArrayAttribute(BaseModel):
+        my_text_array: List[str] = Field(alias="my_text_array")
+
+    class PublicCompositeTypeWithRecordAttribute(BaseModel):
+        todo: PublicTodos = Field(alias="todo")"
+  `)
+})
+
+test('typegen: python w/ excluded/included schemas', async () => {
+  // Create a test schema with some tables
+  await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `
+        CREATE SCHEMA IF NOT EXISTS test_schema;
+        CREATE TABLE IF NOT EXISTS test_schema.test_table (
+          id serial PRIMARY KEY,
+          name text
+        );
+        CREATE TABLE IF NOT EXISTS test_schema.another_table (
+          id serial PRIMARY KEY,
+          value text
+        );
+      `,
+    },
+  })
+
+  try {
+    // Test excluded_schemas - should exclude test_schema
+    const { body: excludedBody } = await app.inject({
+      method: 'GET',
+      path: '/generators/python',
+      query: { access_control: 'public', excluded_schemas: 'test_schema' },
+    })
+    expect(excludedBody).not.toContain('TestSchemaTestTable')
+    expect(excludedBody).not.toContain('TestSchemaAnotherTable')
+    expect(excludedBody).toContain('PublicUsers')
+    expect(excludedBody).toContain('PublicTodos')
+
+    // Test included_schemas - should only include test_schema
+    const { body: includedBody } = await app.inject({
+      method: 'GET',
+      path: '/generators/python',
+      query: { access_control: 'public', included_schemas: 'test_schema' },
+    })
+    expect(includedBody).toContain('TestSchemaTestTable')
+    expect(includedBody).toContain('TestSchemaAnotherTable')
+    expect(includedBody).not.toContain('PublicUsers')
+    expect(includedBody).not.toContain('PublicTodos')
+
+    // Test multiple excluded schemas
+    const { body: multipleExcludedBody } = await app.inject({
+      method: 'GET',
+      path: '/generators/python',
+      query: { access_control: 'public', excluded_schemas: 'test_schema,public' },
+    })
+    expect(multipleExcludedBody).not.toContain('TestSchemaTestTable')
+    expect(multipleExcludedBody).not.toContain('PublicUsers')
+
+    // // Test multiple included schemas
+    const { body: multipleIncludedBody } = await app.inject({
+      method: 'GET',
+      path: '/generators/python',
+      query: { access_control: 'public', included_schemas: 'public,test_schema' },
+    })
+    expect(multipleIncludedBody).toContain('TestSchemaTestTable')
+    expect(multipleIncludedBody).toContain('PublicUsers')
+  } finally {
+    // Clean up test schema
+    await app.inject({
+      method: 'POST',
+      path: '/query',
+      payload: {
+        query: `
+          DROP SCHEMA IF EXISTS test_schema CASCADE;
+        `,
+      },
+    })
+  }
 })

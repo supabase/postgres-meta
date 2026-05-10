@@ -1,3 +1,4 @@
+import { literal } from 'pg-format'
 import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './common.js'
 
 export const POLICIES_SQL = (
@@ -49,6 +50,6 @@ WHERE
   ${props.schemaFilter ? `n.nspname ${props.schemaFilter}` : 'true'}
   ${props.idsFilter ? `AND pol.oid ${props.idsFilter}` : ''}
   ${props.functionNameIdentifierFilter ? `AND (c.relname || '.' || pol.polname) ${props.functionNameIdentifierFilter}` : ''}
-${props.limit ? `limit ${props.limit}` : ''}
-${props.offset ? `offset ${props.offset}` : ''}
+${props.limit ? `limit ${literal(props.limit)}` : ''}
+${props.offset ? `offset ${literal(props.offset)}` : ''}
 `

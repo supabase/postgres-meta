@@ -1,3 +1,4 @@
+import { literal } from 'pg-format'
 import type { SQLQueryPropsWithSchemaFilter } from './common.js'
 
 export const COLUMNS_SQL = (
@@ -124,6 +125,6 @@ WHERE
       'SELECT, INSERT, UPDATE, REFERENCES'
     )
   )
-${props.limit ? `limit ${props.limit}` : ''}
-${props.offset ? `offset ${props.offset}` : ''}
+${props.limit ? `limit ${literal(props.limit)}` : ''}
+${props.offset ? `offset ${literal(props.offset)}` : ''}
 `

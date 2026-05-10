@@ -74,7 +74,7 @@ test('list types with include Table Types', async () => {
       "id": Any<Number>,
       "name": "todos",
       "schema": "public",
-      "type_relation_id": 16402,
+      "type_relation_id": 16403,
     }
   `
   )

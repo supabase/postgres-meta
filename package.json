@@ -15,7 +15,9 @@
   "imports": {
     "#package.json": "./package.json"
   },
-  "repository": "supabase/postgres-meta",
+  "repository": {
+    "url": "git+https://github.com/supabase/postgres-meta.git"
+  },
   "scripts": {
     "check": "tsc -p tsconfig.json --noEmit",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
@@ -25,6 +27,7 @@
     "gen:types:typescript": "PG_META_GENERATE_TYPES=typescript node --loader ts-node/esm src/server/server.ts",
     "gen:types:go": "PG_META_GENERATE_TYPES=go node --loader ts-node/esm src/server/server.ts",
     "gen:types:swift": "PG_META_GENERATE_TYPES=swift node --loader ts-node/esm src/server/server.ts",
+    "gen:types:python": "PG_META_GENERATE_TYPES=python node --loader ts-node/esm src/server/server.ts",
     "start": "node dist/server/server.js",
     "dev": "trap 'npm run db:clean' INT && run-s db:clean db:run &&  run-s dev:code",
     "dev:code": "nodemon --exec node --loader ts-node/esm src/server/server.ts | pino-pretty --colorize",
@@ -53,7 +56,7 @@
     "pg-connection-string": "^2.7.0",
     "pg-format": "^1.0.4",
     "pg-protocol": "npm:@supabase/pg-protocol@0.0.2",
-    "pgsql-parser": "^13.16.0",
+    "pgsql-parser": "^17.8.2",
     "pino": "^9.5.0",
     "postgres-array": "^3.0.1",
     "prettier": "^3.3.3",

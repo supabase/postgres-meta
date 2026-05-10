@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { app } from './utils'
+import { app, normalizeUuids } from './utils'
 
 test('query', async () => {
   const res = await app.inject({
@@ -7,19 +7,21 @@ test('query', async () => {
     path: '/query',
     payload: { query: 'SELECT * FROM users' },
   })
-  expect(res.json()).toMatchInlineSnapshot(`
+  expect(normalizeUuids(res.json())).toMatchInlineSnapshot(`
     [
       {
         "decimal": null,
         "id": 1,
         "name": "Joe Bloggs",
         "status": "ACTIVE",
+        "user_uuid": "00000000-0000-0000-0000-000000000000",
       },
       {
         "decimal": null,
         "id": 2,
         "name": "Jane Doe",
         "status": "ACTIVE",
+        "user_uuid": "00000000-0000-0000-0000-000000000000",
       },
     ]
   `)
@@ -56,9 +58,9 @@ test('parser select statements', async () => {
     payload: { query: 'SELECT id, name FROM users where user_id = 1234' },
   })
   expect(res.json()).toMatchInlineSnapshot(`
-    [
-      {
-        "RawStmt": {
+    {
+      "stmts": [
+        {
           "stmt": {
             "SelectStmt": {
               "fromClause": [
@@ -82,7 +84,7 @@ test('parser select statements', async () => {
                         "fields": [
                           {
                             "String": {
-                              "str": "id",
+                              "sval": "id",
                             },
                           },
                         ],
@@ -99,7 +101,7 @@ test('parser select statements', async () => {
                         "fields": [
                           {
                             "String": {
-                              "str": "name",
+                              "sval": "name",
                             },
                           },
                         ],
@@ -117,7 +119,7 @@ test('parser select statements', async () => {
                       "fields": [
                         {
                           "String": {
-                            "str": "user_id",
+                            "sval": "user_id",
                           },
                         },
                       ],
@@ -128,28 +130,26 @@ test('parser select statements', async () => {
                   "name": [
                     {
                       "String": {
-                        "str": "=",
+                        "sval": "=",
                       },
                     },
                   ],
                   "rexpr": {
                     "A_Const": {
-                      "location": 43,
-                      "val": {
-                        "Integer": {
-                          "ival": 1234,
-                        },
+                      "ival": {
+                        "ival": 1234,
                       },
+                      "location": 43,
                     },
                   },
                 },
               },
             },
           },
-          "stmt_location": 0,
         },
-      },
-    ]
+      ],
+      "version": 170004,
+    }
   `)
 })
 
@@ -163,7 +163,12 @@ test('parser comments', async () => {
 `,
     },
   })
-  expect(res.json()).toMatchInlineSnapshot(`[]`)
+  expect(res.json()).toMatchInlineSnapshot(`
+    {
+      "stmts": [],
+      "version": 170004,
+    }
+  `)
 })
 
 test('parser create schema', async () => {
@@ -177,9 +182,9 @@ create schema if not exists test_schema;
     },
   })
   expect(res.json()).toMatchInlineSnapshot(`
-    [
-      {
-        "RawStmt": {
+    {
+      "stmts": [
+        {
           "stmt": {
             "CreateSchemaStmt": {
               "if_not_exists": true,
@@ -187,10 +192,10 @@ create schema if not exists test_schema;
             },
           },
           "stmt_len": 40,
-          "stmt_location": 0,
         },
-      },
-    ]
+      ],
+      "version": 170004,
+    }
   `)
 })
 
@@ -211,9 +216,9 @@ CREATE TABLE table_name (
     },
   })
   expect(res.json()).toMatchInlineSnapshot(`
-    [
-      {
-        "RawStmt": {
+    {
+      "stmts": [
+        {
           "stmt": {
             "CreateStmt": {
               "oncommit": "ONCOMMIT_NOOP",
@@ -249,12 +254,12 @@ CREATE TABLE table_name (
                       "names": [
                         {
                           "String": {
-                            "str": "pg_catalog",
+                            "sval": "pg_catalog",
                           },
                         },
                         {
                           "String": {
-                            "str": "int8",
+                            "sval": "int8",
                           },
                         },
                       ],
@@ -278,10 +283,8 @@ CREATE TABLE table_name (
                                     "arg": {
                                       "A_Const": {
                                         "location": 141,
-                                        "val": {
-                                          "String": {
-                                            "str": "utc",
-                                          },
+                                        "sval": {
+                                          "sval": "utc",
                                         },
                                       },
                                     },
@@ -291,7 +294,7 @@ CREATE TABLE table_name (
                                       "names": [
                                         {
                                           "String": {
-                                            "str": "text",
+                                            "sval": "text",
                                           },
                                         },
                                       ],
@@ -301,10 +304,11 @@ CREATE TABLE table_name (
                                 },
                                 {
                                   "FuncCall": {
+                                    "funcformat": "COERCE_EXPLICIT_CALL",
                                     "funcname": [
                                       {
                                         "String": {
-                                          "str": "now",
+                                          "sval": "now",
                                         },
                                       },
                                     ],
@@ -312,10 +316,11 @@ CREATE TABLE table_name (
                                   },
                                 },
                               ],
+                              "funcformat": "COERCE_EXPLICIT_CALL",
                               "funcname": [
                                 {
                                   "String": {
-                                    "str": "timezone",
+                                    "sval": "timezone",
                                   },
                                 },
                               ],
@@ -338,12 +343,12 @@ CREATE TABLE table_name (
                       "names": [
                         {
                           "String": {
-                            "str": "pg_catalog",
+                            "sval": "pg_catalog",
                           },
                         },
                         {
                           "String": {
-                            "str": "timestamptz",
+                            "sval": "timestamptz",
                           },
                         },
                       ],
@@ -367,10 +372,8 @@ CREATE TABLE table_name (
                                     "arg": {
                                       "A_Const": {
                                         "location": 226,
-                                        "val": {
-                                          "String": {
-                                            "str": "utc",
-                                          },
+                                        "sval": {
+                                          "sval": "utc",
                                         },
                                       },
                                     },
@@ -380,7 +383,7 @@ CREATE TABLE table_name (
                                       "names": [
                                         {
                                           "String": {
-                                            "str": "text",
+                                            "sval": "text",
                                           },
                                         },
                                       ],
@@ -390,10 +393,11 @@ CREATE TABLE table_name (
                                 },
                                 {
                                   "FuncCall": {
+                                    "funcformat": "COERCE_EXPLICIT_CALL",
                                     "funcname": [
                                       {
                                         "String": {
-                                          "str": "now",
+                                          "sval": "now",
                                         },
                                       },
                                     ],
@@ -401,10 +405,11 @@ CREATE TABLE table_name (
                                   },
                                 },
                               ],
+                              "funcformat": "COERCE_EXPLICIT_CALL",
                               "funcname": [
                                 {
                                   "String": {
-                                    "str": "timezone",
+                                    "sval": "timezone",
                                   },
                                 },
                               ],
@@ -427,12 +432,12 @@ CREATE TABLE table_name (
                       "names": [
                         {
                           "String": {
-                            "str": "pg_catalog",
+                            "sval": "pg_catalog",
                           },
                         },
                         {
                           "String": {
-                            "str": "timestamptz",
+                            "sval": "timestamptz",
                           },
                         },
                       ],
@@ -450,7 +455,7 @@ CREATE TABLE table_name (
                       "names": [
                         {
                           "String": {
-                            "str": "jsonb",
+                            "sval": "jsonb",
                           },
                         },
                       ],
@@ -468,7 +473,7 @@ CREATE TABLE table_name (
                       "names": [
                         {
                           "String": {
-                            "str": "text",
+                            "sval": "text",
                           },
                         },
                       ],
@@ -480,10 +485,10 @@ CREATE TABLE table_name (
             },
           },
           "stmt_len": 283,
-          "stmt_location": 0,
         },
-      },
-    ]
+      ],
+      "version": 170004,
+    }
   `)
 
   const deparse = await app.inject({
@@ -493,11 +498,11 @@ CREATE TABLE table_name (
   })
   expect(deparse.body).toMatchInlineSnapshot(`
     "CREATE TABLE table_name (
-     	id bigint GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
-    	inserted_at pg_catalog.timestamptz DEFAULT ( timezone('utc'::text, now()) ) NOT NULL,
-    	updated_at pg_catalog.timestamptz DEFAULT ( timezone('utc'::text, now()) ) NOT NULL,
-    	data jsonb,
-    	name text 
+      id bigint GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+      inserted_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+      updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+      data jsonb,
+      name text
     );"
   `)
 })
@@ -755,13 +760,14 @@ test('parameter binding with positional parameters', async () => {
       parameters: [1, 'ACTIVE'],
     },
   })
-  expect(res.json()).toMatchInlineSnapshot(`
+  expect(normalizeUuids(res.json())).toMatchInlineSnapshot(`
     [
       {
         "decimal": null,
         "id": 1,
         "name": "Joe Bloggs",
         "status": "ACTIVE",
+        "user_uuid": "00000000-0000-0000-0000-000000000000",
       },
     ]
   `)

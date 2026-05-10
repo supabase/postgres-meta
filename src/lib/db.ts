@@ -124,9 +124,10 @@ export const init: (config: PoolConfig) => {
           async () => {
             // Use statement_timeout AND idle_session_timeout to ensure the connection will be killed even if idle after
             // timeout time.
-            const statementTimeoutQueryPrefix = statementQueryTimeout
-              ? `SET statement_timeout='${statementQueryTimeout}s'; SET idle_session_timeout='${statementQueryTimeout}s';`
-              : ''
+            const statementTimeoutQueryPrefix =
+              statementQueryTimeout !== undefined
+                ? `SET statement_timeout='${statementQueryTimeout}s'; SET idle_session_timeout='${statementQueryTimeout}s';`
+                : ''
             // node-postgres need a statement_timeout to kill the connection when timeout is reached
             // otherwise the query will keep running on the database even if query timeout was reached
             // This need to be added at query and not connection level because poolers (pgbouncer) doesn't

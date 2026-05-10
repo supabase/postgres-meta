@@ -1,3 +1,4 @@
+import { literal } from 'pg-format'
 import type { SQLQueryPropsWithSchemaFilterAndIdsFilter } from './common.js'
 
 export const VIEWS_SQL = (
@@ -20,6 +21,6 @@ WHERE
   ${props.idsFilter ? `c.oid ${props.idsFilter} AND` : ''}
   ${props.viewIdentifierFilter ? `(n.nspname || '.' || c.relname) ${props.viewIdentifierFilter} AND` : ''}
   c.relkind = 'v'
-${props.limit ? `limit ${props.limit}` : ''}
-${props.offset ? `offset ${props.offset}` : ''}
+${props.limit ? `limit ${literal(props.limit)}` : ''}
+${props.offset ? `offset ${literal(props.offset)}` : ''}
 `
