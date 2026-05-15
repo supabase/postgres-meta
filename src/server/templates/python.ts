@@ -258,7 +258,7 @@ class PythonBaseModel implements Serializable {
       this.class_attributes.length > 0
         ? this.class_attributes.map((attr) => attr.serialize()).join('\n')
         : '    pass'
-    return `class ${this.name}(BaseModel):\n${attributes}`
+    return `class ${this.name}(BaseModel, frozen=True):\n${attributes}`
   }
 }
 
