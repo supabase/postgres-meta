@@ -6891,6 +6891,440 @@ test('typegen: python', async () => {
   `)
 })
 
+test('typegen: kotlin', async () => {
+  const { body } = await app.inject({ method: 'GET', path: '/generators/kotlin' })
+  expect(body).toMatchInlineSnapshot(`
+    "import kotlinx.serialization.SerialName
+    import kotlinx.serialization.Serializable
+
+    @Serializable
+    enum class MemeStatus {
+        @SerialName("new") NEW,
+        @SerialName("old") OLD,
+        @SerialName("retired") RETIRED
+    }
+
+    @Serializable
+    enum class UserStatus {
+        @SerialName("ACTIVE") ACTIVE,
+        @SerialName("INACTIVE") INACTIVE
+    }
+
+    @Serializable
+    data class CategorySelect(
+        val id: Int,
+        val name: String
+    )
+
+    @Serializable
+    data class CategoryInsert(
+        val id: Int? = null,
+        val name: String
+    )
+
+    @Serializable
+    data class CategoryUpdate(
+        val id: Int? = null,
+        val name: String? = null
+    )
+
+    @Serializable
+    class EmptySelect
+
+    @Serializable
+    class EmptyInsert
+
+    @Serializable
+    class EmptyUpdate
+
+    @Serializable
+    data class EventsSelect(
+        @SerialName("created_at")
+        val createdAt: String,
+        val data: kotlinx.serialization.json.JsonElement? = null,
+        @SerialName("event_type")
+        val eventType: String? = null,
+        val id: Long
+    )
+
+    @Serializable
+    data class EventsInsert(
+        @SerialName("created_at")
+        val createdAt: String? = null,
+        val data: kotlinx.serialization.json.JsonElement? = null,
+        @SerialName("event_type")
+        val eventType: String? = null,
+        val id: Long? = null
+    )
+
+    @Serializable
+    data class EventsUpdate(
+        @SerialName("created_at")
+        val createdAt: String? = null,
+        val data: kotlinx.serialization.json.JsonElement? = null,
+        @SerialName("event_type")
+        val eventType: String? = null,
+        val id: Long? = null
+    )
+
+    @Serializable
+    data class Events2024Select(
+        @SerialName("created_at")
+        val createdAt: String,
+        val data: kotlinx.serialization.json.JsonElement? = null,
+        @SerialName("event_type")
+        val eventType: String? = null,
+        val id: Long
+    )
+
+    @Serializable
+    data class Events2024Insert(
+        @SerialName("created_at")
+        val createdAt: String? = null,
+        val data: kotlinx.serialization.json.JsonElement? = null,
+        @SerialName("event_type")
+        val eventType: String? = null,
+        val id: Long
+    )
+
+    @Serializable
+    data class Events2024Update(
+        @SerialName("created_at")
+        val createdAt: String? = null,
+        val data: kotlinx.serialization.json.JsonElement? = null,
+        @SerialName("event_type")
+        val eventType: String? = null,
+        val id: Long? = null
+    )
+
+    @Serializable
+    data class Events2025Select(
+        @SerialName("created_at")
+        val createdAt: String,
+        val data: kotlinx.serialization.json.JsonElement? = null,
+        @SerialName("event_type")
+        val eventType: String? = null,
+        val id: Long
+    )
+
+    @Serializable
+    data class Events2025Insert(
+        @SerialName("created_at")
+        val createdAt: String? = null,
+        val data: kotlinx.serialization.json.JsonElement? = null,
+        @SerialName("event_type")
+        val eventType: String? = null,
+        val id: Long
+    )
+
+    @Serializable
+    data class Events2025Update(
+        @SerialName("created_at")
+        val createdAt: String? = null,
+        val data: kotlinx.serialization.json.JsonElement? = null,
+        @SerialName("event_type")
+        val eventType: String? = null,
+        val id: Long? = null
+    )
+
+    @Serializable
+    data class ForeignTableSelect(
+        val id: Long,
+        val name: String? = null,
+        val status: UserStatus? = null
+    )
+
+    @Serializable
+    data class ForeignTableInsert(
+        val id: Long,
+        val name: String? = null,
+        val status: UserStatus? = null
+    )
+
+    @Serializable
+    data class ForeignTableUpdate(
+        val id: Long? = null,
+        val name: String? = null,
+        val status: UserStatus? = null
+    )
+
+    @Serializable
+    data class IntervalTestSelect(
+        @SerialName("duration_optional")
+        val durationOptional: IntervalSelect? = null,
+        @SerialName("duration_required")
+        val durationRequired: IntervalSelect,
+        val id: Long
+    )
+
+    @Serializable
+    data class IntervalTestInsert(
+        @SerialName("duration_optional")
+        val durationOptional: IntervalSelect? = null,
+        @SerialName("duration_required")
+        val durationRequired: IntervalSelect,
+        val id: Long? = null
+    )
+
+    @Serializable
+    data class IntervalTestUpdate(
+        @SerialName("duration_optional")
+        val durationOptional: IntervalSelect? = null,
+        @SerialName("duration_required")
+        val durationRequired: IntervalSelect? = null,
+        val id: Long? = null
+    )
+
+    @Serializable
+    data class MemesSelect(
+        val category: Int? = null,
+        @SerialName("created_at")
+        val createdAt: String,
+        val id: Int,
+        val metadata: kotlinx.serialization.json.JsonElement? = null,
+        val name: String,
+        val status: MemeStatus? = null
+    )
+
+    @Serializable
+    data class MemesInsert(
+        val category: Int? = null,
+        @SerialName("created_at")
+        val createdAt: String,
+        val id: Int? = null,
+        val metadata: kotlinx.serialization.json.JsonElement? = null,
+        val name: String,
+        val status: MemeStatus? = null
+    )
+
+    @Serializable
+    data class MemesUpdate(
+        val category: Int? = null,
+        @SerialName("created_at")
+        val createdAt: String? = null,
+        val id: Int? = null,
+        val metadata: kotlinx.serialization.json.JsonElement? = null,
+        val name: String? = null,
+        val status: MemeStatus? = null
+    )
+
+    @Serializable
+    data class TableWithOtherTablesRowTypeSelect(
+        val col1: UserDetailsSelect? = null,
+        val col2: AViewSelect? = null
+    )
+
+    @Serializable
+    data class TableWithOtherTablesRowTypeInsert(
+        val col1: UserDetailsSelect? = null,
+        val col2: AViewSelect? = null
+    )
+
+    @Serializable
+    data class TableWithOtherTablesRowTypeUpdate(
+        val col1: UserDetailsSelect? = null,
+        val col2: AViewSelect? = null
+    )
+
+    @Serializable
+    data class TableWithPrimaryKeyOtherThanIdSelect(
+        val name: String? = null,
+        @SerialName("other_id")
+        val otherId: Long
+    )
+
+    @Serializable
+    data class TableWithPrimaryKeyOtherThanIdInsert(
+        val name: String? = null,
+        @SerialName("other_id")
+        val otherId: Long? = null
+    )
+
+    @Serializable
+    data class TableWithPrimaryKeyOtherThanIdUpdate(
+        val name: String? = null,
+        @SerialName("other_id")
+        val otherId: Long? = null
+    )
+
+    @Serializable
+    data class TodosSelect(
+        val details: String? = null,
+        val id: Long,
+        @SerialName("user-id")
+        val userId: Long
+    )
+
+    @Serializable
+    data class TodosInsert(
+        val details: String? = null,
+        val id: Long? = null,
+        @SerialName("user-id")
+        val userId: Long
+    )
+
+    @Serializable
+    data class TodosUpdate(
+        val details: String? = null,
+        val id: Long? = null,
+        @SerialName("user-id")
+        val userId: Long? = null
+    )
+
+    @Serializable
+    data class UserDetailsSelect(
+        val details: String? = null,
+        @SerialName("user_id")
+        val userId: Long
+    )
+
+    @Serializable
+    data class UserDetailsInsert(
+        val details: String? = null,
+        @SerialName("user_id")
+        val userId: Long
+    )
+
+    @Serializable
+    data class UserDetailsUpdate(
+        val details: String? = null,
+        @SerialName("user_id")
+        val userId: Long? = null
+    )
+
+    @Serializable
+    data class UsersSelect(
+        val decimal: Double? = null,
+        val id: Long,
+        val name: String? = null,
+        val status: UserStatus? = null,
+        @SerialName("user_uuid")
+        val userUuid: String? = null
+    )
+
+    @Serializable
+    data class UsersInsert(
+        val decimal: Double? = null,
+        val id: Long? = null,
+        val name: String? = null,
+        val status: UserStatus? = null,
+        @SerialName("user_uuid")
+        val userUuid: String? = null
+    )
+
+    @Serializable
+    data class UsersUpdate(
+        val decimal: Double? = null,
+        val id: Long? = null,
+        val name: String? = null,
+        val status: UserStatus? = null,
+        @SerialName("user_uuid")
+        val userUuid: String? = null
+    )
+
+    @Serializable
+    data class UsersAuditSelect(
+        @SerialName("created_at")
+        val createdAt: String? = null,
+        val id: Long,
+        @SerialName("previous_value")
+        val previousValue: kotlinx.serialization.json.JsonElement? = null,
+        @SerialName("user_id")
+        val userId: Long? = null
+    )
+
+    @Serializable
+    data class UsersAuditInsert(
+        @SerialName("created_at")
+        val createdAt: String? = null,
+        val id: Long? = null,
+        @SerialName("previous_value")
+        val previousValue: kotlinx.serialization.json.JsonElement? = null,
+        @SerialName("user_id")
+        val userId: Long? = null
+    )
+
+    @Serializable
+    data class UsersAuditUpdate(
+        @SerialName("created_at")
+        val createdAt: String? = null,
+        val id: Long? = null,
+        @SerialName("previous_value")
+        val previousValue: kotlinx.serialization.json.JsonElement? = null,
+        @SerialName("user_id")
+        val userId: Long? = null
+    )
+
+    @Serializable
+    data class AViewSelect(
+        val id: Long? = null
+    )
+
+    @Serializable
+    data class TodosMatviewSelect(
+        val details: String? = null,
+        val id: Long? = null,
+        @SerialName("user-id")
+        val userId: Long? = null
+    )
+
+    @Serializable
+    data class TodosViewSelect(
+        val details: String? = null,
+        val id: Long? = null,
+        @SerialName("user-id")
+        val userId: Long? = null
+    )
+
+    @Serializable
+    data class UserTodosSummaryViewSelect(
+        @SerialName("todo_count")
+        val todoCount: Long? = null,
+        @SerialName("todo_details")
+        val todoDetails: List<String>? = null,
+        @SerialName("user_id")
+        val userId: Long? = null,
+        @SerialName("user_name")
+        val userName: String? = null,
+        @SerialName("user_status")
+        val userStatus: UserStatus? = null
+    )
+
+    @Serializable
+    data class UsersViewSelect(
+        val decimal: Double? = null,
+        val id: Long? = null,
+        val name: String? = null,
+        val status: UserStatus? = null,
+        @SerialName("user_uuid")
+        val userUuid: String? = null
+    )
+
+    @Serializable
+    data class UsersViewWithMultipleRefsToUsersSelect(
+        @SerialName("initial_id")
+        val initialId: Long? = null,
+        @SerialName("initial_name")
+        val initialName: String? = null,
+        @SerialName("second_id")
+        val secondId: Long? = null,
+        @SerialName("second_name")
+        val secondName: String? = null
+    )
+
+    @Serializable
+    data class CompositeTypeWithArrayAttribute(
+        @SerialName("my_text_array")
+        val myTextArray: kotlinx.serialization.json.JsonElement
+    )
+
+    @Serializable
+    data class CompositeTypeWithRecordAttribute(
+        val todo: TodosSelect
+    )"
+  `)
+})
+
 test('typegen: python w/ excluded/included schemas', async () => {
   // Create a test schema with some tables
   await app.inject({
