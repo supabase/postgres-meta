@@ -171,6 +171,46 @@ test('typegen: typescript', async () => {
               },
             ]
           }
+          profile: {
+            Row: {
+              id: string
+              profile_type_id: number | null
+              username: string | null
+            }
+            Insert: {
+              id?: string
+              profile_type_id?: number | null
+              username?: string | null
+            }
+            Update: {
+              id?: string
+              profile_type_id?: number | null
+              username?: string | null
+            }
+            Relationships: [
+              {
+                foreignKeyName: "profile_profile_type_id_fkey"
+                columns: ["profile_type_id"]
+                referencedRelation: "profile_type"
+                referencedColumns: ["id"]
+              },
+            ]
+          }
+          profile_type: {
+            Row: {
+              id: number
+              name: string
+            }
+            Insert: {
+              id: number
+              name: string
+            }
+            Update: {
+              id?: number
+              name?: string
+            }
+            Relationships: []
+          }
           table_with_other_tables_row_type: {
             Row: {
               col1: Database["public"]["Tables"]["user_details"]["Row"] | null
@@ -387,6 +427,20 @@ test('typegen: typescript', async () => {
             }
             Relationships: []
           }
+          profile_view: {
+            Row: {
+              id: string | null
+              profileType: string | null
+              username: string | null
+            }
+
+            Update: {
+              id?: never
+              profileType?: never
+              username?: never
+            }
+            Relationships: []
+          }
           todos_matview: {
             Row: {
               details: string | null
@@ -398,6 +452,7 @@ test('typegen: typescript', async () => {
                 "user-id": number
               } | null
             }
+
             Relationships: [
               {
                 foreignKeyName: "todos_user-id_fkey"
@@ -506,6 +561,7 @@ test('typegen: typescript', async () => {
               user_name: string | null
               user_status: Database["public"]["Enums"]["user_status"] | null
             }
+
             Relationships: []
           }
           users_view: {
@@ -539,6 +595,7 @@ test('typegen: typescript', async () => {
               second_id: number | null
               second_name: string | null
             }
+
             Relationships: []
           }
         }
@@ -1372,6 +1429,47 @@ test('typegen w/ one-to-one relationships', async () => {
               },
             ]
           }
+          profile: {
+            Row: {
+              id: string
+              profile_type_id: number | null
+              username: string | null
+            }
+            Insert: {
+              id?: string
+              profile_type_id?: number | null
+              username?: string | null
+            }
+            Update: {
+              id?: string
+              profile_type_id?: number | null
+              username?: string | null
+            }
+            Relationships: [
+              {
+                foreignKeyName: "profile_profile_type_id_fkey"
+                columns: ["profile_type_id"]
+                isOneToOne: false
+                referencedRelation: "profile_type"
+                referencedColumns: ["id"]
+              },
+            ]
+          }
+          profile_type: {
+            Row: {
+              id: number
+              name: string
+            }
+            Insert: {
+              id: number
+              name: string
+            }
+            Update: {
+              id?: number
+              name?: string
+            }
+            Relationships: []
+          }
           table_with_other_tables_row_type: {
             Row: {
               col1: Database["public"]["Tables"]["user_details"]["Row"] | null
@@ -1600,6 +1698,20 @@ test('typegen w/ one-to-one relationships', async () => {
             }
             Relationships: []
           }
+          profile_view: {
+            Row: {
+              id: string | null
+              profileType: string | null
+              username: string | null
+            }
+
+            Update: {
+              id?: never
+              profileType?: never
+              username?: never
+            }
+            Relationships: []
+          }
           todos_matview: {
             Row: {
               details: string | null
@@ -1611,6 +1723,7 @@ test('typegen w/ one-to-one relationships', async () => {
                 "user-id": number
               } | null
             }
+
             Relationships: [
               {
                 foreignKeyName: "todos_user-id_fkey"
@@ -1731,6 +1844,7 @@ test('typegen w/ one-to-one relationships', async () => {
               user_name: string | null
               user_status: Database["public"]["Enums"]["user_status"] | null
             }
+
             Relationships: []
           }
           users_view: {
@@ -1764,6 +1878,7 @@ test('typegen w/ one-to-one relationships', async () => {
               second_id: number | null
               second_name: string | null
             }
+
             Relationships: []
           }
         }
@@ -2597,6 +2712,47 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               },
             ]
           }
+          profile: {
+            Row: {
+              id: string
+              profile_type_id: number | null
+              username: string | null
+            }
+            Insert: {
+              id?: string
+              profile_type_id?: number | null
+              username?: string | null
+            }
+            Update: {
+              id?: string
+              profile_type_id?: number | null
+              username?: string | null
+            }
+            Relationships: [
+              {
+                foreignKeyName: "profile_profile_type_id_fkey"
+                columns: ["profile_type_id"]
+                isOneToOne: false
+                referencedRelation: "profile_type"
+                referencedColumns: ["id"]
+              },
+            ]
+          }
+          profile_type: {
+            Row: {
+              id: number
+              name: string
+            }
+            Insert: {
+              id: number
+              name: string
+            }
+            Update: {
+              id?: number
+              name?: string
+            }
+            Relationships: []
+          }
           table_with_other_tables_row_type: {
             Row: {
               col1: Database["public"]["Tables"]["user_details"]["Row"] | null
@@ -2825,6 +2981,20 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             }
             Relationships: []
           }
+          profile_view: {
+            Row: {
+              id: string | null
+              profileType: string | null
+              username: string | null
+            }
+
+            Update: {
+              id?: never
+              profileType?: never
+              username?: never
+            }
+            Relationships: []
+          }
           todos_matview: {
             Row: {
               details: string | null
@@ -2836,6 +3006,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 "user-id": number
               } | null
             }
+
             Relationships: [
               {
                 foreignKeyName: "todos_user-id_fkey"
@@ -2956,6 +3127,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               user_name: string | null
               user_status: Database["public"]["Enums"]["user_status"] | null
             }
+
             Relationships: []
           }
           users_view: {
@@ -2989,6 +3161,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               second_id: number | null
               second_name: string | null
             }
+
             Relationships: []
           }
         }
@@ -3827,6 +4000,47 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               },
             ]
           }
+          profile: {
+            Row: {
+              id: string
+              profile_type_id: number | null
+              username: string | null
+            }
+            Insert: {
+              id?: string
+              profile_type_id?: number | null
+              username?: string | null
+            }
+            Update: {
+              id?: string
+              profile_type_id?: number | null
+              username?: string | null
+            }
+            Relationships: [
+              {
+                foreignKeyName: "profile_profile_type_id_fkey"
+                columns: ["profile_type_id"]
+                isOneToOne: false
+                referencedRelation: "profile_type"
+                referencedColumns: ["id"]
+              },
+            ]
+          }
+          profile_type: {
+            Row: {
+              id: number
+              name: string
+            }
+            Insert: {
+              id: number
+              name: string
+            }
+            Update: {
+              id?: number
+              name?: string
+            }
+            Relationships: []
+          }
           table_with_other_tables_row_type: {
             Row: {
               col1: Database["public"]["Tables"]["user_details"]["Row"] | null
@@ -4055,6 +4269,20 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             }
             Relationships: []
           }
+          profile_view: {
+            Row: {
+              id: string | null
+              profileType: string | null
+              username: string | null
+            }
+
+            Update: {
+              id?: never
+              profileType?: never
+              username?: never
+            }
+            Relationships: []
+          }
           todos_matview: {
             Row: {
               details: string | null
@@ -4066,6 +4294,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 "user-id": number
               } | null
             }
+
             Relationships: [
               {
                 foreignKeyName: "todos_user-id_fkey"
@@ -4186,6 +4415,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               user_name: string | null
               user_status: Database["public"]["Enums"]["user_status"] | null
             }
+
             Relationships: []
           }
           users_view: {
@@ -4219,6 +4449,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               second_id: number | null
               second_name: string | null
             }
+
             Relationships: []
           }
         }
@@ -5469,6 +5700,39 @@ test('typegen: go', async () => {
       Id               *int64  \`json:"id"\`
     }
 
+    type PublicProfileTypeSelect struct {
+      Id   int16  \`json:"id"\`
+      Name string \`json:"name"\`
+    }
+
+    type PublicProfileTypeInsert struct {
+      Id   int16  \`json:"id"\`
+      Name string \`json:"name"\`
+    }
+
+    type PublicProfileTypeUpdate struct {
+      Id   *int16  \`json:"id"\`
+      Name *string \`json:"name"\`
+    }
+
+    type PublicProfileSelect struct {
+      Id            string  \`json:"id"\`
+      ProfileTypeId *int16  \`json:"profile_type_id"\`
+      Username      *string \`json:"username"\`
+    }
+
+    type PublicProfileInsert struct {
+      Id            *string \`json:"id"\`
+      ProfileTypeId *int16  \`json:"profile_type_id"\`
+      Username      *string \`json:"username"\`
+    }
+
+    type PublicProfileUpdate struct {
+      Id            *string \`json:"id"\`
+      ProfileTypeId *int16  \`json:"profile_type_id"\`
+      Username      *string \`json:"username"\`
+    }
+
     type PublicCategorySelect struct {
       Id   int32  \`json:"id"\`
       Name string \`json:"name"\`
@@ -5542,6 +5806,12 @@ test('typegen: go', async () => {
       InitialName *string \`json:"initial_name"\`
       SecondId    *int64  \`json:"second_id"\`
       SecondName  *string \`json:"second_name"\`
+    }
+
+    type PublicProfileViewSelect struct {
+      Id          *string \`json:"id"\`
+      ProfileType *string \`json:"profileType"\`
+      Username    *string \`json:"username"\`
     }
 
     type PublicTodosMatviewSelect struct {
@@ -5822,6 +6092,60 @@ test('typegen: swift', async () => {
           case status = "status"
         }
       }
+      internal struct ProfileSelect: Codable, Hashable, Sendable {
+        internal let id: UUID
+        internal let profileTypeId: Int16?
+        internal let username: String?
+        internal enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case profileTypeId = "profile_type_id"
+          case username = "username"
+        }
+      }
+      internal struct ProfileInsert: Codable, Hashable, Sendable {
+        internal let id: UUID?
+        internal let profileTypeId: Int16?
+        internal let username: String?
+        internal enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case profileTypeId = "profile_type_id"
+          case username = "username"
+        }
+      }
+      internal struct ProfileUpdate: Codable, Hashable, Sendable {
+        internal let id: UUID?
+        internal let profileTypeId: Int16?
+        internal let username: String?
+        internal enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case profileTypeId = "profile_type_id"
+          case username = "username"
+        }
+      }
+      internal struct ProfileTypeSelect: Codable, Hashable, Sendable {
+        internal let id: Int16
+        internal let name: String
+        internal enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case name = "name"
+        }
+      }
+      internal struct ProfileTypeInsert: Codable, Hashable, Sendable {
+        internal let id: Int16
+        internal let name: String
+        internal enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case name = "name"
+        }
+      }
+      internal struct ProfileTypeUpdate: Codable, Hashable, Sendable {
+        internal let id: Int16?
+        internal let name: String?
+        internal enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case name = "name"
+        }
+      }
       internal struct TableWithOtherTablesRowTypeSelect: Codable, Hashable, Sendable {
         internal let col1: UserDetailsSelect?
         internal let col2: AViewSelect?
@@ -6009,6 +6333,16 @@ test('typegen: swift', async () => {
         internal let id: Int64?
         internal enum CodingKeys: String, CodingKey {
           case id = "id"
+        }
+      }
+      internal struct ProfileViewSelect: Codable, Hashable, Sendable {
+        internal let id: UUID?
+        internal let profiletype: String?
+        internal let username: String?
+        internal enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case profiletype = "profileType"
+          case username = "username"
         }
       }
       internal struct TodosMatviewSelect: Codable, Hashable, Sendable {
@@ -6353,6 +6687,60 @@ test('typegen: swift w/ public access control', async () => {
           case status = "status"
         }
       }
+      public struct ProfileSelect: Codable, Hashable, Sendable {
+        public let id: UUID
+        public let profileTypeId: Int16?
+        public let username: String?
+        public enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case profileTypeId = "profile_type_id"
+          case username = "username"
+        }
+      }
+      public struct ProfileInsert: Codable, Hashable, Sendable {
+        public let id: UUID?
+        public let profileTypeId: Int16?
+        public let username: String?
+        public enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case profileTypeId = "profile_type_id"
+          case username = "username"
+        }
+      }
+      public struct ProfileUpdate: Codable, Hashable, Sendable {
+        public let id: UUID?
+        public let profileTypeId: Int16?
+        public let username: String?
+        public enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case profileTypeId = "profile_type_id"
+          case username = "username"
+        }
+      }
+      public struct ProfileTypeSelect: Codable, Hashable, Sendable {
+        public let id: Int16
+        public let name: String
+        public enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case name = "name"
+        }
+      }
+      public struct ProfileTypeInsert: Codable, Hashable, Sendable {
+        public let id: Int16
+        public let name: String
+        public enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case name = "name"
+        }
+      }
+      public struct ProfileTypeUpdate: Codable, Hashable, Sendable {
+        public let id: Int16?
+        public let name: String?
+        public enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case name = "name"
+        }
+      }
       public struct TableWithOtherTablesRowTypeSelect: Codable, Hashable, Sendable {
         public let col1: UserDetailsSelect?
         public let col2: AViewSelect?
@@ -6540,6 +6928,16 @@ test('typegen: swift w/ public access control', async () => {
         public let id: Int64?
         public enum CodingKeys: String, CodingKey {
           case id = "id"
+        }
+      }
+      public struct ProfileViewSelect: Codable, Hashable, Sendable {
+        public let id: UUID?
+        public let profiletype: String?
+        public let username: String?
+        public enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case profiletype = "profileType"
+          case username = "username"
         }
       }
       public struct TodosMatviewSelect: Codable, Hashable, Sendable {
@@ -6814,6 +7212,33 @@ test('typegen: python', async () => {
         duration_required: NotRequired[Annotated[str, Field(alias="duration_required")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
+    class PublicProfileType(BaseModel):
+        id: int = Field(alias="id")
+        name: str = Field(alias="name")
+
+    class PublicProfileTypeInsert(TypedDict):
+        id: Annotated[int, Field(alias="id")]
+        name: Annotated[str, Field(alias="name")]
+
+    class PublicProfileTypeUpdate(TypedDict):
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+        name: NotRequired[Annotated[str, Field(alias="name")]]
+
+    class PublicProfile(BaseModel):
+        id: uuid.UUID = Field(alias="id")
+        profile_type_id: Optional[int] = Field(alias="profile_type_id")
+        username: Optional[str] = Field(alias="username")
+
+    class PublicProfileInsert(TypedDict):
+        id: NotRequired[Annotated[uuid.UUID, Field(alias="id")]]
+        profile_type_id: NotRequired[Annotated[Optional[int], Field(alias="profile_type_id")]]
+        username: NotRequired[Annotated[Optional[str], Field(alias="username")]]
+
+    class PublicProfileUpdate(TypedDict):
+        id: NotRequired[Annotated[uuid.UUID, Field(alias="id")]]
+        profile_type_id: NotRequired[Annotated[Optional[int], Field(alias="profile_type_id")]]
+        username: NotRequired[Annotated[Optional[str], Field(alias="username")]]
+
     class PublicCategory(BaseModel):
         id: int = Field(alias="id")
         name: str = Field(alias="name")
@@ -6877,6 +7302,11 @@ test('typegen: python', async () => {
         initial_name: Optional[str] = Field(alias="initial_name")
         second_id: Optional[int] = Field(alias="second_id")
         second_name: Optional[str] = Field(alias="second_name")
+
+    class PublicProfileView(BaseModel):
+        id: Optional[uuid.UUID] = Field(alias="id")
+        profiletype: Optional[str] = Field(alias="profileType")
+        username: Optional[str] = Field(alias="username")
 
     class PublicTodosMatview(BaseModel):
         details: Optional[str] = Field(alias="details")

@@ -460,6 +460,8 @@ export const postgresViewSchema = Type.Object({
   schema: Type.String(),
   name: Type.String(),
   is_updatable: Type.Boolean(),
+  is_insert_enabled: Type.Boolean(),
+  is_update_enabled: Type.Boolean(),
   comment: Type.Union([Type.String(), Type.Null()]),
   columns: Type.Optional(Type.Array(postgresColumnSchema)),
 })
