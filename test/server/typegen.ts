@@ -674,7 +674,7 @@ test('typegen: typescript', async () => {
             SetofOptions: {
               from: "users"
               to: "todos"
-              isOneToOne: true
+              isOneToOne: false
               isSetofReturn: true
             }
           }
@@ -715,7 +715,7 @@ test('typegen: typescript', async () => {
                 SetofOptions: {
                   from: "*"
                   to: "user_todos_summary_view"
-                  isOneToOne: true
+                  isOneToOne: false
                   isSetofReturn: true
                 }
               }
@@ -731,7 +731,7 @@ test('typegen: typescript', async () => {
                 SetofOptions: {
                   from: "users"
                   to: "user_todos_summary_view"
-                  isOneToOne: true
+                  isOneToOne: false
                   isSetofReturn: true
                 }
               }
@@ -749,7 +749,7 @@ test('typegen: typescript', async () => {
                 SetofOptions: {
                   from: "users_view"
                   to: "user_todos_summary_view"
-                  isOneToOne: true
+                  isOneToOne: false
                   isSetofReturn: true
                 }
               }
@@ -763,7 +763,7 @@ test('typegen: typescript', async () => {
             SetofOptions: {
               from: "todos_matview"
               to: "todos"
-              isOneToOne: true
+              isOneToOne: false
               isSetofReturn: true
             }
           }
@@ -852,7 +852,7 @@ test('typegen: typescript', async () => {
             SetofOptions: {
               from: "users"
               to: "users_audit"
-              isOneToOne: true
+              isOneToOne: false
               isSetofReturn: true
             }
           }
@@ -1899,7 +1899,7 @@ test('typegen w/ one-to-one relationships', async () => {
             SetofOptions: {
               from: "users"
               to: "todos"
-              isOneToOne: true
+              isOneToOne: false
               isSetofReturn: true
             }
           }
@@ -1940,7 +1940,7 @@ test('typegen w/ one-to-one relationships', async () => {
                 SetofOptions: {
                   from: "*"
                   to: "user_todos_summary_view"
-                  isOneToOne: true
+                  isOneToOne: false
                   isSetofReturn: true
                 }
               }
@@ -1956,7 +1956,7 @@ test('typegen w/ one-to-one relationships', async () => {
                 SetofOptions: {
                   from: "users"
                   to: "user_todos_summary_view"
-                  isOneToOne: true
+                  isOneToOne: false
                   isSetofReturn: true
                 }
               }
@@ -1974,7 +1974,7 @@ test('typegen w/ one-to-one relationships', async () => {
                 SetofOptions: {
                   from: "users_view"
                   to: "user_todos_summary_view"
-                  isOneToOne: true
+                  isOneToOne: false
                   isSetofReturn: true
                 }
               }
@@ -1988,7 +1988,7 @@ test('typegen w/ one-to-one relationships', async () => {
             SetofOptions: {
               from: "todos_matview"
               to: "todos"
-              isOneToOne: true
+              isOneToOne: false
               isSetofReturn: true
             }
           }
@@ -2077,7 +2077,7 @@ test('typegen w/ one-to-one relationships', async () => {
             SetofOptions: {
               from: "users"
               to: "users_audit"
-              isOneToOne: true
+              isOneToOne: false
               isSetofReturn: true
             }
           }
@@ -3124,7 +3124,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             SetofOptions: {
               from: "users"
               to: "todos"
-              isOneToOne: true
+              isOneToOne: false
               isSetofReturn: true
             }
           }
@@ -3165,7 +3165,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 SetofOptions: {
                   from: "*"
                   to: "user_todos_summary_view"
-                  isOneToOne: true
+                  isOneToOne: false
                   isSetofReturn: true
                 }
               }
@@ -3181,7 +3181,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 SetofOptions: {
                   from: "users"
                   to: "user_todos_summary_view"
-                  isOneToOne: true
+                  isOneToOne: false
                   isSetofReturn: true
                 }
               }
@@ -3199,7 +3199,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 SetofOptions: {
                   from: "users_view"
                   to: "user_todos_summary_view"
-                  isOneToOne: true
+                  isOneToOne: false
                   isSetofReturn: true
                 }
               }
@@ -3213,7 +3213,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             SetofOptions: {
               from: "todos_matview"
               to: "todos"
-              isOneToOne: true
+              isOneToOne: false
               isSetofReturn: true
             }
           }
@@ -3302,7 +3302,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             SetofOptions: {
               from: "users"
               to: "users_audit"
-              isOneToOne: true
+              isOneToOne: false
               isSetofReturn: true
             }
           }
@@ -4354,7 +4354,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             SetofOptions: {
               from: "users"
               to: "todos"
-              isOneToOne: true
+              isOneToOne: false
               isSetofReturn: true
             }
           }
@@ -4395,7 +4395,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 SetofOptions: {
                   from: "*"
                   to: "user_todos_summary_view"
-                  isOneToOne: true
+                  isOneToOne: false
                   isSetofReturn: true
                 }
               }
@@ -4411,7 +4411,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 SetofOptions: {
                   from: "users"
                   to: "user_todos_summary_view"
-                  isOneToOne: true
+                  isOneToOne: false
                   isSetofReturn: true
                 }
               }
@@ -4429,7 +4429,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 SetofOptions: {
                   from: "users_view"
                   to: "user_todos_summary_view"
-                  isOneToOne: true
+                  isOneToOne: false
                   isSetofReturn: true
                 }
               }
@@ -4443,7 +4443,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             SetofOptions: {
               from: "todos_matview"
               to: "todos"
-              isOneToOne: true
+              isOneToOne: false
               isSetofReturn: true
             }
           }
@@ -4532,7 +4532,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             SetofOptions: {
               from: "users"
               to: "users_audit"
-              isOneToOne: true
+              isOneToOne: false
               isSetofReturn: true
             }
           }
