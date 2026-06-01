@@ -670,7 +670,7 @@ test('typegen: typescript', async () => {
               details: string | null
               id: number
               "user-id": number
-            }
+            }[]
             SetofOptions: {
               from: "users"
               to: "todos"
@@ -711,7 +711,7 @@ test('typegen: typescript', async () => {
                   user_id: number | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
-                }
+                }[]
                 SetofOptions: {
                   from: "*"
                   to: "user_todos_summary_view"
@@ -727,7 +727,7 @@ test('typegen: typescript', async () => {
                   user_id: number | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
-                }
+                }[]
                 SetofOptions: {
                   from: "users"
                   to: "user_todos_summary_view"
@@ -745,7 +745,7 @@ test('typegen: typescript', async () => {
                   user_id: number | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
-                }
+                }[]
                 SetofOptions: {
                   from: "users_view"
                   to: "user_todos_summary_view"
@@ -759,7 +759,7 @@ test('typegen: typescript', async () => {
               details: string | null
               id: number
               "user-id": number
-            }
+            }[]
             SetofOptions: {
               from: "todos_matview"
               to: "todos"
@@ -848,7 +848,7 @@ test('typegen: typescript', async () => {
               id: number
               previous_value: Json | null
               user_id: number | null
-            }
+            }[]
             SetofOptions: {
               from: "users"
               to: "users_audit"
@@ -1895,7 +1895,7 @@ test('typegen w/ one-to-one relationships', async () => {
               details: string | null
               id: number
               "user-id": number
-            }
+            }[]
             SetofOptions: {
               from: "users"
               to: "todos"
@@ -1936,7 +1936,7 @@ test('typegen w/ one-to-one relationships', async () => {
                   user_id: number | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
-                }
+                }[]
                 SetofOptions: {
                   from: "*"
                   to: "user_todos_summary_view"
@@ -1952,7 +1952,7 @@ test('typegen w/ one-to-one relationships', async () => {
                   user_id: number | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
-                }
+                }[]
                 SetofOptions: {
                   from: "users"
                   to: "user_todos_summary_view"
@@ -1970,7 +1970,7 @@ test('typegen w/ one-to-one relationships', async () => {
                   user_id: number | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
-                }
+                }[]
                 SetofOptions: {
                   from: "users_view"
                   to: "user_todos_summary_view"
@@ -1984,7 +1984,7 @@ test('typegen w/ one-to-one relationships', async () => {
               details: string | null
               id: number
               "user-id": number
-            }
+            }[]
             SetofOptions: {
               from: "todos_matview"
               to: "todos"
@@ -2073,7 +2073,7 @@ test('typegen w/ one-to-one relationships', async () => {
               id: number
               previous_value: Json | null
               user_id: number | null
-            }
+            }[]
             SetofOptions: {
               from: "users"
               to: "users_audit"
@@ -3120,7 +3120,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               details: string | null
               id: number
               "user-id": number
-            }
+            }[]
             SetofOptions: {
               from: "users"
               to: "todos"
@@ -3161,7 +3161,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   user_id: number | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
-                }
+                }[]
                 SetofOptions: {
                   from: "*"
                   to: "user_todos_summary_view"
@@ -3177,7 +3177,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   user_id: number | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
-                }
+                }[]
                 SetofOptions: {
                   from: "users"
                   to: "user_todos_summary_view"
@@ -3195,7 +3195,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   user_id: number | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
-                }
+                }[]
                 SetofOptions: {
                   from: "users_view"
                   to: "user_todos_summary_view"
@@ -3209,7 +3209,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               details: string | null
               id: number
               "user-id": number
-            }
+            }[]
             SetofOptions: {
               from: "todos_matview"
               to: "todos"
@@ -3298,7 +3298,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id: number
               previous_value: Json | null
               user_id: number | null
-            }
+            }[]
             SetofOptions: {
               from: "users"
               to: "users_audit"
@@ -4350,7 +4350,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               details: string | null
               id: number
               "user-id": number
-            }
+            }[]
             SetofOptions: {
               from: "users"
               to: "todos"
@@ -4391,7 +4391,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   user_id: number | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
-                }
+                }[]
                 SetofOptions: {
                   from: "*"
                   to: "user_todos_summary_view"
@@ -4407,7 +4407,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   user_id: number | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
-                }
+                }[]
                 SetofOptions: {
                   from: "users"
                   to: "user_todos_summary_view"
@@ -4425,7 +4425,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   user_id: number | null
                   user_name: string | null
                   user_status: Database["public"]["Enums"]["user_status"] | null
-                }
+                }[]
                 SetofOptions: {
                   from: "users_view"
                   to: "user_todos_summary_view"
@@ -4439,7 +4439,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               details: string | null
               id: number
               "user-id": number
-            }
+            }[]
             SetofOptions: {
               from: "todos_matview"
               to: "todos"
@@ -4528,7 +4528,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               id: number
               previous_value: Json | null
               user_id: number | null
-            }
+            }[]
             SetofOptions: {
               from: "users"
               to: "users_audit"

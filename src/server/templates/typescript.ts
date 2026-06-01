@@ -220,7 +220,7 @@ export const apply = async ({
       fn.return_type_id
     )
     const returnsSetOfTable = fn.is_set_returning_function && fn.return_type_relation_id !== null
-    const returnsMultipleRows = fn.prorows !== null && fn.prorows > 1
+    const returnsMultipleRows = fn.is_set_returning_function
     // Case 1: if the function returns a table, we need to add SetofOptions to allow selecting sub fields of the table
     // Those can be used in rpc to select sub fields of a table
     if (returnTableName) {
