@@ -1,4 +1,6 @@
+import CryptoJS from 'crypto-js'
 import { expect, test } from 'vitest'
+import { CRYPTO_KEY } from '../../src/server/constants'
 import { app } from './utils'
 
 test('typegen: typescript', async () => {
@@ -6963,4 +6965,38 @@ test('typegen: python w/ excluded/included schemas', async () => {
       },
     })
   }
+})
+
+test('typegen: typescript keeps ROWS 1 set-returning functions as arrays', async () => {
+  const connectionString = process.env.PG_META_TEST_CONNECTION_STRING
+  const encryptedConnection = connectionString
+    ? CryptoJS.AES.encrypt(connectionString, CRYPTO_KEY).toString()
+    : undefined
+  const { body } = await app.inject({
+    method: 'GET',
+    path: '/generators/typescript',
+    ...(encryptedConnection
+      ? {
+          headers: {
+            'x-connection-encrypted': encryptedConnection,
+          },
+        }
+      : {}),
+  })
+
+  const setofRowsOneMatch = body.match(
+    /function_using_setof_rows_one:[\s\S]*?function_using_table_returns:/
+  )
+  expect(setofRowsOneMatch).not.toBeNull()
+  expect(setofRowsOneMatch?.[0]).toContain('}[]')
+  expect(setofRowsOneMatch?.[0]).toContain('isOneToOne: false')
+  expect(setofRowsOneMatch?.[0]).toContain('isSetofReturn: true')
+
+  const tableReturnsMatch = body.match(
+    /function_using_table_returns:[\s\S]*?get_composite_type_data:/
+  )
+  expect(tableReturnsMatch).not.toBeNull()
+  expect(tableReturnsMatch?.[0]).not.toContain('}[]')
+  expect(tableReturnsMatch?.[0]).toContain('isOneToOne: true')
+  expect(tableReturnsMatch?.[0]).toContain('isSetofReturn: false')
 })
