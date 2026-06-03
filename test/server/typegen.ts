@@ -1,6 +1,4 @@
-import CryptoJS from 'crypto-js'
 import { expect, test } from 'vitest'
-import { CRYPTO_KEY } from '../../src/server/constants'
 import { app } from './utils'
 
 test('typegen: typescript', async () => {
@@ -6968,21 +6966,7 @@ test('typegen: python w/ excluded/included schemas', async () => {
 })
 
 test('typegen: typescript keeps ROWS 1 set-returning functions as arrays', async () => {
-  const connectionString = process.env.PG_META_TEST_CONNECTION_STRING
-  const encryptedConnection = connectionString
-    ? CryptoJS.AES.encrypt(connectionString, CRYPTO_KEY).toString()
-    : undefined
-  const { body } = await app.inject({
-    method: 'GET',
-    path: '/generators/typescript',
-    ...(encryptedConnection
-      ? {
-          headers: {
-            'x-connection-encrypted': encryptedConnection,
-          },
-        }
-      : {}),
-  })
+  const { body } = await app.inject({ method: 'GET', path: '/generators/typescript' })
 
   const setofRowsOneMatch = body.match(
     /function_using_setof_rows_one:[\s\S]*?function_using_table_returns:/
