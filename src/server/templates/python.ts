@@ -193,7 +193,7 @@ class PythonEnum implements Serializable {
     this.variants = type.enums
   }
   serialize(): string {
-    const variants = this.variants.map((item) => `"${item}"`).join(', ')
+    const variants = this.variants.map((item) => JSON.stringify(item)).join(', ')
     return `${this.name}: TypeAlias = Literal[${variants}]`
   }
 }
@@ -237,7 +237,7 @@ class PythonBaseModelAttr implements Serializable {
     const py_type = this.nullable
       ? `Optional[${this.py_type.serialize()}]`
       : this.py_type.serialize()
-    return `    ${this.name}: ${py_type} = Field(alias="${this.pg_name}")`
+    return `    ${this.name}: ${py_type} = Field(alias=${JSON.stringify(this.pg_name)})`
   }
 }
 
@@ -281,7 +281,7 @@ class PythonTypedDictAttr implements Serializable {
     const py_type = this.nullable
       ? `Optional[${this.py_type.serialize()}]`
       : this.py_type.serialize()
-    const annotation = `Annotated[${py_type}, Field(alias="${this.pg_name}")]`
+    const annotation = `Annotated[${py_type}, Field(alias=${JSON.stringify(this.pg_name)})]`
     const rhs = this.not_required ? `NotRequired[${annotation}]` : annotation
     return `    ${this.name}: ${rhs}`
   }
