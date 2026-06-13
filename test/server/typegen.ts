@@ -3647,6 +3647,39 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
   )
 })
 
+test('typegen: typescript w/ bigintAs defaults to number', async () => {
+  const { body } = await app.inject({ method: 'GET', path: '/generators/typescript' })
+  // Back-compat: without the flag, int8 and numeric still generate as `number`.
+  expect(body).toContain('"user-id": number')
+  expect(body).toContain('days_since_event: number | null')
+})
+
+test('typegen: typescript w/ bigintAs=string', async () => {
+  const { body } = await app.inject({
+    method: 'GET',
+    path: '/generators/typescript',
+    query: { bigint_as: 'string' },
+  })
+  // int8 and numeric can exceed Number.MAX_SAFE_INTEGER and are lossy as JS numbers,
+  // so they are emitted as `string` when bigint_as=string.
+  expect(body).toContain('"user-id": string') // int8 column
+  expect(body).toContain('days_since_event: string | null') // numeric (computed)
+  // int2/int4/float4/float8 fit safely in a JS number and are unaffected.
+  expect(body).toContain('details_length: number | null') // int4 (computed)
+})
+
+test('typegen: typescript w/ bigintAs=bigint', async () => {
+  const { body } = await app.inject({
+    method: 'GET',
+    path: '/generators/typescript',
+    query: { bigint_as: 'bigint' },
+  })
+  expect(body).toContain('"user-id": bigint') // int8 column
+  expect(body).toContain('days_since_event: bigint | null') // numeric (computed)
+  // int2/int4/float4/float8 remain `number`.
+  expect(body).toContain('details_length: number | null') // int4 (computed)
+})
+
 test('typegen: typescript w/ postgrestVersion', async () => {
   const { body } = await app.inject({
     method: 'GET',

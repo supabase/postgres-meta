@@ -31,9 +31,11 @@ export const apply = async ({
   types,
   detectOneToOneRelationships,
   postgrestVersion,
+  bigintAs = 'number',
 }: GeneratorMetadata & {
   detectOneToOneRelationships: boolean
   postgrestVersion?: string
+  bigintAs?: 'number' | 'string' | 'bigint'
 }): Promise<string> => {
   schemas.sort((a, b) => a.name.localeCompare(b.name))
   relationships.sort(
@@ -279,6 +281,7 @@ export const apply = async ({
             schemas,
             tables,
             views,
+            bigintAs,
           })
         }
         return { name, type: tsType }
@@ -314,6 +317,7 @@ export const apply = async ({
                       schemas,
                       tables,
                       views,
+                      bigintAs,
                     }
                   )
                 )
@@ -329,6 +333,7 @@ export const apply = async ({
         schemas,
         tables,
         views,
+        bigintAs,
       })
     }
 
@@ -426,6 +431,7 @@ export const apply = async ({
                   schemas,
                   tables,
                   views,
+                  bigintAs,
                 })
               }
               return { name, type: tsType, has_default }
@@ -445,6 +451,7 @@ export const apply = async ({
                   schemas,
                   tables,
                   views,
+                  bigintAs,
                 })
               }
               return { name, type: tsType, has_default }
@@ -462,6 +469,7 @@ export const apply = async ({
                 schemas,
                 tables,
                 views,
+                bigintAs,
               })
             }
             return { name, type: tsType, has_default }
@@ -503,6 +511,7 @@ export const apply = async ({
       schemas: PostgresSchema[]
       tables: PostgresTable[]
       views: PostgresView[]
+      bigintAs: 'number' | 'string' | 'bigint'
     }
   ) {
     return `${JSON.stringify(column.name)}${column.is_optional ? '?' : ''}: ${generateNullableUnionTsType(pgTypeToTsType(schema, column.format, context), column.is_nullable)}`
@@ -539,7 +548,7 @@ export type Database = {
                             is_nullable: column.is_nullable,
                             is_optional: false,
                           },
-                          { types, schemas, tables, views }
+                          { types, schemas, tables, views, bigintAs }
                         )
                       ),
                       ...schemaFunctions
@@ -565,7 +574,7 @@ export type Database = {
                             column.is_identity ||
                             column.default_value !== null,
                         },
-                        { types, schemas, tables, views }
+                        { types, schemas, tables, views, bigintAs }
                       )
                     })}
                   }
@@ -583,7 +592,7 @@ export type Database = {
                           is_nullable: column.is_nullable,
                           is_optional: true,
                         },
-                        { types, schemas, tables, views }
+                        { types, schemas, tables, views, bigintAs }
                       )
                     })}
                   }
@@ -611,7 +620,7 @@ export type Database = {
                             is_nullable: column.is_nullable,
                             is_optional: false,
                           },
-                          { types, schemas, tables, views }
+                          { types, schemas, tables, views, bigintAs }
                         )
                       ),
                       ...schemaFunctions
@@ -637,7 +646,7 @@ export type Database = {
                                  is_nullable: true,
                                  is_optional: true,
                                },
-                               { types, schemas, tables, views }
+                               { types, schemas, tables, views, bigintAs }
                              )
                            })}
                          }
@@ -654,7 +663,7 @@ export type Database = {
                                  is_nullable: true,
                                  is_optional: true,
                                },
-                               { types, schemas, tables, views }
+                               { types, schemas, tables, views, bigintAs }
                              )
                            })}
                          }
@@ -725,6 +734,7 @@ export type Database = {
                                 schemas,
                                 tables,
                                 views,
+                                bigintAs,
                               }),
                               true
                             )}`
@@ -877,16 +887,26 @@ export const pgTypeToTsType = (
     schemas,
     tables,
     views,
+    bigintAs = 'number',
   }: {
     types: PostgresType[]
     schemas: PostgresSchema[]
     tables: PostgresTable[]
     views: PostgresView[]
+    bigintAs?: 'number' | 'string' | 'bigint'
   }
 ): string => {
   if (pgType === 'bool') {
     return 'boolean'
-  } else if (['int2', 'int4', 'int8', 'float4', 'float8', 'numeric'].includes(pgType)) {
+  } else if (['int2', 'int4', 'float4', 'float8'].includes(pgType)) {
+    return 'number'
+  } else if (['int8', 'numeric'].includes(pgType)) {
+    if (bigintAs === 'string') {
+      return 'string'
+    }
+    if (bigintAs === 'bigint') {
+      return 'bigint'
+    }
     return 'number'
   } else if (
     [
@@ -918,6 +938,7 @@ export const pgTypeToTsType = (
       schemas,
       tables,
       views,
+      bigintAs,
     })})[]`
   } else {
     const enumTypes = types.filter((type) => type.name === pgType && type.enums.length > 0)

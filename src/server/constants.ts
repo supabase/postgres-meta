@@ -50,6 +50,8 @@ export const GENERATE_TYPES_SWIFT_ACCESS_CONTROL = process.env
   .PG_META_GENERATE_TYPES_SWIFT_ACCESS_CONTROL
   ? (process.env.PG_META_GENERATE_TYPES_SWIFT_ACCESS_CONTROL as AccessControl)
   : 'internal'
+export const GENERATE_TYPES_BIGINT_AS = (process.env.PG_META_GENERATE_TYPES_BIGINT_AS ??
+  'number') as 'number' | 'string' | 'bigint'
 
 // json/jsonb/text types
 export const VALID_UNNAMED_FUNCTION_ARG_TYPES = new Set([114, 3802, 25])
