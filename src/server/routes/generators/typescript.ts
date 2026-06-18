@@ -12,7 +12,7 @@ export default async (fastify: FastifyInstance) => {
       included_schemas?: string
       detect_one_to_one_relationships?: string
       postgrest_version?: string
-      bigint_as?: 'number' | 'string' | 'bigint'
+      bigint_as?: string
     }
   }>('/', async (request, reply) => {
     const config = createConnectionConfig(request)
