@@ -7,6 +7,7 @@ import {
   DEFAULT_POOL_CONFIG,
   EXPORT_DOCS,
   GENERATE_TYPES,
+  GENERATE_TYPES_DEFAULT_SCHEMA,
   GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS,
   GENERATE_TYPES_INCLUDED_SCHEMAS,
   GENERATE_TYPES_SWIFT_ACCESS_CONTROL,
@@ -15,10 +16,13 @@ import {
   PG_META_PORT,
   POSTGREST_VERSION,
 } from './constants.js'
-import { apply as applyTypescriptTemplate } from './templates/typescript.js'
-import { apply as applyGoTemplate } from './templates/go.js'
-import { apply as applySwiftTemplate } from './templates/swift.js'
-import { apply as applyPythonTemplate } from './templates/python.js'
+import {
+  generateGo,
+  generatePython,
+  generateSwift,
+  generateTypescript,
+} from '@supabase/postgrest-typegen'
+import { getGeneratorMetadata } from '../lib/generators.js'
 
 const logger = pino({
   formatters: {
@@ -37,115 +41,31 @@ async function getTypeOutput(): Promise<string | null> {
     ...DEFAULT_POOL_CONFIG,
     connectionString: PG_CONNECTION,
   })
-  const [
-    { data: schemas, error: schemasError },
-    { data: tables, error: tablesError },
-    { data: foreignTables, error: foreignTablesError },
-    { data: views, error: viewsError },
-    { data: materializedViews, error: materializedViewsError },
-    { data: columns, error: columnsError },
-    { data: relationships, error: relationshipsError },
-    { data: functions, error: functionsError },
-    { data: types, error: typesError },
-  ] = await Promise.all([
-    pgMeta.schemas.list(),
-    pgMeta.tables.list({
-      includedSchemas:
-        GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
-      includeColumns: false,
-    }),
-    pgMeta.foreignTables.list({
-      includedSchemas:
-        GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
-      includeColumns: false,
-    }),
-    pgMeta.views.list({
-      includedSchemas:
-        GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
-      includeColumns: false,
-    }),
-    pgMeta.materializedViews.list({
-      includedSchemas:
-        GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
-      includeColumns: false,
-    }),
-    pgMeta.columns.list({
-      includedSchemas:
-        GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
-    }),
-    pgMeta.relationships.list(),
-    pgMeta.functions.list({
-      includedSchemas:
-        GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
-    }),
-    pgMeta.types.list({
-      includeTableTypes: true,
-      includeArrayTypes: true,
-      includeSystemSchemas: true,
-    }),
-  ])
-  await pgMeta.end()
-
-  if (schemasError) {
-    throw new Error(schemasError.message)
-  }
-  if (tablesError) {
-    throw new Error(tablesError.message)
-  }
-  if (foreignTablesError) {
-    throw new Error(foreignTablesError.message)
-  }
-  if (viewsError) {
-    throw new Error(viewsError.message)
-  }
-  if (materializedViewsError) {
-    throw new Error(materializedViewsError.message)
-  }
-  if (columnsError) {
-    throw new Error(columnsError.message)
-  }
-  if (relationshipsError) {
-    throw new Error(relationshipsError.message)
-  }
-  if (functionsError) {
-    throw new Error(functionsError.message)
-  }
-  if (typesError) {
-    throw new Error(typesError.message)
-  }
-
-  const config = {
-    schemas: schemas!.filter(
-      ({ name }) =>
-        GENERATE_TYPES_INCLUDED_SCHEMAS.length === 0 ||
-        GENERATE_TYPES_INCLUDED_SCHEMAS.includes(name)
-    ),
-    tables: tables!,
-    foreignTables: foreignTables!,
-    views: views!,
-    materializedViews: materializedViews!,
-    columns: columns!,
-    relationships: relationships!,
-    functions: functions!.filter(
-      ({ return_type }) => !['trigger', 'event_trigger'].includes(return_type)
-    ),
-    types: types!,
-    detectOneToOneRelationships: GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS,
-    postgrestVersion: POSTGREST_VERSION,
+  // `getGeneratorMetadata` introspects via @supabase/postgrest-typegen and ends
+  // the pool. Behavior freeze: the CLI path only supports included schemas.
+  const { data: generatorMetadata, error } = await getGeneratorMetadata(pgMeta, {
+    includedSchemas:
+      GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
+  })
+  if (error) {
+    throw new Error(error.message)
   }
 
   switch (GENERATE_TYPES?.toLowerCase()) {
     case 'typescript':
-      return await applyTypescriptTemplate(config)
+      return await generateTypescript(generatorMetadata!, {
+        detectOneToOneRelationships: GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS,
+        postgrestVersion: POSTGREST_VERSION,
+        defaultSchema: GENERATE_TYPES_DEFAULT_SCHEMA,
+      })
     case 'swift':
-      return await applySwiftTemplate({
-        ...config,
+      return generateSwift(generatorMetadata!, {
         accessControl: GENERATE_TYPES_SWIFT_ACCESS_CONTROL,
       })
     case 'go':
-      return applyGoTemplate(config)
+      return generateGo(generatorMetadata!)
     case 'python':
-      return applyPythonTemplate(config)
+      return generatePython(generatorMetadata!)
     default:
       throw new Error(`Unsupported language for GENERATE_TYPES: ${GENERATE_TYPES}`)
   }
