@@ -6964,3 +6964,46 @@ test('typegen: python w/ excluded/included schemas', async () => {
     })
   }
 })
+
+test('typegen: typescript w/ NOT NULL json column narrows Json to NonNullable<Json>', async () => {
+  // The generated Json type includes `null`, so a NOT NULL json/jsonb column has to be
+  // narrowed with NonNullable to honor the database constraint. A nullable json column is
+  // left as-is because Json already covers null. See supabase/postgres-meta#1055.
+  await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `
+        CREATE SCHEMA IF NOT EXISTS json_nullability_test;
+        CREATE TABLE IF NOT EXISTS json_nullability_test.documents (
+          id serial PRIMARY KEY,
+          required_metadata jsonb NOT NULL,
+          optional_metadata jsonb
+        );
+      `,
+    },
+  })
+
+  try {
+    const { body } = await app.inject({
+      method: 'GET',
+      path: '/generators/typescript',
+      query: { included_schemas: 'json_nullability_test' },
+    })
+    // NOT NULL jsonb narrows to NonNullable<Json> (Row and Insert).
+    expect(body).toContain('required_metadata: NonNullable<Json>')
+    expect(body).not.toContain('required_metadata: Json | null')
+    // Nullable jsonb is unchanged: Json already includes null.
+    expect(body).toContain('optional_metadata: Json | null')
+  } finally {
+    await app.inject({
+      method: 'POST',
+      path: '/query',
+      payload: {
+        query: `
+          DROP SCHEMA IF EXISTS json_nullability_test CASCADE;
+        `,
+      },
+    })
+  }
+})
