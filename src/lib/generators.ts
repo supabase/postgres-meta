@@ -1,4 +1,9 @@
-import { introspect, type GeneratorMetadata, type Queryable } from '@supabase/postgrest-typegen'
+import {
+  introspect,
+  sortGeneratorMetadata,
+  type GeneratorMetadata,
+  type Queryable,
+} from '@supabase/postgrest-typegen'
 import PostgresMeta from './PostgresMeta.js'
 import { PostgresMetaResult } from './types.js'
 
@@ -33,10 +38,14 @@ export async function getGeneratorMetadata(
   }
 
   try {
-    const data = await introspect(queryable, {
-      includedSchemas: filters.includedSchemas,
-      excludedSchemas: filters.excludedSchemas,
-    })
+    // The generators emit objects in metadata order, so apply the package's
+    // canonical sort pass before returning (and before any generator runs).
+    const data = sortGeneratorMetadata(
+      await introspect(queryable, {
+        includedSchemas: filters.includedSchemas,
+        excludedSchemas: filters.excludedSchemas,
+      })
+    )
     return { data, error: null }
   } catch (error) {
     return {

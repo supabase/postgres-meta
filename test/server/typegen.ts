@@ -5511,10 +5511,6 @@ test('typegen: go', async () => {
       Status    *string     \`json:"status"\`
     }
 
-    type PublicAViewSelect struct {
-      Id *int64 \`json:"id"\`
-    }
-
     type PublicTodosViewSelect struct {
       Details *string \`json:"details"\`
       Id      *int64  \`json:"id"\`
@@ -5535,6 +5531,10 @@ test('typegen: go', async () => {
       UserId      *int64     \`json:"user_id"\`
       UserName    *string    \`json:"user_name"\`
       UserStatus  *string    \`json:"user_status"\`
+    }
+
+    type PublicAViewSelect struct {
+      Id *int64 \`json:"id"\`
     }
 
     type PublicUsersViewWithMultipleRefsToUsersSelect struct {
@@ -6850,9 +6850,6 @@ test('typegen: python', async () => {
         name: NotRequired[Annotated[str, Field(alias="name")]]
         status: NotRequired[Annotated[Optional[PublicMemeStatus], Field(alias="status")]]
 
-    class PublicAView(BaseModel):
-        id: Optional[int] = Field(alias="id")
-
     class PublicTodosView(BaseModel):
         details: Optional[str] = Field(alias="details")
         id: Optional[int] = Field(alias="id")
@@ -6871,6 +6868,9 @@ test('typegen: python', async () => {
         user_id: Optional[int] = Field(alias="user_id")
         user_name: Optional[str] = Field(alias="user_name")
         user_status: Optional[PublicUserStatus] = Field(alias="user_status")
+
+    class PublicAView(BaseModel):
+        id: Optional[int] = Field(alias="id")
 
     class PublicUsersViewWithMultipleRefsToUsers(BaseModel):
         initial_id: Optional[int] = Field(alias="initial_id")
