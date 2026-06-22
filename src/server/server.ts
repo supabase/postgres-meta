@@ -9,6 +9,7 @@ import {
   GENERATE_TYPES,
   GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS,
   GENERATE_TYPES_INCLUDED_SCHEMAS,
+  GENERATE_TYPES_KOTLIN_VISIBILITY,
   GENERATE_TYPES_SWIFT_ACCESS_CONTROL,
   PG_CONNECTION,
   PG_META_HOST,
@@ -19,6 +20,7 @@ import { apply as applyTypescriptTemplate } from './templates/typescript.js'
 import { apply as applyGoTemplate } from './templates/go.js'
 import { apply as applySwiftTemplate } from './templates/swift.js'
 import { apply as applyPythonTemplate } from './templates/python.js'
+import { apply as applyKotlinTemplate } from './templates/kotlin.js'
 
 const logger = pino({
   formatters: {
@@ -146,6 +148,11 @@ async function getTypeOutput(): Promise<string | null> {
       return applyGoTemplate(config)
     case 'python':
       return applyPythonTemplate(config)
+    case 'kotlin':
+      return applyKotlinTemplate({
+        ...config,
+        visibility: GENERATE_TYPES_KOTLIN_VISIBILITY,
+      })
     default:
       throw new Error(`Unsupported language for GENERATE_TYPES: ${GENERATE_TYPES}`)
   }
