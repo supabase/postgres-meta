@@ -107,11 +107,13 @@ function pgCompositeTypeToKotlinDataClass(
 ): KotlinDataClass {
   const properties: KotlinProperty[] = type.attributes.map((attribute) => {
     const attributeType = context.types.find((t) => t.id === attribute.type_id)
+    // Resolve via the catalog name (e.g. `int4`), not `format` (e.g. `integer`):
+    // the type map and column metadata are both keyed on the catalog name.
     return {
       formattedName: formatForKotlinPropertyName(attribute.name),
       formattedType: attributeType
-        ? pgTypeToKotlinType(attributeType.format, context, usage)
-        : 'JsonElement',
+        ? pgTypeToKotlinType(attributeType.name, context, usage)
+        : markJsonElementUsed(usage),
       serialName: attribute.name,
       nullable: false,
     }
@@ -359,6 +361,11 @@ function pgTypeToKotlinType(
   }
 
   // Fallback
+  usage.jsonElement = true
+  return 'JsonElement'
+}
+
+function markJsonElementUsed(usage: ImportUsage): string {
   usage.jsonElement = true
   return 'JsonElement'
 }
