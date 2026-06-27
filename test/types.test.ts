@@ -55,4 +55,26 @@ describe('server/routes/types', () => {
 
     expect(result).toBe('string')
   })
+
+  test('vector column maps to number[]', () => {
+    const result = pgTypeToTsType({ name: 'public' } as any, 'vector', {
+      types: [],
+      schemas: [],
+      tables: [],
+      views: [],
+    })
+
+    expect(result).toBe('number[]')
+  })
+
+  test('vector array column (_vector) maps to (number[])[]', () => {
+    const result = pgTypeToTsType({ name: 'public' } as any, '_vector', {
+      types: [],
+      schemas: [],
+      tables: [],
+      views: [],
+    })
+
+    expect(result).toBe('(number[])[]')
+  })
 })
