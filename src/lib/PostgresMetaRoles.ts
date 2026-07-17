@@ -110,9 +110,10 @@ export default class PostgresMetaRoles {
     const connectionLimitClause = `CONNECTION LIMIT ${connection_limit}`
     const passwordClause = password === undefined ? '' : `PASSWORD ${literal(password)}`
     const validUntilClause = valid_until === undefined ? '' : `VALID UNTIL ${literal(valid_until)}`
-    const memberOfClause = member_of === undefined ? '' : `IN ROLE ${member_of.join(',')}`
-    const membersClause = members === undefined ? '' : `ROLE ${members.join(',')}`
-    const adminsClause = admins === undefined ? '' : `ADMIN ${admins.join(',')}`
+    const memberOfClause =
+      member_of === undefined ? '' : `IN ROLE ${member_of.map((r) => ident(r)).join(',')}`
+    const membersClause = members === undefined ? '' : `ROLE ${members.map((r) => ident(r)).join(',')}`
+    const adminsClause = admins === undefined ? '' : `ADMIN ${admins.map((r) => ident(r)).join(',')}`
     let configClause = ''
     if (config !== undefined) {
       configClause = Object.keys(config)
@@ -121,7 +122,7 @@ export default class PostgresMetaRoles {
           if (!k || !v) {
             return ''
           }
-          return `ALTER ROLE ${name} SET ${k} = ${v};`
+          return `ALTER ROLE ${ident(name)} SET ${ident(k)} = ${literal(v)};`
         })
         .join('\n')
     }
