@@ -7,6 +7,18 @@ import {
   PostgresRoleUpdate,
 } from './types.js'
 import { filterByValue } from './helpers.js'
+
+// GUC_LIST_INPUT parameters (e.g. search_path) expect a comma-separated list of
+// individually-quoted values, not the whole comma-containing string as one literal -
+// escape each list item separately so multi-value configs round-trip correctly.
+const literalConfigValue = (value: string | null): string =>
+  value === null
+    ? literal(value)
+    : value
+        .split(',')
+        .map((part) => literal(part.trim()))
+        .join(',')
+
 export function changeRoleConfig2Object(config: string[]) {
   if (!config) {
     return null
@@ -122,7 +134,7 @@ export default class PostgresMetaRoles {
           if (!k || !v) {
             return ''
           }
-          return `ALTER ROLE ${ident(name)} SET ${ident(k)} = ${literal(v)};`
+          return `ALTER ROLE ${ident(name)} SET ${ident(k)} = ${literalConfigValue(v)};`
         })
         .join('\n')
     }
@@ -220,7 +232,7 @@ COMMIT;`
         switch (op) {
           case 'add':
           case 'replace':
-            return `ALTER ROLE ${ident(old!.name)} SET ${ident(k)} = ${literal(v)};`
+            return `ALTER ROLE ${ident(old!.name)} SET ${ident(k)} = ${literalConfigValue(v)};`
           case 'remove':
             return `ALTER ROLE ${ident(old!.name)} RESET ${ident(k)};`
           default:
