@@ -1,29 +1,25 @@
-import PostgresMeta from './PostgresMeta.js'
 import {
-  PostgresColumn,
-  PostgresForeignTable,
-  PostgresFunction,
-  PostgresMaterializedView,
-  PostgresMetaResult,
-  PostgresRelationship,
-  PostgresSchema,
-  PostgresTable,
-  PostgresType,
-  PostgresView,
-} from './types.js'
+  introspect,
+  sortGeneratorMetadata,
+  type GeneratorMetadata,
+  type Queryable,
+} from '@supabase/postgrest-typegen'
+import PostgresMeta from './PostgresMeta.js'
+import { PostgresMetaResult } from './types.js'
 
-export type GeneratorMetadata = {
-  schemas: PostgresSchema[]
-  tables: Omit<PostgresTable, 'columns'>[]
-  foreignTables: Omit<PostgresForeignTable, 'columns'>[]
-  views: Omit<PostgresView, 'columns'>[]
-  materializedViews: Omit<PostgresMaterializedView, 'columns'>[]
-  columns: PostgresColumn[]
-  relationships: PostgresRelationship[]
-  functions: PostgresFunction[]
-  types: PostgresType[]
-}
+// Re-export so existing consumers can keep importing the type from here.
+export type { GeneratorMetadata }
 
+/**
+ * Adapter over `@supabase/postgrest-typegen`'s `introspect()`, preserving the
+ * historical `getGeneratorMetadata` signature and `{ data, error }` contract.
+ *
+ * The package is driver-agnostic: it takes a structural `Queryable` whose
+ * `query()` resolves to `{ rows }` and throws on failure. We wrap `pgMeta.query`
+ * (which returns `{ data, error }`) into that shape, surface the first query
+ * error as the result error, and always end the pool — matching the previous
+ * behavior.
+ */
 export async function getGeneratorMetadata(
   pgMeta: PostgresMeta,
   filters: { includedSchemas?: string[]; excludedSchemas?: string[] } = {
@@ -31,111 +27,32 @@ export async function getGeneratorMetadata(
     excludedSchemas: [],
   }
 ): Promise<PostgresMetaResult<GeneratorMetadata>> {
-  const includedSchemas = filters.includedSchemas ?? []
-  const excludedSchemas = filters.excludedSchemas ?? []
-
-  const { data: schemas, error: schemasError } = await pgMeta.schemas.list({
-    includeSystemSchemas: false,
-    includedSchemas: includedSchemas.length > 0 ? includedSchemas : undefined,
-    excludedSchemas: excludedSchemas.length > 0 ? excludedSchemas : undefined,
-  })
-  if (schemasError) {
-    return { data: null, error: schemasError }
-  }
-
-  const { data: tables, error: tablesError } = await pgMeta.tables.list({
-    includedSchemas: includedSchemas.length > 0 ? includedSchemas : undefined,
-    excludedSchemas: excludedSchemas.length > 0 ? excludedSchemas : undefined,
-    includeColumns: false,
-  })
-  if (tablesError) {
-    return { data: null, error: tablesError }
-  }
-
-  const { data: foreignTables, error: foreignTablesError } = await pgMeta.foreignTables.list({
-    includedSchemas: includedSchemas.length > 0 ? includedSchemas : undefined,
-    excludedSchemas: excludedSchemas.length > 0 ? excludedSchemas : undefined,
-    includeColumns: false,
-  })
-  if (foreignTablesError) {
-    return { data: null, error: foreignTablesError }
-  }
-
-  const { data: views, error: viewsError } = await pgMeta.views.list({
-    includedSchemas: includedSchemas.length > 0 ? includedSchemas : undefined,
-    excludedSchemas: excludedSchemas.length > 0 ? excludedSchemas : undefined,
-    includeColumns: false,
-  })
-  if (viewsError) {
-    return { data: null, error: viewsError }
-  }
-
-  const { data: materializedViews, error: materializedViewsError } =
-    await pgMeta.materializedViews.list({
-      includedSchemas: includedSchemas.length > 0 ? includedSchemas : undefined,
-      excludedSchemas: excludedSchemas.length > 0 ? excludedSchemas : undefined,
-      includeColumns: false,
-    })
-  if (materializedViewsError) {
-    return { data: null, error: materializedViewsError }
-  }
-
-  const { data: columns, error: columnsError } = await pgMeta.columns.list({
-    includedSchemas: includedSchemas.length > 0 ? includedSchemas : undefined,
-    excludedSchemas: excludedSchemas.length > 0 ? excludedSchemas : undefined,
-    includeSystemSchemas: false,
-  })
-  if (columnsError) {
-    return { data: null, error: columnsError }
-  }
-
-  const { data: relationships, error: relationshipsError } = await pgMeta.relationships.list({
-    includedSchemas: includedSchemas.length > 0 ? includedSchemas : undefined,
-    excludedSchemas: excludedSchemas.length > 0 ? excludedSchemas : undefined,
-    includeSystemSchemas: false,
-  })
-  if (relationshipsError) {
-    return { data: null, error: relationshipsError }
-  }
-
-  const { data: functions, error: functionsError } = await pgMeta.functions.list({
-    includedSchemas: includedSchemas.length > 0 ? includedSchemas : undefined,
-    excludedSchemas: excludedSchemas.length > 0 ? excludedSchemas : undefined,
-    includeSystemSchemas: false,
-  })
-  if (functionsError) {
-    return { data: null, error: functionsError }
-  }
-
-  const { data: types, error: typesError } = await pgMeta.types.list({
-    includeTableTypes: true,
-    includeArrayTypes: true,
-    includeSystemSchemas: true,
-  })
-  if (typesError) {
-    return { data: null, error: typesError }
-  }
-
-  await pgMeta.end()
-
-  return {
-    data: {
-      schemas: schemas.filter(
-        ({ name }) =>
-          !excludedSchemas.includes(name) &&
-          (includedSchemas.length === 0 || includedSchemas.includes(name))
-      ),
-      tables,
-      foreignTables,
-      views,
-      materializedViews,
-      columns,
-      relationships,
-      functions: functions.filter(
-        ({ return_type }) => !['trigger', 'event_trigger'].includes(return_type)
-      ),
-      types,
+  const queryable: Queryable = {
+    query: async (sql: string) => {
+      const { data, error } = await pgMeta.query(sql)
+      if (error) {
+        throw error
+      }
+      return { rows: data ?? [] }
     },
-    error: null,
+  }
+
+  try {
+    // The generators emit objects in metadata order, so apply the package's
+    // canonical sort pass before returning (and before any generator runs).
+    const data = sortGeneratorMetadata(
+      await introspect(queryable, {
+        includedSchemas: filters.includedSchemas,
+        excludedSchemas: filters.excludedSchemas,
+      })
+    )
+    return { data, error: null }
+  } catch (error) {
+    return {
+      data: null,
+      error: error as PostgresMetaResult<GeneratorMetadata>['error'] & { message: string },
+    }
+  } finally {
+    await pgMeta.end()
   }
 }

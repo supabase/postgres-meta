@@ -5268,82 +5268,19 @@ test('typegen: go', async () => {
   expect(body).toMatchInlineSnapshot(`
     "package database
 
-    type PublicUsersSelect struct {
-      Decimal  *float64 \`json:"decimal"\`
-      Id       int64    \`json:"id"\`
-      Name     *string  \`json:"name"\`
-      Status   *string  \`json:"status"\`
-      UserUuid *string  \`json:"user_uuid"\`
+    type PublicCategorySelect struct {
+      Id   int32  \`json:"id"\`
+      Name string \`json:"name"\`
     }
 
-    type PublicUsersInsert struct {
-      Decimal  *float64 \`json:"decimal"\`
-      Id       *int64   \`json:"id"\`
-      Name     *string  \`json:"name"\`
-      Status   *string  \`json:"status"\`
-      UserUuid *string  \`json:"user_uuid"\`
+    type PublicCategoryInsert struct {
+      Id   *int32 \`json:"id"\`
+      Name string \`json:"name"\`
     }
 
-    type PublicUsersUpdate struct {
-      Decimal  *float64 \`json:"decimal"\`
-      Id       *int64   \`json:"id"\`
-      Name     *string  \`json:"name"\`
-      Status   *string  \`json:"status"\`
-      UserUuid *string  \`json:"user_uuid"\`
-    }
-
-    type PublicTodosSelect struct {
-      Details *string \`json:"details"\`
-      Id      int64   \`json:"id"\`
-      UserId  int64   \`json:"user-id"\`
-    }
-
-    type PublicTodosInsert struct {
-      Details *string \`json:"details"\`
-      Id      *int64  \`json:"id"\`
-      UserId  int64   \`json:"user-id"\`
-    }
-
-    type PublicTodosUpdate struct {
-      Details *string \`json:"details"\`
-      Id      *int64  \`json:"id"\`
-      UserId  *int64  \`json:"user-id"\`
-    }
-
-    type PublicUsersAuditSelect struct {
-      CreatedAt     *string     \`json:"created_at"\`
-      Id            int64       \`json:"id"\`
-      PreviousValue interface{} \`json:"previous_value"\`
-      UserId        *int64      \`json:"user_id"\`
-    }
-
-    type PublicUsersAuditInsert struct {
-      CreatedAt     *string     \`json:"created_at"\`
-      Id            *int64      \`json:"id"\`
-      PreviousValue interface{} \`json:"previous_value"\`
-      UserId        *int64      \`json:"user_id"\`
-    }
-
-    type PublicUsersAuditUpdate struct {
-      CreatedAt     *string     \`json:"created_at"\`
-      Id            *int64      \`json:"id"\`
-      PreviousValue interface{} \`json:"previous_value"\`
-      UserId        *int64      \`json:"user_id"\`
-    }
-
-    type PublicUserDetailsSelect struct {
-      Details *string \`json:"details"\`
-      UserId  int64   \`json:"user_id"\`
-    }
-
-    type PublicUserDetailsInsert struct {
-      Details *string \`json:"details"\`
-      UserId  int64   \`json:"user_id"\`
-    }
-
-    type PublicUserDetailsUpdate struct {
-      Details *string \`json:"details"\`
-      UserId  *int64  \`json:"user_id"\`
+    type PublicCategoryUpdate struct {
+      Id   *int32  \`json:"id"\`
+      Name *string \`json:"name"\`
     }
 
     type PublicEmptySelect struct {
@@ -5356,36 +5293,6 @@ test('typegen: go', async () => {
 
     type PublicEmptyUpdate struct {
 
-    }
-
-    type PublicTableWithOtherTablesRowTypeSelect struct {
-      Col1 interface{} \`json:"col1"\`
-      Col2 interface{} \`json:"col2"\`
-    }
-
-    type PublicTableWithOtherTablesRowTypeInsert struct {
-      Col1 interface{} \`json:"col1"\`
-      Col2 interface{} \`json:"col2"\`
-    }
-
-    type PublicTableWithOtherTablesRowTypeUpdate struct {
-      Col1 interface{} \`json:"col1"\`
-      Col2 interface{} \`json:"col2"\`
-    }
-
-    type PublicTableWithPrimaryKeyOtherThanIdSelect struct {
-      Name    *string \`json:"name"\`
-      OtherId int64   \`json:"other_id"\`
-    }
-
-    type PublicTableWithPrimaryKeyOtherThanIdInsert struct {
-      Name    *string \`json:"name"\`
-      OtherId *int64  \`json:"other_id"\`
-    }
-
-    type PublicTableWithPrimaryKeyOtherThanIdUpdate struct {
-      Name    *string \`json:"name"\`
-      OtherId *int64  \`json:"other_id"\`
     }
 
     type PublicEventsSelect struct {
@@ -5469,21 +5376,6 @@ test('typegen: go', async () => {
       Id               *int64  \`json:"id"\`
     }
 
-    type PublicCategorySelect struct {
-      Id   int32  \`json:"id"\`
-      Name string \`json:"name"\`
-    }
-
-    type PublicCategoryInsert struct {
-      Id   *int32 \`json:"id"\`
-      Name string \`json:"name"\`
-    }
-
-    type PublicCategoryUpdate struct {
-      Id   *int32  \`json:"id"\`
-      Name *string \`json:"name"\`
-    }
-
     type PublicMemesSelect struct {
       Category  *int32      \`json:"category"\`
       CreatedAt string      \`json:"created_at"\`
@@ -5511,6 +5403,114 @@ test('typegen: go', async () => {
       Status    *string     \`json:"status"\`
     }
 
+    type PublicTableWithOtherTablesRowTypeSelect struct {
+      Col1 interface{} \`json:"col1"\`
+      Col2 interface{} \`json:"col2"\`
+    }
+
+    type PublicTableWithOtherTablesRowTypeInsert struct {
+      Col1 interface{} \`json:"col1"\`
+      Col2 interface{} \`json:"col2"\`
+    }
+
+    type PublicTableWithOtherTablesRowTypeUpdate struct {
+      Col1 interface{} \`json:"col1"\`
+      Col2 interface{} \`json:"col2"\`
+    }
+
+    type PublicTableWithPrimaryKeyOtherThanIdSelect struct {
+      Name    *string \`json:"name"\`
+      OtherId int64   \`json:"other_id"\`
+    }
+
+    type PublicTableWithPrimaryKeyOtherThanIdInsert struct {
+      Name    *string \`json:"name"\`
+      OtherId *int64  \`json:"other_id"\`
+    }
+
+    type PublicTableWithPrimaryKeyOtherThanIdUpdate struct {
+      Name    *string \`json:"name"\`
+      OtherId *int64  \`json:"other_id"\`
+    }
+
+    type PublicTodosSelect struct {
+      Details *string \`json:"details"\`
+      Id      int64   \`json:"id"\`
+      UserId  int64   \`json:"user-id"\`
+    }
+
+    type PublicTodosInsert struct {
+      Details *string \`json:"details"\`
+      Id      *int64  \`json:"id"\`
+      UserId  int64   \`json:"user-id"\`
+    }
+
+    type PublicTodosUpdate struct {
+      Details *string \`json:"details"\`
+      Id      *int64  \`json:"id"\`
+      UserId  *int64  \`json:"user-id"\`
+    }
+
+    type PublicUserDetailsSelect struct {
+      Details *string \`json:"details"\`
+      UserId  int64   \`json:"user_id"\`
+    }
+
+    type PublicUserDetailsInsert struct {
+      Details *string \`json:"details"\`
+      UserId  int64   \`json:"user_id"\`
+    }
+
+    type PublicUserDetailsUpdate struct {
+      Details *string \`json:"details"\`
+      UserId  *int64  \`json:"user_id"\`
+    }
+
+    type PublicUsersSelect struct {
+      Decimal  *float64 \`json:"decimal"\`
+      Id       int64    \`json:"id"\`
+      Name     *string  \`json:"name"\`
+      Status   *string  \`json:"status"\`
+      UserUuid *string  \`json:"user_uuid"\`
+    }
+
+    type PublicUsersInsert struct {
+      Decimal  *float64 \`json:"decimal"\`
+      Id       *int64   \`json:"id"\`
+      Name     *string  \`json:"name"\`
+      Status   *string  \`json:"status"\`
+      UserUuid *string  \`json:"user_uuid"\`
+    }
+
+    type PublicUsersUpdate struct {
+      Decimal  *float64 \`json:"decimal"\`
+      Id       *int64   \`json:"id"\`
+      Name     *string  \`json:"name"\`
+      Status   *string  \`json:"status"\`
+      UserUuid *string  \`json:"user_uuid"\`
+    }
+
+    type PublicUsersAuditSelect struct {
+      CreatedAt     *string     \`json:"created_at"\`
+      Id            int64       \`json:"id"\`
+      PreviousValue interface{} \`json:"previous_value"\`
+      UserId        *int64      \`json:"user_id"\`
+    }
+
+    type PublicUsersAuditInsert struct {
+      CreatedAt     *string     \`json:"created_at"\`
+      Id            *int64      \`json:"id"\`
+      PreviousValue interface{} \`json:"previous_value"\`
+      UserId        *int64      \`json:"user_id"\`
+    }
+
+    type PublicUsersAuditUpdate struct {
+      CreatedAt     *string     \`json:"created_at"\`
+      Id            *int64      \`json:"id"\`
+      PreviousValue interface{} \`json:"previous_value"\`
+      UserId        *int64      \`json:"user_id"\`
+    }
+
     type PublicAViewSelect struct {
       Id *int64 \`json:"id"\`
     }
@@ -5521,20 +5521,20 @@ test('typegen: go', async () => {
       UserId  *int64  \`json:"user-id"\`
     }
 
-    type PublicUsersViewSelect struct {
-      Decimal  *float64 \`json:"decimal"\`
-      Id       *int64   \`json:"id"\`
-      Name     *string  \`json:"name"\`
-      Status   *string  \`json:"status"\`
-      UserUuid *string  \`json:"user_uuid"\`
-    }
-
     type PublicUserTodosSummaryViewSelect struct {
       TodoCount   *int64     \`json:"todo_count"\`
       TodoDetails []*string  \`json:"todo_details"\`
       UserId      *int64     \`json:"user_id"\`
       UserName    *string    \`json:"user_name"\`
       UserStatus  *string    \`json:"user_status"\`
+    }
+
+    type PublicUsersViewSelect struct {
+      Decimal  *float64 \`json:"decimal"\`
+      Id       *int64   \`json:"id"\`
+      Name     *string  \`json:"name"\`
+      Status   *string  \`json:"status"\`
+      UserUuid *string  \`json:"user_uuid"\`
     }
 
     type PublicUsersViewWithMultipleRefsToUsersSelect struct {
@@ -6642,75 +6642,21 @@ test('typegen: python', async () => {
 
     from pydantic import BaseModel, Field, Json
 
-    PublicUserStatus: TypeAlias = Literal["ACTIVE", "INACTIVE"]
-
     PublicMemeStatus: TypeAlias = Literal["new", "old", "retired"]
 
-    class PublicUsers(BaseModel):
-        decimal: Optional[float] = Field(alias="decimal")
+    PublicUserStatus: TypeAlias = Literal["ACTIVE", "INACTIVE"]
+
+    class PublicCategory(BaseModel):
         id: int = Field(alias="id")
-        name: Optional[str] = Field(alias="name")
-        status: Optional[PublicUserStatus] = Field(alias="status")
-        user_uuid: Optional[uuid.UUID] = Field(alias="user_uuid")
+        name: str = Field(alias="name")
 
-    class PublicUsersInsert(TypedDict):
-        decimal: NotRequired[Annotated[Optional[float], Field(alias="decimal")]]
+    class PublicCategoryInsert(TypedDict):
         id: NotRequired[Annotated[int, Field(alias="id")]]
-        name: NotRequired[Annotated[Optional[str], Field(alias="name")]]
-        status: NotRequired[Annotated[Optional[PublicUserStatus], Field(alias="status")]]
-        user_uuid: NotRequired[Annotated[Optional[uuid.UUID], Field(alias="user_uuid")]]
+        name: Annotated[str, Field(alias="name")]
 
-    class PublicUsersUpdate(TypedDict):
-        decimal: NotRequired[Annotated[Optional[float], Field(alias="decimal")]]
+    class PublicCategoryUpdate(TypedDict):
         id: NotRequired[Annotated[int, Field(alias="id")]]
-        name: NotRequired[Annotated[Optional[str], Field(alias="name")]]
-        status: NotRequired[Annotated[Optional[PublicUserStatus], Field(alias="status")]]
-        user_uuid: NotRequired[Annotated[Optional[uuid.UUID], Field(alias="user_uuid")]]
-
-    class PublicTodos(BaseModel):
-        details: Optional[str] = Field(alias="details")
-        id: int = Field(alias="id")
-        user_id: int = Field(alias="user-id")
-
-    class PublicTodosInsert(TypedDict):
-        details: NotRequired[Annotated[Optional[str], Field(alias="details")]]
-        id: NotRequired[Annotated[int, Field(alias="id")]]
-        user_id: Annotated[int, Field(alias="user-id")]
-
-    class PublicTodosUpdate(TypedDict):
-        details: NotRequired[Annotated[Optional[str], Field(alias="details")]]
-        id: NotRequired[Annotated[int, Field(alias="id")]]
-        user_id: NotRequired[Annotated[int, Field(alias="user-id")]]
-
-    class PublicUsersAudit(BaseModel):
-        created_at: Optional[datetime.datetime] = Field(alias="created_at")
-        id: int = Field(alias="id")
-        previous_value: Optional[Json[Any]] = Field(alias="previous_value")
-        user_id: Optional[int] = Field(alias="user_id")
-
-    class PublicUsersAuditInsert(TypedDict):
-        created_at: NotRequired[Annotated[Optional[datetime.datetime], Field(alias="created_at")]]
-        id: NotRequired[Annotated[int, Field(alias="id")]]
-        previous_value: NotRequired[Annotated[Optional[Json[Any]], Field(alias="previous_value")]]
-        user_id: NotRequired[Annotated[Optional[int], Field(alias="user_id")]]
-
-    class PublicUsersAuditUpdate(TypedDict):
-        created_at: NotRequired[Annotated[Optional[datetime.datetime], Field(alias="created_at")]]
-        id: NotRequired[Annotated[int, Field(alias="id")]]
-        previous_value: NotRequired[Annotated[Optional[Json[Any]], Field(alias="previous_value")]]
-        user_id: NotRequired[Annotated[Optional[int], Field(alias="user_id")]]
-
-    class PublicUserDetails(BaseModel):
-        details: Optional[str] = Field(alias="details")
-        user_id: int = Field(alias="user_id")
-
-    class PublicUserDetailsInsert(TypedDict):
-        details: NotRequired[Annotated[Optional[str], Field(alias="details")]]
-        user_id: Annotated[int, Field(alias="user_id")]
-
-    class PublicUserDetailsUpdate(TypedDict):
-        details: NotRequired[Annotated[Optional[str], Field(alias="details")]]
-        user_id: NotRequired[Annotated[int, Field(alias="user_id")]]
+        name: NotRequired[Annotated[str, Field(alias="name")]]
 
     class PublicEmpty(BaseModel):
         pass
@@ -6720,30 +6666,6 @@ test('typegen: python', async () => {
 
     class PublicEmptyUpdate(TypedDict):
         pass
-
-    class PublicTableWithOtherTablesRowType(BaseModel):
-        col1: Optional[PublicUserDetails] = Field(alias="col1")
-        col2: Optional[PublicAView] = Field(alias="col2")
-
-    class PublicTableWithOtherTablesRowTypeInsert(TypedDict):
-        col1: NotRequired[Annotated[Optional[PublicUserDetails], Field(alias="col1")]]
-        col2: NotRequired[Annotated[Optional[PublicAView], Field(alias="col2")]]
-
-    class PublicTableWithOtherTablesRowTypeUpdate(TypedDict):
-        col1: NotRequired[Annotated[Optional[PublicUserDetails], Field(alias="col1")]]
-        col2: NotRequired[Annotated[Optional[PublicAView], Field(alias="col2")]]
-
-    class PublicTableWithPrimaryKeyOtherThanId(BaseModel):
-        name: Optional[str] = Field(alias="name")
-        other_id: int = Field(alias="other_id")
-
-    class PublicTableWithPrimaryKeyOtherThanIdInsert(TypedDict):
-        name: NotRequired[Annotated[Optional[str], Field(alias="name")]]
-        other_id: NotRequired[Annotated[int, Field(alias="other_id")]]
-
-    class PublicTableWithPrimaryKeyOtherThanIdUpdate(TypedDict):
-        name: NotRequired[Annotated[Optional[str], Field(alias="name")]]
-        other_id: NotRequired[Annotated[int, Field(alias="other_id")]]
 
     class PublicEvents(BaseModel):
         created_at: datetime.datetime = Field(alias="created_at")
@@ -6814,18 +6736,6 @@ test('typegen: python', async () => {
         duration_required: NotRequired[Annotated[str, Field(alias="duration_required")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
-    class PublicCategory(BaseModel):
-        id: int = Field(alias="id")
-        name: str = Field(alias="name")
-
-    class PublicCategoryInsert(TypedDict):
-        id: NotRequired[Annotated[int, Field(alias="id")]]
-        name: Annotated[str, Field(alias="name")]
-
-    class PublicCategoryUpdate(TypedDict):
-        id: NotRequired[Annotated[int, Field(alias="id")]]
-        name: NotRequired[Annotated[str, Field(alias="name")]]
-
     class PublicMemes(BaseModel):
         category: Optional[int] = Field(alias="category")
         created_at: datetime.datetime = Field(alias="created_at")
@@ -6850,6 +6760,96 @@ test('typegen: python', async () => {
         name: NotRequired[Annotated[str, Field(alias="name")]]
         status: NotRequired[Annotated[Optional[PublicMemeStatus], Field(alias="status")]]
 
+    class PublicTableWithOtherTablesRowType(BaseModel):
+        col1: Optional[PublicUserDetails] = Field(alias="col1")
+        col2: Optional[PublicAView] = Field(alias="col2")
+
+    class PublicTableWithOtherTablesRowTypeInsert(TypedDict):
+        col1: NotRequired[Annotated[Optional[PublicUserDetails], Field(alias="col1")]]
+        col2: NotRequired[Annotated[Optional[PublicAView], Field(alias="col2")]]
+
+    class PublicTableWithOtherTablesRowTypeUpdate(TypedDict):
+        col1: NotRequired[Annotated[Optional[PublicUserDetails], Field(alias="col1")]]
+        col2: NotRequired[Annotated[Optional[PublicAView], Field(alias="col2")]]
+
+    class PublicTableWithPrimaryKeyOtherThanId(BaseModel):
+        name: Optional[str] = Field(alias="name")
+        other_id: int = Field(alias="other_id")
+
+    class PublicTableWithPrimaryKeyOtherThanIdInsert(TypedDict):
+        name: NotRequired[Annotated[Optional[str], Field(alias="name")]]
+        other_id: NotRequired[Annotated[int, Field(alias="other_id")]]
+
+    class PublicTableWithPrimaryKeyOtherThanIdUpdate(TypedDict):
+        name: NotRequired[Annotated[Optional[str], Field(alias="name")]]
+        other_id: NotRequired[Annotated[int, Field(alias="other_id")]]
+
+    class PublicTodos(BaseModel):
+        details: Optional[str] = Field(alias="details")
+        id: int = Field(alias="id")
+        user_id: int = Field(alias="user-id")
+
+    class PublicTodosInsert(TypedDict):
+        details: NotRequired[Annotated[Optional[str], Field(alias="details")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+        user_id: Annotated[int, Field(alias="user-id")]
+
+    class PublicTodosUpdate(TypedDict):
+        details: NotRequired[Annotated[Optional[str], Field(alias="details")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+        user_id: NotRequired[Annotated[int, Field(alias="user-id")]]
+
+    class PublicUserDetails(BaseModel):
+        details: Optional[str] = Field(alias="details")
+        user_id: int = Field(alias="user_id")
+
+    class PublicUserDetailsInsert(TypedDict):
+        details: NotRequired[Annotated[Optional[str], Field(alias="details")]]
+        user_id: Annotated[int, Field(alias="user_id")]
+
+    class PublicUserDetailsUpdate(TypedDict):
+        details: NotRequired[Annotated[Optional[str], Field(alias="details")]]
+        user_id: NotRequired[Annotated[int, Field(alias="user_id")]]
+
+    class PublicUsers(BaseModel):
+        decimal: Optional[float] = Field(alias="decimal")
+        id: int = Field(alias="id")
+        name: Optional[str] = Field(alias="name")
+        status: Optional[PublicUserStatus] = Field(alias="status")
+        user_uuid: Optional[uuid.UUID] = Field(alias="user_uuid")
+
+    class PublicUsersInsert(TypedDict):
+        decimal: NotRequired[Annotated[Optional[float], Field(alias="decimal")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+        name: NotRequired[Annotated[Optional[str], Field(alias="name")]]
+        status: NotRequired[Annotated[Optional[PublicUserStatus], Field(alias="status")]]
+        user_uuid: NotRequired[Annotated[Optional[uuid.UUID], Field(alias="user_uuid")]]
+
+    class PublicUsersUpdate(TypedDict):
+        decimal: NotRequired[Annotated[Optional[float], Field(alias="decimal")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+        name: NotRequired[Annotated[Optional[str], Field(alias="name")]]
+        status: NotRequired[Annotated[Optional[PublicUserStatus], Field(alias="status")]]
+        user_uuid: NotRequired[Annotated[Optional[uuid.UUID], Field(alias="user_uuid")]]
+
+    class PublicUsersAudit(BaseModel):
+        created_at: Optional[datetime.datetime] = Field(alias="created_at")
+        id: int = Field(alias="id")
+        previous_value: Optional[Json[Any]] = Field(alias="previous_value")
+        user_id: Optional[int] = Field(alias="user_id")
+
+    class PublicUsersAuditInsert(TypedDict):
+        created_at: NotRequired[Annotated[Optional[datetime.datetime], Field(alias="created_at")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+        previous_value: NotRequired[Annotated[Optional[Json[Any]], Field(alias="previous_value")]]
+        user_id: NotRequired[Annotated[Optional[int], Field(alias="user_id")]]
+
+    class PublicUsersAuditUpdate(TypedDict):
+        created_at: NotRequired[Annotated[Optional[datetime.datetime], Field(alias="created_at")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+        previous_value: NotRequired[Annotated[Optional[Json[Any]], Field(alias="previous_value")]]
+        user_id: NotRequired[Annotated[Optional[int], Field(alias="user_id")]]
+
     class PublicAView(BaseModel):
         id: Optional[int] = Field(alias="id")
 
@@ -6858,19 +6858,19 @@ test('typegen: python', async () => {
         id: Optional[int] = Field(alias="id")
         user_id: Optional[int] = Field(alias="user-id")
 
-    class PublicUsersView(BaseModel):
-        decimal: Optional[float] = Field(alias="decimal")
-        id: Optional[int] = Field(alias="id")
-        name: Optional[str] = Field(alias="name")
-        status: Optional[PublicUserStatus] = Field(alias="status")
-        user_uuid: Optional[uuid.UUID] = Field(alias="user_uuid")
-
     class PublicUserTodosSummaryView(BaseModel):
         todo_count: Optional[int] = Field(alias="todo_count")
         todo_details: Optional[List[str]] = Field(alias="todo_details")
         user_id: Optional[int] = Field(alias="user_id")
         user_name: Optional[str] = Field(alias="user_name")
         user_status: Optional[PublicUserStatus] = Field(alias="user_status")
+
+    class PublicUsersView(BaseModel):
+        decimal: Optional[float] = Field(alias="decimal")
+        id: Optional[int] = Field(alias="id")
+        name: Optional[str] = Field(alias="name")
+        status: Optional[PublicUserStatus] = Field(alias="status")
+        user_uuid: Optional[uuid.UUID] = Field(alias="user_uuid")
 
     class PublicUsersViewWithMultipleRefsToUsers(BaseModel):
         initial_id: Optional[int] = Field(alias="initial_id")

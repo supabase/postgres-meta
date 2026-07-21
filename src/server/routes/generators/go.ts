@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { PostgresMeta } from '../../../lib/index.js'
 import { createConnectionConfig, extractRequestForLogging } from '../../utils.js'
-import { apply as applyGoTemplate } from '../../templates/go.js'
+import { generateGo } from '@supabase/postgrest-typegen'
 import { getGeneratorMetadata } from '../../../lib/generators.js'
 
 export default async (fastify: FastifyInstance) => {
@@ -29,6 +29,6 @@ export default async (fastify: FastifyInstance) => {
       return { error: generatorMetaError.message }
     }
 
-    return applyGoTemplate(generatorMeta)
+    return generateGo(generatorMeta!)
   })
 }

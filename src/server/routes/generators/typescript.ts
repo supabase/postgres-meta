@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { PostgresMeta } from '../../../lib/index.js'
 import { createConnectionConfig, extractRequestForLogging } from '../../utils.js'
-import { apply as applyTypescriptTemplate } from '../../templates/typescript.js'
+import { generateTypescript } from '@supabase/postgrest-typegen'
 import { getGeneratorMetadata } from '../../../lib/generators.js'
 
 export default async (fastify: FastifyInstance) => {
@@ -33,8 +33,7 @@ export default async (fastify: FastifyInstance) => {
       return { error: generatorMetaError.message }
     }
 
-    return applyTypescriptTemplate({
-      ...generatorMeta,
+    return generateTypescript(generatorMeta!, {
       detectOneToOneRelationships,
       postgrestVersion,
     })
