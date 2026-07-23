@@ -223,7 +223,7 @@ COMMIT;`
     const passwordClause = password === undefined ? '' : `PASSWORD ${literal(password)}`
     const validUntilClause = valid_until === undefined ? '' : `VALID UNTIL ${literal(valid_until)}`
     let configClause = ''
-    if (config !== undefined) {
+    if (config != null) {
       const configSql = config.map((c) => {
         const { op, path, value } = c
         const k = path

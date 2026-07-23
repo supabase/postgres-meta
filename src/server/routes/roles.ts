@@ -27,7 +27,7 @@ export default async (fastify: FastifyInstance) => {
           'x-pg-application-name': Type.Optional(Type.String()),
         }),
         querystring: Type.Object({
-          include_system_schemas: Type.Optional(Type.String()),
+          include_default_roles: Type.Optional(Type.String()),
           limit: Type.Optional(Type.String()),
           offset: Type.Optional(Type.String()),
         }),
