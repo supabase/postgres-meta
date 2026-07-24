@@ -37,6 +37,14 @@ SELECT
     END
   END AS data_type,
   COALESCE(bt.typname, t.typname) AS format,
+  CASE
+    WHEN t.typtype = 'd' THEN nt.nspname
+    ELSE NULL
+  END AS domain_schema,
+  CASE
+    WHEN t.typtype = 'd' THEN t.typname
+    ELSE NULL
+  END AS domain_name,
   a.attidentity IN ('a', 'd') AS is_identity,
   CASE
     a.attidentity

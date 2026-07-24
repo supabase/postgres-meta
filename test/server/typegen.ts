@@ -31,6 +31,27 @@ test('typegen: typescript', async () => {
             }
             Relationships: []
           }
+          domain_test: {
+            Row: {
+              id: number
+              plain: Json | null
+              quantity: number
+              search: Json | null
+            }
+            Insert: {
+              id?: number
+              plain?: Json | null
+              quantity: number
+              search?: Json | null
+            }
+            Update: {
+              id?: number
+              plain?: Json | null
+              quantity?: number
+              search?: Json | null
+            }
+            Relationships: []
+          }
           empty: {
             Row: {}
             Insert: {}
@@ -1228,6 +1249,27 @@ test('typegen w/ one-to-one relationships', async () => {
             Update: {
               id?: number
               name?: string
+            }
+            Relationships: []
+          }
+          domain_test: {
+            Row: {
+              id: number
+              plain: Json | null
+              quantity: number
+              search: Json | null
+            }
+            Insert: {
+              id?: number
+              plain?: Json | null
+              quantity: number
+              search?: Json | null
+            }
+            Update: {
+              id?: number
+              plain?: Json | null
+              quantity?: number
+              search?: Json | null
             }
             Relationships: []
           }
@@ -2453,6 +2495,27 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Update: {
               id?: number
               name?: string
+            }
+            Relationships: []
+          }
+          domain_test: {
+            Row: {
+              id: number
+              plain: Json | null
+              quantity: number
+              search: Json | null
+            }
+            Insert: {
+              id?: number
+              plain?: Json | null
+              quantity: number
+              search?: Json | null
+            }
+            Update: {
+              id?: number
+              plain?: Json | null
+              quantity?: number
+              search?: Json | null
             }
             Relationships: []
           }
@@ -3683,6 +3746,27 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Update: {
               id?: number
               name?: string
+            }
+            Relationships: []
+          }
+          domain_test: {
+            Row: {
+              id: number
+              plain: Json | null
+              quantity: number
+              search: Json | null
+            }
+            Insert: {
+              id?: number
+              plain?: Json | null
+              quantity: number
+              search?: Json | null
+            }
+            Update: {
+              id?: number
+              plain?: Json | null
+              quantity?: number
+              search?: Json | null
             }
             Relationships: []
           }
@@ -5469,6 +5553,27 @@ test('typegen: go', async () => {
       Id               *int64  \`json:"id"\`
     }
 
+    type PublicDomainTestSelect struct {
+      Id       int64       \`json:"id"\`
+      Plain    interface{} \`json:"plain"\`
+      Quantity int32       \`json:"quantity"\`
+      Search   interface{} \`json:"search"\`
+    }
+
+    type PublicDomainTestInsert struct {
+      Id       *int64      \`json:"id"\`
+      Plain    interface{} \`json:"plain"\`
+      Quantity int32       \`json:"quantity"\`
+      Search   interface{} \`json:"search"\`
+    }
+
+    type PublicDomainTestUpdate struct {
+      Id       *int64      \`json:"id"\`
+      Plain    interface{} \`json:"plain"\`
+      Quantity *int32      \`json:"quantity"\`
+      Search   interface{} \`json:"search"\`
+    }
+
     type PublicCategorySelect struct {
       Id   int32  \`json:"id"\`
       Name string \`json:"name"\`
@@ -5598,6 +5703,42 @@ test('typegen: swift', async () => {
         internal enum CodingKeys: String, CodingKey {
           case id = "id"
           case name = "name"
+        }
+      }
+      internal struct DomainTestSelect: Codable, Hashable, Sendable, Identifiable {
+        internal let id: Int64
+        internal let plain: AnyJSON?
+        internal let quantity: Int32
+        internal let search: AnyJSON?
+        internal enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case plain = "plain"
+          case quantity = "quantity"
+          case search = "search"
+        }
+      }
+      internal struct DomainTestInsert: Codable, Hashable, Sendable, Identifiable {
+        internal let id: Int64?
+        internal let plain: AnyJSON?
+        internal let quantity: Int32
+        internal let search: AnyJSON?
+        internal enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case plain = "plain"
+          case quantity = "quantity"
+          case search = "search"
+        }
+      }
+      internal struct DomainTestUpdate: Codable, Hashable, Sendable, Identifiable {
+        internal let id: Int64?
+        internal let plain: AnyJSON?
+        internal let quantity: Int32?
+        internal let search: AnyJSON?
+        internal enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case plain = "plain"
+          case quantity = "quantity"
+          case search = "search"
         }
       }
       internal struct EmptySelect: Codable, Hashable, Sendable {
@@ -6129,6 +6270,42 @@ test('typegen: swift w/ public access control', async () => {
         public enum CodingKeys: String, CodingKey {
           case id = "id"
           case name = "name"
+        }
+      }
+      public struct DomainTestSelect: Codable, Hashable, Sendable, Identifiable {
+        public let id: Int64
+        public let plain: AnyJSON?
+        public let quantity: Int32
+        public let search: AnyJSON?
+        public enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case plain = "plain"
+          case quantity = "quantity"
+          case search = "search"
+        }
+      }
+      public struct DomainTestInsert: Codable, Hashable, Sendable, Identifiable {
+        public let id: Int64?
+        public let plain: AnyJSON?
+        public let quantity: Int32
+        public let search: AnyJSON?
+        public enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case plain = "plain"
+          case quantity = "quantity"
+          case search = "search"
+        }
+      }
+      public struct DomainTestUpdate: Codable, Hashable, Sendable, Identifiable {
+        public let id: Int64?
+        public let plain: AnyJSON?
+        public let quantity: Int32?
+        public let search: AnyJSON?
+        public enum CodingKeys: String, CodingKey {
+          case id = "id"
+          case plain = "plain"
+          case quantity = "quantity"
+          case search = "search"
         }
       }
       public struct EmptySelect: Codable, Hashable, Sendable {
@@ -6813,6 +6990,24 @@ test('typegen: python', async () => {
         duration_optional: NotRequired[Annotated[Optional[str], Field(alias="duration_optional")]]
         duration_required: NotRequired[Annotated[str, Field(alias="duration_required")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
+
+    class PublicDomainTest(BaseModel):
+        id: int = Field(alias="id")
+        plain: Optional[Json[Any]] = Field(alias="plain")
+        quantity: int = Field(alias="quantity")
+        search: Optional[Json[Any]] = Field(alias="search")
+
+    class PublicDomainTestInsert(TypedDict):
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+        plain: NotRequired[Annotated[Optional[Json[Any]], Field(alias="plain")]]
+        quantity: Annotated[int, Field(alias="quantity")]
+        search: NotRequired[Annotated[Optional[Json[Any]], Field(alias="search")]]
+
+    class PublicDomainTestUpdate(TypedDict):
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+        plain: NotRequired[Annotated[Optional[Json[Any]], Field(alias="plain")]]
+        quantity: NotRequired[Annotated[int, Field(alias="quantity")]]
+        search: NotRequired[Annotated[Optional[Json[Any]], Field(alias="search")]]
 
     class PublicCategory(BaseModel):
         id: int = Field(alias="id")
