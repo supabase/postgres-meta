@@ -501,3 +501,38 @@ STABLE
 AS $$
   SELECT interval_test_row.duration_required * 2;
 $$;
+
+CREATE TABLE IF NOT EXISTS public.profile_type (
+  id int2 NOT NULL PRIMARY KEY,
+  name text NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.profile (
+  id uuid NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+  username text UNIQUE,
+  profile_type_id int2 REFERENCES public.profile_type(id)
+);
+
+CREATE OR REPLACE VIEW public.profile_view ("id", "username", "profileType")
+AS SELECT p.id, p.username, pt.name
+FROM public.profile AS p
+JOIN public.profile_type AS pt ON p.profile_type_id = pt.id;
+
+CREATE OR REPLACE FUNCTION public.profile_view_instead_of_trigger()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    INSERT INTO public.profile (id, username) VALUES (NEW.id, NEW.username);
+  ELSIF TG_OP = 'UPDATE' THEN
+    UPDATE public.profile SET username = NEW.username WHERE id = OLD.id;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE TRIGGER profile_view_instead_of_trigger
+  INSTEAD OF INSERT OR UPDATE ON public.profile_view
+  FOR EACH ROW
+  EXECUTE FUNCTION public.profile_view_instead_of_trigger();

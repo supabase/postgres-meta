@@ -150,6 +150,8 @@ export const apply = async ({
         view: {
           ...materializedView,
           is_updatable: false,
+          is_insert_enabled: false,
+          is_update_enabled: false,
         },
         relationships: getRelationships(materializedView, relationships),
       })
@@ -623,7 +625,7 @@ export type Database = {
                     ]}
                   }
                   ${
-                    view.is_updatable
+                    view.is_insert_enabled
                       ? `Insert: {
                            ${columnsByTableId[view.id].map((column) => {
                              if (!column.is_updatable) {
@@ -640,8 +642,12 @@ export type Database = {
                                { types, schemas, tables, views }
                              )
                            })}
-                         }
-                         Update: {
+                         }`
+                      : ''
+                  }
+                  ${
+                    view.is_update_enabled
+                      ? `Update: {
                            ${columnsByTableId[view.id].map((column) => {
                              if (!column.is_updatable) {
                                return `${JSON.stringify(column.name)}?: never`
