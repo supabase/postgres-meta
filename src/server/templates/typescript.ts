@@ -719,17 +719,14 @@ export type Database = {
                           const type = typesById.get(type_id)
                           let tsType = 'unknown'
                           if (type) {
-                            tsType = `${generateNullableUnionTsType(
-                              pgTypeToTsType(schema, type.name, {
-                                types,
-                                schemas,
-                                tables,
-                                views,
-                              }),
-                              true
-                            )}`
+                            tsType = pgTypeToTsType(schema, type.name, {
+                              types,
+                              schemas,
+                              tables,
+                              views,
+                            })
                           }
-                          return `${JSON.stringify(name)}: ${tsType}`
+                          return `${JSON.stringify(name)}: ${tsType} | null`
                         })}
                       }`
                   )
