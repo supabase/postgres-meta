@@ -6624,6 +6624,7 @@ test('typegen: python', async () => {
     path: '/generators/python',
     query: { access_control: 'public' },
   })
+  expect(body).toContain('from typing_extensions import NotRequired, TypeAlias')
   expect(body).toMatchInlineSnapshot(`
     "from __future__ import annotations
 
@@ -6634,11 +6635,10 @@ test('typegen: python', async () => {
         Any,
         List,
         Literal,
-        NotRequired,
         Optional,
-        TypeAlias,
         TypedDict,
     )
+    from typing_extensions import NotRequired, TypeAlias
 
     from pydantic import BaseModel, Field, Json
 
