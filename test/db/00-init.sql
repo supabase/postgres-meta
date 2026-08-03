@@ -501,3 +501,24 @@ STABLE
 AS $$
   SELECT interval_test_row.duration_required * 2;
 $$;
+
+-- Set-returning function with an ad-hoc TABLE return type and a ROWS 1 estimate.
+-- ROWS 1 is only a planner estimate: PostgREST still returns an array, and with no
+-- named relation there is no SetofOptions metadata to restore the array shape, so
+-- the generated return type must keep the array.
+CREATE OR REPLACE FUNCTION public.get_todos_summary_rows_one()
+RETURNS TABLE (id int, name text)
+LANGUAGE SQL STABLE
+ROWS 1
+AS $$
+  SELECT 1 AS id, 'test' AS name;
+$$;
+
+-- Set-returning scalar function with a ROWS 1 estimate: array type must be kept here too.
+CREATE OR REPLACE FUNCTION public.get_todo_ids_rows_one()
+RETURNS SETOF bigint
+LANGUAGE SQL STABLE
+ROWS 1
+AS $$
+  SELECT id FROM public.todos LIMIT 1;
+$$;

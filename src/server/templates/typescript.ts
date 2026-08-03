@@ -262,7 +262,12 @@ export const apply = async ({
       }
     }
 
-    return `${returnType}${fn.is_set_returning_function && returnsMultipleRows ? '[]' : ''}
+    // A ROWS 1 estimate may only collapse the array type when SetofOptions is also emitted
+    // (returnTableName resolved): postgrest-js relies on isOneToOne to restore the array shape
+    // for direct RPC calls. Without that metadata PostgREST still returns an array, so the
+    // collapse would make the type diverge from the actual response.
+    const collapsibleSingleRow = !returnsMultipleRows && returnTableName !== null
+    return `${returnType}${fn.is_set_returning_function && !collapsibleSingleRow ? '[]' : ''}
                           ${setofOptionsInfo ? `${setofOptionsInfo}` : ''}`
   }
 
