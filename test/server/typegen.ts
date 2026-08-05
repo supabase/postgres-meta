@@ -753,6 +753,7 @@ test('typegen: typescript', async () => {
                   isSetofReturn: true
                 }
               }
+          get_todo_ids_rows_one: { Args: never; Returns: number[] }
           get_todos_by_matview: {
             Args: { "": unknown }
             Returns: {
@@ -841,6 +842,13 @@ test('typegen: typescript', async () => {
                   isSetofReturn: true
                 }
               }
+          get_todos_summary_rows_one: {
+            Args: never
+            Returns: {
+              id: number
+              name: string
+            }[]
+          }
           get_user_audit_setof_single_row: {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
@@ -1978,6 +1986,7 @@ test('typegen w/ one-to-one relationships', async () => {
                   isSetofReturn: true
                 }
               }
+          get_todo_ids_rows_one: { Args: never; Returns: number[] }
           get_todos_by_matview: {
             Args: { "": unknown }
             Returns: {
@@ -2066,6 +2075,13 @@ test('typegen w/ one-to-one relationships', async () => {
                   isSetofReturn: true
                 }
               }
+          get_todos_summary_rows_one: {
+            Args: never
+            Returns: {
+              id: number
+              name: string
+            }[]
+          }
           get_user_audit_setof_single_row: {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
@@ -3203,6 +3219,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   isSetofReturn: true
                 }
               }
+          get_todo_ids_rows_one: { Args: never; Returns: number[] }
           get_todos_by_matview: {
             Args: { "": unknown }
             Returns: {
@@ -3291,6 +3308,13 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   isSetofReturn: true
                 }
               }
+          get_todos_summary_rows_one: {
+            Args: never
+            Returns: {
+              id: number
+              name: string
+            }[]
+          }
           get_user_audit_setof_single_row: {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
@@ -4433,6 +4457,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   isSetofReturn: true
                 }
               }
+          get_todo_ids_rows_one: { Args: never; Returns: number[] }
           get_todos_by_matview: {
             Args: { "": unknown }
             Returns: {
@@ -4521,6 +4546,13 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   isSetofReturn: true
                 }
               }
+          get_todos_summary_rows_one: {
+            Args: never
+            Returns: {
+              id: number
+              name: string
+            }[]
+          }
           get_user_audit_setof_single_row: {
             Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
             Returns: {
