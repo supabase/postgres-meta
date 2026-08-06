@@ -1,4 +1,4 @@
-FROM node:20 AS build
+FROM node:22 AS build
 WORKDIR /usr/src/app
 # Do `npm ci` separately so we can cache `node_modules`
 # https://nodejs.org/en/docs/guides/nodejs-docker-webapp/
@@ -7,7 +7,7 @@ RUN npm clean-install
 COPY . .
 RUN npm run build && npm prune --omit=dev
 
-FROM node:20-slim
+FROM node:22-slim
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
