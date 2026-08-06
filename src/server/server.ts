@@ -7,6 +7,7 @@ import {
   DEFAULT_POOL_CONFIG,
   EXPORT_DOCS,
   GENERATE_TYPES,
+  GENERATE_TYPES_BIGINT_AS,
   GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS,
   GENERATE_TYPES_INCLUDED_SCHEMAS,
   GENERATE_TYPES_SWIFT_ACCESS_CONTROL,
@@ -136,7 +137,7 @@ async function getTypeOutput(): Promise<string | null> {
 
   switch (GENERATE_TYPES?.toLowerCase()) {
     case 'typescript':
-      return await applyTypescriptTemplate(config)
+      return await applyTypescriptTemplate({ ...config, bigintAs: GENERATE_TYPES_BIGINT_AS })
     case 'swift':
       return await applySwiftTemplate({
         ...config,

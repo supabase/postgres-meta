@@ -12,6 +12,7 @@ export default async (fastify: FastifyInstance) => {
       included_schemas?: string
       detect_one_to_one_relationships?: string
       postgrest_version?: string
+      bigint_as?: string
     }
   }>('/', async (request, reply) => {
     const config = createConnectionConfig(request)
@@ -21,6 +22,7 @@ export default async (fastify: FastifyInstance) => {
       request.query.included_schemas?.split(',').map((schema) => schema.trim()) ?? []
     const detectOneToOneRelationships = request.query.detect_one_to_one_relationships === 'true'
     const postgrestVersion = request.query.postgrest_version
+    const bigintAs = request.query.bigint_as ?? 'number'
 
     const pgMeta: PostgresMeta = new PostgresMeta(config)
     const { data: generatorMeta, error: generatorMetaError } = await getGeneratorMetadata(pgMeta, {
@@ -37,6 +39,7 @@ export default async (fastify: FastifyInstance) => {
       ...generatorMeta,
       detectOneToOneRelationships,
       postgrestVersion,
+      bigintAs,
     })
   })
 }

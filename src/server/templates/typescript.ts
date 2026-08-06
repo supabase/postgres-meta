@@ -31,9 +31,11 @@ export const apply = async ({
   types,
   detectOneToOneRelationships,
   postgrestVersion,
+  bigintAs = 'number',
 }: GeneratorMetadata & {
   detectOneToOneRelationships: boolean
   postgrestVersion?: string
+  bigintAs?: string
 }): Promise<string> => {
   schemas.sort((a, b) => a.name.localeCompare(b.name))
   relationships.sort(
@@ -284,6 +286,7 @@ export const apply = async ({
             schemas,
             tables,
             views,
+            bigintAs,
           })
         }
         return { name, type: tsType }
@@ -319,6 +322,7 @@ export const apply = async ({
                       schemas,
                       tables,
                       views,
+                      bigintAs,
                     }
                   )
                 )
@@ -334,6 +338,7 @@ export const apply = async ({
         schemas,
         tables,
         views,
+        bigintAs,
       })
     }
 
@@ -431,6 +436,7 @@ export const apply = async ({
                   schemas,
                   tables,
                   views,
+                  bigintAs,
                 })
               }
               return { name, type: tsType, has_default }
@@ -450,6 +456,7 @@ export const apply = async ({
                   schemas,
                   tables,
                   views,
+                  bigintAs,
                 })
               }
               return { name, type: tsType, has_default }
@@ -467,6 +474,7 @@ export const apply = async ({
                 schemas,
                 tables,
                 views,
+                bigintAs,
               })
             }
             return { name, type: tsType, has_default }
@@ -508,6 +516,8 @@ export const apply = async ({
       schemas: PostgresSchema[]
       tables: PostgresTable[]
       views: PostgresView[]
+      bigintAs: string
+      isWriteColumn?: boolean
     }
   ) {
     return `${JSON.stringify(column.name)}${column.is_optional ? '?' : ''}: ${generateNullableUnionTsType(pgTypeToTsType(schema, column.format, context), column.is_nullable)}`
@@ -544,7 +554,7 @@ export type Database = {
                             is_nullable: column.is_nullable,
                             is_optional: false,
                           },
-                          { types, schemas, tables, views }
+                          { types, schemas, tables, views, bigintAs }
                         )
                       ),
                       ...schemaFunctions
@@ -570,7 +580,7 @@ export type Database = {
                             column.is_identity ||
                             column.default_value !== null,
                         },
-                        { types, schemas, tables, views }
+                        { types, schemas, tables, views, bigintAs, isWriteColumn: true }
                       )
                     })}
                   }
@@ -588,7 +598,7 @@ export type Database = {
                           is_nullable: column.is_nullable,
                           is_optional: true,
                         },
-                        { types, schemas, tables, views }
+                        { types, schemas, tables, views, bigintAs, isWriteColumn: true }
                       )
                     })}
                   }
@@ -616,7 +626,7 @@ export type Database = {
                             is_nullable: column.is_nullable,
                             is_optional: false,
                           },
-                          { types, schemas, tables, views }
+                          { types, schemas, tables, views, bigintAs }
                         )
                       ),
                       ...schemaFunctions
@@ -642,7 +652,7 @@ export type Database = {
                                  is_nullable: true,
                                  is_optional: true,
                                },
-                               { types, schemas, tables, views }
+                               { types, schemas, tables, views, bigintAs, isWriteColumn: true }
                              )
                            })}
                          }
@@ -659,7 +669,7 @@ export type Database = {
                                  is_nullable: true,
                                  is_optional: true,
                                },
-                               { types, schemas, tables, views }
+                               { types, schemas, tables, views, bigintAs, isWriteColumn: true }
                              )
                            })}
                          }
@@ -730,6 +740,7 @@ export type Database = {
                                 schemas,
                                 tables,
                                 views,
+                                bigintAs,
                               }),
                               true
                             )}`
@@ -873,6 +884,22 @@ export const Constants = {
   return output
 }
 
+// `bigintAs` is a pipe-delimited set of TypeScript representations for int8/numeric columns on
+// Insert/Update, for example "number|bigint". Only `number` and `bigint` are accepted: `bigint`
+// is the lossless write channel (postgrest-js serializes it to a JSON string), while `number`
+// keeps the ergonomic path for small values. `string` is deliberately excluded, since an
+// arbitrary non-numeric string would pass the type check and only fail at runtime in PostgREST.
+// Unknown tokens are ignored, and an empty result falls back to "number".
+const BIGINT_AS_REPRESENTATIONS = ['number', 'bigint']
+export const bigintAsToTsType = (bigintAs: string): string => {
+  const representations = bigintAs
+    .split('|')
+    .map((value) => value.trim())
+    .filter((value) => BIGINT_AS_REPRESENTATIONS.includes(value))
+  const unique = [...new Set(representations)]
+  return unique.length > 0 ? unique.join(' | ') : 'number'
+}
+
 // TODO: Make this more robust. Currently doesn't handle range types - returns them as unknown.
 export const pgTypeToTsType = (
   schema: PostgresSchema,
@@ -882,17 +909,26 @@ export const pgTypeToTsType = (
     schemas,
     tables,
     views,
+    bigintAs = 'number',
+    isWriteColumn = false,
   }: {
     types: PostgresType[]
     schemas: PostgresSchema[]
     tables: PostgresTable[]
     views: PostgresView[]
+    bigintAs?: string
+    isWriteColumn?: boolean
   }
 ): string => {
   if (pgType === 'bool') {
     return 'boolean'
-  } else if (['int2', 'int4', 'int8', 'float4', 'float8', 'numeric'].includes(pgType)) {
+  } else if (['int2', 'int4', 'float4', 'float8'].includes(pgType)) {
     return 'number'
+  } else if (['int8', 'numeric'].includes(pgType)) {
+    // int8/numeric can exceed Number.MAX_SAFE_INTEGER. On reads they stay `number` to match the
+    // (lossy) JSON number PostgREST returns; cast to ::text for the exact value. On writes the
+    // column is widened to the `bigintAs` representations so callers can pass a lossless form.
+    return isWriteColumn ? bigintAsToTsType(bigintAs) : 'number'
   } else if (
     [
       'bytea',
@@ -923,6 +959,8 @@ export const pgTypeToTsType = (
       schemas,
       tables,
       views,
+      bigintAs,
+      isWriteColumn,
     })})[]`
   } else {
     const enumTypes = types.filter((type) => type.name === pgType && type.enums.length > 0)

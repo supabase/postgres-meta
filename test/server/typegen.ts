@@ -3671,6 +3671,42 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
   )
 })
 
+test('typegen: typescript w/ bigintAs defaults to number', async () => {
+  const { body } = await app.inject({ method: 'GET', path: '/generators/typescript' })
+  // Back-compat: without the flag, int8 and numeric generate as `number` on reads and writes.
+  expect(body).toContain('"user-id": number') // int8, Row
+  expect(body).toContain('"user-id"?: number') // int8, Insert/Update
+  expect(body).toContain('days_since_event: number | null') // numeric (computed), Row
+})
+
+test('typegen: typescript w/ bigint_as=number|bigint widens writes only', async () => {
+  const { body } = await app.inject({
+    method: 'GET',
+    path: '/generators/typescript',
+    query: { bigint_as: 'number|bigint' },
+  })
+  // int8/numeric can exceed Number.MAX_SAFE_INTEGER. Insert/Update widen to the union so callers
+  // can pass a lossless BigInt (postgrest-js serializes it to a JSON string).
+  expect(body).toContain('"user-id"?: number | bigint') // int8, Update
+  // Reads stay `number`: PostgREST returns int8 as a lossy JSON number; cast to ::text for the exact value.
+  expect(body).toContain('"user-id": number') // int8, Row unchanged
+  expect(body).toContain('days_since_event: number | null') // numeric (computed), Row unchanged
+})
+
+test('typegen: typescript w/ bigint_as=bigint widens writes only', async () => {
+  const { body } = await app.inject({
+    method: 'GET',
+    path: '/generators/typescript',
+    query: { bigint_as: 'bigint' },
+  })
+  // `bigint` is the lossless write channel: postgrest-js serializes a BigInt to a JSON string,
+  // so values past Number.MAX_SAFE_INTEGER go in intact. It still only widens writes.
+  expect(body).toContain('"user-id"?: bigint') // int8, Update
+  // Reads stay `number`: PostgREST returns int8 as a lossy JSON number; cast to ::text for the exact value.
+  expect(body).toContain('"user-id": number') // int8, Row unchanged
+  expect(body).toContain('days_since_event: number | null') // numeric (computed), Row unchanged
+})
+
 test('typegen: typescript w/ postgrestVersion', async () => {
   const { body } = await app.inject({
     method: 'GET',
