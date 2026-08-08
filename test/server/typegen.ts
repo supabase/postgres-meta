@@ -6650,6 +6650,20 @@ test('typegen: swift w/ public access control', async () => {
   `)
 })
 
+test('typegen: kotlin', async () => {
+  const { body } = await app.inject({ method: 'GET', path: '/generators/kotlin' })
+  expect(body).toMatchInlineSnapshot()
+})
+
+test('typegen: kotlin w/ internal visibility', async () => {
+  const { body } = await app.inject({
+    method: 'GET',
+    path: '/generators/kotlin',
+    query: { visibility: 'internal' },
+  })
+  expect(body).toMatchInlineSnapshot()
+})
+
 test('typegen: python', async () => {
   const { body } = await app.inject({
     method: 'GET',
