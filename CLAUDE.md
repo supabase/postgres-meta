@@ -153,6 +153,21 @@ PG_META_MAX_RESULT_SIZE_MB=20           # Max query result size in MB (default: 
 PG_META_MAX_BODY_LIMIT_MB=3             # Max request body size in MB (default: 3MB)
 ```
 
+Type generation formatting (opt-in):
+```bash
+PG_META_FORMAT_IN_WORKER=true           # Format generated types on a worker thread (default: false)
+PG_META_FORMAT_POOL_SIZE=1              # Worker threads used for formatting (default: 1)
+PG_META_FORMAT_MAX_QUEUE=20             # Max format calls in flight before returning 503 (default: 20)
+PG_META_FORMAT_TIMEOUT_SECS=60          # Per-format timeout (default: 60)
+PG_META_FORMAT_IDLE_TIMEOUT_SECS=30     # Idle time before a worker exits (default: 30)
+```
+
+Prettier is CPU-bound and synchronous, so formatting a large schema blocks the
+event loop for seconds and the server cannot answer anything else, health checks
+included. `PG_META_FORMAT_IN_WORKER=true` moves it to a worker thread. Always
+off during type generation (`PG_META_GENERATE_TYPES`), which generates once and
+exits.
+
 ## Testing Notes
 
 ### Snapshot Testing

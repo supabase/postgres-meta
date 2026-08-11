@@ -3,6 +3,7 @@ import { PostgresMeta } from '../../../lib/index.js'
 import { createConnectionConfig, extractRequestForLogging } from '../../utils.js'
 import { apply as applyTypescriptTemplate } from '../../templates/typescript.js'
 import { getGeneratorMetadata } from '../../../lib/generators.js'
+import { FormatQueueFullError } from '../../format-pool.js'
 
 export default async (fastify: FastifyInstance) => {
   fastify.get<{
@@ -33,10 +34,23 @@ export default async (fastify: FastifyInstance) => {
       return { error: generatorMetaError.message }
     }
 
-    return applyTypescriptTemplate({
-      ...generatorMeta,
-      detectOneToOneRelationships,
-      postgrestVersion,
-    })
+    try {
+      return await applyTypescriptTemplate({
+        ...generatorMeta,
+        detectOneToOneRelationships,
+        postgrestVersion,
+      })
+    } catch (error) {
+      // Anything else is a genuine failure and is already logged and turned
+      // into a 500 by the app-level error handler.
+      if (!(error instanceof FormatQueueFullError)) {
+        throw error
+      }
+      // Load shedding, not a fault: 503 tells the caller it is transient and
+      // worth retrying.
+      request.log.warn({ error, request: extractRequestForLogging(request) })
+      reply.code(503)
+      return { error: error.message }
+    }
   })
 }

@@ -15,6 +15,7 @@ import {
   PG_META_PORT,
   POSTGREST_VERSION,
 } from './constants.js'
+import { destroyFormatPool } from './format-pool.js'
 import { apply as applyTypescriptTemplate } from './templates/typescript.js'
 import { apply as applyGoTemplate } from './templates/go.js'
 import { apply as applySwiftTemplate } from './templates/swift.js'
@@ -178,6 +179,13 @@ if (EXPORT_DOCS) {
       await adminApp.close()
     } catch (err) {
       app.log.error({ err }, `Failed to close adminApp`)
+      throw err
+    }
+    try {
+      // worker threads keep the event loop alive, so the process would not exit
+      await destroyFormatPool()
+    } catch (err) {
+      app.log.error({ err }, `Failed to destroy format pool`)
       throw err
     }
   })

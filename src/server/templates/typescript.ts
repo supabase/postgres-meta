@@ -1,4 +1,4 @@
-import prettier from 'prettier'
+import { format } from '../format-pool.js'
 import type { GeneratorMetadata } from '../../lib/generators.js'
 import type {
   PostgresColumn,
@@ -874,7 +874,7 @@ export const Constants = {
 } as const
 `
 
-  output = await prettier.format(output, {
+  output = await format(output, {
     parser: 'typescript',
     semi: false,
   })
