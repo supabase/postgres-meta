@@ -79,7 +79,7 @@ test('sheds load with FormatQueueFullError once the in-flight limit is reached',
 
   // big enough that formatting takes long enough for calls to overlap
   let big = ''
-  for (let i = 0; i < 4000; i++) {
+  for (let i = 0; i < 1000; i++) {
     big += `export type T${i} = { a: number; b: string; c: Array<{ x: number; y: string }> }\n`
   }
 
