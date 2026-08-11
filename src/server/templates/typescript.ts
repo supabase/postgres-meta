@@ -96,19 +96,27 @@ export const apply = async ({
     }
   }
 
-  function getRelationships(
-    object: { schema: string; name: string },
-    relationships: GeneratorMetadata['relationships']
-  ): Pick<
+  const relationshipsByRelation = new Map<string, GeneratorMetadata['relationships']>()
+  for (const relationship of relationships) {
+    const key = `${relationship.schema}.${relationship.relation}`
+    let bucket = relationshipsByRelation.get(key)
+    if (!bucket) {
+      bucket = []
+      relationshipsByRelation.set(key, bucket)
+    }
+    bucket.push(relationship)
+  }
+
+  function getRelationships(object: {
+    schema: string
+    name: string
+  }): Pick<
     GeneratorMetadata['relationships'][number],
     'foreign_key_name' | 'columns' | 'is_one_to_one' | 'referenced_relation' | 'referenced_columns'
   >[] {
-    return relationships.filter(
-      (relationship) =>
-        relationship.schema === object.schema &&
-        relationship.referenced_schema === object.schema &&
-        relationship.relation === object.name
-    )
+    const candidates = relationshipsByRelation.get(`${object.schema}.${object.name}`)
+    if (!candidates) return []
+    return candidates.filter((relationship) => relationship.referenced_schema === object.schema)
   }
 
   function generateRelationshiptTsDefinition(relationship: TsRelationship): string {
@@ -124,7 +132,7 @@ export const apply = async ({
     if (table.schema in introspectionBySchema) {
       introspectionBySchema[table.schema].tables.push({
         table,
-        relationships: getRelationships(table, relationships),
+        relationships: getRelationships(table),
       })
     }
   }
@@ -132,7 +140,7 @@ export const apply = async ({
     if (table.schema in introspectionBySchema) {
       introspectionBySchema[table.schema].tables.push({
         table,
-        relationships: getRelationships(table, relationships),
+        relationships: getRelationships(table),
       })
     }
   }
@@ -140,7 +148,7 @@ export const apply = async ({
     if (view.schema in introspectionBySchema) {
       introspectionBySchema[view.schema].views.push({
         view,
-        relationships: getRelationships(view, relationships),
+        relationships: getRelationships(view),
       })
     }
   }
@@ -151,7 +159,7 @@ export const apply = async ({
           ...materializedView,
           is_updatable: false,
         },
-        relationships: getRelationships(materializedView, relationships),
+        relationships: getRelationships(materializedView),
       })
     }
   }
