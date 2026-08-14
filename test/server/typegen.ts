@@ -1,6 +1,19 @@
 import { expect, test } from 'vitest'
 import { app } from './utils'
 
+function extractTableTypes(generated: string, table: string) {
+  const escaped = table.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const match = generated.match(
+    new RegExp(
+      `${escaped}: \\{\\s*Row: \\{([\\s\\S]*?)\\}\\s*Insert: \\{([\\s\\S]*?)\\}\\s*Update: \\{([\\s\\S]*?)\\}`
+    )
+  )
+  if (!match) {
+    throw new Error(`Could not find table types for ${table}`)
+  }
+  return { row: match[1], insert: match[2], update: match[3] }
+}
+
 test('typegen: typescript', async () => {
   const { body } = await app.inject({ method: 'GET', path: '/generators/typescript' })
   expect(body).toMatchInlineSnapshot(
@@ -170,6 +183,24 @@ test('typegen: typescript', async () => {
                 referencedColumns: ["id"]
               },
             ]
+          }
+          people: {
+            Row: {
+              height_cm: number | null
+              height_in: number | null
+              id: number
+            }
+            Insert: {
+              height_cm?: number | null
+              height_in?: never
+              id?: number
+            }
+            Update: {
+              height_cm?: number | null
+              height_in?: never
+              id?: number
+            }
+            Relationships: []
           }
           table_with_other_tables_row_type: {
             Row: {
@@ -1205,6 +1236,15 @@ test('typegen: typescript', async () => {
   )
 })
 
+test('typegen: typescript omits generated columns from Insert and Update', async () => {
+  const { body } = await app.inject({ method: 'GET', path: '/generators/typescript' })
+  const people = extractTableTypes(body, 'people')
+
+  expect(people.row).toMatch(/height_in:/)
+  expect(people.insert).not.toMatch(/height_in\??: number/)
+  expect(people.update).not.toMatch(/height_in\??: number/)
+})
+
 test('typegen w/ one-to-one relationships', async () => {
   const { body } = await app.inject({
     method: 'GET',
@@ -1379,6 +1419,24 @@ test('typegen w/ one-to-one relationships', async () => {
                 referencedColumns: ["id"]
               },
             ]
+          }
+          people: {
+            Row: {
+              height_cm: number | null
+              height_in: number | null
+              id: number
+            }
+            Insert: {
+              height_cm?: number | null
+              height_in?: never
+              id?: number
+            }
+            Update: {
+              height_cm?: number | null
+              height_in?: never
+              id?: number
+            }
+            Relationships: []
           }
           table_with_other_tables_row_type: {
             Row: {
@@ -2612,6 +2670,24 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 referencedColumns: ["id"]
               },
             ]
+          }
+          people: {
+            Row: {
+              height_cm: number | null
+              height_in: number | null
+              id: number
+            }
+            Insert: {
+              height_cm?: number | null
+              height_in?: never
+              id?: number
+            }
+            Update: {
+              height_cm?: number | null
+              height_in?: never
+              id?: number
+            }
+            Relationships: []
           }
           table_with_other_tables_row_type: {
             Row: {
@@ -3850,6 +3926,24 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 referencedColumns: ["id"]
               },
             ]
+          }
+          people: {
+            Row: {
+              height_cm: number | null
+              height_in: number | null
+              id: number
+            }
+            Insert: {
+              height_cm?: number | null
+              height_in?: never
+              id?: number
+            }
+            Update: {
+              height_cm?: number | null
+              height_in?: never
+              id?: number
+            }
+            Relationships: []
           }
           table_with_other_tables_row_type: {
             Row: {
@@ -5501,6 +5595,24 @@ test('typegen: go', async () => {
       Id               *int64  \`json:"id"\`
     }
 
+    type PublicPeopleSelect struct {
+      HeightCm *float64 \`json:"height_cm"\`
+      HeightIn *float64 \`json:"height_in"\`
+      Id       int64    \`json:"id"\`
+    }
+
+    type PublicPeopleInsert struct {
+      HeightCm *float64 \`json:"height_cm"\`
+      HeightIn *float64 \`json:"height_in"\`
+      Id       *int64   \`json:"id"\`
+    }
+
+    type PublicPeopleUpdate struct {
+      HeightCm *float64 \`json:"height_cm"\`
+      HeightIn *float64 \`json:"height_in"\`
+      Id       *int64   \`json:"id"\`
+    }
+
     type PublicCategorySelect struct {
       Id   int32  \`json:"id"\`
       Name string \`json:"name"\`
@@ -5852,6 +5964,36 @@ test('typegen: swift', async () => {
           case metadata = "metadata"
           case name = "name"
           case status = "status"
+        }
+      }
+      internal struct PeopleSelect: Codable, Hashable, Sendable, Identifiable {
+        internal let heightCm: Decimal?
+        internal let heightIn: Decimal?
+        internal let id: Int64
+        internal enum CodingKeys: String, CodingKey {
+          case heightCm = "height_cm"
+          case heightIn = "height_in"
+          case id = "id"
+        }
+      }
+      internal struct PeopleInsert: Codable, Hashable, Sendable, Identifiable {
+        internal let heightCm: Decimal?
+        internal let heightIn: Decimal?
+        internal let id: Int64?
+        internal enum CodingKeys: String, CodingKey {
+          case heightCm = "height_cm"
+          case heightIn = "height_in"
+          case id = "id"
+        }
+      }
+      internal struct PeopleUpdate: Codable, Hashable, Sendable, Identifiable {
+        internal let heightCm: Decimal?
+        internal let heightIn: Decimal?
+        internal let id: Int64?
+        internal enum CodingKeys: String, CodingKey {
+          case heightCm = "height_cm"
+          case heightIn = "height_in"
+          case id = "id"
         }
       }
       internal struct TableWithOtherTablesRowTypeSelect: Codable, Hashable, Sendable {
@@ -6385,6 +6527,36 @@ test('typegen: swift w/ public access control', async () => {
           case status = "status"
         }
       }
+      public struct PeopleSelect: Codable, Hashable, Sendable, Identifiable {
+        public let heightCm: Decimal?
+        public let heightIn: Decimal?
+        public let id: Int64
+        public enum CodingKeys: String, CodingKey {
+          case heightCm = "height_cm"
+          case heightIn = "height_in"
+          case id = "id"
+        }
+      }
+      public struct PeopleInsert: Codable, Hashable, Sendable, Identifiable {
+        public let heightCm: Decimal?
+        public let heightIn: Decimal?
+        public let id: Int64?
+        public enum CodingKeys: String, CodingKey {
+          case heightCm = "height_cm"
+          case heightIn = "height_in"
+          case id = "id"
+        }
+      }
+      public struct PeopleUpdate: Codable, Hashable, Sendable, Identifiable {
+        public let heightCm: Decimal?
+        public let heightIn: Decimal?
+        public let id: Int64?
+        public enum CodingKeys: String, CodingKey {
+          case heightCm = "height_cm"
+          case heightIn = "height_in"
+          case id = "id"
+        }
+      }
       public struct TableWithOtherTablesRowTypeSelect: Codable, Hashable, Sendable {
         public let col1: UserDetailsSelect?
         public let col2: AViewSelect?
@@ -6844,6 +7016,21 @@ test('typegen: python', async () => {
     class PublicIntervalTestUpdate(TypedDict):
         duration_optional: NotRequired[Annotated[Optional[str], Field(alias="duration_optional")]]
         duration_required: NotRequired[Annotated[str, Field(alias="duration_required")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+
+    class PublicPeople(BaseModel):
+        height_cm: Optional[float] = Field(alias="height_cm")
+        height_in: Optional[float] = Field(alias="height_in")
+        id: int = Field(alias="id")
+
+    class PublicPeopleInsert(TypedDict):
+        height_cm: NotRequired[Annotated[Optional[float], Field(alias="height_cm")]]
+        height_in: NotRequired[Annotated[Optional[float], Field(alias="height_in")]]
+        id: NotRequired[Annotated[int, Field(alias="id")]]
+
+    class PublicPeopleUpdate(TypedDict):
+        height_cm: NotRequired[Annotated[Optional[float], Field(alias="height_cm")]]
+        height_in: NotRequired[Annotated[Optional[float], Field(alias="height_in")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
     class PublicCategory(BaseModel):
