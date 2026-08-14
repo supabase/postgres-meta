@@ -14,6 +14,7 @@ import {
   PG_META_HOST,
   PG_META_PORT,
   POSTGREST_VERSION,
+  SHUTDOWN_GRACE_PERIOD_MS,
 } from './constants.js'
 import { destroyFormatPool } from './format-pool.js'
 import { apply as applyTypescriptTemplate } from './templates/typescript.js'
@@ -160,10 +161,7 @@ if (EXPORT_DOCS) {
 } else if (GENERATE_TYPES) {
   console.log(await getTypeOutput())
 } else {
-  // The delay must stay well under container runtimes' stop grace period
-  // (10s by default in Docker), or the process gets SIGKILLed before it can
-  // exit cleanly.
-  closeWithGrace({ delay: 1500 }, async ({ err, signal, manual }) => {
+  closeWithGrace({ delay: SHUTDOWN_GRACE_PERIOD_MS }, async ({ err, signal, manual }) => {
     if (err) {
       app.log.error({ err }, 'server closing with error')
     } else {

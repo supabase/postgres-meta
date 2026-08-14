@@ -104,3 +104,10 @@ export const FORMAT_TIMEOUT_MS = Number(process.env.PG_META_FORMAT_TIMEOUT_SECS 
 // (and tests can finish) without an explicit teardown.
 export const FORMAT_IDLE_TIMEOUT_MS =
   Number(process.env.PG_META_FORMAT_IDLE_TIMEOUT_SECS || 30) * 1000
+
+// How long a shutdown may wait on in-flight work before the process
+// force-exits. Note the container runtime SIGKILLs at its own stop grace
+// period (10s by default in Docker, same as this default), so set this lower
+// than that for the force-exit to actually run.
+export const SHUTDOWN_GRACE_PERIOD_MS =
+  Number(process.env.PG_META_SHUTDOWN_GRACE_PERIOD_SECS || 10) * 1000

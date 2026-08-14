@@ -151,6 +151,7 @@ PG_CONN_TIMEOUT_SECS=15                 # Connection timeout (default: 15)
 PG_QUERY_TIMEOUT_SECS=55                # Query timeout (default: 55)
 PG_META_MAX_RESULT_SIZE_MB=20           # Max query result size in MB (default: 2048MB)
 PG_META_MAX_BODY_LIMIT_MB=3             # Max request body size in MB (default: 3MB)
+PG_META_SHUTDOWN_GRACE_PERIOD_SECS=10   # Shutdown wait on in-flight work before force-exit (default: 10)
 ```
 
 Type generation formatting (opt-in):
