@@ -160,52 +160,19 @@ if (EXPORT_DOCS) {
 } else if (GENERATE_TYPES) {
   console.log(await getTypeOutput())
 } else {
-  const closeListeners = closeWithGrace(async ({ err, signal, manual }) => {
+  // The delay must stay well under container runtimes' stop grace period
+  // (10s by default in Docker), or the process gets SIGKILLed before it can
+  // exit cleanly.
+  closeWithGrace({ delay: 1500 }, async ({ err, signal, manual }) => {
     if (err) {
       app.log.error({ err }, 'server closing with error')
     } else {
-      app.log.error(
-        { err: new Error('Signal Received') },
-        `${signal} signal received, server closing, close manual received: ${manual}`
-      )
+      app.log.info(`${signal} signal received, server closing, close manual received: ${manual}`)
     }
-    try {
-      await app.close()
-    } catch (err) {
-      app.log.error({ err }, `Failed to close app`)
-      throw err
-    }
-    try {
-      await adminApp.close()
-    } catch (err) {
-      app.log.error({ err }, `Failed to close adminApp`)
-      throw err
-    }
-    try {
-      // worker threads keep the event loop alive, so the process would not exit
-      await destroyFormatPool()
-    } catch (err) {
-      app.log.error({ err }, `Failed to destroy format pool`)
-      throw err
-    }
-  })
-  app.addHook('onClose', async () => {
-    try {
-      closeListeners.uninstall()
-      await adminApp.close()
-    } catch (err) {
-      app.log.error({ err }, `Failed to close adminApp in app onClose hook`)
-      throw err
-    }
-  })
-  adminApp.addHook('onClose', async () => {
-    try {
-      closeListeners.uninstall()
-      await app.close()
-    } catch (err) {
-      app.log.error({ err }, `Failed to close app in adminApp onClose hook`)
-      throw err
-    }
+    await app.close().catch((err) => app.log.error({ err }, 'Failed to close app'))
+    await adminApp.close().catch((err) => app.log.error({ err }, 'Failed to close adminApp'))
+    // worker threads keep the event loop alive, so the process would not exit
+    await destroyFormatPool().catch((err) => app.log.error({ err }, 'Failed to destroy format pool'))
   })
 
   app.listen({ port: PG_META_PORT, host: PG_META_HOST }, (err) => {
