@@ -40,11 +40,10 @@ from typing import (
     Any,
     List,
     Literal,
-    NotRequired,
     Optional,
-    TypeAlias,
     TypedDict,
 )
+from typing_extensions import NotRequired, TypeAlias
 
 from pydantic import BaseModel, Field, Json
 
