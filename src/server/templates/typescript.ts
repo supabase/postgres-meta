@@ -496,6 +496,11 @@ export const apply = async ({
     : ''
 
   function generateNullableUnionTsType(tsType: string, isNullable: boolean) {
+    // The Json type already includes `null`, so a NOT NULL json/jsonb column has to be
+    // narrowed with NonNullable to reflect the database constraint. See supabase/postgres-meta#1055.
+    if (tsType === 'Json' && !isNullable) {
+      return `NonNullable<${tsType}>`
+    }
     // Only add the null union if the type is not unknown as unknown already includes null
     if (tsType === 'unknown' || tsType === 'any' || !isNullable) {
       return tsType
