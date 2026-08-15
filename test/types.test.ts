@@ -1,7 +1,7 @@
 import { expect, test, describe } from 'vitest'
 import { build } from '../src/server/app.js'
 import { TEST_CONNECTION_STRING } from './lib/utils.js'
-import { pgTypeToTsType } from '../src/server/templates/typescript'
+import { pgTypeToTsRpcArgType, pgTypeToTsType } from '../src/server/templates/typescript'
 
 describe('server/routes/types', () => {
   test('should list types', async () => {
@@ -54,5 +54,30 @@ describe('server/routes/types', () => {
     })
 
     expect(result).toBe('string')
+  })
+
+  test('int8 maps to number', () => {
+    const context = {
+      types: [],
+      schemas: [],
+      tables: [],
+      views: [],
+    }
+
+    expect(pgTypeToTsType({ name: 'public' } as any, 'int8', context)).toBe('number')
+  })
+
+  test('int8 rpc args allow bigint', () => {
+    const context = {
+      types: [],
+      schemas: [],
+      tables: [],
+      views: [],
+    }
+
+    expect(pgTypeToTsRpcArgType({ name: 'public' } as any, 'int8', context)).toBe('number | bigint')
+    expect(pgTypeToTsRpcArgType({ name: 'public' } as any, '_int8', context)).toBe(
+      '(number | bigint)[]'
+    )
   })
 })

@@ -434,7 +434,7 @@ export const apply = async ({
               const type = typesById.get(type_id)
               let tsType = 'unknown'
               if (type) {
-                tsType = pgTypeToTsType(schema, type.name, {
+                tsType = pgTypeToTsRpcArgType(schema, type.name, {
                   types,
                   schemas,
                   tables,
@@ -453,7 +453,7 @@ export const apply = async ({
               const type = typesById.get(type_id)
               let tsType = 'unknown'
               if (type) {
-                tsType = pgTypeToTsType(schema, type.name, {
+                tsType = pgTypeToTsRpcArgType(schema, type.name, {
                   types,
                   schemas,
                   tables,
@@ -470,7 +470,7 @@ export const apply = async ({
             const type = typesById.get(type_id)
             let tsType = 'unknown'
             if (type) {
-              tsType = pgTypeToTsType(schema, type.name, {
+              tsType = pgTypeToTsRpcArgType(schema, type.name, {
                 types,
                 schemas,
                 tables,
@@ -984,4 +984,23 @@ export const pgTypeToTsType = (
 
     return 'unknown'
   }
+}
+
+export const pgTypeToTsRpcArgType = (
+  schema: PostgresSchema,
+  pgType: string,
+  context: {
+    types: PostgresType[]
+    schemas: PostgresSchema[]
+    tables: PostgresTable[]
+    views: PostgresView[]
+  }
+): string => {
+  if (pgType === 'int8') {
+    return 'number | bigint'
+  }
+  if (pgType.startsWith('_')) {
+    return `(${pgTypeToTsRpcArgType(schema, pgType.substring(1), context)})[]`
+  }
+  return pgTypeToTsType(schema, pgType, context)
 }
