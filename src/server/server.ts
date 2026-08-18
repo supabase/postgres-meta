@@ -68,6 +68,10 @@ async function getTypeOutput(): Promise<string | null> {
       return generateGo(generatorMetadata!)
     case 'python':
       return generatePython(generatorMetadata!)
+    case 'json':
+      // The raw GeneratorMetadata contract of @supabase/postgrest-typegen,
+      // for third-party type generators.
+      return JSON.stringify(generatorMetadata, null, 2)
     default:
       throw new Error(`Unsupported language for GENERATE_TYPES: ${GENERATE_TYPES}`)
   }
