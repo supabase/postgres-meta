@@ -6964,3 +6964,82 @@ test('typegen: python w/ excluded/included schemas', async () => {
     })
   }
 })
+
+test('typegen: json', async () => {
+  const response = await app.inject({ method: 'GET', path: '/generators/json' })
+  expect(response.statusCode).toBe(200)
+  expect(response.headers['content-type']).toContain('application/json')
+
+  const metadata = JSON.parse(response.body)
+  expect(Object.keys(metadata).sort()).toEqual(
+    [
+      'schemas',
+      'tables',
+      'foreignTables',
+      'views',
+      'materializedViews',
+      'columns',
+      'relationships',
+      'functions',
+      'types',
+    ].sort()
+  )
+
+  // The whole point of this endpoint is introspection fidelity that lossy
+  // sources (like the PostgREST OpenAPI description) cannot provide, so
+  // assert that nullability, defaults, and identity information survive.
+  const usersStatus = metadata.columns.find(
+    (column: any) =>
+      column.schema === 'public' && column.table === 'users' && column.name === 'status'
+  )
+  expect(usersStatus).toMatchObject({
+    is_nullable: true,
+    default_value: "'ACTIVE'::user_status",
+    data_type: 'USER-DEFINED',
+    format: 'user_status',
+  })
+
+  const usersId = metadata.columns.find(
+    (column: any) => column.schema === 'public' && column.table === 'users' && column.name === 'id'
+  )
+  expect(usersId).toMatchObject({
+    is_nullable: false,
+    is_identity: true,
+    identity_generation: 'BY DEFAULT',
+  })
+
+  const userStatusEnum = metadata.types.find(
+    (type: any) => type.schema === 'public' && type.name === 'user_status'
+  )
+  expect(userStatusEnum.enums).toEqual(['ACTIVE', 'INACTIVE'])
+
+  const todosView = metadata.views.find(
+    (view: any) => view.schema === 'public' && view.name === 'todos_view'
+  )
+  expect(todosView).toBeDefined()
+
+  const todosMatview = metadata.materializedViews.find(
+    (view: any) => view.schema === 'public' && view.name === 'todos_matview'
+  )
+  expect(todosMatview).toBeDefined()
+})
+
+test('typegen: json w/ excluded/included schemas', async () => {
+  const { body: excludedBody } = await app.inject({
+    method: 'GET',
+    path: '/generators/json',
+    query: { excluded_schemas: 'public' },
+  })
+  const excludedMetadata = JSON.parse(excludedBody)
+  expect(excludedMetadata.tables).toEqual([])
+  expect(excludedMetadata.schemas.map((schema: any) => schema.name)).not.toContain('public')
+
+  const { body: includedBody } = await app.inject({
+    method: 'GET',
+    path: '/generators/json',
+    query: { included_schemas: 'public' },
+  })
+  const includedMetadata = JSON.parse(includedBody)
+  expect(includedMetadata.schemas.map((schema: any) => schema.name)).toEqual(['public'])
+  expect(includedMetadata.tables.map((table: any) => table.name)).toContain('users')
+})
