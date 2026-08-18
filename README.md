@@ -69,6 +69,7 @@ Helpers:
   - [ ] GET `/typescript`: Generate Typescript types
   - [ ] GET `/swift`: Generate Swift types (beta)
   - [ ] GET `/python`: Generate Python types (beta)
+  - [ ] GET `/json`: Dump the raw generator metadata as JSON, for third-party type generators
 
 ## Quickstart
 
@@ -110,6 +111,7 @@ where `<lang>` is one of:
 - `go`
 - `swift` (beta)
 - `python` (beta)
+- `json` (the raw generator metadata all the other generators consume, for building your own generator)
 
 To use your own database connection string instead of the provided test database, run:
 `PG_META_DB_URL=postgresql://postgres:postgres@localhost:5432/postgres npm run gen:types:<lang>`
