@@ -48,6 +48,7 @@ npm run gen:types:typescript    # Generate TypeScript types from DB schema
 npm run gen:types:python        # Generate Python types (Pydantic models)
 npm run gen:types:go            # Generate Go types
 npm run gen:types:swift         # Generate Swift types (beta)
+npm run gen:types:kotlin        # Generate Kotlin types (kotlinx.serialization)
 
 # With custom DB connection:
 PG_META_DB_URL=postgresql://... npm run gen:types:typescript
@@ -121,7 +122,7 @@ Type generation (`npm run gen:types:*`) works by:
 4. Templates output type definitions to stdout
 
 Environment variables:
-- `PG_META_GENERATE_TYPES`: Language (typescript, python, go, swift)
+- `PG_META_GENERATE_TYPES`: Language (typescript, python, go, swift, kotlin)
 - `PG_META_GENERATE_TYPES_INCLUDED_SCHEMAS`: Comma-separated schemas to include
 - `PG_META_GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS`: Enable 1:1 relationship detection
 - `PG_META_POSTGREST_VERSION`: PostgREST version for TypeScript template compatibility

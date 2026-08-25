@@ -2,6 +2,7 @@ import crypto from 'crypto'
 import { PoolConfig } from '../lib/types.js'
 import { getSecret } from '../lib/secrets.js'
 import { AccessControl } from './templates/swift.js'
+import { Visibility } from './templates/kotlin.js'
 import pkg from '#package.json' with { type: 'json' }
 
 export const PG_META_HOST = process.env.PG_META_HOST || '0.0.0.0'
@@ -50,6 +51,9 @@ export const GENERATE_TYPES_SWIFT_ACCESS_CONTROL = process.env
   .PG_META_GENERATE_TYPES_SWIFT_ACCESS_CONTROL
   ? (process.env.PG_META_GENERATE_TYPES_SWIFT_ACCESS_CONTROL as AccessControl)
   : 'internal'
+export const GENERATE_TYPES_KOTLIN_VISIBILITY = process.env.PG_META_GENERATE_TYPES_KOTLIN_VISIBILITY
+  ? (process.env.PG_META_GENERATE_TYPES_KOTLIN_VISIBILITY as Visibility)
+  : 'public'
 
 // json/jsonb/text types
 export const VALID_UNNAMED_FUNCTION_ARG_TYPES = new Set([114, 3802, 25])
