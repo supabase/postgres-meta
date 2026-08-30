@@ -153,6 +153,36 @@ function generateProtocolConformances(protocols: string[]): string {
   return protocols.length === 0 ? '' : `: ${protocols.join(', ')}`
 }
 
+function swiftStringLiteral(value: string): string {
+  let escaped = ''
+  for (const character of value) {
+    const codePoint = character.codePointAt(0)!
+    switch (character) {
+      case '\\':
+        escaped += '\\\\'
+        break
+      case '"':
+        escaped += '\\"'
+        break
+      case '\t':
+        escaped += '\\t'
+        break
+      case '\n':
+        escaped += '\\n'
+        break
+      case '\r':
+        escaped += '\\r'
+        break
+      default:
+        escaped +=
+          codePoint < 0x20 || codePoint === 0x7f || codePoint === 0x2028 || codePoint === 0x2029
+            ? `\\u{${codePoint.toString(16)}}`
+            : character
+    }
+  }
+  return `"${escaped}"`
+}
+
 function generateEnum(
   enum_: SwiftEnum,
   { accessControl, level }: SwiftGeneratorOptions & { level: number }
@@ -160,7 +190,8 @@ function generateEnum(
   return [
     `${ident(level)}${accessControl} enum ${enum_.formattedEnumName}${generateProtocolConformances(enum_.protocolConformances)} {`,
     ...enum_.cases.map(
-      (case_) => `${ident(level + 1)}case ${case_.formattedName} = "${case_.rawValue}"`
+      (case_) =>
+        `${ident(level + 1)}case ${case_.formattedName} = ${swiftStringLiteral(case_.rawValue)}`
     ),
     `${ident(level)}}`,
   ]
