@@ -104,3 +104,41 @@ describe('go typegen pgTypeToGoType array fallback', () => {
     expect(result).toMatch(/Tags\s+\[]string\b/)
   })
 })
+
+describe('go typegen struct tag escaping', () => {
+  test('uses an interpreted struct tag when a column name contains a backtick', () => {
+    const result = apply(
+      buildMetadata([baseColumn({ name: `back${String.fromCharCode(96)}tick`, format: 'text' })])
+    )
+
+    expect(result).toContain('BackTick string "json:\\"back`tick\\""')
+  })
+
+  test('preserves raw struct tags for ordinary column names', () => {
+    const result = apply(buildMetadata([baseColumn({ name: 'display_name', format: 'text' })]))
+
+    expect(result).toContain('DisplayName string `json:"display_name"`')
+  })
+
+  test('escapes composite type attribute tags', () => {
+    const textType = {
+      id: 101,
+      name: 'text',
+      schema: 'pg_catalog',
+      format: 'text',
+      enums: [],
+      attributes: [],
+    } as PostgresType
+    const compositeType = {
+      id: 102,
+      name: 'details',
+      schema: 'public',
+      format: 'details',
+      enums: [],
+      attributes: [{ name: `back${String.fromCharCode(96)}tick`, type_id: textType.id }],
+    } as PostgresType
+    const result = apply({ ...buildMetadata([]), types: [textType, compositeType] })
+
+    expect(result).toContain('BackTick string "json:\\"back`tick\\""')
+  })
+})

@@ -112,6 +112,11 @@ function formatForGoTypeName(name: string): string {
     .join('')
 }
 
+function formatForGoStructTag(name: string): string {
+  const tag = `json:${JSON.stringify(name)}`
+  return name.includes('`') ? JSON.stringify(tag) : `\`${tag}\``
+}
+
 function generateTableStruct(
   schema: PostgresSchema,
   table: PostgresTable | PostgresView | PostgresMaterializedView,
@@ -157,7 +162,7 @@ function generateTableStruct(
   const formattedColumnEntries = columnEntries.map(([formattedName, type, name]) => {
     return `  ${formattedName.padEnd(maxFormattedNameLength)} ${type.padEnd(
       maxTypeLength
-    )} \`json:"${name}"\``
+    )} ${formatForGoStructTag(name)}`
   })
 
   return `
@@ -215,7 +220,7 @@ function generateCompositeTypeStruct(
   const formattedAttributeEntries = attributeEntries.map(([formattedName, type, name]) => {
     return `  ${formattedName.padEnd(maxFormattedNameLength)} ${type.padEnd(
       maxTypeLength
-    )} \`json:"${name}"\``
+    )} ${formatForGoStructTag(name)}`
   })
 
   return `
