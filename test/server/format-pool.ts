@@ -10,12 +10,12 @@ import { afterEach, expect, test, vi } from 'vitest'
 //
 // The env vars are read once when constants.ts is evaluated, so each test stubs
 // the env and re-imports the module graph via vi.resetModules() to pick them up.
-const loadTypegenPool = async (env: Record<string, string>) => {
+const loadFormatPool = async (env: Record<string, string>) => {
   vi.resetModules()
   for (const [key, value] of Object.entries(env)) {
     vi.stubEnv(key, value)
   }
-  return import('../../src/server/typegen-pool.js')
+  return import('../../src/server/format-pool.js')
 }
 
 const column = (tableId: number, table: string, position: number) => ({
@@ -86,48 +86,45 @@ afterEach(() => {
 })
 
 test('generates on a worker thread with identical output to generating inline', async () => {
-  const { generateTypescriptTypes, destroyTypegenPool, isTypegenPoolActive } =
-    await loadTypegenPool({
-      PG_META_FORMAT_IN_WORKER: 'true',
-    })
+  const { generateTypescriptTypes, destroyFormatPool, isFormatPoolActive } = await loadFormatPool({
+    PG_META_FORMAT_IN_WORKER: 'true',
+  })
 
   try {
-    expect(isTypegenPoolActive()).toBe(false)
+    expect(isFormatPoolActive()).toBe(false)
 
     const viaWorker = await generateTypescriptTypes(METADATA, OPTIONS)
 
     // without this the test would still pass if generation silently fell back
     // to running inline, which is the thing being changed
-    expect(isTypegenPoolActive()).toBe(true)
+    expect(isFormatPoolActive()).toBe(true)
     expect(viaWorker).toBe(await generateTypescript(METADATA, OPTIONS))
   } finally {
-    await destroyTypegenPool()
+    await destroyFormatPool()
   }
 })
 
 test('generates inline when the worker is not enabled', async () => {
-  const { generateTypescriptTypes, destroyTypegenPool, isTypegenPoolActive } =
-    await loadTypegenPool({
-      PG_META_FORMAT_IN_WORKER: 'false',
-    })
+  const { generateTypescriptTypes, destroyFormatPool, isFormatPoolActive } = await loadFormatPool({
+    PG_META_FORMAT_IN_WORKER: 'false',
+  })
 
   try {
     expect(await generateTypescriptTypes(METADATA, OPTIONS)).toBe(
       await generateTypescript(METADATA, OPTIONS)
     )
     // no pool was ever created, so generation ran on the main thread
-    expect(isTypegenPoolActive()).toBe(false)
+    expect(isFormatPoolActive()).toBe(false)
   } finally {
-    await destroyTypegenPool()
+    await destroyFormatPool()
   }
 })
 
 test('never generates on a worker in type-generation mode', async () => {
-  const { generateTypescriptTypes, destroyTypegenPool, isTypegenPoolActive } =
-    await loadTypegenPool({
-      PG_META_FORMAT_IN_WORKER: 'true',
-      PG_META_GENERATE_TYPES: 'typescript',
-    })
+  const { generateTypescriptTypes, destroyFormatPool, isFormatPoolActive } = await loadFormatPool({
+    PG_META_FORMAT_IN_WORKER: 'true',
+    PG_META_GENERATE_TYPES: 'typescript',
+  })
 
   try {
     // one-shot CLI generation has no event loop to protect, and a pool would
@@ -135,19 +132,20 @@ test('never generates on a worker in type-generation mode', async () => {
     expect(await generateTypescriptTypes(METADATA, OPTIONS)).toBe(
       await generateTypescript(METADATA, OPTIONS)
     )
-    expect(isTypegenPoolActive()).toBe(false)
+    expect(isFormatPoolActive()).toBe(false)
   } finally {
-    await destroyTypegenPool()
+    await destroyFormatPool()
   }
 })
 
-test('sheds load with TypegenQueueFullError once the in-flight limit is reached', async () => {
-  const { generateTypescriptTypes, destroyTypegenPool, TypegenQueueFullError } =
-    await loadTypegenPool({
+test('sheds load with FormatQueueFullError once the in-flight limit is reached', async () => {
+  const { generateTypescriptTypes, destroyFormatPool, FormatQueueFullError } = await loadFormatPool(
+    {
       PG_META_FORMAT_IN_WORKER: 'true',
       PG_META_FORMAT_POOL_SIZE: '1',
       PG_META_FORMAT_MAX_QUEUE: '2',
-    })
+    }
+  )
 
   // big enough that generating takes long enough for calls to overlap
   const big = metadata(50)
@@ -162,15 +160,15 @@ test('sheds load with TypegenQueueFullError once the in-flight limit is reached'
     expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(2)
     expect(rejected).toHaveLength(4)
     for (const result of rejected) {
-      expect((result as PromiseRejectedResult).reason).toBeInstanceOf(TypegenQueueFullError)
+      expect((result as PromiseRejectedResult).reason).toBeInstanceOf(FormatQueueFullError)
     }
   } finally {
-    await destroyTypegenPool()
+    await destroyFormatPool()
   }
 })
 
 test('counts a generation call while it is in flight and releases it afterwards', async () => {
-  const { generateTypescriptTypes, destroyTypegenPool, inFlightCount } = await loadTypegenPool({
+  const { generateTypescriptTypes, destroyFormatPool, inFlightCount } = await loadFormatPool({
     PG_META_FORMAT_IN_WORKER: 'true',
     PG_META_FORMAT_MAX_QUEUE: '2',
   })
@@ -188,6 +186,6 @@ test('counts a generation call while it is in flight and releases it afterwards'
     expect(inFlightCount()).toBe(0)
     await expect(generateTypescriptTypes(METADATA, OPTIONS)).resolves.toBeTypeOf('string')
   } finally {
-    await destroyTypegenPool()
+    await destroyFormatPool()
   }
 })

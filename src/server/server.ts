@@ -24,7 +24,7 @@ import {
   generateTypescript,
 } from '@supabase/postgrest-typegen'
 import { getGeneratorMetadata } from '../lib/generators.js'
-import { destroyTypegenPool } from './typegen-pool.js'
+import { destroyFormatPool } from './format-pool.js'
 
 const logger = pino({
   formatters: {
@@ -90,8 +90,8 @@ if (EXPORT_DOCS) {
     await app.close().catch((err) => app.log.error({ err }, 'Failed to close app'))
     await adminApp.close().catch((err) => app.log.error({ err }, 'Failed to close adminApp'))
     // worker threads keep the event loop alive, so the process would not exit
-    await destroyTypegenPool().catch((err) =>
-      app.log.error({ err }, 'Failed to destroy typegen pool')
+    await destroyFormatPool().catch((err) =>
+      app.log.error({ err }, 'Failed to destroy format pool')
     )
   })
 

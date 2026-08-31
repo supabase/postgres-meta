@@ -168,7 +168,7 @@ the event loop and the server cannot answer anything else, health checks
 included. Formatting is the bulk of it (oxfmt since postgrest-typegen 0.2.0,
 much faster than the prettier it replaced but still synchronous) and the string
 building ahead of it costs too, so `PG_META_FORMAT_IN_WORKER=true` moves the
-whole call to a worker thread (`src/server/typegen-pool.ts`). Metadata
+whole call to a worker thread (`src/server/format-pool.ts`). Metadata
 crosses the thread boundary as a structured clone, which is plain JSON and does
 not measurably change wall-clock time. Always off during type generation
 (`PG_META_GENERATE_TYPES`), which generates once and exits.
