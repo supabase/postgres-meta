@@ -404,9 +404,16 @@ COMMIT;`
 // TODO: make this more robust - use type_id or type_schema + type_name instead
 // of just type.
 const typeIdent = (type: string) => {
-  return type.endsWith('[]')
-    ? `${ident(type.slice(0, -2))}[]`
-    : type.includes('.')
-      ? type
-      : ident(type)
+  const isArray = type.endsWith('[]')
+  const base = isArray ? type.slice(0, -2) : type
+  if (!base.includes('.')) {
+    return isArray ? `${ident(base)}[]` : ident(base)
+  }
+  if (isArray) {
+    return `${base
+      .split('.')
+      .map((part) => ident(part))
+      .join('.')}[]`
+  }
+  return base
 }
