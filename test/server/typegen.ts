@@ -6996,3 +6996,24 @@ test('typegen: python w/ excluded/included schemas', async () => {
     })
   }
 })
+
+test('typegen: typescript honors PG_META_GENERATE_TYPES_DEFAULT_SCHEMA', async () => {
+  // The default schema is read from the environment when constants.ts is
+  // evaluated, so the module graph has to be re-imported with the stubbed env.
+  const { vi } = await import('vitest')
+  vi.stubEnv('PG_META_GENERATE_TYPES_DEFAULT_SCHEMA', 'custom_default_schema')
+  vi.resetModules()
+  try {
+    const { build } = await import('../../src/server/app')
+    const freshApp = build()
+    const { body } = await freshApp.inject({ method: 'GET', path: '/generators/typescript' })
+    // Prettier may wrap the DefaultSchema line, so only pin the parts that
+    // prove the env var reached the generator.
+    expect(body).toContain('type DefaultSchema = DatabaseWithoutInternals[Extract<')
+    expect(body).toContain('"custom_default_schema"')
+    await freshApp.close()
+  } finally {
+    vi.unstubAllEnvs()
+    vi.resetModules()
+  }
+})

@@ -16,9 +16,9 @@ export type { GeneratorMetadata }
  *
  * The package is driver-agnostic: it takes a structural `Queryable` whose
  * `query()` resolves to `{ rows }` and throws on failure. We wrap `pgMeta.query`
- * (which returns `{ data, error }`) into that shape, surface the first query
- * error as the result error, and always end the pool — matching the previous
- * behavior.
+ * (which returns `{ data, error }`) into that shape and surface the first query
+ * error as the result error. Unlike the previous implementation, the pool is
+ * ended on error paths too, not just on success.
  */
 export async function getGeneratorMetadata(
   pgMeta: PostgresMeta,

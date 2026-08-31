@@ -3,6 +3,7 @@ import { PostgresMeta } from '../../../lib/index.js'
 import { createConnectionConfig, extractRequestForLogging } from '../../utils.js'
 import { generateTypescript } from '@supabase/postgrest-typegen'
 import { getGeneratorMetadata } from '../../../lib/generators.js'
+import { GENERATE_TYPES_DEFAULT_SCHEMA } from '../../constants.js'
 
 export default async (fastify: FastifyInstance) => {
   fastify.get<{
@@ -36,6 +37,7 @@ export default async (fastify: FastifyInstance) => {
     return generateTypescript(generatorMeta!, {
       detectOneToOneRelationships,
       postgrestVersion,
+      defaultSchema: GENERATE_TYPES_DEFAULT_SCHEMA,
     })
   })
 }
