@@ -1083,12 +1083,12 @@ test('typegen: typescript', async () => {
       DefaultSchemaTableNameOrOptions extends
         | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
         | { schema: keyof DatabaseWithoutInternals },
-      TableName extends DefaultSchemaTableNameOrOptions extends {
+      TableName extends (DefaultSchemaTableNameOrOptions extends {
         schema: keyof DatabaseWithoutInternals
       }
         ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
             DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-        : never = never,
+        : never) = never,
     > = DefaultSchemaTableNameOrOptions extends {
       schema: keyof DatabaseWithoutInternals
     }
@@ -1112,11 +1112,11 @@ test('typegen: typescript', async () => {
       DefaultSchemaTableNameOrOptions extends
         | keyof DefaultSchema["Tables"]
         | { schema: keyof DatabaseWithoutInternals },
-      TableName extends DefaultSchemaTableNameOrOptions extends {
+      TableName extends (DefaultSchemaTableNameOrOptions extends {
         schema: keyof DatabaseWithoutInternals
       }
         ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-        : never = never,
+        : never) = never,
     > = DefaultSchemaTableNameOrOptions extends {
       schema: keyof DatabaseWithoutInternals
     }
@@ -1137,11 +1137,11 @@ test('typegen: typescript', async () => {
       DefaultSchemaTableNameOrOptions extends
         | keyof DefaultSchema["Tables"]
         | { schema: keyof DatabaseWithoutInternals },
-      TableName extends DefaultSchemaTableNameOrOptions extends {
+      TableName extends (DefaultSchemaTableNameOrOptions extends {
         schema: keyof DatabaseWithoutInternals
       }
         ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-        : never = never,
+        : never) = never,
     > = DefaultSchemaTableNameOrOptions extends {
       schema: keyof DatabaseWithoutInternals
     }
@@ -1162,11 +1162,11 @@ test('typegen: typescript', async () => {
       DefaultSchemaEnumNameOrOptions extends
         | keyof DefaultSchema["Enums"]
         | { schema: keyof DatabaseWithoutInternals },
-      EnumName extends DefaultSchemaEnumNameOrOptions extends {
+      EnumName extends (DefaultSchemaEnumNameOrOptions extends {
         schema: keyof DatabaseWithoutInternals
       }
         ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-        : never = never,
+        : never) = never,
     > = DefaultSchemaEnumNameOrOptions extends {
       schema: keyof DatabaseWithoutInternals
     }
@@ -1179,11 +1179,11 @@ test('typegen: typescript', async () => {
       PublicCompositeTypeNameOrOptions extends
         | keyof DefaultSchema["CompositeTypes"]
         | { schema: keyof DatabaseWithoutInternals },
-      CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+      CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
         schema: keyof DatabaseWithoutInternals
       }
         ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-        : never = never,
+        : never) = never,
     > = PublicCompositeTypeNameOrOptions extends {
       schema: keyof DatabaseWithoutInternals
     }
@@ -2316,12 +2316,12 @@ test('typegen w/ one-to-one relationships', async () => {
       DefaultSchemaTableNameOrOptions extends
         | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
         | { schema: keyof DatabaseWithoutInternals },
-      TableName extends DefaultSchemaTableNameOrOptions extends {
+      TableName extends (DefaultSchemaTableNameOrOptions extends {
         schema: keyof DatabaseWithoutInternals
       }
         ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
             DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-        : never = never,
+        : never) = never,
     > = DefaultSchemaTableNameOrOptions extends {
       schema: keyof DatabaseWithoutInternals
     }
@@ -2345,11 +2345,11 @@ test('typegen w/ one-to-one relationships', async () => {
       DefaultSchemaTableNameOrOptions extends
         | keyof DefaultSchema["Tables"]
         | { schema: keyof DatabaseWithoutInternals },
-      TableName extends DefaultSchemaTableNameOrOptions extends {
+      TableName extends (DefaultSchemaTableNameOrOptions extends {
         schema: keyof DatabaseWithoutInternals
       }
         ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-        : never = never,
+        : never) = never,
     > = DefaultSchemaTableNameOrOptions extends {
       schema: keyof DatabaseWithoutInternals
     }
@@ -2370,11 +2370,11 @@ test('typegen w/ one-to-one relationships', async () => {
       DefaultSchemaTableNameOrOptions extends
         | keyof DefaultSchema["Tables"]
         | { schema: keyof DatabaseWithoutInternals },
-      TableName extends DefaultSchemaTableNameOrOptions extends {
+      TableName extends (DefaultSchemaTableNameOrOptions extends {
         schema: keyof DatabaseWithoutInternals
       }
         ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-        : never = never,
+        : never) = never,
     > = DefaultSchemaTableNameOrOptions extends {
       schema: keyof DatabaseWithoutInternals
     }
@@ -2395,11 +2395,11 @@ test('typegen w/ one-to-one relationships', async () => {
       DefaultSchemaEnumNameOrOptions extends
         | keyof DefaultSchema["Enums"]
         | { schema: keyof DatabaseWithoutInternals },
-      EnumName extends DefaultSchemaEnumNameOrOptions extends {
+      EnumName extends (DefaultSchemaEnumNameOrOptions extends {
         schema: keyof DatabaseWithoutInternals
       }
         ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-        : never = never,
+        : never) = never,
     > = DefaultSchemaEnumNameOrOptions extends {
       schema: keyof DatabaseWithoutInternals
     }
@@ -2412,11 +2412,11 @@ test('typegen w/ one-to-one relationships', async () => {
       PublicCompositeTypeNameOrOptions extends
         | keyof DefaultSchema["CompositeTypes"]
         | { schema: keyof DatabaseWithoutInternals },
-      CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+      CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
         schema: keyof DatabaseWithoutInternals
       }
         ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-        : never = never,
+        : never) = never,
     > = PublicCompositeTypeNameOrOptions extends {
       schema: keyof DatabaseWithoutInternals
     }
@@ -3549,12 +3549,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
       DefaultSchemaTableNameOrOptions extends
         | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
         | { schema: keyof DatabaseWithoutInternals },
-      TableName extends DefaultSchemaTableNameOrOptions extends {
+      TableName extends (DefaultSchemaTableNameOrOptions extends {
         schema: keyof DatabaseWithoutInternals
       }
         ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
             DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-        : never = never,
+        : never) = never,
     > = DefaultSchemaTableNameOrOptions extends {
       schema: keyof DatabaseWithoutInternals
     }
@@ -3578,11 +3578,11 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
       DefaultSchemaTableNameOrOptions extends
         | keyof DefaultSchema["Tables"]
         | { schema: keyof DatabaseWithoutInternals },
-      TableName extends DefaultSchemaTableNameOrOptions extends {
+      TableName extends (DefaultSchemaTableNameOrOptions extends {
         schema: keyof DatabaseWithoutInternals
       }
         ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-        : never = never,
+        : never) = never,
     > = DefaultSchemaTableNameOrOptions extends {
       schema: keyof DatabaseWithoutInternals
     }
@@ -3603,11 +3603,11 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
       DefaultSchemaTableNameOrOptions extends
         | keyof DefaultSchema["Tables"]
         | { schema: keyof DatabaseWithoutInternals },
-      TableName extends DefaultSchemaTableNameOrOptions extends {
+      TableName extends (DefaultSchemaTableNameOrOptions extends {
         schema: keyof DatabaseWithoutInternals
       }
         ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-        : never = never,
+        : never) = never,
     > = DefaultSchemaTableNameOrOptions extends {
       schema: keyof DatabaseWithoutInternals
     }
@@ -3628,11 +3628,11 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
       DefaultSchemaEnumNameOrOptions extends
         | keyof DefaultSchema["Enums"]
         | { schema: keyof DatabaseWithoutInternals },
-      EnumName extends DefaultSchemaEnumNameOrOptions extends {
+      EnumName extends (DefaultSchemaEnumNameOrOptions extends {
         schema: keyof DatabaseWithoutInternals
       }
         ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-        : never = never,
+        : never) = never,
     > = DefaultSchemaEnumNameOrOptions extends {
       schema: keyof DatabaseWithoutInternals
     }
@@ -3645,11 +3645,11 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
       PublicCompositeTypeNameOrOptions extends
         | keyof DefaultSchema["CompositeTypes"]
         | { schema: keyof DatabaseWithoutInternals },
-      CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+      CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
         schema: keyof DatabaseWithoutInternals
       }
         ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-        : never = never,
+        : never) = never,
     > = PublicCompositeTypeNameOrOptions extends {
       schema: keyof DatabaseWithoutInternals
     }
@@ -4787,12 +4787,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
       DefaultSchemaTableNameOrOptions extends
         | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
         | { schema: keyof DatabaseWithoutInternals },
-      TableName extends DefaultSchemaTableNameOrOptions extends {
+      TableName extends (DefaultSchemaTableNameOrOptions extends {
         schema: keyof DatabaseWithoutInternals
       }
         ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
             DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-        : never = never,
+        : never) = never,
     > = DefaultSchemaTableNameOrOptions extends {
       schema: keyof DatabaseWithoutInternals
     }
@@ -4816,11 +4816,11 @@ test('typegen: typescript w/ postgrestVersion', async () => {
       DefaultSchemaTableNameOrOptions extends
         | keyof DefaultSchema["Tables"]
         | { schema: keyof DatabaseWithoutInternals },
-      TableName extends DefaultSchemaTableNameOrOptions extends {
+      TableName extends (DefaultSchemaTableNameOrOptions extends {
         schema: keyof DatabaseWithoutInternals
       }
         ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-        : never = never,
+        : never) = never,
     > = DefaultSchemaTableNameOrOptions extends {
       schema: keyof DatabaseWithoutInternals
     }
@@ -4841,11 +4841,11 @@ test('typegen: typescript w/ postgrestVersion', async () => {
       DefaultSchemaTableNameOrOptions extends
         | keyof DefaultSchema["Tables"]
         | { schema: keyof DatabaseWithoutInternals },
-      TableName extends DefaultSchemaTableNameOrOptions extends {
+      TableName extends (DefaultSchemaTableNameOrOptions extends {
         schema: keyof DatabaseWithoutInternals
       }
         ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-        : never = never,
+        : never) = never,
     > = DefaultSchemaTableNameOrOptions extends {
       schema: keyof DatabaseWithoutInternals
     }
@@ -4866,11 +4866,11 @@ test('typegen: typescript w/ postgrestVersion', async () => {
       DefaultSchemaEnumNameOrOptions extends
         | keyof DefaultSchema["Enums"]
         | { schema: keyof DatabaseWithoutInternals },
-      EnumName extends DefaultSchemaEnumNameOrOptions extends {
+      EnumName extends (DefaultSchemaEnumNameOrOptions extends {
         schema: keyof DatabaseWithoutInternals
       }
         ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-        : never = never,
+        : never) = never,
     > = DefaultSchemaEnumNameOrOptions extends {
       schema: keyof DatabaseWithoutInternals
     }
@@ -4883,11 +4883,11 @@ test('typegen: typescript w/ postgrestVersion', async () => {
       PublicCompositeTypeNameOrOptions extends
         | keyof DefaultSchema["CompositeTypes"]
         | { schema: keyof DatabaseWithoutInternals },
-      CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+      CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
         schema: keyof DatabaseWithoutInternals
       }
         ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-        : never = never,
+        : never) = never,
     > = PublicCompositeTypeNameOrOptions extends {
       schema: keyof DatabaseWithoutInternals
     }

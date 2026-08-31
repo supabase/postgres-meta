@@ -164,11 +164,11 @@ PG_META_FORMAT_IDLE_TIMEOUT_SECS=30     # Idle time before a worker exits (defau
 ```
 
 `generateTypescript` is CPU-bound and synchronous: on a large schema it blocks
-the event loop for seconds and the server cannot answer anything else, health
-checks included. Prettier is the bulk of it (~90% on a 400-table schema) but the
-string building ahead of it costs too, and `@supabase/postgrest-typegen` formats
-internally with no hook to intercept, so `PG_META_FORMAT_IN_WORKER=true` moves
-the whole call to a worker thread (`src/server/typegen-pool.ts`). Metadata
+the event loop and the server cannot answer anything else, health checks
+included. Formatting is the bulk of it (oxfmt since postgrest-typegen 0.2.0,
+much faster than the prettier it replaced but still synchronous) and the string
+building ahead of it costs too, so `PG_META_FORMAT_IN_WORKER=true` moves the
+whole call to a worker thread (`src/server/typegen-pool.ts`). Metadata
 crosses the thread boundary as a structured clone, which is plain JSON and does
 not measurably change wall-clock time. Always off during type generation
 (`PG_META_GENERATE_TYPES`), which generates once and exits.

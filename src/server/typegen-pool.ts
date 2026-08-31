@@ -14,8 +14,8 @@ import {
 
 // `format` is excluded because a function cannot cross the worker boundary:
 // piscina transfers the task via structured clone, which throws on callbacks.
-// Newer postgrest-typegen versions accept a `format` hook; if it is ever
-// needed here it must be constructed inside typegen-worker.js instead.
+// If a custom `format` hook is ever needed here it must be constructed inside
+// typegen-worker.js instead.
 type WorkerSafeOptions = Omit<GenerateTypescriptOptions, 'format'>
 
 type TypescriptTask = {
@@ -71,12 +71,12 @@ export const isTypegenPoolActive = (): boolean => pool !== null
 /**
  * Generates TypeScript types, on a worker thread when enabled.
  *
- * The whole of `generateTypescript` is handed to the worker rather than just
- * the prettier pass: prettier is the bulk of the cost (~90% on a 400-table
- * schema), but the string building ahead of it is CPU-bound too, and the
- * package formats internally with no hook to intercept. Metadata crosses the
- * thread boundary as a structured clone, which is plain JSON here and does not
- * measurably change wall-clock time.
+ * The whole of `generateTypescript` is handed to the worker rather than a
+ * worker-backed `format` hook: formatting is the bulk of the cost (~90% under
+ * prettier on a 400-table schema; oxfmt, the default since 0.2.0, is much
+ * faster but still synchronous), and the string building ahead of it is
+ * CPU-bound too. Metadata crosses the thread boundary as a structured clone,
+ * which is plain JSON here and does not measurably change wall-clock time.
  *
  * Falls back to generating inline when workers are disabled (type-generation
  * CLI mode, or PG_META_FORMAT_IN_WORKER=false), where blocking is harmless.
