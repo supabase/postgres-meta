@@ -153,6 +153,27 @@ function generateProtocolConformances(protocols: string[]): string {
   return protocols.length === 0 ? '' : `: ${protocols.join(', ')}`
 }
 
+// Enum labels and column names come from the database and can contain characters
+// that end a Swift string literal early, so escape them before interpolating.
+function escapeForSwiftStringLiteral(value: string): string {
+  return value.replace(/["\\\u0000-\u001f\u007f]/g, (char) => {
+    switch (char) {
+      case '\\':
+        return '\\\\'
+      case '"':
+        return '\\"'
+      case '\n':
+        return '\\n'
+      case '\r':
+        return '\\r'
+      case '\t':
+        return '\\t'
+      default:
+        return `\\u{${char.codePointAt(0)!.toString(16)}}`
+    }
+  })
+}
+
 function generateEnum(
   enum_: SwiftEnum,
   { accessControl, level }: SwiftGeneratorOptions & { level: number }
@@ -160,7 +181,8 @@ function generateEnum(
   return [
     `${ident(level)}${accessControl} enum ${enum_.formattedEnumName}${generateProtocolConformances(enum_.protocolConformances)} {`,
     ...enum_.cases.map(
-      (case_) => `${ident(level + 1)}case ${case_.formattedName} = "${case_.rawValue}"`
+      (case_) =>
+        `${ident(level + 1)}case ${case_.formattedName} = "${escapeForSwiftStringLiteral(case_.rawValue)}"`
     ),
     `${ident(level)}}`,
   ]
