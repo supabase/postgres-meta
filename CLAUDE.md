@@ -71,6 +71,7 @@ npm run format          # Format code with Prettier
 ### Two-Layer Design
 
 1. **Library Layer** (`src/lib/`): Core PostgreSQL introspection logic
+
    - `PostgresMeta.ts`: Main class that aggregates all metadata managers
    - `PostgresMeta*.ts`: Individual managers for each database object type (columns, tables, functions, etc.)
    - `sql/*.sql.ts`: SQL query templates for fetching metadata from system catalogs
@@ -168,21 +169,28 @@ PG_META_MAX_BODY_LIMIT_MB=3             # Max request body size in MB (default: 
 PG_META_SHUTDOWN_GRACE_PERIOD_SECS=10   # Shutdown wait on in-flight work before force-exit (default: 10)
 ```
 
-Type generation formatting (opt-in):
+TypeScript generation on a worker thread (opt-in):
 
 ```bash
-PG_META_FORMAT_IN_WORKER=true           # Format generated types on a worker thread (default: false)
-PG_META_FORMAT_POOL_SIZE=1              # Worker threads used for formatting (default: 1)
-PG_META_FORMAT_MAX_QUEUE=20             # Max format calls in flight before returning 503 (default: 20)
-PG_META_FORMAT_TIMEOUT_SECS=60          # Per-format timeout (default: 60)
+PG_META_FORMAT_IN_WORKER=true           # Generate TypeScript types on a worker thread (default: false)
+PG_META_FORMAT_POOL_SIZE=1              # Worker threads used for generation (default: 1)
+PG_META_FORMAT_MAX_QUEUE=20             # Max generation calls in flight before returning 503 (default: 20)
+PG_META_FORMAT_TIMEOUT_SECS=60          # Per-generation timeout (default: 60)
 PG_META_FORMAT_IDLE_TIMEOUT_SECS=30     # Idle time before a worker exits (default: 30)
 ```
 
-Prettier is CPU-bound and synchronous, so formatting a large schema blocks the
-event loop for seconds and the server cannot answer anything else, health checks
-included. `PG_META_FORMAT_IN_WORKER=true` moves it to a worker thread. Always
-off during type generation (`PG_META_GENERATE_TYPES`), which generates once and
-exits.
+`generateTypescript` is CPU-bound and synchronous: on a large schema it blocks
+the event loop for seconds and the server cannot answer anything else, health
+checks included. Prettier is the bulk of it (~90% on a 400-table schema) but the
+string building ahead of it costs too, and `@supabase/postgrest-typegen` formats
+internally with no hook to intercept, so `PG_META_FORMAT_IN_WORKER=true` moves
+the whole call to a worker thread (`src/server/typegen-pool.ts`). Metadata
+crosses the thread boundary as a structured clone, which is plain JSON and does
+not measurably change wall-clock time. Always off during type generation
+(`PG_META_GENERATE_TYPES`), which generates once and exits.
+
+The env vars keep their `PG_META_FORMAT_*` names from when the worker formatted
+only, so existing deployments do not need reconfiguring.
 
 ## Testing Notes
 

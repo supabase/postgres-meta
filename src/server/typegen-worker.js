@@ -7,12 +7,15 @@
 // tests and the built output all load the exact same file. It is copied to
 // dist/ by the build script alongside the .sql files.
 
-import prettier from 'prettier'
+import { generateTypescript } from '@supabase/postgrest-typegen'
 
 /**
- * @param {{ code: string, options: import('prettier').Options }} task
+ * @param {{
+ *   metadata: import('@supabase/postgrest-typegen').GeneratorMetadata,
+ *   options: import('@supabase/postgrest-typegen').GenerateTypescriptOptions,
+ * }} task
  * @returns {Promise<string>}
  */
-export default async function format({ code, options }) {
-  return prettier.format(code, options)
+export default async function generate({ metadata, options }) {
+  return generateTypescript(metadata, options)
 }

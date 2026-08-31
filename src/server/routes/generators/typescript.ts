@@ -1,9 +1,9 @@
 import type { FastifyInstance } from 'fastify'
 import { PostgresMeta } from '../../../lib/index.js'
 import { createConnectionConfig, extractRequestForLogging } from '../../utils.js'
-import { generateTypescript } from '@supabase/postgrest-typegen'
 import { getGeneratorMetadata } from '../../../lib/generators.js'
 import { GENERATE_TYPES_DEFAULT_SCHEMA } from '../../constants.js'
+import { generateTypescriptTypes, TypegenQueueFullError } from '../../typegen-pool.js'
 
 export default async (fastify: FastifyInstance) => {
   fastify.get<{
@@ -34,10 +34,23 @@ export default async (fastify: FastifyInstance) => {
       return { error: generatorMetaError.message }
     }
 
-    return generateTypescript(generatorMeta!, {
-      detectOneToOneRelationships,
-      postgrestVersion,
-      defaultSchema: GENERATE_TYPES_DEFAULT_SCHEMA,
-    })
+    try {
+      return await generateTypescriptTypes(generatorMeta!, {
+        detectOneToOneRelationships,
+        postgrestVersion,
+        defaultSchema: GENERATE_TYPES_DEFAULT_SCHEMA,
+      })
+    } catch (error) {
+      // Anything else is a genuine failure and is already logged and turned
+      // into a 500 by the app-level error handler.
+      if (!(error instanceof TypegenQueueFullError)) {
+        throw error
+      }
+      // Load shedding, not a fault: 503 tells the caller it is transient and
+      // worth retrying.
+      request.log.warn({ error, request: extractRequestForLogging(request) })
+      reply.code(503)
+      return { error: error.message }
+    }
   })
 }
