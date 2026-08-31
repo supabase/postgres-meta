@@ -1,9 +1,9 @@
 import type { FastifyInstance } from 'fastify'
 import { PostgresMeta } from '../../../lib/index.js'
 import { createConnectionConfig, extractRequestForLogging } from '../../utils.js'
-import { apply as applyTypescriptTemplate } from '../../templates/typescript.js'
 import { getGeneratorMetadata } from '../../../lib/generators.js'
-import { FormatQueueFullError } from '../../format-pool.js'
+import { GENERATE_TYPES_DEFAULT_SCHEMA } from '../../constants.js'
+import { generateTypescriptTypes, FormatQueueFullError } from '../../format-pool.js'
 
 export default async (fastify: FastifyInstance) => {
   fastify.get<{
@@ -35,10 +35,10 @@ export default async (fastify: FastifyInstance) => {
     }
 
     try {
-      return await applyTypescriptTemplate({
-        ...generatorMeta,
+      return await generateTypescriptTypes(generatorMeta!, {
         detectOneToOneRelationships,
         postgrestVersion,
+        defaultSchema: GENERATE_TYPES_DEFAULT_SCHEMA,
       })
     } catch (error) {
       // Anything else is a genuine failure and is already logged and turned

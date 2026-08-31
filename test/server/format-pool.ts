@@ -1,7 +1,11 @@
-import prettier from 'prettier'
+import {
+  GENERATOR_METADATA_VERSION,
+  generateTypescript,
+  type GeneratorMetadata,
+} from '@supabase/postgrest-typegen'
 import { afterEach, expect, test, vi } from 'vitest'
 
-// These tests exercise the worker-thread formatting path, which is opt-in via
+// These tests exercise the worker-thread generation path, which is opt-in via
 // PG_META_FORMAT_IN_WORKER and therefore never hit by the rest of the suite.
 //
 // The env vars are read once when constants.ts is evaluated, so each test stubs
@@ -14,48 +18,110 @@ const loadFormatPool = async (env: Record<string, string>) => {
   return import('../../src/server/format-pool.js')
 }
 
-const SOURCE = `export type Foo={a:number;b:string};export const bar={x:1,y:[1,2,3]} as const`
-const OPTIONS: prettier.Options = { parser: 'typescript', semi: false }
+const column = (tableId: number, table: string, position: number) => ({
+  table_id: tableId,
+  schema: 'public',
+  table,
+  id: `${tableId}.${position}`,
+  ordinal_position: position,
+  name: `col_${position}`,
+  default_value: null,
+  data_type: 'text',
+  format: position === 0 ? 'int8' : 'text',
+  type_schema: 'pg_catalog',
+  is_identity: position === 0,
+  identity_generation: null,
+  is_generated: false,
+  is_nullable: position !== 0,
+  is_updatable: true,
+  is_unique: position === 0,
+  enums: [],
+  check: null,
+  comment: null,
+})
+
+const metadata = (tableCount: number): GeneratorMetadata => {
+  const tables = []
+  const columns = []
+  const primaryKeys = []
+  for (let i = 0; i < tableCount; i++) {
+    const name = `table_${i}`
+    const id = 10000 + i
+    tables.push({
+      id,
+      schema: 'public',
+      name,
+      rls_enabled: false,
+      rls_forced: false,
+      replica_identity: 'DEFAULT' as const,
+      bytes: 0,
+      size: '0 bytes',
+      live_rows_estimate: 0,
+      dead_rows_estimate: 0,
+      comment: null,
+    })
+    primaryKeys.push({ schema: 'public', table_name: name, name: 'col_0', table_id: id })
+    for (let position = 0; position < 4; position++) columns.push(column(id, name, position))
+  }
+  return {
+    version: GENERATOR_METADATA_VERSION,
+    schemas: [{ id: 2200, name: 'public', owner: 'postgres' }],
+    tables,
+    foreignTables: [],
+    views: [],
+    materializedViews: [],
+    columns,
+    primaryKeys,
+    relationships: [],
+    functions: [],
+    types: [],
+  }
+}
+
+const METADATA = metadata(1)
+const OPTIONS = { detectOneToOneRelationships: true }
 
 afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-test('formats on a worker thread with identical output to formatting inline', async () => {
-  const { format, destroyFormatPool, isFormatPoolActive } = await loadFormatPool({
+test('generates on a worker thread with identical output to generating inline', async () => {
+  const { generateTypescriptTypes, destroyFormatPool, isFormatPoolActive } = await loadFormatPool({
     PG_META_FORMAT_IN_WORKER: 'true',
   })
 
   try {
     expect(isFormatPoolActive()).toBe(false)
 
-    const viaWorker = await format(SOURCE, OPTIONS)
+    const viaWorker = await generateTypescriptTypes(METADATA, OPTIONS)
 
-    // without this the test would still pass if formatting silently fell back
+    // without this the test would still pass if generation silently fell back
     // to running inline, which is the thing being changed
     expect(isFormatPoolActive()).toBe(true)
-    expect(viaWorker).toBe(await prettier.format(SOURCE, OPTIONS))
+    expect(viaWorker).toBe(await generateTypescript(METADATA, OPTIONS))
   } finally {
     await destroyFormatPool()
   }
 })
 
-test('formats inline when the worker is not enabled', async () => {
-  const { format, destroyFormatPool, isFormatPoolActive } = await loadFormatPool({
+test('generates inline when the worker is not enabled', async () => {
+  const { generateTypescriptTypes, destroyFormatPool, isFormatPoolActive } = await loadFormatPool({
     PG_META_FORMAT_IN_WORKER: 'false',
   })
 
   try {
-    expect(await format(SOURCE, OPTIONS)).toBe(await prettier.format(SOURCE, OPTIONS))
-    // no pool was ever created, so formatting ran on the main thread
+    expect(await generateTypescriptTypes(METADATA, OPTIONS)).toBe(
+      await generateTypescript(METADATA, OPTIONS)
+    )
+    // no pool was ever created, so generation ran on the main thread
     expect(isFormatPoolActive()).toBe(false)
   } finally {
     await destroyFormatPool()
   }
 })
 
-test('never formats on a worker in type-generation mode', async () => {
-  const { format, destroyFormatPool, isFormatPoolActive } = await loadFormatPool({
+test('never generates on a worker in type-generation mode', async () => {
+  const { generateTypescriptTypes, destroyFormatPool, isFormatPoolActive } = await loadFormatPool({
     PG_META_FORMAT_IN_WORKER: 'true',
     PG_META_GENERATE_TYPES: 'typescript',
   })
@@ -63,7 +129,9 @@ test('never formats on a worker in type-generation mode', async () => {
   try {
     // one-shot CLI generation has no event loop to protect, and a pool would
     // keep the process alive after it is done
-    expect(await format(SOURCE, OPTIONS)).toBe(await prettier.format(SOURCE, OPTIONS))
+    expect(await generateTypescriptTypes(METADATA, OPTIONS)).toBe(
+      await generateTypescript(METADATA, OPTIONS)
+    )
     expect(isFormatPoolActive()).toBe(false)
   } finally {
     await destroyFormatPool()
@@ -71,20 +139,21 @@ test('never formats on a worker in type-generation mode', async () => {
 })
 
 test('sheds load with FormatQueueFullError once the in-flight limit is reached', async () => {
-  const { format, destroyFormatPool, FormatQueueFullError } = await loadFormatPool({
-    PG_META_FORMAT_IN_WORKER: 'true',
-    PG_META_FORMAT_POOL_SIZE: '1',
-    PG_META_FORMAT_MAX_QUEUE: '2',
-  })
+  const { generateTypescriptTypes, destroyFormatPool, FormatQueueFullError } = await loadFormatPool(
+    {
+      PG_META_FORMAT_IN_WORKER: 'true',
+      PG_META_FORMAT_POOL_SIZE: '1',
+      PG_META_FORMAT_MAX_QUEUE: '2',
+    }
+  )
 
-  // big enough that formatting takes long enough for calls to overlap
-  let big = ''
-  for (let i = 0; i < 1000; i++) {
-    big += `export type T${i} = { a: number; b: string; c: Array<{ x: number; y: string }> }\n`
-  }
+  // big enough that generating takes long enough for calls to overlap
+  const big = metadata(50)
 
   try {
-    const results = await Promise.allSettled(Array.from({ length: 6 }, () => format(big, OPTIONS)))
+    const results = await Promise.allSettled(
+      Array.from({ length: 6 }, () => generateTypescriptTypes(big, OPTIONS))
+    )
 
     const rejected = results.filter((r) => r.status === 'rejected')
     // 2 admitted, the rest shed immediately rather than queueing
@@ -98,8 +167,8 @@ test('sheds load with FormatQueueFullError once the in-flight limit is reached',
   }
 })
 
-test('counts a format call while it is in flight and releases it afterwards', async () => {
-  const { format, destroyFormatPool, inFlightCount } = await loadFormatPool({
+test('counts a generation call while it is in flight and releases it afterwards', async () => {
+  const { generateTypescriptTypes, destroyFormatPool, inFlightCount } = await loadFormatPool({
     PG_META_FORMAT_IN_WORKER: 'true',
     PG_META_FORMAT_MAX_QUEUE: '2',
   })
@@ -107,7 +176,7 @@ test('counts a format call while it is in flight and releases it afterwards', as
   try {
     expect(inFlightCount()).toBe(0)
 
-    const pending = format(SOURCE, OPTIONS)
+    const pending = generateTypescriptTypes(METADATA, OPTIONS)
     // observed before awaiting: checking only afterwards would pass even if the
     // counter were never incremented at all
     expect(inFlightCount()).toBe(1)
@@ -115,7 +184,7 @@ test('counts a format call while it is in flight and releases it afterwards', as
 
     // a leaked counter would make the pool refuse work forever after a burst
     expect(inFlightCount()).toBe(0)
-    await expect(format(SOURCE, OPTIONS)).resolves.toBeTypeOf('string')
+    await expect(generateTypescriptTypes(METADATA, OPTIONS)).resolves.toBeTypeOf('string')
   } finally {
     await destroyFormatPool()
   }

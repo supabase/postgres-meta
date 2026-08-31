@@ -1,5 +1,9 @@
 import { Piscina } from 'piscina'
-import prettier from 'prettier'
+import {
+  generateTypescript,
+  type GeneratorMetadata,
+  type GenerateTypescriptOptions,
+} from '@supabase/postgrest-typegen'
 import {
   FORMAT_IDLE_TIMEOUT_MS,
   FORMAT_IN_WORKER,
@@ -7,9 +11,16 @@ import {
   FORMAT_POOL_SIZE,
   FORMAT_TIMEOUT_MS,
 } from './constants.js'
+
+// `format` is excluded because a function cannot cross the worker boundary:
+// piscina transfers the task via structured clone, which throws on callbacks.
+// If a custom `format` hook is ever needed here it must be constructed inside
+// format-worker.js instead.
+type WorkerSafeOptions = Omit<GenerateTypescriptOptions, 'format'>
+
 type FormatTask = {
-  code: string
-  options: prettier.Options
+  metadata: GeneratorMetadata
+  options: WorkerSafeOptions
 }
 
 /**
@@ -58,14 +69,23 @@ export const inFlightCount = (): number => inFlight
 export const isFormatPoolActive = (): boolean => pool !== null
 
 /**
- * Formats generated code with prettier, on a worker thread when enabled.
+ * Generates and formats TypeScript types, on a worker thread when enabled.
  *
- * Falls back to formatting inline when workers are disabled (type-generation
+ * The whole of `generateTypescript` is handed to the worker rather than a
+ * worker-backed `format` hook: formatting is the bulk of the cost, and the
+ * string building ahead of it is CPU-bound too. Metadata crosses the thread
+ * boundary as a structured clone, which is plain JSON here and does not
+ * measurably change wall-clock time.
+ *
+ * Falls back to generating inline when workers are disabled (type-generation
  * CLI mode, or PG_META_FORMAT_IN_WORKER=false), where blocking is harmless.
  */
-export const format = async (code: string, options: prettier.Options): Promise<string> => {
+export const generateTypescriptTypes = async (
+  metadata: GeneratorMetadata,
+  options: WorkerSafeOptions
+): Promise<string> => {
   if (!FORMAT_IN_WORKER) {
-    return prettier.format(code, options)
+    return generateTypescript(metadata, options)
   }
 
   // Admission control is done here rather than with piscina's own maxQueue,
@@ -82,7 +102,7 @@ export const format = async (code: string, options: prettier.Options): Promise<s
     throw new FormatQueueFullError()
   }
 
-  const task: FormatTask = { code, options }
+  const task: FormatTask = { metadata, options }
   inFlight++
   try {
     return await getPool().run(task, { signal: AbortSignal.timeout(FORMAT_TIMEOUT_MS) })

@@ -1,7 +1,7 @@
 import { expect, test, describe } from 'vitest'
 import { build } from '../src/server/app.js'
 import { TEST_CONNECTION_STRING } from './lib/utils.js'
-import { pgTypeToTsType } from '../src/server/templates/typescript'
+import { pgTypeToTsType } from '@supabase/postgrest-typegen'
 
 describe('server/routes/types', () => {
   test('should list types', async () => {
