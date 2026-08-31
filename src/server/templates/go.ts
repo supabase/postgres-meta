@@ -112,6 +112,16 @@ function formatForGoTypeName(name: string): string {
     .join('')
 }
 
+// Go raw string literals cannot contain a backtick, so a column name with one
+// has to be emitted as an interpreted literal instead.
+function formatGoStructTag(name: string): string {
+  const tag = `json:"${name}"`
+  if (!tag.includes('`')) {
+    return `\`${tag}\``
+  }
+  return `"${tag.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`
+}
+
 function generateTableStruct(
   schema: PostgresSchema,
   table: PostgresTable | PostgresView | PostgresMaterializedView,
@@ -157,7 +167,7 @@ function generateTableStruct(
   const formattedColumnEntries = columnEntries.map(([formattedName, type, name]) => {
     return `  ${formattedName.padEnd(maxFormattedNameLength)} ${type.padEnd(
       maxTypeLength
-    )} \`json:"${name}"\``
+    )} ${formatGoStructTag(name)}`
   })
 
   return `
@@ -215,7 +225,7 @@ function generateCompositeTypeStruct(
   const formattedAttributeEntries = attributeEntries.map(([formattedName, type, name]) => {
     return `  ${formattedName.padEnd(maxFormattedNameLength)} ${type.padEnd(
       maxTypeLength
-    )} \`json:"${name}"\``
+    )} ${formatGoStructTag(name)}`
   })
 
   return `

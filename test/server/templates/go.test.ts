@@ -104,3 +104,24 @@ describe('go typegen pgTypeToGoType array fallback', () => {
     expect(result).toMatch(/Tags\s+\[]string\b/)
   })
 })
+
+describe('go typegen struct tags', () => {
+  test('a column name containing a backtick is emitted as an interpreted literal', () => {
+    const result = apply(buildMetadata([baseColumn({ name: 'bad`tag' })]))
+
+    expect(result).toContain('"json:\\"bad`tag\\""')
+    expect(result).not.toContain('`json:"bad`tag"`')
+  })
+
+  test('double quotes are escaped alongside the backtick', () => {
+    const result = apply(buildMetadata([baseColumn({ name: 'a"b`c' })]))
+
+    expect(result).toContain('"json:\\"a\\"b`c\\""')
+  })
+
+  test('ordinary column names keep the raw literal form', () => {
+    const result = apply(buildMetadata([baseColumn({ name: 'title' })]))
+
+    expect(result).toContain('`json:"title"`')
+  })
+})
