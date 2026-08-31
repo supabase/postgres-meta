@@ -46,7 +46,7 @@ from typing import (
     TypedDict,
 )
 
-from pydantic import BaseModel, Field, Json
+from pydantic import BaseModel, Field, JsonValue
 
 ${concatLines(Object.values(ctx.user_enums))}
 
@@ -351,8 +351,8 @@ const PY_TYPE_MAP: Record<string, string> = {
   interval: 'str',
 
   // JSON
-  json: 'Json[Any]',
-  jsonb: 'Json[Any]',
+  json: 'JsonValue',
+  jsonb: 'JsonValue',
 
   // Range types (can be adjusted to more complex types if needed)
   int4range: 'str',
