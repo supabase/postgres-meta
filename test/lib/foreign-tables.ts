@@ -173,3 +173,32 @@ test('retrieve', async () => {
     }
   `)
 })
+
+test('retrieve by id returns the matching foreign table among several', async () => {
+  await pgMeta.query(`
+    create foreign table public.foreign_table_2 (
+      id int8 not null
+    ) server foreign_server options (schema_name 'public', table_name 'users');
+  `)
+
+  try {
+    const listed = await pgMeta.foreignTables.list({ includeColumns: false })
+    const first = listed.data!.find(({ name }) => name === 'foreign_table')
+    const second = listed.data!.find(({ name }) => name === 'foreign_table_2')
+    expect(first).toBeTruthy()
+    expect(second).toBeTruthy()
+    expect(first!.id).not.toBe(second!.id)
+
+    const retrievedSecond = await pgMeta.foreignTables.retrieve({ id: second!.id })
+    expect(retrievedSecond.error).toBeNull()
+    expect(retrievedSecond.data!.name).toBe('foreign_table_2')
+    expect(retrievedSecond.data!.id).toBe(second!.id)
+
+    const retrievedFirst = await pgMeta.foreignTables.retrieve({ id: first!.id })
+    expect(retrievedFirst.error).toBeNull()
+    expect(retrievedFirst.data!.name).toBe('foreign_table')
+    expect(retrievedFirst.data!.id).toBe(first!.id)
+  } finally {
+    await pgMeta.query(`drop foreign table if exists public.foreign_table_2`)
+  }
+})
