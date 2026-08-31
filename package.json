@@ -22,7 +22,7 @@
     "check": "tsc -p tsconfig.json --noEmit",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "format": "prettier --write '{src,test}/**/*.ts' '*.ts'",
-    "build": "tsc -p tsconfig.json && cpy 'src/lib/sql/*.sql' dist/lib/sql",
+    "build": "tsc -p tsconfig.json && cpy 'src/lib/sql/*.sql' dist/lib/sql && cpy 'src/server/format-worker.js' dist/server --flat",
     "docs:export": "PG_META_EXPORT_DOCS=true node --loader ts-node/esm src/server/server.ts > openapi.json",
     "gen:types:typescript": "PG_META_GENERATE_TYPES=typescript node --loader ts-node/esm src/server/server.ts",
     "gen:types:go": "PG_META_GENERATE_TYPES=go node --loader ts-node/esm src/server/server.ts",
@@ -59,6 +59,7 @@
     "pg-protocol": "npm:@supabase/pg-protocol@1.13.2",
     "pgsql-parser": "^17.8.2",
     "pino": "^9.5.0",
+    "piscina": "^5.3.0",
     "postgres-array": "^3.0.1",
     "prettier": "^3.3.3",
     "prettier-plugin-sql": "0.17.1"

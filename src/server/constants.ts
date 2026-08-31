@@ -72,3 +72,38 @@ export const DEFAULT_POOL_CONFIG: PoolConfig = {
 }
 
 export const PG_META_REQ_HEADER = process.env.PG_META_REQ_HEADER || 'request-id'
+
+// Formatting generated types with prettier is CPU-bound and synchronous, so on
+// a large schema it blocks the event loop for seconds at a time and the server
+// cannot answer anything else, health checks included. Setting this to 'true'
+// moves formatting onto a worker thread, which leaves the main thread free.
+//
+// Opt-in: the default keeps formatting inline, so behaviour is unchanged unless
+// it is explicitly enabled. Always off in type-generation mode, where the
+// process generates once and exits and there is nothing to keep responsive.
+export const FORMAT_IN_WORKER =
+  process.env.PG_META_FORMAT_IN_WORKER === 'true' && !process.env.PG_META_GENERATE_TYPES
+
+// Kept at 1 by default: the point is to keep the main thread free, not to
+// parallelise formatting. Raise it only if there are spare cores.
+export const FORMAT_POOL_SIZE = Number(process.env.PG_META_FORMAT_POOL_SIZE || 1)
+
+// Maximum format calls running or waiting at once. Past this the request is
+// rejected with a 503 instead of queueing: without a bound the backlog absorbs
+// a burst and every caller waits, which relocates the pile-up instead of
+// shedding it.
+export const FORMAT_MAX_QUEUE = Number(process.env.PG_META_FORMAT_MAX_QUEUE || 20)
+
+export const FORMAT_TIMEOUT_MS = Number(process.env.PG_META_FORMAT_TIMEOUT_SECS || 60) * 1000
+
+// Workers exit after being idle this long, so the process can still shut down
+// (and tests can finish) without an explicit teardown.
+export const FORMAT_IDLE_TIMEOUT_MS =
+  Number(process.env.PG_META_FORMAT_IDLE_TIMEOUT_SECS || 30) * 1000
+
+// How long a shutdown may wait on in-flight work before the process
+// force-exits. Note the container runtime SIGKILLs at its own stop grace
+// period (10s by default in Docker, same as this default), so set this lower
+// than that for the force-exit to actually run.
+export const SHUTDOWN_GRACE_PERIOD_MS =
+  Number(process.env.PG_META_SHUTDOWN_GRACE_PERIOD_SECS || 10) * 1000

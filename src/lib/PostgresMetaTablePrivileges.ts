@@ -121,7 +121,9 @@ begin
 ${revokes
   .map(
     (revoke) =>
-      `execute format('revoke ${revoke.privilege_type} on table %s from ${revoke.grantee}', ${revoke.relation_id}::regclass);`
+      `execute format('revoke ${revoke.privilege_type} on table %s from ${
+        revoke.grantee.toLowerCase() === 'public' ? 'public' : ident(revoke.grantee)
+      }', ${revoke.relation_id}::regclass);`
   )
   .join('\n')}
 end $$;

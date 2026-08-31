@@ -15,6 +15,7 @@ import {
   PG_META_HOST,
   PG_META_PORT,
   POSTGREST_VERSION,
+  SHUTDOWN_GRACE_PERIOD_MS,
 } from './constants.js'
 import {
   generateGo,
@@ -23,6 +24,7 @@ import {
   generateTypescript,
 } from '@supabase/postgrest-typegen'
 import { getGeneratorMetadata } from '../lib/generators.js'
+import { destroyFormatPool } from './format-pool.js'
 
 const logger = pino({
   formatters: {
@@ -79,45 +81,18 @@ if (EXPORT_DOCS) {
 } else if (GENERATE_TYPES) {
   console.log(await getTypeOutput())
 } else {
-  const closeListeners = closeWithGrace(async ({ err, signal, manual }) => {
+  closeWithGrace({ delay: SHUTDOWN_GRACE_PERIOD_MS }, async ({ err, signal, manual }) => {
     if (err) {
       app.log.error({ err }, 'server closing with error')
     } else {
-      app.log.error(
-        { err: new Error('Signal Received') },
-        `${signal} signal received, server closing, close manual received: ${manual}`
-      )
+      app.log.info(`${signal} signal received, server closing, close manual received: ${manual}`)
     }
-    try {
-      await app.close()
-    } catch (err) {
-      app.log.error({ err }, `Failed to close app`)
-      throw err
-    }
-    try {
-      await adminApp.close()
-    } catch (err) {
-      app.log.error({ err }, `Failed to close adminApp`)
-      throw err
-    }
-  })
-  app.addHook('onClose', async () => {
-    try {
-      closeListeners.uninstall()
-      await adminApp.close()
-    } catch (err) {
-      app.log.error({ err }, `Failed to close adminApp in app onClose hook`)
-      throw err
-    }
-  })
-  adminApp.addHook('onClose', async () => {
-    try {
-      closeListeners.uninstall()
-      await app.close()
-    } catch (err) {
-      app.log.error({ err }, `Failed to close app in adminApp onClose hook`)
-      throw err
-    }
+    await app.close().catch((err) => app.log.error({ err }, 'Failed to close app'))
+    await adminApp.close().catch((err) => app.log.error({ err }, 'Failed to close adminApp'))
+    // worker threads keep the event loop alive, so the process would not exit
+    await destroyFormatPool().catch((err) =>
+      app.log.error({ err }, 'Failed to destroy format pool')
+    )
   })
 
   app.listen({ port: PG_META_PORT, host: PG_META_HOST }, (err) => {

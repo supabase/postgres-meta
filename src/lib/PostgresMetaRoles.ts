@@ -7,6 +7,18 @@ import {
   PostgresRoleUpdate,
 } from './types.js'
 import { filterByValue } from './helpers.js'
+
+// GUC_LIST_INPUT parameters (e.g. search_path) expect a comma-separated list of
+// individually-quoted values, not the whole comma-containing string as one literal -
+// escape each list item separately so multi-value configs round-trip correctly.
+const literalConfigValue = (value: string | null): string =>
+  value === null
+    ? literal(value)
+    : value
+        .split(',')
+        .map((part) => literal(part.trim()))
+        .join(',')
+
 export function changeRoleConfig2Object(config: string[]) {
   if (!config) {
     return null
@@ -110,9 +122,12 @@ export default class PostgresMetaRoles {
     const connectionLimitClause = `CONNECTION LIMIT ${connection_limit}`
     const passwordClause = password === undefined ? '' : `PASSWORD ${literal(password)}`
     const validUntilClause = valid_until === undefined ? '' : `VALID UNTIL ${literal(valid_until)}`
-    const memberOfClause = member_of === undefined ? '' : `IN ROLE ${member_of.join(',')}`
-    const membersClause = members === undefined ? '' : `ROLE ${members.join(',')}`
-    const adminsClause = admins === undefined ? '' : `ADMIN ${admins.join(',')}`
+    const memberOfClause =
+      member_of === undefined ? '' : `IN ROLE ${member_of.map((r) => ident(r)).join(',')}`
+    const membersClause =
+      members === undefined ? '' : `ROLE ${members.map((r) => ident(r)).join(',')}`
+    const adminsClause =
+      admins === undefined ? '' : `ADMIN ${admins.map((r) => ident(r)).join(',')}`
     let configClause = ''
     if (config !== undefined) {
       configClause = Object.keys(config)
@@ -121,7 +136,7 @@ export default class PostgresMetaRoles {
           if (!k || !v) {
             return ''
           }
-          return `ALTER ROLE ${name} SET ${k} = ${v};`
+          return `ALTER ROLE ${ident(name)} SET ${ident(k)} = ${literalConfigValue(v)};`
         })
         .join('\n')
     }
@@ -219,7 +234,7 @@ COMMIT;`
         switch (op) {
           case 'add':
           case 'replace':
-            return `ALTER ROLE ${ident(old!.name)} SET ${ident(k)} = ${literal(v)};`
+            return `ALTER ROLE ${ident(old!.name)} SET ${ident(k)} = ${literalConfigValue(v)};`
           case 'remove':
             return `ALTER ROLE ${ident(old!.name)} RESET ${ident(k)};`
           default:
