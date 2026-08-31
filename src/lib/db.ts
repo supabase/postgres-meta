@@ -32,16 +32,32 @@ const poolerQueryHandleError = (
     { op: 'db', name: 'poolerQuery' },
     () =>
       new Promise((resolve, reject) => {
-        let rejected = false
+        let settled = false
+        let connectionErrorTimer: NodeJS.Timeout | undefined
+        const cleanup = () => {
+          if (connectionErrorTimer) {
+            clearTimeout(connectionErrorTimer)
+          }
+          pgpool.removeListener('error', connectionErrorHandler)
+        }
+        const resolveOnce = (results: pg.QueryResult<any>) => {
+          if (settled) return
+          settled = true
+          cleanup()
+          resolve(results)
+        }
+        const rejectOnce = (err: any) => {
+          if (settled) return
+          settled = true
+          cleanup()
+          reject(err)
+        }
         const connectionErrorHandler = (err: any) => {
           // If the error hasn't already be propagated to the catch
-          if (!rejected) {
+          if (!settled) {
             // This is a trick to wait for the next tick, leaving a chance for handled errors such as
             // RESULT_SIZE_LIMIT to take over other stream errors such as `unexpected commandComplete message`
-            setTimeout(() => {
-              rejected = true
-              return reject(err)
-            })
+            connectionErrorTimer = setTimeout(() => rejectOnce(err))
           }
         }
         // This listened avoid getting uncaught exceptions for errors happening at connection level within the stream
@@ -50,16 +66,11 @@ const poolerQueryHandleError = (
         pgpool
           .query(sql, parameters)
           .then((results: pg.QueryResult<any>) => {
-            if (!rejected) {
-              return resolve(results)
-            }
+            resolveOnce(results)
           })
           .catch((err: any) => {
             // If the error hasn't already be handled within the error listener
-            if (!rejected) {
-              rejected = true
-              return reject(err)
-            }
+            rejectOnce(err)
           })
       })
   )
