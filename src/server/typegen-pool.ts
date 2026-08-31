@@ -12,9 +12,15 @@ import {
   FORMAT_TIMEOUT_MS,
 } from './constants.js'
 
+// `format` is excluded because a function cannot cross the worker boundary:
+// piscina transfers the task via structured clone, which throws on callbacks.
+// Newer postgrest-typegen versions accept a `format` hook; if it is ever
+// needed here it must be constructed inside typegen-worker.js instead.
+type WorkerSafeOptions = Omit<GenerateTypescriptOptions, 'format'>
+
 type TypescriptTask = {
   metadata: GeneratorMetadata
-  options: GenerateTypescriptOptions
+  options: WorkerSafeOptions
 }
 
 /**
@@ -77,7 +83,7 @@ export const isTypegenPoolActive = (): boolean => pool !== null
  */
 export const generateTypescriptTypes = async (
   metadata: GeneratorMetadata,
-  options: GenerateTypescriptOptions
+  options: WorkerSafeOptions
 ): Promise<string> => {
   if (!FORMAT_IN_WORKER) {
     return generateTypescript(metadata, options)
