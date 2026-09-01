@@ -577,3 +577,25 @@ test('composite primary keys preserve order', async () => {
 
   await pgMeta.tables.remove(res.data!.id)
 })
+
+test('update replica identity using an index whose name needs quoting', async () => {
+  // The index name contains a space and uppercase letters, so it only resolves
+  // if it is passed through ident(). An unquoted name would make the generated
+  // ALTER TABLE ... USING INDEX statement invalid.
+  await pgMeta.query(`
+    CREATE TABLE public.t_replica_idx (id int8 NOT NULL);
+    CREATE UNIQUE INDEX "Weird Index" ON public.t_replica_idx (id);
+  `)
+  const { data: tables } = await pgMeta.tables.list()
+  const tableId = tables!.find((t) => t.name === 't_replica_idx')!.id
+
+  const res = await pgMeta.tables.update(tableId, {
+    replica_identity: 'INDEX',
+    replica_identity_index: 'Weird Index',
+  })
+
+  expect(res.error).toBeNull()
+  expect(res.data!.replica_identity).toBe('INDEX')
+
+  await pgMeta.tables.remove(tableId)
+})
