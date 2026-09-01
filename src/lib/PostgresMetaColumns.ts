@@ -191,7 +191,7 @@ COMMIT;`
       default_value,
       default_value_format = 'literal',
       is_identity,
-      identity_generation = 'BY DEFAULT',
+      identity_generation,
       is_nullable,
       is_unique,
       comment,
@@ -265,7 +265,7 @@ COMMIT;`
     } else if (is_identity === undefined) {
       identitySql = ''
     } else {
-      identitySql += ` ADD GENERATED ${identity_generation} AS IDENTITY;`
+      identitySql += ` ADD GENERATED ${identity_generation ?? 'BY DEFAULT'} AS IDENTITY;`
     }
     let isNullableSql: string
     if (is_nullable === undefined) {

@@ -1017,3 +1017,29 @@ test('column with fully-qualified type', async () => {
 
   await pgMeta.query(`drop table public.t; drop schema s cascade;`)
 })
+
+test('updating a comment does not rewrite ALWAYS identity to BY DEFAULT', async () => {
+  const { data: table, error: tableError } = await pgMeta.tables.create({
+    name: 't_identity_comment_update',
+  })
+  expect(tableError).toBeNull()
+
+  try {
+    const created = await pgMeta.columns.create({
+      table_id: table!.id,
+      name: 'id',
+      type: 'int8',
+      is_identity: true,
+      identity_generation: 'ALWAYS',
+    })
+    expect(created.error).toBeNull()
+    expect(created.data!.identity_generation).toBe('ALWAYS')
+
+    const updated = await pgMeta.columns.update(created.data!.id, { comment: 'pk' })
+    expect(updated.error).toBeNull()
+    expect(updated.data!.identity_generation).toBe('ALWAYS')
+    expect(updated.data!.comment).toBe('pk')
+  } finally {
+    await pgMeta.tables.remove(table!.id, { cascade: true })
+  }
+})
