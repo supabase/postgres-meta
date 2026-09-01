@@ -8,7 +8,7 @@ import {
 } from '../utils.js'
 
 const errorOnEmptyQuery = (request: FastifyRequest) => {
-  if (!(request.body as any).query) {
+  if (!request.body || !(request.body as any).query) {
     throw new Error('query not found')
   }
 }
@@ -74,7 +74,7 @@ export default async (fastify: FastifyInstance) => {
     Headers: { pg: string; 'x-pg-application-name'?: string }
     Body: { ast: object }
   }>('/deparse', async (request, reply) => {
-    const { data, error } = await Parser.Deparse(request.body.ast)
+    const { data, error } = await Parser.Deparse(request.body?.ast ?? {})
 
     if (error) {
       request.log.error({ error, request: extractRequestForLogging(request) })
