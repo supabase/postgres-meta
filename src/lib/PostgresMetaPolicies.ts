@@ -142,7 +142,11 @@ CREATE POLICY ${ident(name)} ON ${ident(schema)}.${ident(table)}
     const nameSql = name === undefined ? '' : `${alter} RENAME TO ${ident(name)};`
     const definitionSql = definition === undefined ? '' : `${alter} USING (${definition});`
     const checkSql = check === undefined ? '' : `${alter} WITH CHECK (${check});`
-    const rolesSql = roles === undefined ? '' : `${alter} TO ${roles.map(ident).join(',')};`
+    // An empty array means "all roles", which is the default `create` applies.
+    const rolesSql =
+      roles === undefined
+        ? ''
+        : `${alter} TO ${(roles.length === 0 ? ['public'] : roles).map(ident).join(',')};`
 
     // nameSql must be last
     const sql = `BEGIN; ${definitionSql} ${checkSql} ${rolesSql} ${nameSql} COMMIT;`
