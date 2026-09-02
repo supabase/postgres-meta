@@ -37,8 +37,7 @@ test('list', async () => {
       id: expect.any(Number),
       live_rows_estimate: expect.any(Number),
       size: expect.any(String),
-    },
-    `
+    }, `
     {
       "bytes": Any<Number>,
       "columns": [
@@ -47,6 +46,8 @@ test('list', async () => {
           "comment": null,
           "data_type": "bigint",
           "default_value": null,
+          "domain_name": null,
+          "domain_schema": null,
           "enums": [],
           "format": "int8",
           "identity_generation": "BY DEFAULT",
@@ -65,6 +66,8 @@ test('list', async () => {
           "comment": null,
           "data_type": "text",
           "default_value": null,
+          "domain_name": null,
+          "domain_schema": null,
           "enums": [],
           "format": "text",
           "identity_generation": null,
@@ -83,6 +86,8 @@ test('list', async () => {
           "comment": null,
           "data_type": "USER-DEFINED",
           "default_value": "'ACTIVE'::user_status",
+          "domain_name": null,
+          "domain_schema": null,
           "enums": [
             "ACTIVE",
             "INACTIVE",
@@ -104,6 +109,8 @@ test('list', async () => {
           "comment": null,
           "data_type": "numeric",
           "default_value": null,
+          "domain_name": null,
+          "domain_schema": null,
           "enums": [],
           "format": "numeric",
           "identity_generation": null,
@@ -122,6 +129,8 @@ test('list', async () => {
           "comment": null,
           "data_type": "uuid",
           "default_value": "gen_random_uuid()",
+          "domain_name": null,
+          "domain_schema": null,
           "enums": [],
           "format": "uuid",
           "identity_generation": null,
@@ -174,8 +183,7 @@ test('list', async () => {
       "schema": "public",
       "size": Any<String>,
     }
-  `
-  )
+  `)
 })
 
 test('list without columns', async () => {
@@ -470,8 +478,7 @@ test('primary keys', async () => {
         live_rows_estimate: expect.any(Number),
         size: expect.any(String),
       },
-    },
-    `
+    }, `
     {
       "data": {
         "bytes": Any<Number>,
@@ -481,6 +488,8 @@ test('primary keys', async () => {
             "comment": null,
             "data_type": "bigint",
             "default_value": null,
+            "domain_name": null,
+            "domain_schema": null,
             "enums": [],
             "format": "int8",
             "identity_generation": null,
@@ -499,6 +508,8 @@ test('primary keys', async () => {
             "comment": null,
             "data_type": "text",
             "default_value": null,
+            "domain_name": null,
+            "domain_schema": null,
             "enums": [],
             "format": "text",
             "identity_generation": null,
@@ -539,8 +550,7 @@ test('primary keys', async () => {
       },
       "error": null,
     }
-  `
-  )
+  `)
   await pgMeta.tables.remove(res.data!.id)
 })
 
