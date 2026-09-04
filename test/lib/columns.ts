@@ -981,6 +981,27 @@ test('dropping column checks', async () => {
   await pgMeta.query(`drop table t`)
 })
 
+test('dropping hyphenated column check constraints', async () => {
+  await pgMeta.query(`
+    create table public.t (c int8);
+    alter table public.t add constraint "t-c-check" check (c <> 0);
+  `)
+
+  let res = await pgMeta.columns.retrieve({
+    schema: 'public',
+    table: 't',
+    name: 'c',
+  })
+  expect(res.error).toBeNull()
+  expect(res.data?.check).toBeTruthy()
+
+  res = await pgMeta.columns.update(res.data!.id, { check: null })
+  expect(res.error).toBeNull()
+  expect(res.data?.check).toBeNull()
+
+  await pgMeta.query(`drop table public.t`)
+})
+
 test('column with fully-qualified type', async () => {
   await pgMeta.query(`create table public.t(); create schema s; create type s.my_type as enum ();`)
 
