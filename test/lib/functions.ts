@@ -531,3 +531,23 @@ test('retrieve function by args filter - function with no arguments', async () =
   })
   expect(res.error).toBeNull()
 })
+
+test('create function with statement_timeout config_params', async () => {
+  // Unquoted `SET statement_timeout TO 5s` is invalid SQL; values must be literals.
+  const res = await pgMeta.functions.create({
+    name: 'test_timeout_func',
+    schema: 'public',
+    args: [],
+    definition: 'select 1',
+    return_type: 'integer',
+    language: 'sql',
+    behavior: 'VOLATILE',
+    security_definer: false,
+    config_params: { statement_timeout: '5s' },
+  })
+  expect(res.error).toBeNull()
+  expect(res.data?.config_params).toMatchObject({ statement_timeout: '5s' })
+  expect(res.data?.complete_statement).toContain(`SET statement_timeout TO '5s'`)
+
+  await pgMeta.functions.remove(res.data!.id)
+})
