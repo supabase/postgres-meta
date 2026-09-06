@@ -44,21 +44,23 @@ with functions as (
                 ? `(
           SELECT STRING_AGG(type_oid::text, ' ') FROM (
             SELECT (
-              split_args.arr[
-                array_length(
-                  split_args.arr,
-                  1
-                )
-              ]::regtype::oid
-            ) AS type_oid FROM (
-              SELECT STRING_TO_ARRAY(
-                UNNEST(
-                  ARRAY[${props.args}]
-                ),
-                ' '
-              ) AS arr
-            ) AS split_args
-          ) args
+              CASE
+                -- Unnamed multi-word SQL types (and single-token types) cast as-is.
+                -- Taking only the last space-separated token breaks these
+                -- ("double precision" -> "precision").
+                WHEN arg ~* '^(timestamp|time)( with| without) time zone(\\[\\])?$'
+                  OR arg ~* '^double precision(\\[\\])?$'
+                  OR arg ~* '^character varying(\\[\\])?$'
+                  OR arg ~* '^bit varying(\\[\\])?$'
+                  OR position(' ' in arg) = 0
+                THEN arg::regtype
+                -- Named args: drop the parameter name (first token) and cast the rest.
+                ELSE substring(arg from position(' ' in arg) + 1)::regtype
+              END
+            )::oid AS type_oid FROM (
+              SELECT UNNEST(ARRAY[${props.args}]) AS arg
+            ) AS args
+          ) resolved
     )`
                 : "''"
             } AND`
