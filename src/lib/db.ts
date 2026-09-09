@@ -247,7 +247,7 @@ export const init: (config: PoolConfig) => {
       },
 
       async end() {
-        Sentry.startSpan({ op: 'db', name: 'init.end' }, async () => {
+        return Sentry.startSpan({ op: 'db', name: 'init.end' }, async () => {
           try {
             const _pool = pool
             pool = null
