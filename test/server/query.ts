@@ -27,6 +27,82 @@ test('query', async () => {
   `)
 })
 
+test('query without includeNotices keeps returning a bare rows array', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: { query: 'DROP TABLE IF EXISTS missing_table' },
+  })
+  expect(res.json()).toMatchInlineSnapshot(`[]`)
+})
+
+test('query with includeNotices returns rows and the notices Postgres emitted', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query?includeNotices=true',
+    payload: {
+      query: `
+        DROP TABLE IF EXISTS missing_table;
+        DO $$ BEGIN RAISE WARNING 'careful' USING HINT = 'a hint', DETAIL = 'some detail'; END $$;
+        SELECT 1 AS one;
+      `,
+    },
+  })
+  expect(res.json()).toMatchInlineSnapshot(`
+    {
+      "data": [
+        {
+          "one": 1,
+        },
+      ],
+      "notices": [
+        {
+          "code": "00000",
+          "message": "table "missing_table" does not exist, skipping",
+          "severity": "NOTICE",
+        },
+        {
+          "code": "01000",
+          "detail": "some detail",
+          "hint": "a hint",
+          "message": "careful",
+          "severity": "WARNING",
+          "where": "PL/pgSQL function inline_code_block line 1 at RAISE",
+        },
+      ],
+    }
+  `)
+})
+
+test('query with includeNotices returns an empty notices list when there are none', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query?includeNotices=true',
+    payload: { query: 'SELECT 1 AS one' },
+  })
+  expect(res.json()).toMatchInlineSnapshot(`
+    {
+      "data": [
+        {
+          "one": 1,
+        },
+      ],
+      "notices": [],
+    }
+  `)
+})
+
+test('query with includeNotices keeps the error response shape on failure', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query?includeNotices=true',
+    payload: { query: 'DROP TABLE missing_table' },
+  })
+  expect(res.statusCode).toBe(400)
+  expect(res.json()).toMatchObject({ code: '42P01', severity: 'ERROR' })
+  expect(res.json()).not.toHaveProperty('notices')
+})
+
 test('error', async () => {
   const res = await app.inject({
     method: 'POST',

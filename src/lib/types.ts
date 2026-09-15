@@ -17,6 +17,24 @@ export interface PostgresMetaErr {
 
 export type PostgresMetaResult<T> = PostgresMetaOk<T> | PostgresMetaErr
 
+/**
+ * A NOTICE/WARNING/INFO/LOG/DEBUG message sent by Postgres while a query was running, e.g.
+ * `WARNING:  no privileges were granted for "messages"`. These are not errors: the query
+ * still succeeded, but psql prints them and users expect to see them.
+ */
+export const postgresNoticeSchema = Type.Object({
+  severity: Type.Optional(Type.String()),
+  code: Type.Optional(Type.String()),
+  message: Type.Optional(Type.String()),
+  detail: Type.Optional(Type.String()),
+  hint: Type.Optional(Type.String()),
+  where: Type.Optional(Type.String()),
+})
+export type PostgresNotice = Static<typeof postgresNoticeSchema>
+
+export type PostgresMetaQueryOk<T> = PostgresMetaOk<T> & { notices: PostgresNotice[] }
+export type PostgresMetaQueryResult<T> = PostgresMetaQueryOk<T> | PostgresMetaErr
+
 export const postgresColumnSchema = Type.Object({
   table_id: Type.Integer(),
   schema: Type.String(),

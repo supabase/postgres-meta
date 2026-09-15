@@ -1,7 +1,8 @@
 import pg from 'pg'
 import * as Sentry from '@sentry/node'
 import { parse as parseArray } from 'postgres-array'
-import { PostgresMetaResult, PoolConfig } from './types.js'
+import type { NoticeMessage } from 'pg-protocol/dist/messages.js'
+import { PostgresMetaQueryResult, PostgresNotice, PoolConfig } from './types.js'
 
 pg.types.setTypeParser(pg.types.builtins.INT8, (x) => {
   const asNumber = Number(x)
@@ -21,13 +22,85 @@ pg.types.setTypeParser(1185, parseArray) // _timestamptz
 pg.types.setTypeParser(600, (x) => x) // point
 pg.types.setTypeParser(1017, (x) => x) // _point
 
+const toPostgresNotice = (msg: NoticeMessage): PostgresNotice => ({
+  severity: msg.severity,
+  code: msg.code,
+  message: msg.message,
+  detail: msg.detail,
+  hint: msg.hint,
+  where: msg.where,
+})
+
+type QueryResultWithNotices = {
+  result: pg.QueryResult<any> | pg.QueryResult<any>[]
+  notices: PostgresNotice[]
+}
+
+// Same as `pg.Pool#query`, but on a client we check out ourselves so that the NOTICE/WARNING
+// messages Postgres sends while the query runs (emitted as `notice` events on the client, which
+// the pool does not re-emit) can be collected and returned alongside the rows.
+const queryCollectingNotices = (
+  pgpool: pg.Pool,
+  sql: string,
+  parameters?: unknown[]
+): Promise<QueryResultWithNotices> => {
+  return new Promise((resolve, reject) => {
+    pgpool.connect((connectError, client, release) => {
+      if (connectError || !client) {
+        return reject(connectError ?? new Error('Failed to acquire a client from the pool'))
+      }
+
+      const notices: PostgresNotice[] = []
+      const onNotice = (msg: NoticeMessage) => notices.push(toPostgresNotice(msg))
+      client.on('notice', onNotice)
+
+      let clientReleased = false
+      const releaseOnce = (err?: Error) => {
+        if (clientReleased) return
+        clientReleased = true
+        client.removeListener('notice', onNotice)
+        release(err)
+      }
+      // Connection-level errors (e.g. RESULT_SIZE_EXCEEDED) are emitted on the client while the
+      // query is in flight: release the broken client back with the error so the pool discards it.
+      const onError = (err: Error) => {
+        if (clientReleased) return
+        releaseOnce(err)
+        reject(err)
+      }
+      client.once('error', onError)
+
+      // Callback form, like `pg.Pool#query`: the callback runs synchronously when Postgres (or the
+      // protocol parser) reports an error, before any follow-up connection error gets a chance to
+      // win the race. Leaving `values` undefined keeps the simple query protocol, which is what
+      // allows multi-statement SQL.
+      try {
+        client.query(
+          { text: sql, values: parameters as any[] | undefined },
+          (err: Error | undefined, result: pg.QueryResult<any> | pg.QueryResult<any>[]) => {
+            client.removeListener('error', onError)
+            if (clientReleased) return
+            releaseOnce(err ?? undefined)
+            if (err) return reject(err)
+            return resolve({ result, notices })
+          }
+        )
+      } catch (err: any) {
+        client.removeListener('error', onError)
+        releaseOnce(err)
+        reject(err)
+      }
+    })
+  })
+}
+
 // Ensure any query will have an appropriate error handler on the pool to prevent connections errors
 // to bubble up all the stack eventually killing the server
 const poolerQueryHandleError = (
   pgpool: pg.Pool,
   sql: string,
   parameters?: unknown[]
-): Promise<pg.QueryResult<any>> => {
+): Promise<QueryResultWithNotices> => {
   return Sentry.startSpan(
     { op: 'db', name: 'poolerQuery' },
     () =>
@@ -47,9 +120,8 @@ const poolerQueryHandleError = (
         // This listened avoid getting uncaught exceptions for errors happening at connection level within the stream
         // such as parse or RESULT_SIZE_EXCEEDED errors instead, handle the error gracefully by bubbling in up to the caller
         pgpool.once('error', connectionErrorHandler)
-        pgpool
-          .query(sql, parameters)
-          .then((results: pg.QueryResult<any>) => {
+        queryCollectingNotices(pgpool, sql, parameters)
+          .then((results) => {
             if (!rejected) {
               return resolve(results)
             }
@@ -65,11 +137,20 @@ const poolerQueryHandleError = (
   )
 }
 
+// A multi-statement simple query returns one result per statement: keep the last one that
+// produced rows so e.g. `SET ...; SELECT ...` returns the SELECT's rows.
+const pickRows = (result: pg.QueryResult<any> | pg.QueryResult<any>[]): any[] => {
+  if (Array.isArray(result)) {
+    return [...result].reverse().find((x) => x.rows.length !== 0)?.rows ?? []
+  }
+  return result.rows
+}
+
 export const init: (config: PoolConfig) => {
   query: (
     sql: string,
     opts?: { statementQueryTimeout?: number; trackQueryInSentry?: boolean; parameters?: unknown[] }
-  ) => Promise<PostgresMetaResult<any>>
+  ) => Promise<PostgresMetaQueryResult<any>>
   end: () => Promise<void>
 } = (config) => {
   return Sentry.startSpan({ op: 'db', name: 'db.init' }, () => {
@@ -136,19 +217,21 @@ export const init: (config: PoolConfig) => {
             try {
               if (!pool) {
                 const pool = new pg.Pool(config)
-                let res = await poolerQueryHandleError(pool, sqlWithStatementTimeout, parameters)
-                if (Array.isArray(res)) {
-                  res = res.reverse().find((x) => x.rows.length !== 0) ?? { rows: [] }
-                }
+                const { result, notices } = await poolerQueryHandleError(
+                  pool,
+                  sqlWithStatementTimeout,
+                  parameters
+                )
                 await pool.end()
-                return { data: res.rows, error: null }
+                return { data: pickRows(result), error: null, notices }
               }
 
-              let res = await poolerQueryHandleError(pool, sqlWithStatementTimeout, parameters)
-              if (Array.isArray(res)) {
-                res = res.reverse().find((x) => x.rows.length !== 0) ?? { rows: [] }
-              }
-              return { data: res.rows, error: null }
+              const { result, notices } = await poolerQueryHandleError(
+                pool,
+                sqlWithStatementTimeout,
+                parameters
+              )
+              return { data: pickRows(result), error: null, notices }
             } catch (error: any) {
               if (error.constructor.name === 'DatabaseError') {
                 // Roughly based on:

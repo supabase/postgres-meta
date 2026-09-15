@@ -19,13 +19,13 @@ import PostgresMetaTypes from './PostgresMetaTypes.js'
 import PostgresMetaVersion from './PostgresMetaVersion.js'
 import PostgresMetaViews from './PostgresMetaViews.js'
 import { init } from './db.js'
-import { PostgresMetaResult, PoolConfig } from './types.js'
+import { PostgresMetaQueryResult, PoolConfig } from './types.js'
 
 export default class PostgresMeta {
   query: (
     sql: string,
     opts?: { statementQueryTimeout?: number; trackQueryInSentry?: boolean; parameters?: unknown[] }
-  ) => Promise<PostgresMetaResult<any>>
+  ) => Promise<PostgresMetaQueryResult<any>>
   end: () => Promise<void>
   columnPrivileges: PostgresMetaColumnPrivileges
   columns: PostgresMetaColumns
