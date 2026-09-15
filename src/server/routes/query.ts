@@ -21,16 +21,16 @@ export default async (fastify: FastifyInstance) => {
       statementTimeoutSecs?: number
       queryTimeoutSecs?: number
       /**
-       * When `true`, the response is `{ data: rows, notices }` instead of the bare `rows` array,
-       * where `notices` are the NOTICE/WARNING messages Postgres emitted while running the query.
-       * Opt-in so existing clients that expect a plain array keep working.
+       * `?withnotice=1` switches the response to `{ data: rows, notices }` instead of the bare
+       * `rows` array, where `notices` are the NOTICE/WARNING messages Postgres emitted while
+       * running the query. Opt-in so the many existing `/query` clients that expect a plain
+       * array are untouched.
        */
-      includeNotices?: boolean | string
+      withnotice?: string
     }
   }>('/', async (request, reply) => {
     const statementTimeoutSecs = request.query.statementTimeoutSecs
-    const includeNotices =
-      request.query.includeNotices === true || request.query.includeNotices === 'true'
+    const withNotice = request.query.withnotice === '1'
     errorOnEmptyQuery(request)
     const config = createConnectionConfig(request, request.query.queryTimeoutSecs)
     const pgMeta = new PostgresMeta(config)
@@ -48,7 +48,7 @@ export default async (fastify: FastifyInstance) => {
     }
 
     const rows = result.data || []
-    if (includeNotices) {
+    if (withNotice) {
       return { data: rows, notices: result.notices }
     }
     return rows
