@@ -12,6 +12,7 @@ import {
   GENERATE_TYPES_INCLUDED_SCHEMAS,
   GENERATE_TYPES_SWIFT_ACCESS_CONTROL,
   PG_CONNECTION,
+  PG_META_ADMIN_PORT,
   PG_META_HOST,
   PG_META_PORT,
   POSTGREST_VERSION,
@@ -100,8 +101,7 @@ if (EXPORT_DOCS) {
       app.log.error({ err }, 'Uncaught error in app, exit(1)')
       process.exit(1)
     }
-    const adminPort = PG_META_PORT + 1
-    adminApp.listen({ port: adminPort, host: PG_META_HOST }, (err) => {
+    adminApp.listen({ port: PG_META_ADMIN_PORT, host: PG_META_HOST }, (err) => {
       if (err) {
         app.log.error({ err }, 'Uncaught error in adminApp, exit(1)')
         process.exit(1)

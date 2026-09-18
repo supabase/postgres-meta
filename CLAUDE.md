@@ -74,7 +74,7 @@ npm run format          # Format code with Prettier
 2. **Server Layer** (`src/server/`): REST API built with Fastify
    - `server.ts`: Entry point, handles normal server mode + type generation mode
    - `app.ts`: Main Fastify app with routes, CORS, Swagger docs
-   - `admin-app.ts`: Admin server (runs on PG_META_PORT + 1) for metrics
+   - `admin-app.ts`: Admin server (runs on PG_META_ADMIN_PORT, defaulting to PG_META_PORT + 1) for metrics
    - `routes/*.ts`: REST endpoints mapping to library methods
    - `routes/generators/*.ts`: Type generation endpoints backed by `@supabase/postgrest-typegen`
 
@@ -131,7 +131,8 @@ Environment variables:
 Required for server operation:
 ```bash
 PG_META_HOST=0.0.0.0                    # Server host
-PG_META_PORT=8080                       # Server port (admin runs on +1)
+PG_META_PORT=8080                       # Server port
+PG_META_ADMIN_PORT=8081                # Optional metrics port; defaults to PG_META_PORT + 1, or use 0 for OS assignment
 PG_META_DB_HOST=localhost               # PostgreSQL host
 PG_META_DB_NAME=postgres                # Database name
 PG_META_DB_USER=postgres                # Database user

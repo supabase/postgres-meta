@@ -77,12 +77,15 @@ Set the following ENV VARS:
 ```bash
 PG_META_HOST="0.0.0.0"
 PG_META_PORT=8080
+PG_META_ADMIN_PORT=8081
 PG_META_DB_HOST="postgres"
 PG_META_DB_NAME="postgres"
 PG_META_DB_USER="postgres"
 PG_META_DB_PORT=5432
 PG_META_DB_PASSWORD="postgres"
 ```
+
+`PG_META_ADMIN_PORT` is optional and defaults to `PG_META_PORT + 1`; set it to `0` to let the OS assign an available port.
 
 Then run any of the binaries in the releases.
 

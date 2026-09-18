@@ -6,6 +6,7 @@ import pkg from '#package.json' with { type: 'json' }
 
 export const PG_META_HOST = process.env.PG_META_HOST || '0.0.0.0'
 export const PG_META_PORT = Number(process.env.PG_META_PORT || 1337)
+export const PG_META_ADMIN_PORT = Number(process.env.PG_META_ADMIN_PORT || PG_META_PORT + 1)
 export const CRYPTO_KEY = (await getSecret('CRYPTO_KEY')) || 'SAMPLE_KEY'
 
 const PG_META_DB_HOST = process.env.PG_META_DB_HOST || 'localhost'
