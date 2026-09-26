@@ -258,3 +258,13 @@ test('retrieve, create, update, delete', async () => {
     },
   })
 })
+
+test('update with name unchanged', async () => {
+  const { data: role } = await pgMeta.roles.create({ name: 'r_same_name' })
+  try {
+    const res = await pgMeta.roles.update(role!.id, { name: 'r_same_name', can_login: true })
+    expect(res).toMatchObject({ data: { name: 'r_same_name', can_login: true }, error: null })
+  } finally {
+    await pgMeta.roles.remove(role!.id)
+  }
+})

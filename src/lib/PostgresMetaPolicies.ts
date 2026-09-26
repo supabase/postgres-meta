@@ -139,7 +139,8 @@ CREATE POLICY ${ident(name)} ON ${ident(schema)}.${ident(table)}
     }
 
     const alter = `ALTER POLICY ${ident(old!.name)} ON ${ident(old!.schema)}.${ident(old!.table)}`
-    const nameSql = name === undefined ? '' : `${alter} RENAME TO ${ident(name)};`
+    const nameSql =
+      name === undefined || name === old!.name ? '' : `${alter} RENAME TO ${ident(name)};`
     const definitionSql = definition === undefined ? '' : `${alter} USING (${definition});`
     const checkSql = check === undefined ? '' : `${alter} WITH CHECK (${check});`
     const rolesSql = roles === undefined ? '' : `${alter} TO ${roles.map(ident).join(',')};`

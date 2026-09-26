@@ -189,7 +189,9 @@ COMMIT;`
     }
 
     const nameSql =
-      name === undefined ? '' : `ALTER ROLE ${ident(old!.name)} RENAME TO ${ident(name)};`
+      name === undefined || name === old!.name
+        ? ''
+        : `ALTER ROLE ${ident(old!.name)} RENAME TO ${ident(name)};`
     let isSuperuserClause = ''
     if (is_superuser !== undefined) {
       isSuperuserClause = is_superuser ? 'SUPERUSER' : 'NOSUPERUSER'
