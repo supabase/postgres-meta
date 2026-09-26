@@ -136,18 +136,26 @@ export default class PostgresMetaFunctions {
     const args = currentFunc!.argument_types.split(', ')
     const identityArgs = currentFunc!.identity_argument_types
 
-    const updateDefinitionSql =
-      typeof definition === 'string'
-        ? this.generateCreateFunctionSql(
-            {
-              ...currentFunc!,
-              definition,
-              args,
-              config_params: currentFunc!.config_params ?? {},
-            },
-            { replace: true }
-          )
-        : ''
+    let updateDefinitionSql = ''
+    if (typeof definition === 'string') {
+      // CREATE OR REPLACE resets every attribute it does not spell out, so carry
+      // over the ones the function row does not expose.
+      const { data: attributes, error } = await this.query(
+        `select proisstrict, proparallel, procost, prorows, proretset from pg_proc where oid = ${literal(id)};`
+      )
+      if (error) {
+        return { data: null, error }
+      }
+      updateDefinitionSql = this.generateCreateFunctionSql(
+        {
+          ...currentFunc!,
+          definition,
+          args,
+          config_params: currentFunc!.config_params ?? {},
+        },
+        { replace: true, attributes: attributes[0] }
+      )
+    }
 
     const updateNameSql =
       name && name !== currentFunc!.name
@@ -237,8 +245,21 @@ export default class PostgresMetaFunctions {
       security_definer,
       config_params,
     }: PostgresFunctionCreate,
-    { replace = false } = {}
+    {
+      replace = false,
+      attributes,
+    }: {
+      replace?: boolean
+      attributes?: {
+        proisstrict: boolean
+        proparallel: 's' | 'r' | 'u'
+        procost: number
+        prorows: number
+        proretset: boolean
+      }
+    } = {}
   ): string {
+    const parallel = { s: 'SAFE', r: 'RESTRICTED', u: 'UNSAFE' }[attributes?.proparallel ?? 'u']
     return `
       CREATE ${replace ? 'OR REPLACE' : ''} FUNCTION ${ident(schema!)}.${ident(name!)}(${
         args?.join(', ') || ''
@@ -247,8 +268,10 @@ export default class PostgresMetaFunctions {
       AS ${literal(definition)}
       LANGUAGE ${language}
       ${behavior}
-      CALLED ON NULL INPUT
+      ${attributes?.proisstrict ? 'STRICT' : 'CALLED ON NULL INPUT'}
       ${security_definer ? 'SECURITY DEFINER' : 'SECURITY INVOKER'}
+      ${attributes ? `PARALLEL ${parallel} COST ${Number(attributes.procost)}` : ''}
+      ${attributes?.proretset ? `ROWS ${Number(attributes.prorows)}` : ''}
       ${
         config_params
           ? Object.entries(config_params)
