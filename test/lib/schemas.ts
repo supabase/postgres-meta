@@ -95,3 +95,13 @@ test('retrieve, create, update, delete', async () => {
     },
   })
 })
+
+test('update with name unchanged', async () => {
+  const { data: schema } = await pgMeta.schemas.create({ name: 's_same_name' })
+  try {
+    const res = await pgMeta.schemas.update(schema!.id, { name: 's_same_name', owner: 'postgres' })
+    expect(res).toMatchObject({ data: { name: 's_same_name', owner: 'postgres' }, error: null })
+  } finally {
+    await pgMeta.schemas.remove(schema!.id)
+  }
+})
