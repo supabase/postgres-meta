@@ -1,9 +1,10 @@
 import {
   introspect,
+  resolveOptions,
   type GeneratorMetadata,
   type OptionValue,
-  type OptionValues,
   type Queryable,
+  type ResolvedOptions,
   type TypegenLanguage,
 } from '@supabase/typegen'
 import PostgresMeta from './PostgresMeta.js'
@@ -53,13 +54,16 @@ export async function getGeneratorMetadata(
 
 /**
  * Keeps the entries of `candidates` that `language` declares as options and
- * that have a value. Callers list every setting they can supply once; each
- * language receives only its own, since `generate` rejects unknown names.
+ * that have a value, then validates them and applies the language's defaults.
+ * Callers list every setting they can supply once; each language receives
+ * only its own, since `generate` rejects unknown names. Throws an
+ * `InvalidOptionError` for a bad value, so callers can reject it before
+ * touching the database.
  */
 export function declaredOptions(
   language: TypegenLanguage,
   candidates: Readonly<Record<string, OptionValue | undefined>>
-): OptionValues {
+): ResolvedOptions {
   const values: Record<string, OptionValue> = {}
   for (const option of language.options) {
     const value = candidates[option.name]
@@ -67,5 +71,5 @@ export function declaredOptions(
       values[option.name] = value
     }
   }
-  return values
+  return resolveOptions(language.name, language.options, values)
 }

@@ -38,6 +38,12 @@ async function getTypeOutput(): Promise<string> {
   if (!language?.inProcess) {
     throw new Error(`Unsupported language for GENERATE_TYPES: ${GENERATE_TYPES}`)
   }
+  const options = declaredOptions(language, {
+    'detect-one-to-one-relationships': GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS,
+    'postgrest-version': POSTGREST_VERSION,
+    'default-schema': GENERATE_TYPES_DEFAULT_SCHEMA,
+    'swift-access-control': GENERATE_TYPES_SWIFT_ACCESS_CONTROL,
+  })
 
   const pgMeta: PostgresMeta = new PostgresMeta({
     ...DEFAULT_POOL_CONFIG,
@@ -52,16 +58,7 @@ async function getTypeOutput(): Promise<string> {
     throw new Error(error.message)
   }
 
-  return generateTypes(
-    language,
-    generatorMetadata!,
-    declaredOptions(language, {
-      'detect-one-to-one-relationships': GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS,
-      'postgrest-version': POSTGREST_VERSION,
-      'default-schema': GENERATE_TYPES_DEFAULT_SCHEMA,
-      'swift-access-control': GENERATE_TYPES_SWIFT_ACCESS_CONTROL,
-    })
-  )
+  return generateTypes(language, generatorMetadata!, options)
 }
 
 if (EXPORT_DOCS) {

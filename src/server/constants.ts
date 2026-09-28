@@ -46,7 +46,7 @@ export const GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS =
   process.env.PG_META_GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS === 'true'
 export const POSTGREST_VERSION = process.env.PG_META_POSTGREST_VERSION
 export const GENERATE_TYPES_SWIFT_ACCESS_CONTROL =
-  process.env.PG_META_GENERATE_TYPES_SWIFT_ACCESS_CONTROL
+  process.env.PG_META_GENERATE_TYPES_SWIFT_ACCESS_CONTROL || undefined
 
 export const PG_META_MAX_RESULT_SIZE = process.env.PG_META_MAX_RESULT_SIZE_MB
   ? // Node-postgres get a maximum size in bytes make the conversion from the env variable

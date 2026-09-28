@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify'
-import { InvalidOptionError, resolveOptions, type TypegenLanguage } from '@supabase/typegen'
+import { InvalidOptionError, type OptionValues, type TypegenLanguage } from '@supabase/typegen'
 import { PostgresMeta } from '../../../lib/index.js'
 import { createConnectionConfig, extractRequestForLogging } from '../../utils.js'
 import { declaredOptions, getGeneratorMetadata } from '../../../lib/generators.js'
@@ -28,14 +28,14 @@ export default (language: TypegenLanguage) => async (fastify: FastifyInstance) =
       request.query.excluded_schemas?.split(',').map((schema) => schema.trim()) ?? []
     const includedSchemas =
       request.query.included_schemas?.split(',').map((schema) => schema.trim()) ?? []
-    const options = declaredOptions(language, {
-      'detect-one-to-one-relationships': request.query.detect_one_to_one_relationships === 'true',
-      'postgrest-version': request.query.postgrest_version,
-      'swift-access-control': request.query.access_control,
-      'default-schema': GENERATE_TYPES_DEFAULT_SCHEMA,
-    })
+    let options: OptionValues
     try {
-      resolveOptions(language.name, language.options, options)
+      options = declaredOptions(language, {
+        'detect-one-to-one-relationships': request.query.detect_one_to_one_relationships === 'true',
+        'postgrest-version': request.query.postgrest_version,
+        'swift-access-control': request.query.access_control,
+        'default-schema': GENERATE_TYPES_DEFAULT_SCHEMA,
+      })
     } catch (error) {
       if (!(error instanceof InvalidOptionError)) {
         throw error
