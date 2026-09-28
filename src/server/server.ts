@@ -17,14 +17,9 @@ import {
   POSTGREST_VERSION,
   SHUTDOWN_GRACE_PERIOD_MS,
 } from './constants.js'
-import {
-  generateGo,
-  generatePython,
-  generateSwift,
-  generateTypescript,
-} from '@supabase/postgrest-typegen'
-import { getGeneratorMetadata } from '../lib/generators.js'
-import { destroyFormatPool } from './format-pool.js'
+import { findLanguage } from '@supabase/typegen'
+import { declaredOptions, getGeneratorMetadata } from '../lib/generators.js'
+import { destroyFormatPool, generateTypes } from './format-pool.js'
 
 const logger = pino({
   formatters: {
@@ -38,13 +33,17 @@ const logger = pino({
 const app = buildApp({ logger })
 const adminApp = buildAdminApp({ logger })
 
-async function getTypeOutput(): Promise<string | null> {
+async function getTypeOutput(): Promise<string> {
+  const language = findLanguage(GENERATE_TYPES!.toLowerCase())
+  if (!language?.inProcess) {
+    throw new Error(`Unsupported language for GENERATE_TYPES: ${GENERATE_TYPES}`)
+  }
+
   const pgMeta: PostgresMeta = new PostgresMeta({
     ...DEFAULT_POOL_CONFIG,
     connectionString: PG_CONNECTION,
   })
-  // `getGeneratorMetadata` introspects via @supabase/postgrest-typegen and ends
-  // the pool. Behavior freeze: the CLI path only supports included schemas.
+  // `getGeneratorMetadata` ends the pool. The CLI path only supports included schemas.
   const { data: generatorMetadata, error } = await getGeneratorMetadata(pgMeta, {
     includedSchemas:
       GENERATE_TYPES_INCLUDED_SCHEMAS.length > 0 ? GENERATE_TYPES_INCLUDED_SCHEMAS : undefined,
@@ -53,24 +52,16 @@ async function getTypeOutput(): Promise<string | null> {
     throw new Error(error.message)
   }
 
-  switch (GENERATE_TYPES?.toLowerCase()) {
-    case 'typescript':
-      return await generateTypescript(generatorMetadata!, {
-        detectOneToOneRelationships: GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS,
-        postgrestVersion: POSTGREST_VERSION,
-        defaultSchema: GENERATE_TYPES_DEFAULT_SCHEMA,
-      })
-    case 'swift':
-      return generateSwift(generatorMetadata!, {
-        accessControl: GENERATE_TYPES_SWIFT_ACCESS_CONTROL,
-      })
-    case 'go':
-      return generateGo(generatorMetadata!)
-    case 'python':
-      return generatePython(generatorMetadata!)
-    default:
-      throw new Error(`Unsupported language for GENERATE_TYPES: ${GENERATE_TYPES}`)
-  }
+  return generateTypes(
+    language,
+    generatorMetadata!,
+    declaredOptions(language, {
+      'detect-one-to-one-relationships': GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS,
+      'postgrest-version': POSTGREST_VERSION,
+      'default-schema': GENERATE_TYPES_DEFAULT_SCHEMA,
+      'swift-access-control': GENERATE_TYPES_SWIFT_ACCESS_CONTROL,
+    })
+  )
 }
 
 if (EXPORT_DOCS) {
@@ -79,7 +70,7 @@ if (EXPORT_DOCS) {
   // @ts-ignore: app.swagger() is a Fastify decorator, so doesn't show up in the types
   console.log(JSON.stringify(app.swagger(), null, 2))
 } else if (GENERATE_TYPES) {
-  console.log(await getTypeOutput())
+  process.stdout.write(await getTypeOutput())
 } else {
   closeWithGrace({ delay: SHUTDOWN_GRACE_PERIOD_MS }, async ({ err, signal, manual }) => {
     if (err) {

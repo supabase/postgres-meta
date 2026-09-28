@@ -7,15 +7,24 @@
 // tests and the built output all load the exact same file. It is copied to
 // dist/ by the build script alongside the .sql files.
 
-import { generateTypescript } from '@supabase/postgrest-typegen'
+import { findLanguage } from '@supabase/typegen'
+
+// `Host.format` cannot cross the thread boundary, so the host is built here
+// and the generators keep their default formatter.
+const host = { cwd: process.cwd(), env: process.env }
 
 /**
  * @param {{
- *   metadata: import('@supabase/postgrest-typegen').GeneratorMetadata,
- *   options: import('@supabase/postgrest-typegen').GenerateTypescriptOptions,
+ *   language: string,
+ *   metadata: import('@supabase/typegen').GeneratorMetadata,
+ *   options: import('@supabase/typegen').OptionValues,
  * }} task
  * @returns {Promise<string>}
  */
-export default async function generate({ metadata, options }) {
-  return generateTypescript(metadata, options)
+export default async function generate({ language, metadata, options }) {
+  const entry = findLanguage(language)
+  if (!entry) {
+    throw new Error(`Unknown language: ${language}`)
+  }
+  return entry.generate(metadata, options, host)
 }

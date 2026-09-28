@@ -38,7 +38,7 @@
     "test:update": "run-s db:clean db:run && PG_META_MAX_RESULT_SIZE_MB=20 PG_QUERY_TIMEOUT_SECS=5 PG_CONN_TIMEOUT_SECS=30 vitest run --update && run-s db:clean"
   },
   "engines": {
-    "node": ">=20",
+    "node": ">=22.12.0",
     "npm": ">=9"
   },
   "dependencies": {
@@ -48,11 +48,12 @@
     "@sentry/node": "^9.12.0",
     "@sentry/profiling-node": "^9.12.0",
     "@sinclair/typebox": "^0.31.25",
-    "@supabase/postgrest-typegen": "^0.2.0",
+    "@supabase/typegen": "^0.2.0",
     "close-with-grace": "^2.1.0",
     "crypto-js": "^4.0.0",
     "fastify": "^4.24.3",
     "fastify-metrics": "^10.0.0",
+    "oxfmt": "0.66.0",
     "pg": "npm:@supabase/pg@8.21.1",
     "pg-connection-string": "^2.12.0",
     "pg-format": "^1.0.4",

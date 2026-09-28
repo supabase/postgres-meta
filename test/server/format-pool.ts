@@ -1,8 +1,4 @@
-import {
-  GENERATOR_METADATA_VERSION,
-  generateTypescript,
-  type GeneratorMetadata,
-} from '@supabase/postgrest-typegen'
+import { GENERATOR_METADATA_VERSION, typescript, type GeneratorMetadata } from '@supabase/typegen'
 import { afterEach, expect, test, vi } from 'vitest'
 
 // These tests exercise the worker-thread generation path, which is opt-in via
@@ -79,40 +75,40 @@ const metadata = (tableCount: number): GeneratorMetadata => {
 }
 
 const METADATA = metadata(1)
-const OPTIONS = { detectOneToOneRelationships: true }
+const OPTIONS = { 'detect-one-to-one-relationships': true }
+const HOST = { cwd: process.cwd(), env: process.env }
+const generateInline = () => typescript.generate(METADATA, OPTIONS, HOST)
 
 afterEach(() => {
   vi.unstubAllEnvs()
 })
 
 test('generates on a worker thread with identical output to generating inline', async () => {
-  const { generateTypescriptTypes, destroyFormatPool, isFormatPoolActive } = await loadFormatPool({
+  const { generateTypes, destroyFormatPool, isFormatPoolActive } = await loadFormatPool({
     PG_META_FORMAT_IN_WORKER: 'true',
   })
 
   try {
     expect(isFormatPoolActive()).toBe(false)
 
-    const viaWorker = await generateTypescriptTypes(METADATA, OPTIONS)
+    const viaWorker = await generateTypes(typescript, METADATA, OPTIONS)
 
     // without this the test would still pass if generation silently fell back
     // to running inline, which is the thing being changed
     expect(isFormatPoolActive()).toBe(true)
-    expect(viaWorker).toBe(await generateTypescript(METADATA, OPTIONS))
+    expect(viaWorker).toBe(await generateInline())
   } finally {
     await destroyFormatPool()
   }
 })
 
 test('generates inline when the worker is not enabled', async () => {
-  const { generateTypescriptTypes, destroyFormatPool, isFormatPoolActive } = await loadFormatPool({
+  const { generateTypes, destroyFormatPool, isFormatPoolActive } = await loadFormatPool({
     PG_META_FORMAT_IN_WORKER: 'false',
   })
 
   try {
-    expect(await generateTypescriptTypes(METADATA, OPTIONS)).toBe(
-      await generateTypescript(METADATA, OPTIONS)
-    )
+    expect(await generateTypes(typescript, METADATA, OPTIONS)).toBe(await generateInline())
     // no pool was ever created, so generation ran on the main thread
     expect(isFormatPoolActive()).toBe(false)
   } finally {
@@ -121,7 +117,7 @@ test('generates inline when the worker is not enabled', async () => {
 })
 
 test('never generates on a worker in type-generation mode', async () => {
-  const { generateTypescriptTypes, destroyFormatPool, isFormatPoolActive } = await loadFormatPool({
+  const { generateTypes, destroyFormatPool, isFormatPoolActive } = await loadFormatPool({
     PG_META_FORMAT_IN_WORKER: 'true',
     PG_META_GENERATE_TYPES: 'typescript',
   })
@@ -129,9 +125,7 @@ test('never generates on a worker in type-generation mode', async () => {
   try {
     // one-shot CLI generation has no event loop to protect, and a pool would
     // keep the process alive after it is done
-    expect(await generateTypescriptTypes(METADATA, OPTIONS)).toBe(
-      await generateTypescript(METADATA, OPTIONS)
-    )
+    expect(await generateTypes(typescript, METADATA, OPTIONS)).toBe(await generateInline())
     expect(isFormatPoolActive()).toBe(false)
   } finally {
     await destroyFormatPool()
@@ -139,20 +133,18 @@ test('never generates on a worker in type-generation mode', async () => {
 })
 
 test('sheds load with FormatQueueFullError once the in-flight limit is reached', async () => {
-  const { generateTypescriptTypes, destroyFormatPool, FormatQueueFullError } = await loadFormatPool(
-    {
-      PG_META_FORMAT_IN_WORKER: 'true',
-      PG_META_FORMAT_POOL_SIZE: '1',
-      PG_META_FORMAT_MAX_QUEUE: '2',
-    }
-  )
+  const { generateTypes, destroyFormatPool, FormatQueueFullError } = await loadFormatPool({
+    PG_META_FORMAT_IN_WORKER: 'true',
+    PG_META_FORMAT_POOL_SIZE: '1',
+    PG_META_FORMAT_MAX_QUEUE: '2',
+  })
 
   // big enough that generating takes long enough for calls to overlap
   const big = metadata(50)
 
   try {
     const results = await Promise.allSettled(
-      Array.from({ length: 6 }, () => generateTypescriptTypes(big, OPTIONS))
+      Array.from({ length: 6 }, () => generateTypes(typescript, big, OPTIONS))
     )
 
     const rejected = results.filter((r) => r.status === 'rejected')
@@ -168,7 +160,7 @@ test('sheds load with FormatQueueFullError once the in-flight limit is reached',
 })
 
 test('counts a generation call while it is in flight and releases it afterwards', async () => {
-  const { generateTypescriptTypes, destroyFormatPool, inFlightCount } = await loadFormatPool({
+  const { generateTypes, destroyFormatPool, inFlightCount } = await loadFormatPool({
     PG_META_FORMAT_IN_WORKER: 'true',
     PG_META_FORMAT_MAX_QUEUE: '2',
   })
@@ -176,7 +168,7 @@ test('counts a generation call while it is in flight and releases it afterwards'
   try {
     expect(inFlightCount()).toBe(0)
 
-    const pending = generateTypescriptTypes(METADATA, OPTIONS)
+    const pending = generateTypes(typescript, METADATA, OPTIONS)
     // observed before awaiting: checking only afterwards would pass even if the
     // counter were never incremented at all
     expect(inFlightCount()).toBe(1)
@@ -184,7 +176,7 @@ test('counts a generation call while it is in flight and releases it afterwards'
 
     // a leaked counter would make the pool refuse work forever after a burst
     expect(inFlightCount()).toBe(0)
-    await expect(generateTypescriptTypes(METADATA, OPTIONS)).resolves.toBeTypeOf('string')
+    await expect(generateTypes(typescript, METADATA, OPTIONS)).resolves.toBeTypeOf('string')
   } finally {
     await destroyFormatPool()
   }

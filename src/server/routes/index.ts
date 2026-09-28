@@ -1,5 +1,6 @@
 import CryptoJS from 'crypto-js'
 import { FastifyInstance } from 'fastify'
+import { languages } from '@supabase/typegen'
 import ColumnPrivilegesRoute from './column-privileges.js'
 import ColumnRoute from './columns.js'
 import ConfigRoute from './config.js'
@@ -18,10 +19,7 @@ import TablesRoute from './tables.js'
 import TriggersRoute from './triggers.js'
 import TypesRoute from './types.js'
 import ViewsRoute from './views.js'
-import TypeScriptTypeGenRoute from './generators/typescript.js'
-import GoTypeGenRoute from './generators/go.js'
-import SwiftTypeGenRoute from './generators/swift.js'
-import PythonTypeGenRoute from './generators/python.js'
+import GeneratorRoute from './generators/index.js'
 import { PG_CONNECTION, CRYPTO_KEY } from '../constants.js'
 
 export default async (fastify: FastifyInstance) => {
@@ -80,8 +78,9 @@ export default async (fastify: FastifyInstance) => {
   fastify.register(TriggersRoute, { prefix: '/triggers' })
   fastify.register(TypesRoute, { prefix: '/types' })
   fastify.register(ViewsRoute, { prefix: '/views' })
-  fastify.register(TypeScriptTypeGenRoute, { prefix: '/generators/typescript' })
-  fastify.register(GoTypeGenRoute, { prefix: '/generators/go' })
-  fastify.register(SwiftTypeGenRoute, { prefix: '/generators/swift' })
-  fastify.register(PythonTypeGenRoute, { prefix: '/generators/python' })
+  for (const language of languages) {
+    if (language.inProcess) {
+      fastify.register(GeneratorRoute(language), { prefix: `/generators/${language.name}` })
+    }
+  }
 }

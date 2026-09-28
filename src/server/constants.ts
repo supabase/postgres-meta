@@ -1,7 +1,6 @@
 import crypto from 'crypto'
 import { PoolConfig } from '../lib/types.js'
 import { getSecret } from '../lib/secrets.js'
-import type { AccessControl } from '@supabase/postgrest-typegen'
 import pkg from '#package.json' with { type: 'json' }
 
 export const PG_META_HOST = process.env.PG_META_HOST || '0.0.0.0'
@@ -46,10 +45,8 @@ export const GENERATE_TYPES_DEFAULT_SCHEMA =
 export const GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS =
   process.env.PG_META_GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS === 'true'
 export const POSTGREST_VERSION = process.env.PG_META_POSTGREST_VERSION
-export const GENERATE_TYPES_SWIFT_ACCESS_CONTROL = process.env
-  .PG_META_GENERATE_TYPES_SWIFT_ACCESS_CONTROL
-  ? (process.env.PG_META_GENERATE_TYPES_SWIFT_ACCESS_CONTROL as AccessControl)
-  : 'internal'
+export const GENERATE_TYPES_SWIFT_ACCESS_CONTROL =
+  process.env.PG_META_GENERATE_TYPES_SWIFT_ACCESS_CONTROL
 
 export const PG_META_MAX_RESULT_SIZE = process.env.PG_META_MAX_RESULT_SIZE_MB
   ? // Node-postgres get a maximum size in bytes make the conversion from the env variable
@@ -73,10 +70,11 @@ export const DEFAULT_POOL_CONFIG: PoolConfig = {
 
 export const PG_META_REQ_HEADER = process.env.PG_META_REQ_HEADER || 'request-id'
 
-// Formatting generated types with prettier is CPU-bound and synchronous, so on
-// a large schema it blocks the event loop for seconds at a time and the server
-// cannot answer anything else, health checks included. Setting this to 'true'
-// moves formatting onto a worker thread, which leaves the main thread free.
+// Generating types, and for TypeScript formatting them, is CPU-bound and
+// synchronous, so on a large schema it blocks the event loop for seconds at a
+// time and the server cannot answer anything else, health checks included.
+// Setting this to 'true' moves generation onto a worker thread, which leaves
+// the main thread free.
 //
 // Opt-in: the default keeps formatting inline, so behaviour is unchanged unless
 // it is explicitly enabled. Always off in type-generation mode, where the
