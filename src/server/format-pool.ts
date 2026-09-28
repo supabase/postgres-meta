@@ -1,5 +1,5 @@
 import { Piscina } from 'piscina'
-import type { GeneratorMetadata, Host, OptionValues, TypegenLanguage } from '@supabase/typegen'
+import type { GeneratorMetadata, OptionValues, TypegenLanguage } from '@supabase/typegen'
 import {
   FORMAT_IDLE_TIMEOUT_MS,
   FORMAT_IN_WORKER,
@@ -7,18 +7,13 @@ import {
   FORMAT_POOL_SIZE,
   FORMAT_TIMEOUT_MS,
 } from './constants.js'
+import { host } from './typegen-host.js'
 
 type GenerateTask = {
   language: string
   metadata: GeneratorMetadata
   options: OptionValues
 }
-
-// The hosted routes never spawn a tool or replace a formatter, so the host is
-// only the two fields the contract requires. format-worker.js builds the same
-// one on its own thread, since a `format` function could not cross the
-// boundary anyway.
-const host: Host = { cwd: process.cwd(), env: process.env }
 
 /**
  * Raised when the formatting backlog is full. Callers should surface this as a

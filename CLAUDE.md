@@ -176,6 +176,12 @@ the thread boundary as a structured clone, which is plain JSON and does not
 measurably change wall-clock time. Always off during type generation
 (`PG_META_GENERATE_TYPES`), which generates once and exits.
 
+The registry `Host` both paths use lives in `src/server/typegen-host.js`
+(plain JavaScript, like the worker, so the worker thread can import it). It
+passes an explicit oxfmt formatter through `Host.format`, so oxfmt is this
+package's own dependency and version rather than the optional peer that
+postgrest-typegen's default formatter would load.
+
 The env vars keep their `PG_META_FORMAT_*` names from when the worker formatted
 only, so existing deployments do not need reconfiguring.
 

@@ -8,8 +8,3 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    ignore:
-      # @supabase/postgrest-typegen peers on this exact oxfmt version and formats
-      # the generated TypeScript with it, so it moves together with the
-      # @supabase/typegen pin and its snapshot update, not on its own.
-      - dependency-name: "oxfmt"

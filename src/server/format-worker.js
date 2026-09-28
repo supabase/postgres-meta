@@ -8,10 +8,7 @@
 // dist/ by the build script alongside the .sql files.
 
 import { findLanguage } from '@supabase/typegen'
-
-// `Host.format` cannot cross the thread boundary, so the host is built here
-// and the generators keep their default formatter.
-const host = { cwd: process.cwd(), env: process.env }
+import { host } from './typegen-host.js'
 
 /**
  * @param {{
