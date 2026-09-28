@@ -1278,7 +1278,6 @@ test('typegen: typescript', async () => {
         },
       },
     } as const
-
     "
   `
   )
@@ -2590,7 +2589,6 @@ test('typegen w/ one-to-one relationships', async () => {
         },
       },
     } as const
-
     "
   `
   )
@@ -3902,7 +3900,6 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
         },
       },
     } as const
-
     "
   `
   )
@@ -5219,7 +5216,6 @@ test('typegen: typescript w/ postgrestVersion', async () => {
         },
       },
     } as const
-
     "
   `
   )
