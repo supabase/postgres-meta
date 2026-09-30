@@ -21,6 +21,7 @@ test('typegen: typescript', async () => {
               id: number
               name: string
             }
+            ComputedFields: never
             Insert: {
               id?: number
               name: string
@@ -33,6 +34,7 @@ test('typegen: typescript', async () => {
           }
           empty: {
             Row: {}
+            ComputedFields: never
             Insert: {}
             Update: {}
             Relationships: []
@@ -45,6 +47,7 @@ test('typegen: typescript', async () => {
               id: number
               days_since_event: number | null
             }
+            ComputedFields: "days_since_event"
             Insert: {
               created_at?: string
               data?: Json | null
@@ -66,6 +69,7 @@ test('typegen: typescript', async () => {
               event_type: string | null
               id: number
             }
+            ComputedFields: never
             Insert: {
               created_at?: string
               data?: Json | null
@@ -87,6 +91,7 @@ test('typegen: typescript', async () => {
               event_type: string | null
               id: number
             }
+            ComputedFields: never
             Insert: {
               created_at?: string
               data?: Json | null
@@ -107,6 +112,7 @@ test('typegen: typescript', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }
+            ComputedFields: never
             Insert: {
               id: number
               name?: string | null
@@ -126,6 +132,7 @@ test('typegen: typescript', async () => {
               id: number
               double_duration: string | null
             }
+            ComputedFields: "double_duration"
             Insert: {
               duration_optional?: string | null
               duration_required: string
@@ -147,6 +154,7 @@ test('typegen: typescript', async () => {
               name: string
               status: Database["public"]["Enums"]["meme_status"] | null
             }
+            ComputedFields: never
             Insert: {
               category?: number | null
               created_at: string
@@ -177,6 +185,7 @@ test('typegen: typescript', async () => {
               col1: Database["public"]["Tables"]["user_details"]["Row"] | null
               col2: Database["public"]["Views"]["a_view"]["Row"] | null
             }
+            ComputedFields: never
             Insert: {
               col1?: Database["public"]["Tables"]["user_details"]["Row"] | null
               col2?: Database["public"]["Views"]["a_view"]["Row"] | null
@@ -192,6 +201,7 @@ test('typegen: typescript', async () => {
               name: string | null
               other_id: number
             }
+            ComputedFields: never
             Insert: {
               name?: string | null
               other_id?: number
@@ -231,6 +241,16 @@ test('typegen: typescript', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields:
+              | "blurb"
+              | "blurb_varchar"
+              | "details_is_long"
+              | "details_length"
+              | "details_words"
+              | "function_returning_single_row"
+              | "get_todos_setof_rows"
+              | "test_unnamed_row_scalar"
+              | "test_unnamed_row_setof"
             Insert: {
               details?: string | null
               id?: number
@@ -285,6 +305,7 @@ test('typegen: typescript', async () => {
               details: string | null
               user_id: number
             }
+            ComputedFields: never
             Insert: {
               details?: string | null
               user_id: number
@@ -386,6 +407,16 @@ test('typegen: typescript', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields:
+              | "function_using_setof_rows_one"
+              | "function_using_table_returns"
+              | "get_single_user_summary_from_view"
+              | "get_todos_from_user"
+              | "get_todos_setof_rows"
+              | "get_user_audit_setof_single_row"
+              | "postgrest_resolvable_with_override_function"
+              | "test_unnamed_row_composite"
+              | "test_unnamed_row_setof"
             Insert: {
               decimal?: number | null
               id?: number
@@ -410,6 +441,7 @@ test('typegen: typescript', async () => {
               user_id: number | null
               created_ago: number | null
             }
+            ComputedFields: "created_ago"
             Insert: {
               created_at?: string | null
               id?: number
@@ -430,6 +462,7 @@ test('typegen: typescript', async () => {
             Row: {
               id: number | null
             }
+            ComputedFields: never
             Insert: {
               id?: number | null
             }
@@ -449,6 +482,7 @@ test('typegen: typescript', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields: "get_todos_by_matview"
             Relationships: [
               {
                 foreignKeyName: "todos_user-id_fkey"
@@ -500,6 +534,7 @@ test('typegen: typescript', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields: "blurb_varchar" | "test_unnamed_view_row"
             Insert: {
               details?: string | null
               id?: number | null
@@ -557,6 +592,7 @@ test('typegen: typescript', async () => {
               user_name: string | null
               user_status: Database["public"]["Enums"]["user_status"] | null
             }
+            ComputedFields: never
             Relationships: []
           }
           users_view: {
@@ -579,6 +615,9 @@ test('typegen: typescript', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields:
+              | "get_single_user_summary_from_view"
+              | "get_todos_from_user"
             Insert: {
               decimal?: number | null
               id?: number | null
@@ -602,6 +641,7 @@ test('typegen: typescript', async () => {
               second_id: number | null
               second_name: string | null
             }
+            ComputedFields: never
             Relationships: []
           }
         }
@@ -661,7 +701,10 @@ test('typegen: typescript', async () => {
           }
           double_duration: {
             Args: {
-              interval_test_row: Database["public"]["Tables"]["interval_test"]["Row"]
+              interval_test_row: Omit<
+                Database["public"]["Tables"]["interval_test"]["Row"],
+                Database["public"]["Tables"]["interval_test"]["ComputedFields"]
+              >
             }
             Returns: string
           }
@@ -698,7 +741,12 @@ test('typegen: typescript', async () => {
             }
           }
           function_returning_single_row: {
-            Args: { todos: Database["public"]["Tables"]["todos"]["Row"] }
+            Args: {
+              todos: Omit<
+                Database["public"]["Tables"]["todos"]["Row"],
+                Database["public"]["Tables"]["todos"]["ComputedFields"]
+              >
+            }
             Returns: {
               decimal: number | null
               id: number
@@ -728,7 +776,12 @@ test('typegen: typescript', async () => {
             }[]
           }
           function_using_setof_rows_one: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               details: string | null
               id: number
@@ -742,7 +795,12 @@ test('typegen: typescript', async () => {
             }
           }
           function_using_table_returns: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               details: string | null
               id: number
@@ -783,7 +841,12 @@ test('typegen: typescript', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -800,7 +863,10 @@ test('typegen: typescript', async () => {
               }
             | {
                 Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                  userview_row: Omit<
+                    Database["public"]["Views"]["users_view"]["Row"],
+                    Database["public"]["Views"]["users_view"]["ComputedFields"]
+                  >
                 }
                 Returns: {
                   todo_count: number | null
@@ -850,7 +916,12 @@ test('typegen: typescript', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -865,7 +936,10 @@ test('typegen: typescript', async () => {
               }
             | {
                 Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                  userview_row: Omit<
+                    Database["public"]["Views"]["users_view"]["Row"],
+                    Database["public"]["Views"]["users_view"]["ComputedFields"]
+                  >
                 }
                 Returns: {
                   details: string | null
@@ -881,7 +955,12 @@ test('typegen: typescript', async () => {
               }
           get_todos_setof_rows:
             | {
-                Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
+                Args: {
+                  todo_row: Omit<
+                    Database["public"]["Tables"]["todos"]["Row"],
+                    Database["public"]["Tables"]["todos"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -895,7 +974,12 @@ test('typegen: typescript', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -916,7 +1000,12 @@ test('typegen: typescript', async () => {
             }[]
           }
           get_user_audit_setof_single_row: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               created_at: string | null
               id: number
@@ -1019,7 +1108,12 @@ test('typegen: typescript', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -1307,6 +1401,7 @@ test('typegen w/ one-to-one relationships', async () => {
               id: number
               name: string
             }
+            ComputedFields: never
             Insert: {
               id?: number
               name: string
@@ -1319,6 +1414,7 @@ test('typegen w/ one-to-one relationships', async () => {
           }
           empty: {
             Row: {}
+            ComputedFields: never
             Insert: {}
             Update: {}
             Relationships: []
@@ -1331,6 +1427,7 @@ test('typegen w/ one-to-one relationships', async () => {
               id: number
               days_since_event: number | null
             }
+            ComputedFields: "days_since_event"
             Insert: {
               created_at?: string
               data?: Json | null
@@ -1352,6 +1449,7 @@ test('typegen w/ one-to-one relationships', async () => {
               event_type: string | null
               id: number
             }
+            ComputedFields: never
             Insert: {
               created_at?: string
               data?: Json | null
@@ -1373,6 +1471,7 @@ test('typegen w/ one-to-one relationships', async () => {
               event_type: string | null
               id: number
             }
+            ComputedFields: never
             Insert: {
               created_at?: string
               data?: Json | null
@@ -1393,6 +1492,7 @@ test('typegen w/ one-to-one relationships', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }
+            ComputedFields: never
             Insert: {
               id: number
               name?: string | null
@@ -1412,6 +1512,7 @@ test('typegen w/ one-to-one relationships', async () => {
               id: number
               double_duration: string | null
             }
+            ComputedFields: "double_duration"
             Insert: {
               duration_optional?: string | null
               duration_required: string
@@ -1433,6 +1534,7 @@ test('typegen w/ one-to-one relationships', async () => {
               name: string
               status: Database["public"]["Enums"]["meme_status"] | null
             }
+            ComputedFields: never
             Insert: {
               category?: number | null
               created_at: string
@@ -1464,6 +1566,7 @@ test('typegen w/ one-to-one relationships', async () => {
               col1: Database["public"]["Tables"]["user_details"]["Row"] | null
               col2: Database["public"]["Views"]["a_view"]["Row"] | null
             }
+            ComputedFields: never
             Insert: {
               col1?: Database["public"]["Tables"]["user_details"]["Row"] | null
               col2?: Database["public"]["Views"]["a_view"]["Row"] | null
@@ -1479,6 +1582,7 @@ test('typegen w/ one-to-one relationships', async () => {
               name: string | null
               other_id: number
             }
+            ComputedFields: never
             Insert: {
               name?: string | null
               other_id?: number
@@ -1518,6 +1622,16 @@ test('typegen w/ one-to-one relationships', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields:
+              | "blurb"
+              | "blurb_varchar"
+              | "details_is_long"
+              | "details_length"
+              | "details_words"
+              | "function_returning_single_row"
+              | "get_todos_setof_rows"
+              | "test_unnamed_row_scalar"
+              | "test_unnamed_row_setof"
             Insert: {
               details?: string | null
               id?: number
@@ -1578,6 +1692,7 @@ test('typegen w/ one-to-one relationships', async () => {
               details: string | null
               user_id: number
             }
+            ComputedFields: never
             Insert: {
               details?: string | null
               user_id: number
@@ -1685,6 +1800,16 @@ test('typegen w/ one-to-one relationships', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields:
+              | "function_using_setof_rows_one"
+              | "function_using_table_returns"
+              | "get_single_user_summary_from_view"
+              | "get_todos_from_user"
+              | "get_todos_setof_rows"
+              | "get_user_audit_setof_single_row"
+              | "postgrest_resolvable_with_override_function"
+              | "test_unnamed_row_composite"
+              | "test_unnamed_row_setof"
             Insert: {
               decimal?: number | null
               id?: number
@@ -1709,6 +1834,7 @@ test('typegen w/ one-to-one relationships', async () => {
               user_id: number | null
               created_ago: number | null
             }
+            ComputedFields: "created_ago"
             Insert: {
               created_at?: string | null
               id?: number
@@ -1729,6 +1855,7 @@ test('typegen w/ one-to-one relationships', async () => {
             Row: {
               id: number | null
             }
+            ComputedFields: never
             Insert: {
               id?: number | null
             }
@@ -1748,6 +1875,7 @@ test('typegen w/ one-to-one relationships', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields: "get_todos_by_matview"
             Relationships: [
               {
                 foreignKeyName: "todos_user-id_fkey"
@@ -1805,6 +1933,7 @@ test('typegen w/ one-to-one relationships', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields: "blurb_varchar" | "test_unnamed_view_row"
             Insert: {
               details?: string | null
               id?: number | null
@@ -1868,6 +1997,7 @@ test('typegen w/ one-to-one relationships', async () => {
               user_name: string | null
               user_status: Database["public"]["Enums"]["user_status"] | null
             }
+            ComputedFields: never
             Relationships: []
           }
           users_view: {
@@ -1890,6 +2020,9 @@ test('typegen w/ one-to-one relationships', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields:
+              | "get_single_user_summary_from_view"
+              | "get_todos_from_user"
             Insert: {
               decimal?: number | null
               id?: number | null
@@ -1913,6 +2046,7 @@ test('typegen w/ one-to-one relationships', async () => {
               second_id: number | null
               second_name: string | null
             }
+            ComputedFields: never
             Relationships: []
           }
         }
@@ -1972,7 +2106,10 @@ test('typegen w/ one-to-one relationships', async () => {
           }
           double_duration: {
             Args: {
-              interval_test_row: Database["public"]["Tables"]["interval_test"]["Row"]
+              interval_test_row: Omit<
+                Database["public"]["Tables"]["interval_test"]["Row"],
+                Database["public"]["Tables"]["interval_test"]["ComputedFields"]
+              >
             }
             Returns: string
           }
@@ -2009,7 +2146,12 @@ test('typegen w/ one-to-one relationships', async () => {
             }
           }
           function_returning_single_row: {
-            Args: { todos: Database["public"]["Tables"]["todos"]["Row"] }
+            Args: {
+              todos: Omit<
+                Database["public"]["Tables"]["todos"]["Row"],
+                Database["public"]["Tables"]["todos"]["ComputedFields"]
+              >
+            }
             Returns: {
               decimal: number | null
               id: number
@@ -2039,7 +2181,12 @@ test('typegen w/ one-to-one relationships', async () => {
             }[]
           }
           function_using_setof_rows_one: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               details: string | null
               id: number
@@ -2053,7 +2200,12 @@ test('typegen w/ one-to-one relationships', async () => {
             }
           }
           function_using_table_returns: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               details: string | null
               id: number
@@ -2094,7 +2246,12 @@ test('typegen w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -2111,7 +2268,10 @@ test('typegen w/ one-to-one relationships', async () => {
               }
             | {
                 Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                  userview_row: Omit<
+                    Database["public"]["Views"]["users_view"]["Row"],
+                    Database["public"]["Views"]["users_view"]["ComputedFields"]
+                  >
                 }
                 Returns: {
                   todo_count: number | null
@@ -2161,7 +2321,12 @@ test('typegen w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -2176,7 +2341,10 @@ test('typegen w/ one-to-one relationships', async () => {
               }
             | {
                 Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                  userview_row: Omit<
+                    Database["public"]["Views"]["users_view"]["Row"],
+                    Database["public"]["Views"]["users_view"]["ComputedFields"]
+                  >
                 }
                 Returns: {
                   details: string | null
@@ -2192,7 +2360,12 @@ test('typegen w/ one-to-one relationships', async () => {
               }
           get_todos_setof_rows:
             | {
-                Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
+                Args: {
+                  todo_row: Omit<
+                    Database["public"]["Tables"]["todos"]["Row"],
+                    Database["public"]["Tables"]["todos"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -2206,7 +2379,12 @@ test('typegen w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -2227,7 +2405,12 @@ test('typegen w/ one-to-one relationships', async () => {
             }[]
           }
           get_user_audit_setof_single_row: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               created_at: string | null
               id: number
@@ -2330,7 +2513,12 @@ test('typegen w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -2618,6 +2806,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id: number
               name: string
             }
+            ComputedFields: never
             Insert: {
               id?: number
               name: string
@@ -2630,6 +2819,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
           empty: {
             Row: {}
+            ComputedFields: never
             Insert: {}
             Update: {}
             Relationships: []
@@ -2642,6 +2832,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id: number
               days_since_event: number | null
             }
+            ComputedFields: "days_since_event"
             Insert: {
               created_at?: string
               data?: Json | null
@@ -2663,6 +2854,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               event_type: string | null
               id: number
             }
+            ComputedFields: never
             Insert: {
               created_at?: string
               data?: Json | null
@@ -2684,6 +2876,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               event_type: string | null
               id: number
             }
+            ComputedFields: never
             Insert: {
               created_at?: string
               data?: Json | null
@@ -2704,6 +2897,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }
+            ComputedFields: never
             Insert: {
               id: number
               name?: string | null
@@ -2723,6 +2917,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id: number
               double_duration: string | null
             }
+            ComputedFields: "double_duration"
             Insert: {
               duration_optional?: string | null
               duration_required: string
@@ -2744,6 +2939,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               name: string
               status: Database["public"]["Enums"]["meme_status"] | null
             }
+            ComputedFields: never
             Insert: {
               category?: number | null
               created_at: string
@@ -2775,6 +2971,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               col1: Database["public"]["Tables"]["user_details"]["Row"] | null
               col2: Database["public"]["Views"]["a_view"]["Row"] | null
             }
+            ComputedFields: never
             Insert: {
               col1?: Database["public"]["Tables"]["user_details"]["Row"] | null
               col2?: Database["public"]["Views"]["a_view"]["Row"] | null
@@ -2790,6 +2987,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               name: string | null
               other_id: number
             }
+            ComputedFields: never
             Insert: {
               name?: string | null
               other_id?: number
@@ -2829,6 +3027,16 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields:
+              | "blurb"
+              | "blurb_varchar"
+              | "details_is_long"
+              | "details_length"
+              | "details_words"
+              | "function_returning_single_row"
+              | "get_todos_setof_rows"
+              | "test_unnamed_row_scalar"
+              | "test_unnamed_row_setof"
             Insert: {
               details?: string | null
               id?: number
@@ -2889,6 +3097,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               details: string | null
               user_id: number
             }
+            ComputedFields: never
             Insert: {
               details?: string | null
               user_id: number
@@ -2996,6 +3205,16 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields:
+              | "function_using_setof_rows_one"
+              | "function_using_table_returns"
+              | "get_single_user_summary_from_view"
+              | "get_todos_from_user"
+              | "get_todos_setof_rows"
+              | "get_user_audit_setof_single_row"
+              | "postgrest_resolvable_with_override_function"
+              | "test_unnamed_row_composite"
+              | "test_unnamed_row_setof"
             Insert: {
               decimal?: number | null
               id?: number
@@ -3020,6 +3239,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               user_id: number | null
               created_ago: number | null
             }
+            ComputedFields: "created_ago"
             Insert: {
               created_at?: string | null
               id?: number
@@ -3040,6 +3260,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Row: {
               id: number | null
             }
+            ComputedFields: never
             Insert: {
               id?: number | null
             }
@@ -3059,6 +3280,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields: "get_todos_by_matview"
             Relationships: [
               {
                 foreignKeyName: "todos_user-id_fkey"
@@ -3116,6 +3338,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields: "blurb_varchar" | "test_unnamed_view_row"
             Insert: {
               details?: string | null
               id?: number | null
@@ -3179,6 +3402,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               user_name: string | null
               user_status: Database["public"]["Enums"]["user_status"] | null
             }
+            ComputedFields: never
             Relationships: []
           }
           users_view: {
@@ -3201,6 +3425,9 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields:
+              | "get_single_user_summary_from_view"
+              | "get_todos_from_user"
             Insert: {
               decimal?: number | null
               id?: number | null
@@ -3224,6 +3451,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               second_id: number | null
               second_name: string | null
             }
+            ComputedFields: never
             Relationships: []
           }
         }
@@ -3283,7 +3511,10 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
           double_duration: {
             Args: {
-              interval_test_row: Database["public"]["Tables"]["interval_test"]["Row"]
+              interval_test_row: Omit<
+                Database["public"]["Tables"]["interval_test"]["Row"],
+                Database["public"]["Tables"]["interval_test"]["ComputedFields"]
+              >
             }
             Returns: string
           }
@@ -3320,7 +3551,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             }
           }
           function_returning_single_row: {
-            Args: { todos: Database["public"]["Tables"]["todos"]["Row"] }
+            Args: {
+              todos: Omit<
+                Database["public"]["Tables"]["todos"]["Row"],
+                Database["public"]["Tables"]["todos"]["ComputedFields"]
+              >
+            }
             Returns: {
               decimal: number | null
               id: number
@@ -3350,7 +3586,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             }[]
           }
           function_using_setof_rows_one: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               details: string | null
               id: number
@@ -3364,7 +3605,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             }
           }
           function_using_table_returns: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               details: string | null
               id: number
@@ -3405,7 +3651,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -3422,7 +3673,10 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               }
             | {
                 Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                  userview_row: Omit<
+                    Database["public"]["Views"]["users_view"]["Row"],
+                    Database["public"]["Views"]["users_view"]["ComputedFields"]
+                  >
                 }
                 Returns: {
                   todo_count: number | null
@@ -3472,7 +3726,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -3487,7 +3746,10 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               }
             | {
                 Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                  userview_row: Omit<
+                    Database["public"]["Views"]["users_view"]["Row"],
+                    Database["public"]["Views"]["users_view"]["ComputedFields"]
+                  >
                 }
                 Returns: {
                   details: string | null
@@ -3503,7 +3765,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               }
           get_todos_setof_rows:
             | {
-                Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
+                Args: {
+                  todo_row: Omit<
+                    Database["public"]["Tables"]["todos"]["Row"],
+                    Database["public"]["Tables"]["todos"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -3517,7 +3784,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -3538,7 +3810,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             }[]
           }
           get_user_audit_setof_single_row: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               created_at: string | null
               id: number
@@ -3641,7 +3918,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -3934,6 +4216,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               id: number
               name: string
             }
+            ComputedFields: never
             Insert: {
               id?: number
               name: string
@@ -3946,6 +4229,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
           empty: {
             Row: {}
+            ComputedFields: never
             Insert: {}
             Update: {}
             Relationships: []
@@ -3958,6 +4242,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               id: number
               days_since_event: number | null
             }
+            ComputedFields: "days_since_event"
             Insert: {
               created_at?: string
               data?: Json | null
@@ -3979,6 +4264,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               event_type: string | null
               id: number
             }
+            ComputedFields: never
             Insert: {
               created_at?: string
               data?: Json | null
@@ -4000,6 +4286,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               event_type: string | null
               id: number
             }
+            ComputedFields: never
             Insert: {
               created_at?: string
               data?: Json | null
@@ -4020,6 +4307,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }
+            ComputedFields: never
             Insert: {
               id: number
               name?: string | null
@@ -4039,6 +4327,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               id: number
               double_duration: string | null
             }
+            ComputedFields: "double_duration"
             Insert: {
               duration_optional?: string | null
               duration_required: string
@@ -4060,6 +4349,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               name: string
               status: Database["public"]["Enums"]["meme_status"] | null
             }
+            ComputedFields: never
             Insert: {
               category?: number | null
               created_at: string
@@ -4091,6 +4381,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               col1: Database["public"]["Tables"]["user_details"]["Row"] | null
               col2: Database["public"]["Views"]["a_view"]["Row"] | null
             }
+            ComputedFields: never
             Insert: {
               col1?: Database["public"]["Tables"]["user_details"]["Row"] | null
               col2?: Database["public"]["Views"]["a_view"]["Row"] | null
@@ -4106,6 +4397,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               name: string | null
               other_id: number
             }
+            ComputedFields: never
             Insert: {
               name?: string | null
               other_id?: number
@@ -4145,6 +4437,16 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields:
+              | "blurb"
+              | "blurb_varchar"
+              | "details_is_long"
+              | "details_length"
+              | "details_words"
+              | "function_returning_single_row"
+              | "get_todos_setof_rows"
+              | "test_unnamed_row_scalar"
+              | "test_unnamed_row_setof"
             Insert: {
               details?: string | null
               id?: number
@@ -4205,6 +4507,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               details: string | null
               user_id: number
             }
+            ComputedFields: never
             Insert: {
               details?: string | null
               user_id: number
@@ -4312,6 +4615,16 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields:
+              | "function_using_setof_rows_one"
+              | "function_using_table_returns"
+              | "get_single_user_summary_from_view"
+              | "get_todos_from_user"
+              | "get_todos_setof_rows"
+              | "get_user_audit_setof_single_row"
+              | "postgrest_resolvable_with_override_function"
+              | "test_unnamed_row_composite"
+              | "test_unnamed_row_setof"
             Insert: {
               decimal?: number | null
               id?: number
@@ -4336,6 +4649,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               user_id: number | null
               created_ago: number | null
             }
+            ComputedFields: "created_ago"
             Insert: {
               created_at?: string | null
               id?: number
@@ -4356,6 +4670,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Row: {
               id: number | null
             }
+            ComputedFields: never
             Insert: {
               id?: number | null
             }
@@ -4375,6 +4690,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields: "get_todos_by_matview"
             Relationships: [
               {
                 foreignKeyName: "todos_user-id_fkey"
@@ -4432,6 +4748,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields: "blurb_varchar" | "test_unnamed_view_row"
             Insert: {
               details?: string | null
               id?: number | null
@@ -4495,6 +4812,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               user_name: string | null
               user_status: Database["public"]["Enums"]["user_status"] | null
             }
+            ComputedFields: never
             Relationships: []
           }
           users_view: {
@@ -4517,6 +4835,9 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields:
+              | "get_single_user_summary_from_view"
+              | "get_todos_from_user"
             Insert: {
               decimal?: number | null
               id?: number | null
@@ -4540,6 +4861,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               second_id: number | null
               second_name: string | null
             }
+            ComputedFields: never
             Relationships: []
           }
         }
@@ -4599,7 +4921,10 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
           double_duration: {
             Args: {
-              interval_test_row: Database["public"]["Tables"]["interval_test"]["Row"]
+              interval_test_row: Omit<
+                Database["public"]["Tables"]["interval_test"]["Row"],
+                Database["public"]["Tables"]["interval_test"]["ComputedFields"]
+              >
             }
             Returns: string
           }
@@ -4636,7 +4961,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             }
           }
           function_returning_single_row: {
-            Args: { todos: Database["public"]["Tables"]["todos"]["Row"] }
+            Args: {
+              todos: Omit<
+                Database["public"]["Tables"]["todos"]["Row"],
+                Database["public"]["Tables"]["todos"]["ComputedFields"]
+              >
+            }
             Returns: {
               decimal: number | null
               id: number
@@ -4666,7 +4996,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             }[]
           }
           function_using_setof_rows_one: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               details: string | null
               id: number
@@ -4680,7 +5015,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             }
           }
           function_using_table_returns: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               details: string | null
               id: number
@@ -4721,7 +5061,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -4738,7 +5083,10 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               }
             | {
                 Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                  userview_row: Omit<
+                    Database["public"]["Views"]["users_view"]["Row"],
+                    Database["public"]["Views"]["users_view"]["ComputedFields"]
+                  >
                 }
                 Returns: {
                   todo_count: number | null
@@ -4788,7 +5136,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -4803,7 +5156,10 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               }
             | {
                 Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                  userview_row: Omit<
+                    Database["public"]["Views"]["users_view"]["Row"],
+                    Database["public"]["Views"]["users_view"]["ComputedFields"]
+                  >
                 }
                 Returns: {
                   details: string | null
@@ -4819,7 +5175,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               }
           get_todos_setof_rows:
             | {
-                Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
+                Args: {
+                  todo_row: Omit<
+                    Database["public"]["Tables"]["todos"]["Row"],
+                    Database["public"]["Tables"]["todos"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -4833,7 +5194,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -4854,7 +5220,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             }[]
           }
           get_user_audit_setof_single_row: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               created_at: string | null
               id: number
@@ -4957,7 +5328,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
