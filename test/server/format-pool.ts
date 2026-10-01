@@ -1,4 +1,9 @@
-import { GENERATOR_METADATA_VERSION, typescript, type GeneratorMetadata } from '@supabase/typegen'
+import {
+  GENERATOR_METADATA_VERSION,
+  languages,
+  typescript,
+  type GeneratorMetadata,
+} from '@supabase/typegen'
 import { afterEach, expect, test, vi } from 'vitest'
 import { host } from '../../src/server/typegen-host.js'
 
@@ -97,6 +102,21 @@ test('generates on a worker thread with identical output to generating inline', 
     // to running inline, which is the thing being changed
     expect(isFormatPoolActive()).toBe(true)
     expect(viaWorker).toBe(await generateInline())
+  } finally {
+    await destroyFormatPool()
+  }
+})
+
+test('generates every in-process language on the worker with identical output', async () => {
+  const { generateTypes, destroyFormatPool } = await loadFormatPool({
+    PG_META_FORMAT_IN_WORKER: 'true',
+  })
+
+  try {
+    for (const language of languages.filter((language) => language.inProcess)) {
+      const viaWorker = await generateTypes(language, METADATA, {})
+      expect(viaWorker, language.name).toBe(await language.generate(METADATA, {}, host))
+    }
   } finally {
     await destroyFormatPool()
   }

@@ -6,11 +6,25 @@ import { declaredOptions, getGeneratorMetadata } from '../../../lib/generators.j
 import { GENERATE_TYPES_DEFAULT_SCHEMA } from '../../constants.js'
 import { generateTypes, FormatQueueFullError } from '../../format-pool.js'
 
+/** Registry option name of each query parameter a generator route accepts. */
+const QUERY_PARAMETER_OPTIONS = {
+  detect_one_to_one_relationships: 'detect-one-to-one-relationships',
+  postgrest_version: 'postgrest-version',
+  access_control: 'swift-access-control',
+} as const
+
+type QueryParameter = keyof typeof QUERY_PARAMETER_OPTIONS
+
+const queryParameterFor = (option: string): QueryParameter | undefined =>
+  (Object.keys(QUERY_PARAMETER_OPTIONS) as QueryParameter[]).find(
+    (parameter) => QUERY_PARAMETER_OPTIONS[parameter] === option
+  )
+
 /**
  * Route for one in-process language of `@supabase/typegen`. Every query
  * parameter is listed once; each language receives only the options it
  * declares, so a parameter another language uses is ignored rather than
- * rejected.
+ * rejected. An empty value counts as absent, as it did before the registry.
  */
 export default (language: TypegenLanguage) => async (fastify: FastifyInstance) => {
   fastify.get<{
@@ -18,10 +32,7 @@ export default (language: TypegenLanguage) => async (fastify: FastifyInstance) =
     Querystring: {
       excluded_schemas?: string
       included_schemas?: string
-      detect_one_to_one_relationships?: string
-      postgrest_version?: string
-      access_control?: string
-    }
+    } & Partial<Record<QueryParameter, string>>
   }>('/', async (request, reply) => {
     const config = createConnectionConfig(request)
     const excludedSchemas =
@@ -31,9 +42,10 @@ export default (language: TypegenLanguage) => async (fastify: FastifyInstance) =
     let options: OptionValues
     try {
       options = declaredOptions(language, {
-        'detect-one-to-one-relationships': request.query.detect_one_to_one_relationships === 'true',
-        'postgrest-version': request.query.postgrest_version,
-        'swift-access-control': request.query.access_control,
+        [QUERY_PARAMETER_OPTIONS.detect_one_to_one_relationships]:
+          request.query.detect_one_to_one_relationships === 'true',
+        [QUERY_PARAMETER_OPTIONS.postgrest_version]: request.query.postgrest_version || undefined,
+        [QUERY_PARAMETER_OPTIONS.access_control]: request.query.access_control || undefined,
         'default-schema': GENERATE_TYPES_DEFAULT_SCHEMA,
       })
     } catch (error) {
@@ -41,7 +53,12 @@ export default (language: TypegenLanguage) => async (fastify: FastifyInstance) =
         throw error
       }
       reply.code(400)
-      return { error: error.message }
+      const parameter = queryParameterFor(error.option)
+      return {
+        error: parameter
+          ? `Query parameter "${parameter}" is invalid: ${error.message}`
+          : error.message,
+      }
     }
 
     const pgMeta: PostgresMeta = new PostgresMeta(config)

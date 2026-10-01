@@ -1,3 +1,4 @@
+import { languages } from '@supabase/typegen'
 import { expect, test } from 'vitest'
 import { app } from './utils'
 
@@ -7363,13 +7364,29 @@ test('typegen: swift rejects an unknown access control with 400', async () => {
   expect(statusCode).toBe(400)
   expect(json()).toEqual({
     error:
-      'Option "swift-access-control" of language "swift" expects one of "internal", "public", "private", "package", got "fileprivate".',
+      'Query parameter "access_control" is invalid: Option "swift-access-control" of language "swift" expects one of "internal", "public", "private", "package", got "fileprivate".',
   })
 })
 
-test('typegen: only in-process languages have a route', async () => {
-  const { statusCode } = await app.inject({ method: 'GET', path: '/generators/dart' })
-  expect(statusCode).toBe(404)
+test('typegen: swift treats an empty access control as the default', async () => {
+  const { statusCode, body } = await app.inject({
+    method: 'GET',
+    path: '/generators/swift',
+    query: { access_control: '' },
+  })
+  expect(statusCode).toBe(200)
+  expect(body).toContain('internal enum PublicSchema {')
+})
+
+test('typegen: a route exists for every in-process registry language and no other', async () => {
+  expect(languages.some((language) => !language.inProcess)).toBe(true)
+  for (const language of languages) {
+    const { statusCode } = await app.inject({
+      method: 'GET',
+      path: `/generators/${language.name}`,
+    })
+    expect(statusCode, language.name).toBe(language.inProcess ? 200 : 404)
+  }
 })
 
 test('typegen: python', async () => {

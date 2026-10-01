@@ -28,7 +28,7 @@ export class FormatQueueFullError extends Error {
 
 export class FormatTimeoutError extends Error {
   constructor() {
-    super(`Formatting generated types timed out after ${FORMAT_TIMEOUT_MS}ms`)
+    super(`Generating types timed out after ${FORMAT_TIMEOUT_MS}ms`)
     this.name = 'FormatTimeoutError'
   }
 }

@@ -4,10 +4,8 @@
 import { format as formatWithOxfmt } from 'oxfmt'
 
 /**
- * Formats generated TypeScript the way `supabase gen types` output has always
- * been formatted. Passing it explicitly makes oxfmt this package's own
- * dependency instead of the optional peer postgrest-typegen's default
- * formatter would otherwise load.
+ * Formats generated TypeScript with the options postgrest-typegen's default
+ * formatter uses, so the output matches it byte for byte.
  *
  * @param {string} code
  * @param {string} fileName

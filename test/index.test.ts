@@ -23,6 +23,7 @@ import './server/query'
 import './server/ssl'
 import './server/table-privileges'
 import './server/typegen'
+import './server/generate-types-mode'
 import './server/result-size-limit'
 import './server/query-timeout'
 // New tests for increased coverage - commented out to avoid import issues

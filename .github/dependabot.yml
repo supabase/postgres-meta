@@ -8,3 +8,7 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    ignore:
+      # @supabase/typegen declares an exact optional peer on this oxfmt version
+      # and npm rejects any other, so it moves with a registry bump.
+      - dependency-name: "oxfmt"
