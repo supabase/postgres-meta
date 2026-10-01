@@ -76,7 +76,7 @@ npm run format          # Format code with Prettier
    - `app.ts`: Main Fastify app with routes, CORS, Swagger docs
    - `admin-app.ts`: Admin server (runs on PG_META_PORT + 1) for metrics
    - `routes/*.ts`: REST endpoints mapping to library methods
-   - `routes/generators/*.ts`: Type generation endpoints backed by `@supabase/postgrest-typegen`
+   - `routes/generators/index.ts`: one type generation endpoint per in-process language of `@supabase/typegen`
 
 ### Object Manager Pattern
 
@@ -116,15 +116,17 @@ Database errors are formatted to mimic `psql` output:
 
 Type generation (`npm run gen:types:*`) works by:
 1. Connecting to a database (test DB or custom via `PG_META_DB_URL`)
-2. Introspecting schemas, tables, columns, relationships, functions, and types via `@supabase/postgrest-typegen`'s `introspect()` (wrapped by `src/lib/generators.ts`)
-3. Passing the metadata to the package's language generators (`generateTypescript`, `generateGo`, `generateSwift`, `generatePython`)
-4. Generators output type definitions to stdout
+2. Introspecting schemas, tables, columns, relationships, functions, and types via the `introspect()` that `@supabase/typegen` re-exports (wrapped by `src/lib/generators.ts`)
+3. Looking the language up in the `@supabase/typegen` registry and calling its `generate` with the options it declares (`declaredOptions` in `src/lib/generators.ts` keeps only those)
+4. The generated file is written to stdout
 
 Environment variables:
 - `PG_META_GENERATE_TYPES`: Language (typescript, python, go, swift)
 - `PG_META_GENERATE_TYPES_INCLUDED_SCHEMAS`: Comma-separated schemas to include
 - `PG_META_GENERATE_TYPES_DETECT_ONE_TO_ONE_RELATIONSHIPS`: Enable 1:1 relationship detection
 - `PG_META_POSTGREST_VERSION`: PostgREST version for TypeScript template compatibility
+- `PG_META_GENERATE_TYPES_DEFAULT_SCHEMA`: Schema the TypeScript helper types default to (default: public)
+- `PG_META_GENERATE_TYPES_SWIFT_ACCESS_CONTROL`: Swift access level, one of internal, public, private, package (default: internal)
 
 ## Environment Variables
 
@@ -154,24 +156,33 @@ PG_META_MAX_BODY_LIMIT_MB=3             # Max request body size in MB (default: 
 PG_META_SHUTDOWN_GRACE_PERIOD_SECS=10   # Shutdown wait on in-flight work before force-exit (default: 10)
 ```
 
-TypeScript generation on a worker thread (opt-in):
+Type generation on a worker thread (opt-in):
 ```bash
-PG_META_FORMAT_IN_WORKER=true           # Generate TypeScript types on a worker thread (default: false)
+PG_META_FORMAT_IN_WORKER=true           # Generate types on a worker thread (default: false)
 PG_META_FORMAT_POOL_SIZE=1              # Worker threads used for generation (default: 1)
 PG_META_FORMAT_MAX_QUEUE=20             # Max generation calls in flight before returning 503 (default: 20)
 PG_META_FORMAT_TIMEOUT_SECS=60          # Per-generation timeout (default: 60)
 PG_META_FORMAT_IDLE_TIMEOUT_SECS=30     # Idle time before a worker exits (default: 30)
 ```
 
-`generateTypescript` is CPU-bound and synchronous: on a large schema it blocks
-the event loop and the server cannot answer anything else, health checks
-included. Formatting is the bulk of it (oxfmt since postgrest-typegen 0.2.0,
-much faster than the prettier it replaced but still synchronous) and the string
-building ahead of it costs too, so `PG_META_FORMAT_IN_WORKER=true` moves the
-whole call to a worker thread (`src/server/format-pool.ts`). Metadata
-crosses the thread boundary as a structured clone, which is plain JSON and does
-not measurably change wall-clock time. Always off during type generation
+Every in-process generator is CPU-bound and synchronous: on a large schema it
+blocks the event loop and the server cannot answer anything else, health checks
+included. For TypeScript formatting is the bulk of it (oxfmt, much faster than
+the prettier it replaced but still synchronous) and the string building ahead
+of it costs for every language, so `PG_META_FORMAT_IN_WORKER=true` moves the
+whole `generate` call of all four languages to a worker thread
+(`src/server/format-pool.ts`). The language name, metadata and options cross
+the thread boundary as a structured clone, which is plain JSON and does not
+measurably change wall-clock time. Always off during type generation
 (`PG_META_GENERATE_TYPES`), which generates once and exits.
+
+The registry `Host` is `{ cwd, env }` on both paths, built in
+`format-pool.ts` and again in `format-worker.js` since a function cannot cross
+the thread boundary. TypeScript is formatted by postgrest-typegen's default
+formatter, which loads `oxfmt` as an optional peer; npm does not install
+optional peers, so `oxfmt` is a direct dependency pinned to the exact version
+`@supabase/typegen` declares. npm rejects any other version, so dependabot
+skips it and it moves with a registry bump.
 
 The env vars keep their `PG_META_FORMAT_*` names from when the worker formatted
 only, so existing deployments do not need reconfiguring.

@@ -1,3 +1,4 @@
+import { languages } from '@supabase/typegen'
 import { expect, test } from 'vitest'
 import { app } from './utils'
 
@@ -21,6 +22,7 @@ test('typegen: typescript', async () => {
               id: number
               name: string
             }
+            ComputedFields: never
             Insert: {
               id?: number
               name: string
@@ -33,6 +35,7 @@ test('typegen: typescript', async () => {
           }
           empty: {
             Row: {}
+            ComputedFields: never
             Insert: {}
             Update: {}
             Relationships: []
@@ -45,6 +48,7 @@ test('typegen: typescript', async () => {
               id: number
               days_since_event: number | null
             }
+            ComputedFields: "days_since_event"
             Insert: {
               created_at?: string
               data?: Json | null
@@ -66,6 +70,7 @@ test('typegen: typescript', async () => {
               event_type: string | null
               id: number
             }
+            ComputedFields: never
             Insert: {
               created_at?: string
               data?: Json | null
@@ -87,6 +92,7 @@ test('typegen: typescript', async () => {
               event_type: string | null
               id: number
             }
+            ComputedFields: never
             Insert: {
               created_at?: string
               data?: Json | null
@@ -107,6 +113,7 @@ test('typegen: typescript', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }
+            ComputedFields: never
             Insert: {
               id: number
               name?: string | null
@@ -124,7 +131,9 @@ test('typegen: typescript', async () => {
               duration_optional: string | null
               duration_required: string
               id: number
+              double_duration: string | null
             }
+            ComputedFields: "double_duration"
             Insert: {
               duration_optional?: string | null
               duration_required: string
@@ -146,6 +155,7 @@ test('typegen: typescript', async () => {
               name: string
               status: Database["public"]["Enums"]["meme_status"] | null
             }
+            ComputedFields: never
             Insert: {
               category?: number | null
               created_at: string
@@ -176,6 +186,7 @@ test('typegen: typescript', async () => {
               col1: Database["public"]["Tables"]["user_details"]["Row"] | null
               col2: Database["public"]["Views"]["a_view"]["Row"] | null
             }
+            ComputedFields: never
             Insert: {
               col1?: Database["public"]["Tables"]["user_details"]["Row"] | null
               col2?: Database["public"]["Views"]["a_view"]["Row"] | null
@@ -191,6 +202,7 @@ test('typegen: typescript', async () => {
               name: string | null
               other_id: number
             }
+            ComputedFields: never
             Insert: {
               name?: string | null
               other_id?: number
@@ -211,6 +223,18 @@ test('typegen: typescript', async () => {
               details_is_long: boolean | null
               details_length: number | null
               details_words: string[] | null
+              function_returning_single_row: {
+                decimal: number | null
+                id: number
+                name: string | null
+                status: Database["public"]["Enums"]["user_status"] | null
+                user_uuid: string | null
+              } | null
+              get_todos_setof_rows: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
               test_unnamed_row_scalar: number | null
               test_unnamed_row_setof: {
                 details: string | null
@@ -218,6 +242,16 @@ test('typegen: typescript', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields:
+              | "blurb"
+              | "blurb_varchar"
+              | "details_is_long"
+              | "details_length"
+              | "details_words"
+              | "function_returning_single_row"
+              | "get_todos_setof_rows"
+              | "test_unnamed_row_scalar"
+              | "test_unnamed_row_setof"
             Insert: {
               details?: string | null
               id?: number
@@ -272,6 +306,7 @@ test('typegen: typescript', async () => {
               details: string | null
               user_id: number
             }
+            ComputedFields: never
             Insert: {
               details?: string | null
               user_id: number
@@ -326,6 +361,44 @@ test('typegen: typescript', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
+              function_using_setof_rows_one: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
+              function_using_table_returns: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
+              get_single_user_summary_from_view: {
+                todo_count: number | null
+                todo_details: string[] | null
+                user_id: number | null
+                user_name: string | null
+                user_status: Database["public"]["Enums"]["user_status"] | null
+              } | null
+              get_todos_from_user: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
+              get_todos_setof_rows: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
+              get_user_audit_setof_single_row: {
+                created_at: string | null
+                id: number
+                previous_value: Json | null
+                user_id: number | null
+              } | null
+              postgrest_resolvable_with_override_function: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
               test_unnamed_row_composite:
                 | Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
                 | null
@@ -335,6 +408,16 @@ test('typegen: typescript', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields:
+              | "function_using_setof_rows_one"
+              | "function_using_table_returns"
+              | "get_single_user_summary_from_view"
+              | "get_todos_from_user"
+              | "get_todos_setof_rows"
+              | "get_user_audit_setof_single_row"
+              | "postgrest_resolvable_with_override_function"
+              | "test_unnamed_row_composite"
+              | "test_unnamed_row_setof"
             Insert: {
               decimal?: number | null
               id?: number
@@ -359,6 +442,7 @@ test('typegen: typescript', async () => {
               user_id: number | null
               created_ago: number | null
             }
+            ComputedFields: "created_ago"
             Insert: {
               created_at?: string | null
               id?: number
@@ -379,6 +463,7 @@ test('typegen: typescript', async () => {
             Row: {
               id: number | null
             }
+            ComputedFields: never
             Insert: {
               id?: number | null
             }
@@ -398,6 +483,7 @@ test('typegen: typescript', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields: "get_todos_by_matview"
             Relationships: [
               {
                 foreignKeyName: "todos_user-id_fkey"
@@ -449,6 +535,7 @@ test('typegen: typescript', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields: "blurb_varchar" | "test_unnamed_view_row"
             Insert: {
               details?: string | null
               id?: number | null
@@ -506,6 +593,7 @@ test('typegen: typescript', async () => {
               user_name: string | null
               user_status: Database["public"]["Enums"]["user_status"] | null
             }
+            ComputedFields: never
             Relationships: []
           }
           users_view: {
@@ -515,7 +603,22 @@ test('typegen: typescript', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
+              get_single_user_summary_from_view: {
+                todo_count: number | null
+                todo_details: string[] | null
+                user_id: number | null
+                user_name: string | null
+                user_status: Database["public"]["Enums"]["user_status"] | null
+              } | null
+              get_todos_from_user: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
             }
+            ComputedFields:
+              | "get_single_user_summary_from_view"
+              | "get_todos_from_user"
             Insert: {
               decimal?: number | null
               id?: number | null
@@ -539,6 +642,7 @@ test('typegen: typescript', async () => {
               second_id: number | null
               second_name: string | null
             }
+            ComputedFields: never
             Relationships: []
           }
         }
@@ -598,12 +702,15 @@ test('typegen: typescript', async () => {
           }
           double_duration: {
             Args: {
-              interval_test_row: Database["public"]["Tables"]["interval_test"]["Row"]
+              interval_test_row: Omit<
+                Database["public"]["Tables"]["interval_test"]["Row"],
+                Database["public"]["Tables"]["interval_test"]["ComputedFields"]
+              >
             }
             Returns: string
           }
           function_returning_row: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               decimal: number | null
               id: number
@@ -619,7 +726,7 @@ test('typegen: typescript', async () => {
             }
           }
           function_returning_set_of_rows: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               decimal: number | null
               id: number
@@ -635,7 +742,12 @@ test('typegen: typescript', async () => {
             }
           }
           function_returning_single_row: {
-            Args: { todos: Database["public"]["Tables"]["todos"]["Row"] }
+            Args: {
+              todos: Omit<
+                Database["public"]["Tables"]["todos"]["Row"],
+                Database["public"]["Tables"]["todos"]["ComputedFields"]
+              >
+            }
             Returns: {
               decimal: number | null
               id: number
@@ -651,7 +763,7 @@ test('typegen: typescript', async () => {
             }
           }
           function_returning_table: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               id: number
               name: string
@@ -665,7 +777,12 @@ test('typegen: typescript', async () => {
             }[]
           }
           function_using_setof_rows_one: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               details: string | null
               id: number
@@ -679,7 +796,12 @@ test('typegen: typescript', async () => {
             }
           }
           function_using_table_returns: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               details: string | null
               id: number
@@ -693,7 +815,7 @@ test('typegen: typescript', async () => {
             }
           }
           get_composite_type_data: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"][]
             SetofOptions: {
               from: "*"
@@ -720,7 +842,12 @@ test('typegen: typescript', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -737,7 +864,10 @@ test('typegen: typescript', async () => {
               }
             | {
                 Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                  userview_row: Omit<
+                    Database["public"]["Views"]["users_view"]["Row"],
+                    Database["public"]["Views"]["users_view"]["ComputedFields"]
+                  >
                 }
                 Returns: {
                   todo_count: number | null
@@ -753,9 +883,12 @@ test('typegen: typescript', async () => {
                   isSetofReturn: true
                 }
               }
-          get_todo_ids_rows_one: { Args: never; Returns: number[] }
+          get_todo_ids_rows_one: {
+            Args: Record<PropertyKey, never>
+            Returns: number[]
+          }
           get_todos_by_matview: {
-            Args: { "": unknown }
+            Args: { "": Database["public"]["Views"]["todos_matview"]["Row"] }
             Returns: {
               details: string | null
               id: number
@@ -784,7 +917,12 @@ test('typegen: typescript', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -799,7 +937,10 @@ test('typegen: typescript', async () => {
               }
             | {
                 Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                  userview_row: Omit<
+                    Database["public"]["Views"]["users_view"]["Row"],
+                    Database["public"]["Views"]["users_view"]["ComputedFields"]
+                  >
                 }
                 Returns: {
                   details: string | null
@@ -815,7 +956,12 @@ test('typegen: typescript', async () => {
               }
           get_todos_setof_rows:
             | {
-                Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
+                Args: {
+                  todo_row: Omit<
+                    Database["public"]["Tables"]["todos"]["Row"],
+                    Database["public"]["Tables"]["todos"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -829,7 +975,12 @@ test('typegen: typescript', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -843,14 +994,19 @@ test('typegen: typescript', async () => {
                 }
               }
           get_todos_summary_rows_one: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               id: number
               name: string
             }[]
           }
           get_user_audit_setof_single_row: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               created_at: string | null
               id: number
@@ -864,19 +1020,22 @@ test('typegen: typescript', async () => {
               isSetofReturn: true
             }
           }
-          get_user_ids: { Args: never; Returns: number[] }
-          get_user_summary: { Args: never; Returns: Record<string, unknown>[] }
+          get_user_ids: { Args: Record<PropertyKey, never>; Returns: number[] }
+          get_user_summary: {
+            Args: Record<PropertyKey, never>
+            Returns: Record<string, unknown>[]
+          }
           polymorphic_function: { Args: { "": string }; Returns: undefined }
           polymorphic_function_with_different_return: {
             Args: { "": string }
             Returns: string
           }
           polymorphic_function_with_no_params_or_unnamed:
-            | { Args: never; Returns: number }
+            | { Args: Record<PropertyKey, never>; Returns: number }
             | { Args: { "": string }; Returns: string }
           polymorphic_function_with_unnamed_default:
             | {
-                Args: never
+                Args: Record<PropertyKey, never>
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.polymorphic_function_with_unnamed_default(), public.polymorphic_function_with_unnamed_default( => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
@@ -884,7 +1043,7 @@ test('typegen: typescript', async () => {
             | { Args: { ""?: string }; Returns: string }
           polymorphic_function_with_unnamed_default_overload:
             | {
-                Args: never
+                Args: Record<PropertyKey, never>
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.polymorphic_function_with_unnamed_default_overload(), public.polymorphic_function_with_unnamed_default_overload( => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
@@ -903,14 +1062,20 @@ test('typegen: typescript', async () => {
             Returns: number
           }
           postgres_fdw_disconnect: { Args: { "": string }; Returns: boolean }
-          postgres_fdw_disconnect_all: { Args: never; Returns: boolean }
+          postgres_fdw_disconnect_all: {
+            Args: Record<PropertyKey, never>
+            Returns: boolean
+          }
           postgres_fdw_get_connections: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: Record<string, unknown>[]
           }
-          postgres_fdw_handler: { Args: never; Returns: unknown }
+          postgres_fdw_handler: {
+            Args: Record<PropertyKey, never>
+            Returns: unknown
+          }
           postgrest_resolvable_with_override_function:
-            | { Args: never; Returns: undefined }
+            | { Args: Record<PropertyKey, never>; Returns: undefined }
             | { Args: { a: string }; Returns: number }
             | { Args: { b: number }; Returns: string }
             | {
@@ -944,7 +1109,12 @@ test('typegen: typescript', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -958,7 +1128,7 @@ test('typegen: typescript', async () => {
                 }
               }
           postgrest_unresolvable_function:
-            | { Args: never; Returns: undefined }
+            | { Args: Record<PropertyKey, never>; Returns: undefined }
             | {
                 Args: { a: number }
                 Returns: {
@@ -985,7 +1155,10 @@ test('typegen: typescript', async () => {
               isSetofReturn: true
             }
           }
-          test_internal_query: { Args: never; Returns: undefined }
+          test_internal_query: {
+            Args: Record<PropertyKey, never>
+            Returns: undefined
+          }
           test_unnamed_row_composite: {
             Args: { "": Database["public"]["Tables"]["users"]["Row"] }
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
@@ -1229,6 +1402,7 @@ test('typegen w/ one-to-one relationships', async () => {
               id: number
               name: string
             }
+            ComputedFields: never
             Insert: {
               id?: number
               name: string
@@ -1241,6 +1415,7 @@ test('typegen w/ one-to-one relationships', async () => {
           }
           empty: {
             Row: {}
+            ComputedFields: never
             Insert: {}
             Update: {}
             Relationships: []
@@ -1253,6 +1428,7 @@ test('typegen w/ one-to-one relationships', async () => {
               id: number
               days_since_event: number | null
             }
+            ComputedFields: "days_since_event"
             Insert: {
               created_at?: string
               data?: Json | null
@@ -1274,6 +1450,7 @@ test('typegen w/ one-to-one relationships', async () => {
               event_type: string | null
               id: number
             }
+            ComputedFields: never
             Insert: {
               created_at?: string
               data?: Json | null
@@ -1295,6 +1472,7 @@ test('typegen w/ one-to-one relationships', async () => {
               event_type: string | null
               id: number
             }
+            ComputedFields: never
             Insert: {
               created_at?: string
               data?: Json | null
@@ -1315,6 +1493,7 @@ test('typegen w/ one-to-one relationships', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }
+            ComputedFields: never
             Insert: {
               id: number
               name?: string | null
@@ -1332,7 +1511,9 @@ test('typegen w/ one-to-one relationships', async () => {
               duration_optional: string | null
               duration_required: string
               id: number
+              double_duration: string | null
             }
+            ComputedFields: "double_duration"
             Insert: {
               duration_optional?: string | null
               duration_required: string
@@ -1354,6 +1535,7 @@ test('typegen w/ one-to-one relationships', async () => {
               name: string
               status: Database["public"]["Enums"]["meme_status"] | null
             }
+            ComputedFields: never
             Insert: {
               category?: number | null
               created_at: string
@@ -1385,6 +1567,7 @@ test('typegen w/ one-to-one relationships', async () => {
               col1: Database["public"]["Tables"]["user_details"]["Row"] | null
               col2: Database["public"]["Views"]["a_view"]["Row"] | null
             }
+            ComputedFields: never
             Insert: {
               col1?: Database["public"]["Tables"]["user_details"]["Row"] | null
               col2?: Database["public"]["Views"]["a_view"]["Row"] | null
@@ -1400,6 +1583,7 @@ test('typegen w/ one-to-one relationships', async () => {
               name: string | null
               other_id: number
             }
+            ComputedFields: never
             Insert: {
               name?: string | null
               other_id?: number
@@ -1420,6 +1604,18 @@ test('typegen w/ one-to-one relationships', async () => {
               details_is_long: boolean | null
               details_length: number | null
               details_words: string[] | null
+              function_returning_single_row: {
+                decimal: number | null
+                id: number
+                name: string | null
+                status: Database["public"]["Enums"]["user_status"] | null
+                user_uuid: string | null
+              } | null
+              get_todos_setof_rows: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
               test_unnamed_row_scalar: number | null
               test_unnamed_row_setof: {
                 details: string | null
@@ -1427,6 +1623,16 @@ test('typegen w/ one-to-one relationships', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields:
+              | "blurb"
+              | "blurb_varchar"
+              | "details_is_long"
+              | "details_length"
+              | "details_words"
+              | "function_returning_single_row"
+              | "get_todos_setof_rows"
+              | "test_unnamed_row_scalar"
+              | "test_unnamed_row_setof"
             Insert: {
               details?: string | null
               id?: number
@@ -1487,6 +1693,7 @@ test('typegen w/ one-to-one relationships', async () => {
               details: string | null
               user_id: number
             }
+            ComputedFields: never
             Insert: {
               details?: string | null
               user_id: number
@@ -1547,6 +1754,44 @@ test('typegen w/ one-to-one relationships', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
+              function_using_setof_rows_one: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
+              function_using_table_returns: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
+              get_single_user_summary_from_view: {
+                todo_count: number | null
+                todo_details: string[] | null
+                user_id: number | null
+                user_name: string | null
+                user_status: Database["public"]["Enums"]["user_status"] | null
+              } | null
+              get_todos_from_user: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
+              get_todos_setof_rows: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
+              get_user_audit_setof_single_row: {
+                created_at: string | null
+                id: number
+                previous_value: Json | null
+                user_id: number | null
+              } | null
+              postgrest_resolvable_with_override_function: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
               test_unnamed_row_composite:
                 | Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
                 | null
@@ -1556,6 +1801,16 @@ test('typegen w/ one-to-one relationships', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields:
+              | "function_using_setof_rows_one"
+              | "function_using_table_returns"
+              | "get_single_user_summary_from_view"
+              | "get_todos_from_user"
+              | "get_todos_setof_rows"
+              | "get_user_audit_setof_single_row"
+              | "postgrest_resolvable_with_override_function"
+              | "test_unnamed_row_composite"
+              | "test_unnamed_row_setof"
             Insert: {
               decimal?: number | null
               id?: number
@@ -1580,6 +1835,7 @@ test('typegen w/ one-to-one relationships', async () => {
               user_id: number | null
               created_ago: number | null
             }
+            ComputedFields: "created_ago"
             Insert: {
               created_at?: string | null
               id?: number
@@ -1600,6 +1856,7 @@ test('typegen w/ one-to-one relationships', async () => {
             Row: {
               id: number | null
             }
+            ComputedFields: never
             Insert: {
               id?: number | null
             }
@@ -1619,6 +1876,7 @@ test('typegen w/ one-to-one relationships', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields: "get_todos_by_matview"
             Relationships: [
               {
                 foreignKeyName: "todos_user-id_fkey"
@@ -1676,6 +1934,7 @@ test('typegen w/ one-to-one relationships', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields: "blurb_varchar" | "test_unnamed_view_row"
             Insert: {
               details?: string | null
               id?: number | null
@@ -1739,6 +1998,7 @@ test('typegen w/ one-to-one relationships', async () => {
               user_name: string | null
               user_status: Database["public"]["Enums"]["user_status"] | null
             }
+            ComputedFields: never
             Relationships: []
           }
           users_view: {
@@ -1748,7 +2008,22 @@ test('typegen w/ one-to-one relationships', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
+              get_single_user_summary_from_view: {
+                todo_count: number | null
+                todo_details: string[] | null
+                user_id: number | null
+                user_name: string | null
+                user_status: Database["public"]["Enums"]["user_status"] | null
+              } | null
+              get_todos_from_user: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
             }
+            ComputedFields:
+              | "get_single_user_summary_from_view"
+              | "get_todos_from_user"
             Insert: {
               decimal?: number | null
               id?: number | null
@@ -1772,6 +2047,7 @@ test('typegen w/ one-to-one relationships', async () => {
               second_id: number | null
               second_name: string | null
             }
+            ComputedFields: never
             Relationships: []
           }
         }
@@ -1831,12 +2107,15 @@ test('typegen w/ one-to-one relationships', async () => {
           }
           double_duration: {
             Args: {
-              interval_test_row: Database["public"]["Tables"]["interval_test"]["Row"]
+              interval_test_row: Omit<
+                Database["public"]["Tables"]["interval_test"]["Row"],
+                Database["public"]["Tables"]["interval_test"]["ComputedFields"]
+              >
             }
             Returns: string
           }
           function_returning_row: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               decimal: number | null
               id: number
@@ -1852,7 +2131,7 @@ test('typegen w/ one-to-one relationships', async () => {
             }
           }
           function_returning_set_of_rows: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               decimal: number | null
               id: number
@@ -1868,7 +2147,12 @@ test('typegen w/ one-to-one relationships', async () => {
             }
           }
           function_returning_single_row: {
-            Args: { todos: Database["public"]["Tables"]["todos"]["Row"] }
+            Args: {
+              todos: Omit<
+                Database["public"]["Tables"]["todos"]["Row"],
+                Database["public"]["Tables"]["todos"]["ComputedFields"]
+              >
+            }
             Returns: {
               decimal: number | null
               id: number
@@ -1884,7 +2168,7 @@ test('typegen w/ one-to-one relationships', async () => {
             }
           }
           function_returning_table: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               id: number
               name: string
@@ -1898,7 +2182,12 @@ test('typegen w/ one-to-one relationships', async () => {
             }[]
           }
           function_using_setof_rows_one: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               details: string | null
               id: number
@@ -1912,7 +2201,12 @@ test('typegen w/ one-to-one relationships', async () => {
             }
           }
           function_using_table_returns: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               details: string | null
               id: number
@@ -1926,7 +2220,7 @@ test('typegen w/ one-to-one relationships', async () => {
             }
           }
           get_composite_type_data: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"][]
             SetofOptions: {
               from: "*"
@@ -1953,7 +2247,12 @@ test('typegen w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -1970,7 +2269,10 @@ test('typegen w/ one-to-one relationships', async () => {
               }
             | {
                 Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                  userview_row: Omit<
+                    Database["public"]["Views"]["users_view"]["Row"],
+                    Database["public"]["Views"]["users_view"]["ComputedFields"]
+                  >
                 }
                 Returns: {
                   todo_count: number | null
@@ -1986,9 +2288,12 @@ test('typegen w/ one-to-one relationships', async () => {
                   isSetofReturn: true
                 }
               }
-          get_todo_ids_rows_one: { Args: never; Returns: number[] }
+          get_todo_ids_rows_one: {
+            Args: Record<PropertyKey, never>
+            Returns: number[]
+          }
           get_todos_by_matview: {
-            Args: { "": unknown }
+            Args: { "": Database["public"]["Views"]["todos_matview"]["Row"] }
             Returns: {
               details: string | null
               id: number
@@ -2017,7 +2322,12 @@ test('typegen w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -2032,7 +2342,10 @@ test('typegen w/ one-to-one relationships', async () => {
               }
             | {
                 Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                  userview_row: Omit<
+                    Database["public"]["Views"]["users_view"]["Row"],
+                    Database["public"]["Views"]["users_view"]["ComputedFields"]
+                  >
                 }
                 Returns: {
                   details: string | null
@@ -2048,7 +2361,12 @@ test('typegen w/ one-to-one relationships', async () => {
               }
           get_todos_setof_rows:
             | {
-                Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
+                Args: {
+                  todo_row: Omit<
+                    Database["public"]["Tables"]["todos"]["Row"],
+                    Database["public"]["Tables"]["todos"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -2062,7 +2380,12 @@ test('typegen w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -2076,14 +2399,19 @@ test('typegen w/ one-to-one relationships', async () => {
                 }
               }
           get_todos_summary_rows_one: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               id: number
               name: string
             }[]
           }
           get_user_audit_setof_single_row: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               created_at: string | null
               id: number
@@ -2097,19 +2425,22 @@ test('typegen w/ one-to-one relationships', async () => {
               isSetofReturn: true
             }
           }
-          get_user_ids: { Args: never; Returns: number[] }
-          get_user_summary: { Args: never; Returns: Record<string, unknown>[] }
+          get_user_ids: { Args: Record<PropertyKey, never>; Returns: number[] }
+          get_user_summary: {
+            Args: Record<PropertyKey, never>
+            Returns: Record<string, unknown>[]
+          }
           polymorphic_function: { Args: { "": string }; Returns: undefined }
           polymorphic_function_with_different_return: {
             Args: { "": string }
             Returns: string
           }
           polymorphic_function_with_no_params_or_unnamed:
-            | { Args: never; Returns: number }
+            | { Args: Record<PropertyKey, never>; Returns: number }
             | { Args: { "": string }; Returns: string }
           polymorphic_function_with_unnamed_default:
             | {
-                Args: never
+                Args: Record<PropertyKey, never>
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.polymorphic_function_with_unnamed_default(), public.polymorphic_function_with_unnamed_default( => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
@@ -2117,7 +2448,7 @@ test('typegen w/ one-to-one relationships', async () => {
             | { Args: { ""?: string }; Returns: string }
           polymorphic_function_with_unnamed_default_overload:
             | {
-                Args: never
+                Args: Record<PropertyKey, never>
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.polymorphic_function_with_unnamed_default_overload(), public.polymorphic_function_with_unnamed_default_overload( => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
@@ -2136,14 +2467,20 @@ test('typegen w/ one-to-one relationships', async () => {
             Returns: number
           }
           postgres_fdw_disconnect: { Args: { "": string }; Returns: boolean }
-          postgres_fdw_disconnect_all: { Args: never; Returns: boolean }
+          postgres_fdw_disconnect_all: {
+            Args: Record<PropertyKey, never>
+            Returns: boolean
+          }
           postgres_fdw_get_connections: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: Record<string, unknown>[]
           }
-          postgres_fdw_handler: { Args: never; Returns: unknown }
+          postgres_fdw_handler: {
+            Args: Record<PropertyKey, never>
+            Returns: unknown
+          }
           postgrest_resolvable_with_override_function:
-            | { Args: never; Returns: undefined }
+            | { Args: Record<PropertyKey, never>; Returns: undefined }
             | { Args: { a: string }; Returns: number }
             | { Args: { b: number }; Returns: string }
             | {
@@ -2177,7 +2514,12 @@ test('typegen w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -2191,7 +2533,7 @@ test('typegen w/ one-to-one relationships', async () => {
                 }
               }
           postgrest_unresolvable_function:
-            | { Args: never; Returns: undefined }
+            | { Args: Record<PropertyKey, never>; Returns: undefined }
             | {
                 Args: { a: number }
                 Returns: {
@@ -2218,7 +2560,10 @@ test('typegen w/ one-to-one relationships', async () => {
               isSetofReturn: true
             }
           }
-          test_internal_query: { Args: never; Returns: undefined }
+          test_internal_query: {
+            Args: Record<PropertyKey, never>
+            Returns: undefined
+          }
           test_unnamed_row_composite: {
             Args: { "": Database["public"]["Tables"]["users"]["Row"] }
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
@@ -2462,6 +2807,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id: number
               name: string
             }
+            ComputedFields: never
             Insert: {
               id?: number
               name: string
@@ -2474,6 +2820,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
           empty: {
             Row: {}
+            ComputedFields: never
             Insert: {}
             Update: {}
             Relationships: []
@@ -2486,6 +2833,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               id: number
               days_since_event: number | null
             }
+            ComputedFields: "days_since_event"
             Insert: {
               created_at?: string
               data?: Json | null
@@ -2507,6 +2855,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               event_type: string | null
               id: number
             }
+            ComputedFields: never
             Insert: {
               created_at?: string
               data?: Json | null
@@ -2528,6 +2877,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               event_type: string | null
               id: number
             }
+            ComputedFields: never
             Insert: {
               created_at?: string
               data?: Json | null
@@ -2548,6 +2898,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }
+            ComputedFields: never
             Insert: {
               id: number
               name?: string | null
@@ -2565,7 +2916,9 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               duration_optional: string | null
               duration_required: string
               id: number
+              double_duration: string | null
             }
+            ComputedFields: "double_duration"
             Insert: {
               duration_optional?: string | null
               duration_required: string
@@ -2587,6 +2940,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               name: string
               status: Database["public"]["Enums"]["meme_status"] | null
             }
+            ComputedFields: never
             Insert: {
               category?: number | null
               created_at: string
@@ -2618,6 +2972,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               col1: Database["public"]["Tables"]["user_details"]["Row"] | null
               col2: Database["public"]["Views"]["a_view"]["Row"] | null
             }
+            ComputedFields: never
             Insert: {
               col1?: Database["public"]["Tables"]["user_details"]["Row"] | null
               col2?: Database["public"]["Views"]["a_view"]["Row"] | null
@@ -2633,6 +2988,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               name: string | null
               other_id: number
             }
+            ComputedFields: never
             Insert: {
               name?: string | null
               other_id?: number
@@ -2653,6 +3009,18 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               details_is_long: boolean | null
               details_length: number | null
               details_words: string[] | null
+              function_returning_single_row: {
+                decimal: number | null
+                id: number
+                name: string | null
+                status: Database["public"]["Enums"]["user_status"] | null
+                user_uuid: string | null
+              } | null
+              get_todos_setof_rows: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
               test_unnamed_row_scalar: number | null
               test_unnamed_row_setof: {
                 details: string | null
@@ -2660,6 +3028,16 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields:
+              | "blurb"
+              | "blurb_varchar"
+              | "details_is_long"
+              | "details_length"
+              | "details_words"
+              | "function_returning_single_row"
+              | "get_todos_setof_rows"
+              | "test_unnamed_row_scalar"
+              | "test_unnamed_row_setof"
             Insert: {
               details?: string | null
               id?: number
@@ -2720,6 +3098,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               details: string | null
               user_id: number
             }
+            ComputedFields: never
             Insert: {
               details?: string | null
               user_id: number
@@ -2780,6 +3159,44 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
+              function_using_setof_rows_one: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
+              function_using_table_returns: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
+              get_single_user_summary_from_view: {
+                todo_count: number | null
+                todo_details: string[] | null
+                user_id: number | null
+                user_name: string | null
+                user_status: Database["public"]["Enums"]["user_status"] | null
+              } | null
+              get_todos_from_user: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
+              get_todos_setof_rows: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
+              get_user_audit_setof_single_row: {
+                created_at: string | null
+                id: number
+                previous_value: Json | null
+                user_id: number | null
+              } | null
+              postgrest_resolvable_with_override_function: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
               test_unnamed_row_composite:
                 | Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
                 | null
@@ -2789,6 +3206,16 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields:
+              | "function_using_setof_rows_one"
+              | "function_using_table_returns"
+              | "get_single_user_summary_from_view"
+              | "get_todos_from_user"
+              | "get_todos_setof_rows"
+              | "get_user_audit_setof_single_row"
+              | "postgrest_resolvable_with_override_function"
+              | "test_unnamed_row_composite"
+              | "test_unnamed_row_setof"
             Insert: {
               decimal?: number | null
               id?: number
@@ -2813,6 +3240,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               user_id: number | null
               created_ago: number | null
             }
+            ComputedFields: "created_ago"
             Insert: {
               created_at?: string | null
               id?: number
@@ -2833,6 +3261,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Row: {
               id: number | null
             }
+            ComputedFields: never
             Insert: {
               id?: number | null
             }
@@ -2852,6 +3281,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields: "get_todos_by_matview"
             Relationships: [
               {
                 foreignKeyName: "todos_user-id_fkey"
@@ -2909,6 +3339,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields: "blurb_varchar" | "test_unnamed_view_row"
             Insert: {
               details?: string | null
               id?: number | null
@@ -2972,6 +3403,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               user_name: string | null
               user_status: Database["public"]["Enums"]["user_status"] | null
             }
+            ComputedFields: never
             Relationships: []
           }
           users_view: {
@@ -2981,7 +3413,22 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
+              get_single_user_summary_from_view: {
+                todo_count: number | null
+                todo_details: string[] | null
+                user_id: number | null
+                user_name: string | null
+                user_status: Database["public"]["Enums"]["user_status"] | null
+              } | null
+              get_todos_from_user: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
             }
+            ComputedFields:
+              | "get_single_user_summary_from_view"
+              | "get_todos_from_user"
             Insert: {
               decimal?: number | null
               id?: number | null
@@ -3005,6 +3452,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               second_id: number | null
               second_name: string | null
             }
+            ComputedFields: never
             Relationships: []
           }
         }
@@ -3064,12 +3512,15 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
           }
           double_duration: {
             Args: {
-              interval_test_row: Database["public"]["Tables"]["interval_test"]["Row"]
+              interval_test_row: Omit<
+                Database["public"]["Tables"]["interval_test"]["Row"],
+                Database["public"]["Tables"]["interval_test"]["ComputedFields"]
+              >
             }
             Returns: string
           }
           function_returning_row: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               decimal: number | null
               id: number
@@ -3085,7 +3536,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             }
           }
           function_returning_set_of_rows: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               decimal: number | null
               id: number
@@ -3101,7 +3552,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             }
           }
           function_returning_single_row: {
-            Args: { todos: Database["public"]["Tables"]["todos"]["Row"] }
+            Args: {
+              todos: Omit<
+                Database["public"]["Tables"]["todos"]["Row"],
+                Database["public"]["Tables"]["todos"]["ComputedFields"]
+              >
+            }
             Returns: {
               decimal: number | null
               id: number
@@ -3117,7 +3573,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             }
           }
           function_returning_table: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               id: number
               name: string
@@ -3131,7 +3587,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             }[]
           }
           function_using_setof_rows_one: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               details: string | null
               id: number
@@ -3145,7 +3606,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             }
           }
           function_using_table_returns: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               details: string | null
               id: number
@@ -3159,7 +3625,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             }
           }
           get_composite_type_data: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"][]
             SetofOptions: {
               from: "*"
@@ -3186,7 +3652,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -3203,7 +3674,10 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               }
             | {
                 Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                  userview_row: Omit<
+                    Database["public"]["Views"]["users_view"]["Row"],
+                    Database["public"]["Views"]["users_view"]["ComputedFields"]
+                  >
                 }
                 Returns: {
                   todo_count: number | null
@@ -3219,9 +3693,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                   isSetofReturn: true
                 }
               }
-          get_todo_ids_rows_one: { Args: never; Returns: number[] }
+          get_todo_ids_rows_one: {
+            Args: Record<PropertyKey, never>
+            Returns: number[]
+          }
           get_todos_by_matview: {
-            Args: { "": unknown }
+            Args: { "": Database["public"]["Views"]["todos_matview"]["Row"] }
             Returns: {
               details: string | null
               id: number
@@ -3250,7 +3727,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -3265,7 +3747,10 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               }
             | {
                 Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                  userview_row: Omit<
+                    Database["public"]["Views"]["users_view"]["Row"],
+                    Database["public"]["Views"]["users_view"]["ComputedFields"]
+                  >
                 }
                 Returns: {
                   details: string | null
@@ -3281,7 +3766,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               }
           get_todos_setof_rows:
             | {
-                Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
+                Args: {
+                  todo_row: Omit<
+                    Database["public"]["Tables"]["todos"]["Row"],
+                    Database["public"]["Tables"]["todos"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -3295,7 +3785,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -3309,14 +3804,19 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 }
               }
           get_todos_summary_rows_one: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               id: number
               name: string
             }[]
           }
           get_user_audit_setof_single_row: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               created_at: string | null
               id: number
@@ -3330,19 +3830,22 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               isSetofReturn: true
             }
           }
-          get_user_ids: { Args: never; Returns: number[] }
-          get_user_summary: { Args: never; Returns: Record<string, unknown>[] }
+          get_user_ids: { Args: Record<PropertyKey, never>; Returns: number[] }
+          get_user_summary: {
+            Args: Record<PropertyKey, never>
+            Returns: Record<string, unknown>[]
+          }
           polymorphic_function: { Args: { "": string }; Returns: undefined }
           polymorphic_function_with_different_return: {
             Args: { "": string }
             Returns: string
           }
           polymorphic_function_with_no_params_or_unnamed:
-            | { Args: never; Returns: number }
+            | { Args: Record<PropertyKey, never>; Returns: number }
             | { Args: { "": string }; Returns: string }
           polymorphic_function_with_unnamed_default:
             | {
-                Args: never
+                Args: Record<PropertyKey, never>
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.polymorphic_function_with_unnamed_default(), public.polymorphic_function_with_unnamed_default( => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
@@ -3350,7 +3853,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             | { Args: { ""?: string }; Returns: string }
           polymorphic_function_with_unnamed_default_overload:
             | {
-                Args: never
+                Args: Record<PropertyKey, never>
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.polymorphic_function_with_unnamed_default_overload(), public.polymorphic_function_with_unnamed_default_overload( => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
@@ -3369,14 +3872,20 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
             Returns: number
           }
           postgres_fdw_disconnect: { Args: { "": string }; Returns: boolean }
-          postgres_fdw_disconnect_all: { Args: never; Returns: boolean }
+          postgres_fdw_disconnect_all: {
+            Args: Record<PropertyKey, never>
+            Returns: boolean
+          }
           postgres_fdw_get_connections: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: Record<string, unknown>[]
           }
-          postgres_fdw_handler: { Args: never; Returns: unknown }
+          postgres_fdw_handler: {
+            Args: Record<PropertyKey, never>
+            Returns: unknown
+          }
           postgrest_resolvable_with_override_function:
-            | { Args: never; Returns: undefined }
+            | { Args: Record<PropertyKey, never>; Returns: undefined }
             | { Args: { a: string }; Returns: number }
             | { Args: { b: number }; Returns: string }
             | {
@@ -3410,7 +3919,12 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -3424,7 +3938,7 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
                 }
               }
           postgrest_unresolvable_function:
-            | { Args: never; Returns: undefined }
+            | { Args: Record<PropertyKey, never>; Returns: undefined }
             | {
                 Args: { a: number }
                 Returns: {
@@ -3451,7 +3965,10 @@ test('typegen: typescript w/ one-to-one relationships', async () => {
               isSetofReturn: true
             }
           }
-          test_internal_query: { Args: never; Returns: undefined }
+          test_internal_query: {
+            Args: Record<PropertyKey, never>
+            Returns: undefined
+          }
           test_unnamed_row_composite: {
             Args: { "": Database["public"]["Tables"]["users"]["Row"] }
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
@@ -3700,6 +4217,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               id: number
               name: string
             }
+            ComputedFields: never
             Insert: {
               id?: number
               name: string
@@ -3712,6 +4230,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
           empty: {
             Row: {}
+            ComputedFields: never
             Insert: {}
             Update: {}
             Relationships: []
@@ -3724,6 +4243,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               id: number
               days_since_event: number | null
             }
+            ComputedFields: "days_since_event"
             Insert: {
               created_at?: string
               data?: Json | null
@@ -3745,6 +4265,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               event_type: string | null
               id: number
             }
+            ComputedFields: never
             Insert: {
               created_at?: string
               data?: Json | null
@@ -3766,6 +4287,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               event_type: string | null
               id: number
             }
+            ComputedFields: never
             Insert: {
               created_at?: string
               data?: Json | null
@@ -3786,6 +4308,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
             }
+            ComputedFields: never
             Insert: {
               id: number
               name?: string | null
@@ -3803,7 +4326,9 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               duration_optional: string | null
               duration_required: string
               id: number
+              double_duration: string | null
             }
+            ComputedFields: "double_duration"
             Insert: {
               duration_optional?: string | null
               duration_required: string
@@ -3825,6 +4350,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               name: string
               status: Database["public"]["Enums"]["meme_status"] | null
             }
+            ComputedFields: never
             Insert: {
               category?: number | null
               created_at: string
@@ -3856,6 +4382,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               col1: Database["public"]["Tables"]["user_details"]["Row"] | null
               col2: Database["public"]["Views"]["a_view"]["Row"] | null
             }
+            ComputedFields: never
             Insert: {
               col1?: Database["public"]["Tables"]["user_details"]["Row"] | null
               col2?: Database["public"]["Views"]["a_view"]["Row"] | null
@@ -3871,6 +4398,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               name: string | null
               other_id: number
             }
+            ComputedFields: never
             Insert: {
               name?: string | null
               other_id?: number
@@ -3891,6 +4419,18 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               details_is_long: boolean | null
               details_length: number | null
               details_words: string[] | null
+              function_returning_single_row: {
+                decimal: number | null
+                id: number
+                name: string | null
+                status: Database["public"]["Enums"]["user_status"] | null
+                user_uuid: string | null
+              } | null
+              get_todos_setof_rows: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
               test_unnamed_row_scalar: number | null
               test_unnamed_row_setof: {
                 details: string | null
@@ -3898,6 +4438,16 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields:
+              | "blurb"
+              | "blurb_varchar"
+              | "details_is_long"
+              | "details_length"
+              | "details_words"
+              | "function_returning_single_row"
+              | "get_todos_setof_rows"
+              | "test_unnamed_row_scalar"
+              | "test_unnamed_row_setof"
             Insert: {
               details?: string | null
               id?: number
@@ -3958,6 +4508,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               details: string | null
               user_id: number
             }
+            ComputedFields: never
             Insert: {
               details?: string | null
               user_id: number
@@ -4018,6 +4569,44 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
+              function_using_setof_rows_one: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
+              function_using_table_returns: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
+              get_single_user_summary_from_view: {
+                todo_count: number | null
+                todo_details: string[] | null
+                user_id: number | null
+                user_name: string | null
+                user_status: Database["public"]["Enums"]["user_status"] | null
+              } | null
+              get_todos_from_user: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
+              get_todos_setof_rows: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
+              get_user_audit_setof_single_row: {
+                created_at: string | null
+                id: number
+                previous_value: Json | null
+                user_id: number | null
+              } | null
+              postgrest_resolvable_with_override_function: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
               test_unnamed_row_composite:
                 | Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
                 | null
@@ -4027,6 +4616,16 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields:
+              | "function_using_setof_rows_one"
+              | "function_using_table_returns"
+              | "get_single_user_summary_from_view"
+              | "get_todos_from_user"
+              | "get_todos_setof_rows"
+              | "get_user_audit_setof_single_row"
+              | "postgrest_resolvable_with_override_function"
+              | "test_unnamed_row_composite"
+              | "test_unnamed_row_setof"
             Insert: {
               decimal?: number | null
               id?: number
@@ -4051,6 +4650,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               user_id: number | null
               created_ago: number | null
             }
+            ComputedFields: "created_ago"
             Insert: {
               created_at?: string | null
               id?: number
@@ -4071,6 +4671,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Row: {
               id: number | null
             }
+            ComputedFields: never
             Insert: {
               id?: number | null
             }
@@ -4090,6 +4691,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields: "get_todos_by_matview"
             Relationships: [
               {
                 foreignKeyName: "todos_user-id_fkey"
@@ -4147,6 +4749,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 "user-id": number
               } | null
             }
+            ComputedFields: "blurb_varchar" | "test_unnamed_view_row"
             Insert: {
               details?: string | null
               id?: number | null
@@ -4210,6 +4813,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               user_name: string | null
               user_status: Database["public"]["Enums"]["user_status"] | null
             }
+            ComputedFields: never
             Relationships: []
           }
           users_view: {
@@ -4219,7 +4823,22 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               name: string | null
               status: Database["public"]["Enums"]["user_status"] | null
               user_uuid: string | null
+              get_single_user_summary_from_view: {
+                todo_count: number | null
+                todo_details: string[] | null
+                user_id: number | null
+                user_name: string | null
+                user_status: Database["public"]["Enums"]["user_status"] | null
+              } | null
+              get_todos_from_user: {
+                details: string | null
+                id: number
+                "user-id": number
+              } | null
             }
+            ComputedFields:
+              | "get_single_user_summary_from_view"
+              | "get_todos_from_user"
             Insert: {
               decimal?: number | null
               id?: number | null
@@ -4243,6 +4862,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               second_id: number | null
               second_name: string | null
             }
+            ComputedFields: never
             Relationships: []
           }
         }
@@ -4302,12 +4922,15 @@ test('typegen: typescript w/ postgrestVersion', async () => {
           }
           double_duration: {
             Args: {
-              interval_test_row: Database["public"]["Tables"]["interval_test"]["Row"]
+              interval_test_row: Omit<
+                Database["public"]["Tables"]["interval_test"]["Row"],
+                Database["public"]["Tables"]["interval_test"]["ComputedFields"]
+              >
             }
             Returns: string
           }
           function_returning_row: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               decimal: number | null
               id: number
@@ -4323,7 +4946,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             }
           }
           function_returning_set_of_rows: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               decimal: number | null
               id: number
@@ -4339,7 +4962,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             }
           }
           function_returning_single_row: {
-            Args: { todos: Database["public"]["Tables"]["todos"]["Row"] }
+            Args: {
+              todos: Omit<
+                Database["public"]["Tables"]["todos"]["Row"],
+                Database["public"]["Tables"]["todos"]["ComputedFields"]
+              >
+            }
             Returns: {
               decimal: number | null
               id: number
@@ -4355,7 +4983,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             }
           }
           function_returning_table: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               id: number
               name: string
@@ -4369,7 +4997,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             }[]
           }
           function_using_setof_rows_one: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               details: string | null
               id: number
@@ -4383,7 +5016,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             }
           }
           function_using_table_returns: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               details: string | null
               id: number
@@ -4397,7 +5035,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             }
           }
           get_composite_type_data: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"][]
             SetofOptions: {
               from: "*"
@@ -4424,7 +5062,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   todo_count: number | null
                   todo_details: string[] | null
@@ -4441,7 +5084,10 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               }
             | {
                 Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                  userview_row: Omit<
+                    Database["public"]["Views"]["users_view"]["Row"],
+                    Database["public"]["Views"]["users_view"]["ComputedFields"]
+                  >
                 }
                 Returns: {
                   todo_count: number | null
@@ -4457,9 +5103,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                   isSetofReturn: true
                 }
               }
-          get_todo_ids_rows_one: { Args: never; Returns: number[] }
+          get_todo_ids_rows_one: {
+            Args: Record<PropertyKey, never>
+            Returns: number[]
+          }
           get_todos_by_matview: {
-            Args: { "": unknown }
+            Args: { "": Database["public"]["Views"]["todos_matview"]["Row"] }
             Returns: {
               details: string | null
               id: number
@@ -4488,7 +5137,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -4503,7 +5157,10 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               }
             | {
                 Args: {
-                  userview_row: Database["public"]["Views"]["users_view"]["Row"]
+                  userview_row: Omit<
+                    Database["public"]["Views"]["users_view"]["Row"],
+                    Database["public"]["Views"]["users_view"]["ComputedFields"]
+                  >
                 }
                 Returns: {
                   details: string | null
@@ -4519,7 +5176,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               }
           get_todos_setof_rows:
             | {
-                Args: { todo_row: Database["public"]["Tables"]["todos"]["Row"] }
+                Args: {
+                  todo_row: Omit<
+                    Database["public"]["Tables"]["todos"]["Row"],
+                    Database["public"]["Tables"]["todos"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -4533,7 +5195,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -4547,14 +5214,19 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 }
               }
           get_todos_summary_rows_one: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: {
               id: number
               name: string
             }[]
           }
           get_user_audit_setof_single_row: {
-            Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+            Args: {
+              user_row: Omit<
+                Database["public"]["Tables"]["users"]["Row"],
+                Database["public"]["Tables"]["users"]["ComputedFields"]
+              >
+            }
             Returns: {
               created_at: string | null
               id: number
@@ -4568,19 +5240,22 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               isSetofReturn: true
             }
           }
-          get_user_ids: { Args: never; Returns: number[] }
-          get_user_summary: { Args: never; Returns: Record<string, unknown>[] }
+          get_user_ids: { Args: Record<PropertyKey, never>; Returns: number[] }
+          get_user_summary: {
+            Args: Record<PropertyKey, never>
+            Returns: Record<string, unknown>[]
+          }
           polymorphic_function: { Args: { "": string }; Returns: undefined }
           polymorphic_function_with_different_return: {
             Args: { "": string }
             Returns: string
           }
           polymorphic_function_with_no_params_or_unnamed:
-            | { Args: never; Returns: number }
+            | { Args: Record<PropertyKey, never>; Returns: number }
             | { Args: { "": string }; Returns: string }
           polymorphic_function_with_unnamed_default:
             | {
-                Args: never
+                Args: Record<PropertyKey, never>
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.polymorphic_function_with_unnamed_default(), public.polymorphic_function_with_unnamed_default( => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
@@ -4588,7 +5263,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             | { Args: { ""?: string }; Returns: string }
           polymorphic_function_with_unnamed_default_overload:
             | {
-                Args: never
+                Args: Record<PropertyKey, never>
                 Returns: {
                   error: true
                 } & "Could not choose the best candidate function between: public.polymorphic_function_with_unnamed_default_overload(), public.polymorphic_function_with_unnamed_default_overload( => text). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
@@ -4607,14 +5282,20 @@ test('typegen: typescript w/ postgrestVersion', async () => {
             Returns: number
           }
           postgres_fdw_disconnect: { Args: { "": string }; Returns: boolean }
-          postgres_fdw_disconnect_all: { Args: never; Returns: boolean }
+          postgres_fdw_disconnect_all: {
+            Args: Record<PropertyKey, never>
+            Returns: boolean
+          }
           postgres_fdw_get_connections: {
-            Args: never
+            Args: Record<PropertyKey, never>
             Returns: Record<string, unknown>[]
           }
-          postgres_fdw_handler: { Args: never; Returns: unknown }
+          postgres_fdw_handler: {
+            Args: Record<PropertyKey, never>
+            Returns: unknown
+          }
           postgrest_resolvable_with_override_function:
-            | { Args: never; Returns: undefined }
+            | { Args: Record<PropertyKey, never>; Returns: undefined }
             | { Args: { a: string }; Returns: number }
             | { Args: { b: number }; Returns: string }
             | {
@@ -4648,7 +5329,12 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 }
               }
             | {
-                Args: { user_row: Database["public"]["Tables"]["users"]["Row"] }
+                Args: {
+                  user_row: Omit<
+                    Database["public"]["Tables"]["users"]["Row"],
+                    Database["public"]["Tables"]["users"]["ComputedFields"]
+                  >
+                }
                 Returns: {
                   details: string | null
                   id: number
@@ -4662,7 +5348,7 @@ test('typegen: typescript w/ postgrestVersion', async () => {
                 }
               }
           postgrest_unresolvable_function:
-            | { Args: never; Returns: undefined }
+            | { Args: Record<PropertyKey, never>; Returns: undefined }
             | {
                 Args: { a: number }
                 Returns: {
@@ -4689,7 +5375,10 @@ test('typegen: typescript w/ postgrestVersion', async () => {
               isSetofReturn: true
             }
           }
-          test_internal_query: { Args: never; Returns: undefined }
+          test_internal_query: {
+            Args: Record<PropertyKey, never>
+            Returns: undefined
+          }
           test_unnamed_row_composite: {
             Args: { "": Database["public"]["Tables"]["users"]["Row"] }
             Returns: Database["public"]["CompositeTypes"]["composite_type_with_array_attribute"]
@@ -5588,7 +6277,8 @@ test('typegen: go', async () => {
 
     type PublicCompositeTypeWithRecordAttribute struct {
       Todo interface{} \`json:"todo"\`
-    }"
+    }
+    "
   `)
 })
 
@@ -6115,7 +6805,8 @@ test('typegen: swift', async () => {
           case Todo = "todo"
         }
       }
-    }"
+    }
+    "
   `)
 })
 
@@ -6646,8 +7337,56 @@ test('typegen: swift w/ public access control', async () => {
           case Todo = "todo"
         }
       }
-    }"
+    }
+    "
   `)
+})
+
+test('typegen: swift w/ private and package access control', async () => {
+  for (const accessControl of ['private', 'package']) {
+    const { statusCode, body } = await app.inject({
+      method: 'GET',
+      path: '/generators/swift',
+      query: { access_control: accessControl },
+    })
+    expect(statusCode).toBe(200)
+    expect(body).toContain(`${accessControl} enum PublicSchema {`)
+    expect(body).toContain(`${accessControl} struct CategorySelect: Codable, Hashable, Sendable {`)
+  }
+})
+
+test('typegen: swift rejects an unknown access control with 400', async () => {
+  const { statusCode, json } = await app.inject({
+    method: 'GET',
+    path: '/generators/swift',
+    query: { access_control: 'fileprivate' },
+  })
+  expect(statusCode).toBe(400)
+  expect(json()).toEqual({
+    error:
+      'Query parameter "access_control" is invalid: Option "swift-access-control" of language "swift" expects one of "internal", "public", "private", "package", got "fileprivate".',
+  })
+})
+
+test('typegen: swift treats an empty access control as the default', async () => {
+  const { statusCode, body } = await app.inject({
+    method: 'GET',
+    path: '/generators/swift',
+    query: { access_control: '' },
+  })
+  expect(statusCode).toBe(200)
+  expect(body).toContain('internal enum PublicSchema {')
+})
+
+test('typegen: a route exists for every in-process registry language and no other', async () => {
+  expect(languages.some((language) => !language.inProcess)).toBe(true)
+  for (const language of languages) {
+    const { statusCode } = await app.inject({
+      method: 'GET',
+      path: `/generators/${language.name}`,
+    })
+    expect(statusCode, language.name).toBe(language.inProcess ? 200 : 404)
+  }
 })
 
 test('typegen: python', async () => {
@@ -6666,13 +7405,12 @@ test('typegen: python', async () => {
         Any,
         List,
         Literal,
-        NotRequired,
         Optional,
-        TypeAlias,
         TypedDict,
     )
+    from typing_extensions import NotRequired, TypeAlias
 
-    from pydantic import BaseModel, Field, Json
+    from pydantic import BaseModel, Field, JsonValue
 
     PublicMemeStatus: TypeAlias = Literal["new", "old", "retired"]
 
@@ -6701,55 +7439,55 @@ test('typegen: python', async () => {
 
     class PublicEvents(BaseModel):
         created_at: datetime.datetime = Field(alias="created_at")
-        data: Optional[Json[Any]] = Field(alias="data")
+        data: Optional[JsonValue] = Field(alias="data")
         event_type: Optional[str] = Field(alias="event_type")
         id: int = Field(alias="id")
 
     class PublicEventsInsert(TypedDict):
         created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
-        data: NotRequired[Annotated[Optional[Json[Any]], Field(alias="data")]]
+        data: NotRequired[Annotated[Optional[JsonValue], Field(alias="data")]]
         event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
     class PublicEventsUpdate(TypedDict):
         created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
-        data: NotRequired[Annotated[Optional[Json[Any]], Field(alias="data")]]
+        data: NotRequired[Annotated[Optional[JsonValue], Field(alias="data")]]
         event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
     class PublicEvents2024(BaseModel):
         created_at: datetime.datetime = Field(alias="created_at")
-        data: Optional[Json[Any]] = Field(alias="data")
+        data: Optional[JsonValue] = Field(alias="data")
         event_type: Optional[str] = Field(alias="event_type")
         id: int = Field(alias="id")
 
     class PublicEvents2024Insert(TypedDict):
         created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
-        data: NotRequired[Annotated[Optional[Json[Any]], Field(alias="data")]]
+        data: NotRequired[Annotated[Optional[JsonValue], Field(alias="data")]]
         event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
         id: Annotated[int, Field(alias="id")]
 
     class PublicEvents2024Update(TypedDict):
         created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
-        data: NotRequired[Annotated[Optional[Json[Any]], Field(alias="data")]]
+        data: NotRequired[Annotated[Optional[JsonValue], Field(alias="data")]]
         event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
     class PublicEvents2025(BaseModel):
         created_at: datetime.datetime = Field(alias="created_at")
-        data: Optional[Json[Any]] = Field(alias="data")
+        data: Optional[JsonValue] = Field(alias="data")
         event_type: Optional[str] = Field(alias="event_type")
         id: int = Field(alias="id")
 
     class PublicEvents2025Insert(TypedDict):
         created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
-        data: NotRequired[Annotated[Optional[Json[Any]], Field(alias="data")]]
+        data: NotRequired[Annotated[Optional[JsonValue], Field(alias="data")]]
         event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
         id: Annotated[int, Field(alias="id")]
 
     class PublicEvents2025Update(TypedDict):
         created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
-        data: NotRequired[Annotated[Optional[Json[Any]], Field(alias="data")]]
+        data: NotRequired[Annotated[Optional[JsonValue], Field(alias="data")]]
         event_type: NotRequired[Annotated[Optional[str], Field(alias="event_type")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
 
@@ -6772,7 +7510,7 @@ test('typegen: python', async () => {
         category: Optional[int] = Field(alias="category")
         created_at: datetime.datetime = Field(alias="created_at")
         id: int = Field(alias="id")
-        metadata: Optional[Json[Any]] = Field(alias="metadata")
+        metadata: Optional[JsonValue] = Field(alias="metadata")
         name: str = Field(alias="name")
         status: Optional[PublicMemeStatus] = Field(alias="status")
 
@@ -6780,7 +7518,7 @@ test('typegen: python', async () => {
         category: NotRequired[Annotated[Optional[int], Field(alias="category")]]
         created_at: Annotated[datetime.datetime, Field(alias="created_at")]
         id: NotRequired[Annotated[int, Field(alias="id")]]
-        metadata: NotRequired[Annotated[Optional[Json[Any]], Field(alias="metadata")]]
+        metadata: NotRequired[Annotated[Optional[JsonValue], Field(alias="metadata")]]
         name: Annotated[str, Field(alias="name")]
         status: NotRequired[Annotated[Optional[PublicMemeStatus], Field(alias="status")]]
 
@@ -6788,7 +7526,7 @@ test('typegen: python', async () => {
         category: NotRequired[Annotated[Optional[int], Field(alias="category")]]
         created_at: NotRequired[Annotated[datetime.datetime, Field(alias="created_at")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
-        metadata: NotRequired[Annotated[Optional[Json[Any]], Field(alias="metadata")]]
+        metadata: NotRequired[Annotated[Optional[JsonValue], Field(alias="metadata")]]
         name: NotRequired[Annotated[str, Field(alias="name")]]
         status: NotRequired[Annotated[Optional[PublicMemeStatus], Field(alias="status")]]
 
@@ -6867,19 +7605,19 @@ test('typegen: python', async () => {
     class PublicUsersAudit(BaseModel):
         created_at: Optional[datetime.datetime] = Field(alias="created_at")
         id: int = Field(alias="id")
-        previous_value: Optional[Json[Any]] = Field(alias="previous_value")
+        previous_value: Optional[JsonValue] = Field(alias="previous_value")
         user_id: Optional[int] = Field(alias="user_id")
 
     class PublicUsersAuditInsert(TypedDict):
         created_at: NotRequired[Annotated[Optional[datetime.datetime], Field(alias="created_at")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
-        previous_value: NotRequired[Annotated[Optional[Json[Any]], Field(alias="previous_value")]]
+        previous_value: NotRequired[Annotated[Optional[JsonValue], Field(alias="previous_value")]]
         user_id: NotRequired[Annotated[Optional[int], Field(alias="user_id")]]
 
     class PublicUsersAuditUpdate(TypedDict):
         created_at: NotRequired[Annotated[Optional[datetime.datetime], Field(alias="created_at")]]
         id: NotRequired[Annotated[int, Field(alias="id")]]
-        previous_value: NotRequired[Annotated[Optional[Json[Any]], Field(alias="previous_value")]]
+        previous_value: NotRequired[Annotated[Optional[JsonValue], Field(alias="previous_value")]]
         user_id: NotRequired[Annotated[Optional[int], Field(alias="user_id")]]
 
     class PublicAView(BaseModel):
@@ -6916,10 +7654,11 @@ test('typegen: python', async () => {
         user_id: Optional[int] = Field(alias="user-id")
 
     class PublicCompositeTypeWithArrayAttribute(BaseModel):
-        my_text_array: List[str] = Field(alias="my_text_array")
+        my_text_array: Optional[List[str]] = Field(alias="my_text_array")
 
     class PublicCompositeTypeWithRecordAttribute(BaseModel):
-        todo: PublicTodos = Field(alias="todo")"
+        todo: Optional[PublicTodos] = Field(alias="todo")
+    "
   `)
 })
 
