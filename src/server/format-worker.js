@@ -8,7 +8,10 @@
 // dist/ by the build script alongside the .sql files.
 
 import { findLanguage } from '@supabase/typegen'
-import { host } from './typegen-host.js'
+
+// A `Host.format` function could not cross the thread boundary, so the host is
+// built here and TypeScript keeps the generator's default oxfmt formatter.
+const host = { cwd: process.cwd(), env: process.env }
 
 /**
  * @param {{

@@ -5,7 +5,6 @@ import {
   type GeneratorMetadata,
 } from '@supabase/typegen'
 import { afterEach, expect, test, vi } from 'vitest'
-import { host } from '../../src/server/typegen-host.js'
 
 // These tests exercise the worker-thread generation path, which is opt-in via
 // PG_META_FORMAT_IN_WORKER and therefore never hit by the rest of the suite.
@@ -82,6 +81,7 @@ const metadata = (tableCount: number): GeneratorMetadata => {
 
 const METADATA = metadata(1)
 const OPTIONS = { 'detect-one-to-one-relationships': true }
+const host = { cwd: process.cwd(), env: process.env }
 const generateInline = () => typescript.generate(METADATA, OPTIONS, host)
 
 afterEach(() => {

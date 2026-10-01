@@ -176,12 +176,13 @@ the thread boundary as a structured clone, which is plain JSON and does not
 measurably change wall-clock time. Always off during type generation
 (`PG_META_GENERATE_TYPES`), which generates once and exits.
 
-The registry `Host` both paths use lives in `src/server/typegen-host.js`
-(plain JavaScript, like the worker, so the worker thread can import it). It
-passes an explicit oxfmt formatter through `Host.format`, with the options
-postgrest-typegen's default formatter uses. `oxfmt` is pinned to the exact
-version `@supabase/typegen` declares as its optional peer: npm rejects any
-other version, so dependabot skips it and it moves with a registry bump.
+The registry `Host` is `{ cwd, env }` on both paths, built in
+`format-pool.ts` and again in `format-worker.js` since a function cannot cross
+the thread boundary. TypeScript is formatted by postgrest-typegen's default
+formatter, which loads `oxfmt` as an optional peer; npm does not install
+optional peers, so `oxfmt` is a direct dependency pinned to the exact version
+`@supabase/typegen` declares. npm rejects any other version, so dependabot
+skips it and it moves with a registry bump.
 
 The env vars keep their `PG_META_FORMAT_*` names from when the worker formatted
 only, so existing deployments do not need reconfiguring.
