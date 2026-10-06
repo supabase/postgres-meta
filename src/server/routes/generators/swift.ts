@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { PostgresMeta } from '../../../lib/index.js'
 import { createConnectionConfig, extractRequestForLogging } from '../../utils.js'
-import { apply as applySwiftTemplate, AccessControl } from '../../templates/swift.js'
+import { type AccessControl, generateSwift } from '@supabase/postgrest-typegen'
 import { getGeneratorMetadata } from '../../../lib/generators.js'
 
 export default async (fastify: FastifyInstance) => {
@@ -31,9 +31,6 @@ export default async (fastify: FastifyInstance) => {
       return { error: generatorMetaError.message }
     }
 
-    return applySwiftTemplate({
-      ...generatorMeta,
-      accessControl,
-    })
+    return generateSwift(generatorMeta!, { accessControl })
   })
 }
