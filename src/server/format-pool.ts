@@ -1,9 +1,5 @@
 import { Piscina } from 'piscina'
-import {
-  generateTypescript,
-  type GeneratorMetadata,
-  type GenerateTypescriptOptions,
-} from '@supabase/postgrest-typegen'
+import type { GeneratorMetadata, Host, OptionValues, TypegenLanguage } from '@supabase/typegen'
 import {
   FORMAT_IDLE_TIMEOUT_MS,
   FORMAT_IN_WORKER,
@@ -12,15 +8,15 @@ import {
   FORMAT_TIMEOUT_MS,
 } from './constants.js'
 
-// `format` is excluded because a function cannot cross the worker boundary:
-// piscina transfers the task via structured clone, which throws on callbacks.
-// If a custom `format` hook is ever needed here it must be constructed inside
-// format-worker.js instead.
-type WorkerSafeOptions = Omit<GenerateTypescriptOptions, 'format'>
+// The hosted routes never spawn a tool and keep the generators' default
+// formatter, so the host is only the two fields the contract requires.
+// format-worker.js builds the same one on its own thread.
+const host: Host = { cwd: process.cwd(), env: process.env }
 
-type FormatTask = {
+type GenerateTask = {
+  language: string
   metadata: GeneratorMetadata
-  options: WorkerSafeOptions
+  options: OptionValues
 }
 
 /**
@@ -36,7 +32,7 @@ export class FormatQueueFullError extends Error {
 
 export class FormatTimeoutError extends Error {
   constructor() {
-    super(`Formatting generated types timed out after ${FORMAT_TIMEOUT_MS}ms`)
+    super(`Generating types timed out after ${FORMAT_TIMEOUT_MS}ms`)
     this.name = 'FormatTimeoutError'
   }
 }
@@ -69,23 +65,25 @@ export const inFlightCount = (): number => inFlight
 export const isFormatPoolActive = (): boolean => pool !== null
 
 /**
- * Generates and formats TypeScript types, on a worker thread when enabled.
+ * Generates the types of one in-process language, on a worker thread when
+ * enabled.
  *
- * The whole of `generateTypescript` is handed to the worker rather than a
- * worker-backed `format` hook: formatting is the bulk of the cost, and the
- * string building ahead of it is CPU-bound too. Metadata crosses the thread
- * boundary as a structured clone, which is plain JSON here and does not
- * measurably change wall-clock time.
+ * The whole of `generate` is handed to the worker rather than a worker-backed
+ * `format` hook: for TypeScript formatting is the bulk of the cost, and the
+ * string building ahead of it is CPU-bound for every language. The language
+ * name, metadata and options cross the thread boundary as a structured clone,
+ * which is plain JSON here and does not measurably change wall-clock time.
  *
  * Falls back to generating inline when workers are disabled (type-generation
  * CLI mode, or PG_META_FORMAT_IN_WORKER=false), where blocking is harmless.
  */
-export const generateTypescriptTypes = async (
+export const generateTypes = async (
+  language: TypegenLanguage,
   metadata: GeneratorMetadata,
-  options: WorkerSafeOptions
+  options: OptionValues
 ): Promise<string> => {
   if (!FORMAT_IN_WORKER) {
-    return generateTypescript(metadata, options)
+    return language.generate(metadata, options, host)
   }
 
   // Admission control is done here rather than with piscina's own maxQueue,
@@ -102,7 +100,7 @@ export const generateTypescriptTypes = async (
     throw new FormatQueueFullError()
   }
 
-  const task: FormatTask = { metadata, options }
+  const task: GenerateTask = { language: language.name, metadata, options }
   inFlight++
   try {
     return await getPool().run(task, { signal: AbortSignal.timeout(FORMAT_TIMEOUT_MS) })

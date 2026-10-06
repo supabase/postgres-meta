@@ -1,24 +1,23 @@
 import {
   introspect,
-  sortGeneratorMetadata,
+  resolveOptions,
   type GeneratorMetadata,
+  type OptionValue,
   type Queryable,
-} from '@supabase/postgrest-typegen'
+  type ResolvedOptions,
+  type TypegenLanguage,
+} from '@supabase/typegen'
 import PostgresMeta from './PostgresMeta.js'
 import { PostgresMetaResult } from './types.js'
 
-// Re-export so existing consumers can keep importing the type from here.
 export type { GeneratorMetadata }
 
 /**
- * Adapter over `@supabase/postgrest-typegen`'s `introspect()`, preserving the
- * historical `getGeneratorMetadata` signature and `{ data, error }` contract.
- *
- * The package is driver-agnostic: it takes a structural `Queryable` whose
- * `query()` resolves to `{ rows }` and throws on failure. We wrap `pgMeta.query`
- * (which returns `{ data, error }`) into that shape and surface the first query
- * error as the result error. Unlike the previous implementation, the pool is
- * ended on error paths too, not just on success.
+ * Adapter over `introspect()` preserving the `{ data, error }` contract of the
+ * rest of the library. The package takes a structural `Queryable` whose
+ * `query()` resolves to `{ rows }` and throws on failure, so `pgMeta.query`
+ * is wrapped into that shape and the first query error becomes the result
+ * error. The pool is ended on every path.
  */
 export async function getGeneratorMetadata(
   pgMeta: PostgresMeta,
@@ -38,14 +37,10 @@ export async function getGeneratorMetadata(
   }
 
   try {
-    // The generators emit objects in metadata order, so apply the package's
-    // canonical sort pass before returning (and before any generator runs).
-    const data = sortGeneratorMetadata(
-      await introspect(queryable, {
-        includedSchemas: filters.includedSchemas,
-        excludedSchemas: filters.excludedSchemas,
-      })
-    )
+    const data = await introspect(queryable, {
+      includedSchemas: filters.includedSchemas,
+      excludedSchemas: filters.excludedSchemas,
+    })
     return { data, error: null }
   } catch (error) {
     return {
@@ -55,4 +50,26 @@ export async function getGeneratorMetadata(
   } finally {
     await pgMeta.end()
   }
+}
+
+/**
+ * Keeps the entries of `candidates` that `language` declares as options and
+ * that have a value, then validates them and applies the language's defaults.
+ * Callers list every setting they can supply once; each language receives
+ * only its own, since `generate` rejects unknown names. Throws an
+ * `InvalidOptionError` for a bad value, so callers can reject it before
+ * touching the database.
+ */
+export function declaredOptions(
+  language: TypegenLanguage,
+  candidates: Readonly<Record<string, OptionValue | undefined>>
+): ResolvedOptions {
+  const values: Record<string, OptionValue> = {}
+  for (const option of language.options) {
+    const value = candidates[option.name]
+    if (value !== undefined) {
+      values[option.name] = value
+    }
+  }
+  return resolveOptions(language.name, language.options, values)
 }
