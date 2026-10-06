@@ -51,7 +51,7 @@
     "@supabase/typegen": "0.2.2",
     "close-with-grace": "^2.1.0",
     "crypto-js": "^4.0.0",
-    "fastify": "^4.24.3",
+    "fastify": "^5.12.5",
     "fastify-metrics": "^10.0.0",
     "oxfmt": "0.66.0",
     "pg": "npm:@supabase/pg@8.21.1",
