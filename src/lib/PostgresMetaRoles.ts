@@ -24,7 +24,9 @@ export function changeRoleConfig2Object(config: string[]) {
     return null
   }
   return config.reduce((acc: any, cur) => {
-    const [key, value] = cur.split('=')
+    const separator = cur.indexOf('=')
+    const key = separator === -1 ? cur : cur.slice(0, separator)
+    const value = separator === -1 ? undefined : cur.slice(separator + 1)
     acc[key] = value
     return acc
   }, {})
