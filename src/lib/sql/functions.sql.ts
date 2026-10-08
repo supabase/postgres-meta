@@ -110,10 +110,13 @@ from
       (
         select
           oid,
-          (string_to_array(unnest(proconfig), '='))[1] as param,
-          (string_to_array(unnest(proconfig), '='))[2] as value
+          split_part(cfg, '=', 1) as param,
+          -- Keep everything after the first '=', so values like application_name=api=worker
+          -- round-trip intact (string_to_array(...)[2] truncates at the next '=').
+          substring(cfg from position('=' in cfg) + 1) as value
         from
-          functions
+          functions,
+          lateral unnest(proconfig) as cfg
       ) as t
     group by
       oid
