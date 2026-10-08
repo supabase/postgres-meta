@@ -28,7 +28,7 @@ const route: FastifyPluginAsyncTypebox = async (fastify) => {
           excluded_schemas: Type.Optional(Type.String()),
           limit: Type.Optional(Type.Integer()),
           offset: Type.Optional(Type.Integer()),
-          include_columns: Type.Optional(Type.Boolean()),
+          include_columns: Type.Optional(Type.Boolean({ default: false })),
         }),
         response: {
           200: Type.Array(postgresTableSchema),
