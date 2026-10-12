@@ -188,3 +188,24 @@ test('retrieve, create, update, delete', async () => {
     },
   })
 })
+
+test('update roles to an empty array falls back to public', async () => {
+  let res = await pgMeta.policies.create({
+    name: 'test empty roles policy',
+    schema: 'public',
+    table: 'memes',
+    roles: ['postgres'],
+  })
+  const policyId = res.data!.id
+  expect(res.data!.roles).toStrictEqual(['postgres'])
+
+  // An empty array means "all roles" — the same default `create` applies.
+  // `name` is typed as required even though `update` treats it as optional, and
+  // renaming a policy to its own name errors, so it has to be omitted here.
+  res = await pgMeta.policies.update(policyId, { roles: [] } as any)
+
+  expect(res.error).toBeNull()
+  expect(res.data!.roles).toStrictEqual(['public'])
+
+  await pgMeta.policies.remove(policyId)
+})
