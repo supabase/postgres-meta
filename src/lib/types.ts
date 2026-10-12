@@ -27,6 +27,10 @@ export const postgresColumnSchema = Type.Object({
   default_value: Type.Unknown(),
   data_type: Type.String(),
   format: Type.String(),
+  // Set only when the column's type is a DOMAIN. `data_type` and `format` keep
+  // reporting the domain's base type, as information_schema.columns does.
+  domain_schema: Type.Union([Type.String(), Type.Null()]),
+  domain_name: Type.Union([Type.String(), Type.Null()]),
   is_identity: Type.Boolean(),
   identity_generation: Type.Union([
     Type.Literal('ALWAYS'),
