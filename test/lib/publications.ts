@@ -186,6 +186,64 @@ test('tables with uppercase', async () => {
   await pgMeta.tables.remove(testTableId)
 })
 
+test('tables with dotted schema names', async () => {
+  let res = await pgMeta.publications.create({
+    name: 'pub_dotted_schema',
+    publish_insert: true,
+    tables: [{ schema: 'NextWare.Concierge.ConciergeServices', table: 'outbox' }],
+  })
+  expect(cleanNondet(res)).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    {
+      "data": {
+        "id": Any<Number>,
+        "name": "pub_dotted_schema",
+        "owner": "postgres",
+        "publish_delete": false,
+        "publish_insert": true,
+        "publish_truncate": false,
+        "publish_update": false,
+        "tables": [
+          {
+            "name": "outbox",
+            "schema": "NextWare.Concierge.ConciergeServices",
+          },
+        ],
+      },
+      "error": null,
+    }
+  `
+  )
+  res = await pgMeta.publications.update(res.data!.id, {
+    tables: ['"NextWare.Concierge.ConciergeServices".outbox'],
+  })
+  expect(cleanNondet(res)).toMatchInlineSnapshot(
+    { data: { id: expect.any(Number) } },
+    `
+    {
+      "data": {
+        "id": Any<Number>,
+        "name": "pub_dotted_schema",
+        "owner": "postgres",
+        "publish_delete": false,
+        "publish_insert": true,
+        "publish_truncate": false,
+        "publish_update": false,
+        "tables": [
+          {
+            "name": "outbox",
+            "schema": "NextWare.Concierge.ConciergeServices",
+          },
+        ],
+      },
+      "error": null,
+    }
+  `
+  )
+  await pgMeta.publications.remove(res.data!.id)
+})
+
 test('FOR ALL TABLES', async () => {
   let res = await pgMeta.publications.create({
     name: 'for_all',
