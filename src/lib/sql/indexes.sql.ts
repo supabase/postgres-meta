@@ -40,7 +40,7 @@ SELECT
     JOIN pg_namespace n ON c.relnamespace = n.oid
     JOIN pg_am am ON c.relam = am.oid
     JOIN pg_attribute a ON a.attrelid = c.oid AND a.attnum = ANY(idx.indkey)
-    JOIN pg_indexes ix ON c.relname = ix.indexname
+    JOIN pg_indexes ix ON c.relname = ix.indexname AND n.nspname = ix.schemaname
   WHERE
     ${props.schemaFilter ? `n.nspname ${props.schemaFilter}` : 'true'}
     ${props.idsFilter ? `AND idx.indexrelid ${props.idsFilter}` : ''}
