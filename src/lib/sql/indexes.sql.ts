@@ -39,7 +39,7 @@ SELECT
     JOIN pg_class c ON c.oid = idx.indexrelid
     JOIN pg_namespace n ON c.relnamespace = n.oid
     JOIN pg_am am ON c.relam = am.oid
-    JOIN pg_attribute a ON a.attrelid = c.oid AND a.attnum = ANY(idx.indkey)
+    JOIN pg_attribute a ON a.attrelid = c.oid AND a.attnum > 0
     JOIN pg_indexes ix ON c.relname = ix.indexname
   WHERE
     ${props.schemaFilter ? `n.nspname ${props.schemaFilter}` : 'true'}
