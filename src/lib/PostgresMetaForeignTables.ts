@@ -111,7 +111,7 @@ const generateEnrichedForeignTablesSql = ({
   limit?: number
   offset?: number
 }) => `
-with foreign_tables as (${FOREIGN_TABLES_SQL({ schemaFilter, tableIdentifierFilter, limit, offset })})
+with foreign_tables as (${FOREIGN_TABLES_SQL({ schemaFilter, tableIdentifierFilter, idsFilter, limit, offset })})
   ${includeColumns ? `, columns as (${COLUMNS_SQL({ schemaFilter, tableIdentifierFilter, tableIdFilter: idsFilter })})` : ''}
 select
   *
