@@ -531,3 +531,36 @@ test('retrieve function by args filter - function with no arguments', async () =
   })
   expect(res.error).toBeNull()
 })
+
+test('update definition keeps strictness, parallel safety, cost and rows', async () => {
+  await pgMeta.query(`
+    create function public.test_func_attrs(a int) returns setof int
+      language sql immutable strict parallel safe cost 5 rows 3
+      as 'select a + 1'
+  `)
+  const { data: func } = await pgMeta.functions.retrieve({
+    schema: 'public',
+    name: 'test_func_attrs',
+    args: ['integer'],
+  })
+  try {
+    const res = await pgMeta.functions.update(func!.id, { definition: 'select a + 2' })
+    expect(res.error).toBeNull()
+    const { data } = await pgMeta.query(
+      `select prosrc, proisstrict, proparallel, procost, prorows from pg_proc where oid = ${func!.id}`
+    )
+    expect(data).toMatchInlineSnapshot(`
+      [
+        {
+          "procost": 5,
+          "proisstrict": true,
+          "proparallel": "s",
+          "prorows": 3,
+          "prosrc": "select a + 2",
+        },
+      ]
+    `)
+  } finally {
+    await pgMeta.functions.remove(func!.id)
+  }
+})
