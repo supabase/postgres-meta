@@ -188,3 +188,20 @@ test('retrieve, create, update, delete', async () => {
     },
   })
 })
+
+test('update with name unchanged', async () => {
+  const { data: policy } = await pgMeta.policies.create({
+    name: 'p_same_name',
+    schema: 'public',
+    table: 'memes',
+  })
+  try {
+    const res = await pgMeta.policies.update(policy!.id, {
+      name: 'p_same_name',
+      definition: 'true',
+    })
+    expect(res).toMatchObject({ data: { name: 'p_same_name', definition: 'true' }, error: null })
+  } finally {
+    await pgMeta.policies.remove(policy!.id)
+  }
+})
