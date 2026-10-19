@@ -2,6 +2,7 @@
 // https://github.com/supabase/postgres-meta/issues/397#issuecomment-1285078489
 import './lib/columns'
 import './lib/config'
+import './lib/db'
 import './lib/extensions'
 import './lib/foreign-tables'
 import './lib/functions'
