@@ -1017,3 +1017,36 @@ test('column with fully-qualified type', async () => {
 
   await pgMeta.query(`drop table public.t; drop schema s cascade;`)
 })
+
+test('column with schema-qualified array type', async () => {
+  await pgMeta.query(
+    `drop table if exists public.t_schema_array; drop schema if exists s_schema_array cascade;`
+  )
+  await pgMeta.query(
+    `create table public.t_schema_array(); create schema s_schema_array; create type s_schema_array.my_type as enum ('a');`
+  )
+
+  try {
+    const table = await pgMeta.tables.retrieve({
+      schema: 'public',
+      name: 't_schema_array',
+    })
+    const created = await pgMeta.columns.create({
+      table_id: table.data!.id,
+      name: 'c',
+      type: 's_schema_array.my_type[]',
+    })
+    expect(created.error).toBeNull()
+    expect(created.data).toMatchObject({
+      name: 'c',
+      format: '_my_type',
+      data_type: 'ARRAY',
+      schema: 'public',
+      table: 't_schema_array',
+    })
+  } finally {
+    await pgMeta.query(
+      `drop table if exists public.t_schema_array; drop schema if exists s_schema_array cascade;`
+    )
+  }
+})
