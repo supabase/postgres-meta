@@ -531,3 +531,23 @@ test('retrieve function by args filter - function with no arguments', async () =
   })
   expect(res.error).toBeNull()
 })
+
+test('config_params preserves equals signs in values', async () => {
+  await pgMeta.query(`
+    create or replace function public.config_equals_test()
+    returns void
+    language sql
+    set application_name to 'api=worker'
+    as $$ select 1; $$;
+  `)
+
+  const res = await pgMeta.functions.retrieve({
+    schema: 'public',
+    name: 'config_equals_test',
+    args: [],
+  })
+  expect(res.error).toBeNull()
+  expect(res.data?.config_params).toEqual({ application_name: 'api=worker' })
+
+  await pgMeta.query(`drop function public.config_equals_test();`)
+})
