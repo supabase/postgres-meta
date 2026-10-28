@@ -3,6 +3,50 @@ import { PostgresMetaResult, PostgresPublication } from './types.js'
 import { PUBLICATIONS_SQL } from './sql/publications.sql.js'
 import { filterByValue } from './helpers.js'
 
+export type TableIdentifier = string | { schema: string; table: string }
+
+// Splits a possibly schema-qualified table identifier (e.g. `schema.table`) into
+// its parts, respecting double-quoted identifiers that may themselves contain
+// dots or escaped double-quotes. Surrounding quotes are stripped from each part.
+const splitQualifiedIdentifier = (value: string): string[] => {
+  const parts: string[] = []
+  let current = ''
+  let inQuotes = false
+
+  for (let i = 0; i < value.length; i++) {
+    const char = value[i]
+    if (char === '"') {
+      if (inQuotes && value[i + 1] === '"') {
+        current += '"'
+        i++
+      } else {
+        inQuotes = !inQuotes
+      }
+    } else if (char === '.' && !inQuotes) {
+      parts.push(current)
+      current = ''
+    } else {
+      current += char
+    }
+  }
+  parts.push(current)
+  return parts
+}
+
+// Formats a table identifier for use in SQL, quoting each part with `ident`.
+// A `{ schema, table }` object removes any ambiguity when the schema or table
+// name itself contains dots. A string is parsed as a possibly schema-qualified
+// identifier, quoting each part. E.g. `users` -> `users`, `public.users` ->
+// `public.users`, `"Schema.With.Dots".table` -> `"Schema.With.Dots".table`.
+const formatTableIdentifier = (t: TableIdentifier): string => {
+  if (typeof t === 'object') {
+    return `${ident(t.schema)}.${ident(t.table)}`
+  }
+  return splitQualifiedIdentifier(t)
+    .map((part) => ident(part))
+    .join('.')
+}
+
 export default class PostgresMetaPublications {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
 
@@ -70,7 +114,7 @@ export default class PostgresMetaPublications {
     publish_update?: boolean
     publish_delete?: boolean
     publish_truncate?: boolean
-    tables?: string[] | null
+    tables?: TableIdentifier[] | null
   }): Promise<PostgresMetaResult<PostgresPublication>> {
     let tableClause: string
     if (tables === undefined || tables === null) {
@@ -78,17 +122,7 @@ export default class PostgresMetaPublications {
     } else if (tables.length === 0) {
       tableClause = ''
     } else {
-      tableClause = `FOR TABLE ${tables
-        .map((t) => {
-          if (!t.includes('.')) {
-            return ident(t)
-          }
-
-          const [schema, ...rest] = t.split('.')
-          const table = rest.join('.')
-          return `${ident(schema)}.${ident(table)}`
-        })
-        .join(',')}`
+      tableClause = `FOR TABLE ${tables.map((t) => formatTableIdentifier(t)).join(',')}`
     }
 
     let publishOps = []
@@ -124,7 +158,7 @@ CREATE PUBLICATION ${ident(name)} ${tableClause}
       publish_update?: boolean
       publish_delete?: boolean
       publish_truncate?: boolean
-      tables?: string[] | null
+      tables?: TableIdentifier[] | null
     }
   ): Promise<PostgresMetaResult<PostgresPublication>> {
     const sql = `
@@ -142,19 +176,7 @@ declare
     tables === undefined
       ? null
       : literal(
-          tables === null
-            ? 'all tables'
-            : tables
-                .map((t) => {
-                  if (!t.includes('.')) {
-                    return ident(t)
-                  }
-
-                  const [schema, ...rest] = t.split('.')
-                  const table = rest.join('.')
-                  return `${ident(schema)}.${ident(table)}`
-                })
-                .join(',')
+          tables === null ? 'all tables' : tables.map((t) => formatTableIdentifier(t)).join(',')
         )
   };
 begin
