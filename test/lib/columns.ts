@@ -7,13 +7,14 @@ test('list', async () => {
     {
       id: expect.stringMatching(/^\d+\.3$/),
       table_id: expect.any(Number),
-    },
-    `
+    }, `
     {
       "check": null,
       "comment": null,
       "data_type": "bigint",
       "default_value": null,
+      "domain_name": null,
+      "domain_schema": null,
       "enums": [],
       "format": "int8",
       "id": StringMatching /\\^\\\\d\\+\\\\\\.3\\$/,
@@ -29,8 +30,7 @@ test('list', async () => {
       "table": "todos",
       "table_id": Any<Number>,
     }
-  `
-  )
+  `)
 })
 
 test('list from a single table', async () => {
@@ -297,17 +297,18 @@ test('enum column with quoted name', async () => {
     {
       id: expect.stringMatching(/^\d+\.1$/),
       table_id: expect.any(Number),
-    },
-    `
+    }, `
     {
       "check": null,
       "comment": null,
-      "data_type": "USER-DEFINED",
+      "data_type": "ARRAY",
       "default_value": null,
+      "domain_name": null,
+      "domain_schema": null,
       "enums": [
-        "v",
+        "a",
       ],
-      "format": "T",
+      "format": "_test_enum",
       "id": StringMatching /\\^\\\\d\\+\\\\\\.1\\$/,
       "identity_generation": null,
       "is_generated": false,
@@ -321,8 +322,7 @@ test('enum column with quoted name', async () => {
       "table": "t",
       "table_id": Any<Number>,
     }
-  `
-  )
+  `)
 
   await pgMeta.query('DROP TABLE t; DROP TYPE "T";')
 })
@@ -911,12 +911,16 @@ test('column with multiple checks', async () => {
   expect(columns).toMatchInlineSnapshot(`
     [
       {
-        "check": "c <> 0",
+        "check": null,
         "comment": null,
-        "data_type": "bigint",
+        "data_type": "ARRAY",
         "default_value": null,
-        "enums": [],
-        "format": "int8",
+        "domain_name": null,
+        "domain_schema": null,
+        "enums": [
+          "a",
+        ],
+        "format": "_test_enum",
         "identity_generation": null,
         "is_generated": false,
         "is_identity": false,
@@ -925,6 +929,46 @@ test('column with multiple checks', async () => {
         "is_updatable": true,
         "name": "c",
         "ordinal_position": 1,
+        "schema": "public",
+        "table": "t",
+      },
+      {
+        "check": null,
+        "comment": null,
+        "data_type": "text",
+        "default_value": null,
+        "domain_name": null,
+        "domain_schema": null,
+        "enums": [],
+        "format": "text",
+        "identity_generation": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_updatable": true,
+        "name": "c1",
+        "ordinal_position": 2,
+        "schema": "public",
+        "table": "t",
+      },
+      {
+        "check": null,
+        "comment": null,
+        "data_type": "text",
+        "default_value": null,
+        "domain_name": null,
+        "domain_schema": null,
+        "enums": [],
+        "format": "text",
+        "identity_generation": null,
+        "is_generated": false,
+        "is_identity": false,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_updatable": true,
+        "name": "c2",
+        "ordinal_position": 3,
         "schema": "public",
         "table": "t",
       },
@@ -948,6 +992,8 @@ test('column with multiple unique constraints', async () => {
         "comment": null,
         "data_type": "bigint",
         "default_value": null,
+        "domain_name": null,
+        "domain_schema": null,
         "enums": [],
         "format": "int8",
         "identity_generation": null,
@@ -1000,6 +1046,8 @@ test('column with fully-qualified type', async () => {
       "comment": null,
       "data_type": "USER-DEFINED",
       "default_value": null,
+      "domain_name": null,
+      "domain_schema": null,
       "enums": [],
       "format": "my_type",
       "identity_generation": null,
@@ -1016,4 +1064,36 @@ test('column with fully-qualified type', async () => {
   `)
 
   await pgMeta.query(`drop table public.t; drop schema s cascade;`)
+})
+
+test('domain-typed columns expose domain identity', async () => {
+  const table = await pgMeta.tables.retrieve({ schema: 'public', name: 'domain_test' })
+  const res = await pgMeta.columns.list({ tableId: table.data!.id })
+  const columns = res.data!
+
+  expect(columns).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        name: 'search',
+        data_type: 'jsonb',
+        format: 'jsonb',
+        domain_schema: 'public',
+        domain_name: 'text_search',
+      }),
+      expect.objectContaining({
+        name: 'quantity',
+        data_type: 'integer',
+        format: 'int4',
+        domain_schema: 'public',
+        domain_name: 'positive_int',
+      }),
+      expect.objectContaining({
+        name: 'plain',
+        data_type: 'jsonb',
+        format: 'jsonb',
+        domain_schema: null,
+        domain_name: null,
+      }),
+    ])
+  )
 })
