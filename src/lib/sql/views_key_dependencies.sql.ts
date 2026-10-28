@@ -28,7 +28,11 @@ pks_fks as (
   from pg_constraint
   left join lateral unnest(confkey) with ordinality as _(col, ord) on true
   where contype='f'
-  ${props.schemaFilter ? `and connamespace::regnamespace::text ${props.schemaFilter}` : ''}
+  ${
+    props.schemaFilter
+      ? `and connamespace IN (SELECT oid FROM pg_namespace WHERE nspname ${props.schemaFilter})`
+      : ''
+  }
 ),
 views as (
   select
