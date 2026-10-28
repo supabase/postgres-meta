@@ -98,11 +98,19 @@ FROM
     SELECT DISTINCT ON (table_id, ordinal_position)
       conrelid AS table_id,
       conkey[1] AS ordinal_position,
-      substring(
-        pg_get_constraintdef(pg_constraint.oid, true),
-        8,
-        length(pg_get_constraintdef(pg_constraint.oid, true)) - 8
-      ) AS "definition"
+      -- Prefer pg_get_expr over stripping CHECK (...) from pg_get_constraintdef:
+      -- suffixes like NOT VALID / NO INHERIT make the old length-8 heuristic corrupt
+      -- the expression (e.g. "id > 0) NOT VALI"). Strip one outer paren pair so the
+      -- API shape stays "c <> 0" rather than "(c <> 0)".
+      CASE
+        WHEN pg_get_expr(conbin, conrelid) LIKE '(%)' THEN
+          substring(
+            pg_get_expr(conbin, conrelid),
+            2,
+            length(pg_get_expr(conbin, conrelid)) - 2
+          )
+        ELSE pg_get_expr(conbin, conrelid)
+      END AS "definition"
     FROM pg_constraint
     WHERE contype = 'c' AND cardinality(conkey) = 1
     ORDER BY table_id, ordinal_position, oid asc
