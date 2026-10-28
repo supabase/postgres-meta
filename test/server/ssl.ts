@@ -126,3 +126,24 @@ test('query with missing host connection string encrypted connection string', as
     }
   `)
 })
+
+test('query with encrypted connection string using internal "db" host respects PG_META_DB_PORT', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    headers: {
+      'x-connection-encrypted': CryptoJS.AES.encrypt(
+        'postgresql://postgres:postgres@db:5432/postgres',
+        CRYPTO_KEY
+      ).toString(),
+    },
+    payload: { query: 'select 1;' },
+  })
+  expect(res.json()).toMatchInlineSnapshot(`
+    [
+      {
+        "?column?": 1,
+      },
+    ]
+  `)
+})
