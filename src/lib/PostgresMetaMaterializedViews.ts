@@ -98,7 +98,7 @@ const generateEnrichedMaterializedViewsSql = ({
   offset?: number
 }) => `
 with materialized_views as (${MATERIALIZED_VIEWS_SQL({ schemaFilter, limit, offset, materializedViewIdentifierFilter, idsFilter })})
-  ${includeColumns ? `, columns as (${COLUMNS_SQL({ schemaFilter, limit, offset, tableIdentifierFilter: materializedViewIdentifierFilter, tableIdFilter: idsFilter })})` : ''}
+  ${includeColumns ? `, columns as (${COLUMNS_SQL({ schemaFilter, tableIdentifierFilter: materializedViewIdentifierFilter, tableIdFilter: idsFilter })})` : ''}
 select
   *
   ${
