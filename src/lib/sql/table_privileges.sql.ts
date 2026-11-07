@@ -75,8 +75,16 @@ where c.relkind in ('r', 'v', 'm', 'f', 'p')
     pg_has_role(c.relowner, 'USAGE')
     or has_table_privilege(
       c.oid,
-      'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER, MAINTAIN'
+      'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER'
     )
+    -- MAINTAIN was added in PostgreSQL 17. Passing it to
+    -- has_table_privilege() raises "unrecognized privilege type" on older
+    -- servers, which are still supported, so only evaluate it there.
+    or case
+      when pg_catalog.current_setting('server_version_num')::int >= 170000
+        then has_table_privilege(c.oid, 'MAINTAIN')
+      else false
+    end
     or has_any_column_privilege(c.oid, 'SELECT, INSERT, UPDATE, REFERENCES')
   )
 group by
