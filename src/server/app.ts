@@ -20,7 +20,7 @@ export const build = (opts: FastifyServerOptions = {}): FastifyInstance => {
 
   app.setErrorHandler((error, request, reply) => {
     app.log.error({ error: error.toString(), request: extractRequestForLogging(request) })
-    reply.code(500).send({ error: error.message })
+    reply.code(error.validation ? 400 : 500).send({ error: error.message })
   })
 
   app.setNotFoundHandler((request, reply) => {
