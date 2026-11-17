@@ -1,3 +1,4 @@
+import { Type } from '@sinclair/typebox'
 import { FastifyInstance, FastifyRequest } from 'fastify'
 import { PostgresMeta } from '../../lib/index.js'
 import * as Parser from '../../lib/Parser.js'
@@ -41,18 +42,23 @@ export default async (fastify: FastifyInstance) => {
   fastify.post<{
     Headers: { pg: string; 'x-pg-application-name'?: string }
     Body: { query: string }
-  }>('/format', async (request, reply) => {
-    errorOnEmptyQuery(request)
-    const { data, error } = await Parser.Format(request.body.query)
+  }>(
+    '/format',
+    { schema: { body: Type.Object({ query: Type.String() }) } },
+    async (request, reply) => {
+      // An empty editor is not an error; formatting it yields nothing.
+      if (request.body.query === '') return ''
+      const { data, error } = await Parser.Format(request.body.query)
 
-    if (error) {
-      request.log.error({ error, request: extractRequestForLogging(request) })
-      reply.code(translateErrorToResponseCode(error))
-      return { error: error.message }
+      if (error) {
+        request.log.error({ error, request: extractRequestForLogging(request) })
+        reply.code(translateErrorToResponseCode(error))
+        return { error: error.message }
+      }
+
+      return data
     }
-
-    return data
-  })
+  )
 
   fastify.post<{
     Headers: { pg: string; 'x-pg-application-name'?: string }

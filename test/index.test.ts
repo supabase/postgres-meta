@@ -26,6 +26,7 @@ import './server/typegen'
 import './server/generate-types-mode'
 import './server/result-size-limit'
 import './server/query-timeout'
+import './server/request-validation'
 // New tests for increased coverage - commented out to avoid import issues
 // import './server/app'
 // import './server/utils'
