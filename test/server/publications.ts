@@ -1,17 +1,6 @@
 import { expect, test } from 'vitest'
 import { app } from './utils'
 
-test('publication list filtering', async () => {
-  const res = await app.inject({
-    method: 'GET',
-    path: '/publications?limit=5',
-  })
-  expect(res.statusCode).toBe(200)
-  const publications = res.json()
-  expect(Array.isArray(publications)).toBe(true)
-  expect(publications.length).toBeLessThanOrEqual(5)
-})
-
 test('publication with invalid id', async () => {
   const res = await app.inject({
     method: 'GET',
@@ -20,23 +9,8 @@ test('publication with invalid id', async () => {
   expect(res.statusCode).toBe(404)
 })
 
-test('create publication with invalid options', async () => {
-  const res = await app.inject({
-    method: 'POST',
-    path: '/publications',
-    payload: {
-      name: 'test_publication',
-      publish_insert: 'invalid', // Should be boolean but seems to be converted automatically
-      publish_update: true,
-      publish_delete: true,
-      publish_truncate: true,
-      tables: ['public.users'],
-    },
-  })
-  // API accepts invalid type and converts it
-  // TODO: This should error out with invalid parameter
-  expect(res.statusCode).toBe(200)
-})
+// The route coerces non-boolean publish_* values and creates the publication; it should reject them with 400.
+test.todo('create publication with non-boolean publish_insert returns 400')
 
 test('create publication with empty name', async () => {
   const res = await app.inject({

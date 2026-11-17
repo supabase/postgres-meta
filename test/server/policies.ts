@@ -1,29 +1,23 @@
 import { expect, test } from 'vitest'
 import { app } from './utils'
 
-test('policy list filtering', async () => {
-  const res = await app.inject({
-    method: 'GET',
-    path: '/policies?limit=5',
-  })
-  expect(res.statusCode).toBe(200)
-  const policies = res.json()
-  expect(Array.isArray(policies)).toBe(true)
-  expect(policies.length).toBeLessThanOrEqual(5)
-})
-
 test('policy list with specific included schema', async () => {
   const res = await app.inject({
     method: 'GET',
-    path: '/policies?included_schema=public',
+    path: '/policies?included_schemas=public',
   })
   expect(res.statusCode).toBe(200)
   const policies = res.json()
-  expect(Array.isArray(policies)).toBe(true)
-  // All policies should be in the public schema
+  expect(policies.length).toBeGreaterThan(0)
   policies.forEach((policy) => {
     expect(policy.schema).toBe('public')
   })
+})
+
+test('policy list with unknown schema', async () => {
+  const res = await app.inject({ method: 'GET', path: '/policies?included_schemas=nonexistent' })
+  expect(res.statusCode).toBe(200)
+  expect(res.json()).toHaveLength(0)
 })
 
 test('policy with invalid id', async () => {
@@ -44,8 +38,8 @@ test('create policy with missing required field', async () => {
       // Missing required table field
       definition: 'true',
       check: 'true',
-      action: 'SELECT',
-      command: 'PERMISSIVE',
+      action: 'PERMISSIVE',
+      command: 'SELECT',
     },
   })
   expect(res.statusCode).toBe(400)

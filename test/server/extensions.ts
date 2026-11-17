@@ -1,15 +1,13 @@
 import { expect, test } from 'vitest'
 import { app } from './utils'
 
-test('extension list filtering', async () => {
+test('extension list with limit', async () => {
   const res = await app.inject({
     method: 'GET',
     path: '/extensions?limit=5',
   })
   expect(res.statusCode).toBe(200)
-  const extensions = res.json()
-  expect(Array.isArray(extensions)).toBe(true)
-  expect(extensions.length).toBeLessThanOrEqual(5)
+  expect(res.json()).toHaveLength(5)
 })
 
 test('extension with invalid id', async () => {

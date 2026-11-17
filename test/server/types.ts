@@ -1,42 +1,44 @@
 import { expect, test } from 'vitest'
 import { app } from './utils'
 
-test('type list filtering', async () => {
+test('type list with limit', async () => {
   const res = await app.inject({
     method: 'GET',
-    path: '/types?limit=5',
+    path: '/types?limit=2',
   })
   expect(res.statusCode).toBe(200)
-  const types = res.json()
-  expect(Array.isArray(types)).toBe(true)
-  expect(types.length).toBeLessThanOrEqual(5)
+  expect(res.json()).toHaveLength(2)
 })
 
 test('type list with specific included schema', async () => {
   const res = await app.inject({
     method: 'GET',
-    path: '/types?includedSchemas=public',
+    path: '/types?included_schemas=public',
   })
   expect(res.statusCode).toBe(200)
   const types = res.json()
-  expect(Array.isArray(types)).toBe(true)
-  // All types should be in the public schema
+  expect(types.length).toBeGreaterThan(0)
   types.forEach((type) => {
     expect(type.schema).toBe('public')
   })
 })
 
-test('type list excluding array types', async () => {
-  const res = await app.inject({
+test('type list with array types', async () => {
+  const isArray = (type) => type.name.startsWith('_')
+  const without = await app.inject({ method: 'GET', path: '/types?included_schemas=public' })
+  expect(without.json().filter(isArray)).toHaveLength(0)
+  const withArrays = await app.inject({
     method: 'GET',
-    path: '/types?includeArrayTypes=false',
+    path: '/types?included_schemas=public&include_array_types=true',
   })
+  expect(withArrays.statusCode).toBe(200)
+  expect(withArrays.json().filter(isArray).length).toBeGreaterThan(0)
+})
+
+test('type list with unknown schema', async () => {
+  const res = await app.inject({ method: 'GET', path: '/types?included_schemas=nonexistent' })
   expect(res.statusCode).toBe(200)
-  const types = res.json()
-  expect(Array.isArray(types)).toBe(true)
-  // Should not include array types
-  const arrayTypes = types.filter((type) => type.name.startsWith('_'))
-  expect(arrayTypes.length).toBe(0)
+  expect(res.json()).toHaveLength(0)
 })
 
 test('type with invalid id', async () => {

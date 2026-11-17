@@ -69,21 +69,6 @@ test('format invalid SQL query', async () => {
   `)
 })
 
-// TODO(andrew): Those should return 400 error code for invalid parameter
-test('format empty query', async () => {
-  const res = await app.inject({
-    method: 'POST',
-    path: '/query/format',
-    payload: { query: '' },
-  })
-  expect(res.statusCode).toBe(500)
-})
-
-test('format with missing query parameter', async () => {
-  const res = await app.inject({
-    method: 'POST',
-    path: '/query/format',
-    payload: {},
-  })
-  expect(res.statusCode).toBe(500)
-})
+// Both currently return 500; a missing query should be a 400 and an empty one a 200 with empty output.
+test.todo('format empty query returns 200')
+test.todo('format with missing query parameter returns 400')

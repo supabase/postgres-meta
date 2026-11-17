@@ -8,7 +8,9 @@ test('typescript generator route', async () => {
   })
   expect(res.statusCode).toBe(200)
   expect(res.headers['content-type']).toContain('text/plain')
-  expect(res.body).contain('public')
+  expect(res.body).toContain('public: {')
+  expect(res.body).toContain('users: {')
+  expect(res.body).toContain('meme_status:')
 })
 
 test('go generator route', async () => {
@@ -18,7 +20,7 @@ test('go generator route', async () => {
   })
   expect(res.statusCode).toBe(200)
   expect(res.headers['content-type']).toContain('text/plain')
-  expect(res.body).toBeTruthy()
+  expect(res.body).toContain('type PublicUsersSelect struct')
 })
 
 test('swift generator route', async () => {
@@ -28,7 +30,7 @@ test('swift generator route', async () => {
   })
   expect(res.statusCode).toBe(200)
   expect(res.headers['content-type']).toContain('text/plain')
-  expect(res.body).toBeTruthy()
+  expect(res.body).toContain('struct UsersSelect')
 })
 
 test('generator routes with includedSchemas parameter', async () => {

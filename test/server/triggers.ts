@@ -1,32 +1,45 @@
 import { expect, test } from 'vitest'
 import { app } from './utils'
 
-test('trigger list filtering', async () => {
-  const res = await app.inject({
-    method: 'GET',
-    path: '/triggers?limit=5',
+test('trigger list with limit and included schema', async () => {
+  const setup = await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `
+        create function public.pr920_noop() returns trigger language plpgsql as 'begin return new; end';
+        create trigger pr920_a before insert on public.users for each row execute function public.pr920_noop();
+        create trigger pr920_b before update on public.users for each row execute function public.pr920_noop();`,
+    },
   })
-  expect(res.statusCode).toBe(200)
-  const triggers = res.json()
-  expect(Array.isArray(triggers)).toBe(true)
-  expect(triggers.length).toBeLessThanOrEqual(5)
+  expect(setup.statusCode).toBe(200)
+  try {
+    const limited = await app.inject({ method: 'GET', path: '/triggers?limit=1' })
+    expect(limited.json()).toHaveLength(1)
+
+    const pub = await app.inject({ method: 'GET', path: '/triggers?included_schemas=public' })
+    expect(pub.statusCode).toBe(200)
+    const names = pub.json().map((t) => t.name)
+    expect(names).toEqual(expect.arrayContaining(['pr920_a', 'pr920_b']))
+    pub.json().forEach((trigger) => {
+      expect(trigger.schema).toBe('public')
+    })
+
+    const other = await app.inject({
+      method: 'GET',
+      path: '/triggers?included_schemas=nonexistent',
+    })
+    expect(other.json()).toHaveLength(0)
+  } finally {
+    await app.inject({
+      method: 'POST',
+      path: '/query',
+      payload: { query: 'drop function public.pr920_noop() cascade;' },
+    })
+  }
 })
 
-test('trigger list with specific included schema', async () => {
-  const res = await app.inject({
-    method: 'GET',
-    path: '/triggers?includedSchemas=public',
-  })
-  expect(res.statusCode).toBe(200)
-  const triggers = res.json()
-  expect(Array.isArray(triggers)).toBe(true)
-  // All triggers should be in the public schema
-  triggers.forEach((trigger) => {
-    expect(trigger.schema).toBe('public')
-  })
-})
-
-test('trigger with invalid id', async () => {
+test('get trigger with invalid id', async () => {
   const res = await app.inject({
     method: 'GET',
     path: '/triggers/99999999',

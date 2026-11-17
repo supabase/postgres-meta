@@ -1,42 +1,40 @@
 import { expect, test } from 'vitest'
 import { app } from './utils'
 
-test('function list filtering', async () => {
+test('function list with limit', async () => {
   const res = await app.inject({
     method: 'GET',
     path: '/functions?limit=5',
   })
   expect(res.statusCode).toBe(200)
-  const functions = res.json()
-  expect(Array.isArray(functions)).toBe(true)
-  expect(functions.length).toBeLessThanOrEqual(5)
+  expect(res.json()).toHaveLength(5)
 })
 
 test('function list with specific included schema', async () => {
   const res = await app.inject({
     method: 'GET',
-    path: '/functions?includedSchemas=public',
+    path: '/functions?included_schemas=public',
   })
   expect(res.statusCode).toBe(200)
   const functions = res.json()
-  expect(Array.isArray(functions)).toBe(true)
-  // All functions should be in the public schema
+  expect(functions.length).toBeGreaterThan(0)
   functions.forEach((func) => {
     expect(func.schema).toBe('public')
   })
 })
 
-test('function list exclude system schemas', async () => {
-  const res = await app.inject({
+test('function list with system schemas', async () => {
+  const withoutSystem = await app.inject({ method: 'GET', path: '/functions' })
+  expect(withoutSystem.json().filter((func) => func.schema === 'pg_catalog')).toHaveLength(0)
+  const withSystem = await app.inject({
     method: 'GET',
-    path: '/functions?includeSystemSchemas=false',
+    path: '/functions?included_schemas=pg_catalog&include_system_schemas=true',
   })
-  expect(res.statusCode).toBe(200)
-  const functions = res.json()
-  expect(Array.isArray(functions)).toBe(true)
-  // No functions should be in pg_ schemas
+  expect(withSystem.statusCode).toBe(200)
+  const functions = withSystem.json()
+  expect(functions.length).toBeGreaterThan(0)
   functions.forEach((func) => {
-    expect(func.schema).not.toMatch(/^pg_/)
+    expect(func.schema).toBe('pg_catalog')
   })
 })
 
