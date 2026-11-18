@@ -4,6 +4,9 @@ import { filterByList, filterByValue } from './helpers.js'
 import { PostgresMetaResult, PostgresPolicy } from './types.js'
 import { POLICIES_SQL } from './sql/policies.sql.js'
 
+const POLICY_ACTIONS = ['PERMISSIVE', 'RESTRICTIVE']
+const POLICY_COMMANDS = ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'ALL']
+
 export default class PostgresMetaPolicies {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
 
@@ -107,6 +110,16 @@ export default class PostgresMetaPolicies {
     if (!table || !name) {
       return { data: null, error: { message: 'Missing required name or table parameter' } }
     }
+    // action and command are interpolated into the SQL below, so they must
+    // be validated against the values Postgres accepts instead of being
+    // passed through as raw SQL.
+    if (!POLICY_ACTIONS.includes(action.toUpperCase())) {
+      return { data: null, error: { message: `Invalid policy action: ${action}` } }
+    }
+    if (!POLICY_COMMANDS.includes(command.toUpperCase())) {
+      return { data: null, error: { message: `Invalid policy command: ${command}` } }
+    }
+
     const definitionClause = definition === undefined ? '' : `USING (${definition})`
     const checkClause = check === undefined ? '' : `WITH CHECK (${check})`
     const sql = `
