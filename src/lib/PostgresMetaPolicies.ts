@@ -107,6 +107,9 @@ export default class PostgresMetaPolicies {
     command?: string
     roles?: string[]
   }): Promise<PostgresMetaResult<PostgresPolicy>> {
+    if (!table || !name) {
+      return { data: null, error: { message: 'Missing required name or table parameter' } }
+    }
     // action and command are interpolated into the SQL below, so they must
     // be validated against the values Postgres accepts instead of being
     // passed through as raw SQL.
