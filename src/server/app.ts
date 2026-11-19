@@ -5,6 +5,7 @@ import swagger from '@fastify/swagger'
 import { fastify, FastifyInstance, FastifyServerOptions } from 'fastify'
 import { PG_META_REQ_HEADER, MAX_BODY_LIMIT } from './constants.js'
 import routes from './routes/index.js'
+import { registerRequestMetrics } from './metrics.js'
 import { extractRequestForLogging } from './utils.js'
 // Pseudo package declared only for this module
 import pkg from '#package.json' with { type: 'json' }
@@ -41,6 +42,8 @@ export const build = (opts: FastifyServerOptions = {}): FastifyInstance => {
 
   app.register(cors)
 
+  registerRequestMetrics(app)
+
   app.get('/', async (_request, _reply) => {
     return {
       status: 200,
@@ -50,7 +53,7 @@ export const build = (opts: FastifyServerOptions = {}): FastifyInstance => {
     }
   })
 
-  app.get('/health', async (_request, _reply) => {
+  app.get('/health', { config: { disableMetrics: true } }, async (_request, _reply) => {
     return { date: new Date() }
   })
 
