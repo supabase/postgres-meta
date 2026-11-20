@@ -531,3 +531,28 @@ test('retrieve function by args filter - function with no arguments', async () =
   })
   expect(res.error).toBeNull()
 })
+
+test('create and retrieve function with multi-word argument types', async () => {
+  const created = await pgMeta.functions.create({
+    name: 'test_multiword_arg',
+    schema: 'public',
+    args: ['x double precision', 'ts timestamp with time zone'],
+    definition: 'select x',
+    return_type: 'double precision',
+    language: 'sql',
+    behavior: 'STABLE',
+    security_definer: false,
+  })
+  expect(created.error).toBeNull()
+  expect(created.data?.name).toBe('test_multiword_arg')
+
+  const byTypes = await pgMeta.functions.retrieve({
+    schema: 'public',
+    name: 'test_multiword_arg',
+    args: ['double precision', 'timestamp with time zone'],
+  })
+  expect(byTypes.error).toBeNull()
+  expect(byTypes.data?.id).toBe(created.data!.id)
+
+  await pgMeta.functions.remove(created.data!.id)
+})
