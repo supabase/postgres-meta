@@ -100,3 +100,19 @@ test('materialized views with columns', async () => {
     ]
   `)
 })
+
+test('materialized views with columns keep every column when listing with limit', async () => {
+  const { body } = await app.inject({
+    method: 'GET',
+    path: '/materialized-views',
+    query: { include_columns: 'true', limit: '1' },
+  })
+  const data = JSON.parse(body)
+  expect(data).toHaveLength(1)
+  expect(data[0].name).toBe('todos_matview')
+  expect(data[0].columns.map((column: { name: string }) => column.name)).toEqual([
+    'id',
+    'details',
+    'user-id',
+  ])
+})
