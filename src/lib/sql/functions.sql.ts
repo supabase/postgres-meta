@@ -38,10 +38,9 @@ with functions as (
     ${
       props.args === undefined
         ? ''
-        : props.args.length > 0
-          ? `p.proargtypes::text = ${
-              props.args.length
-                ? `(
+        : `p.proargtypes::text = ${
+            props.args.length > 0
+              ? `(
           SELECT STRING_AGG(type_oid::text, ' ') FROM (
             SELECT (
               split_args.arr[
@@ -60,9 +59,8 @@ with functions as (
             ) AS split_args
           ) args
     )`
-                : "''"
-            } AND`
-          : ''
+              : "''"
+          } AND`
     }
     p.prokind = 'f'
 )
