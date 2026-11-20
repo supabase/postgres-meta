@@ -6,20 +6,23 @@ export const TABLE_RELATIONSHIPS_SQL = (props: SQLQueryPropsWithSchemaFilter) =>
 WITH
 pks_uniques_cols AS (
   SELECT
-    connamespace,
-    conrelid,
+    con.connamespace,
+    con.conrelid,
     jsonb_agg(column_info.cols) as cols
-  FROM pg_constraint
+  FROM pg_constraint con
+  JOIN pg_namespace ns ON ns.oid = con.connamespace
   JOIN lateral (
     SELECT array_agg(cols.attname order by cols.attnum) as cols
-    FROM ( select unnest(conkey) as col) _
-    JOIN pg_attribute cols on cols.attrelid = conrelid and cols.attnum = col
+    FROM ( select unnest(con.conkey) as col) _
+    JOIN pg_attribute cols on cols.attrelid = con.conrelid and cols.attnum = col
   ) column_info ON TRUE
   WHERE
-    contype IN ('p', 'u') and
-    connamespace::regnamespace::text <> 'pg_catalog'
-    ${props.schemaFilter ? `and connamespace::regnamespace::text ${props.schemaFilter}` : ''}
-  GROUP BY connamespace, conrelid
+    con.contype IN ('p', 'u') and
+    -- Compare nspname, not connamespace::regnamespace::text: the latter quotes
+    -- dotted / mixed-case schemas (e.g. "odd.schema"), so IN ('odd.schema') misses.
+    ns.nspname <> 'pg_catalog'
+    ${props.schemaFilter ? `and ns.nspname ${props.schemaFilter}` : ''}
+  GROUP BY con.connamespace, con.conrelid
 )
 SELECT
   traint.conname AS foreign_key_name,
@@ -38,7 +41,6 @@ JOIN LATERAL (
   FROM unnest(traint.conkey, traint.confkey) WITH ORDINALITY AS _(col, ref, ord)
   JOIN pg_attribute cols ON cols.attrelid = traint.conrelid AND cols.attnum = col
   JOIN pg_attribute refs ON refs.attrelid = traint.confrelid AND refs.attnum = ref
-  WHERE ${props.schemaFilter ? `traint.connamespace::regnamespace::text ${props.schemaFilter}` : 'true'}
 ) AS column_info ON TRUE
 JOIN pg_namespace ns1 ON ns1.oid = traint.connamespace
 JOIN pg_class tab ON tab.oid = traint.conrelid
