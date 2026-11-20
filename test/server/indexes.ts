@@ -56,6 +56,52 @@ test('list indexes', async () => {
   )
 })
 
+test('index_definition is scoped to the index schema', async () => {
+  let res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `
+        drop schema if exists private cascade;
+        drop table if exists public.dup_idx cascade;
+        create schema private;
+        create table public.dup_idx (id int primary key);
+        create table private.dup_idx (id int primary key);
+      `,
+    },
+  })
+  if (res.json().error) {
+    throw new Error(res.payload)
+  }
+
+  res = await app.inject({ method: 'GET', path: '/indexes' })
+  const indexes = res.json<PostgresIndex[]>()
+  const privatePkeys = indexes.filter(
+    ({ schema, index_definition }) =>
+      schema === 'private' && index_definition.includes('dup_idx_pkey')
+  )
+
+  expect(privatePkeys).toHaveLength(1)
+  expect(privatePkeys[0].index_definition).toBe(
+    'CREATE UNIQUE INDEX dup_idx_pkey ON private.dup_idx USING btree (id)'
+  )
+  expect(privatePkeys[0].index_definition).not.toContain('public.dup_idx')
+
+  res = await app.inject({ method: 'GET', path: `/indexes/${privatePkeys[0].id}` })
+  expect(res.json<PostgresIndex>().index_definition).toBe(privatePkeys[0].index_definition)
+
+  res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    payload: {
+      query: `drop schema private cascade; drop table public.dup_idx cascade;`,
+    },
+  })
+  if (res.json().error) {
+    throw new Error(res.payload)
+  }
+})
+
 test('retrieve index', async () => {
   const res = await app.inject({ method: 'GET', path: '/indexes/16400' })
   const index = res.json<PostgresIndex>()
