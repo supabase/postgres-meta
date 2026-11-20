@@ -4,8 +4,7 @@ import { pgMeta } from './utils'
 test('list', async () => {
   const res = await pgMeta.views.list()
   expect(res.data?.find(({ name }) => name === 'todos_view')).toMatchInlineSnapshot(
-    { id: expect.any(Number) },
-    `
+    { id: expect.any(Number) }, `
     {
       "columns": [
         {
@@ -13,6 +12,8 @@ test('list', async () => {
           "comment": null,
           "data_type": "bigint",
           "default_value": null,
+          "domain_name": null,
+          "domain_schema": null,
           "enums": [],
           "format": "int8",
           "id": "16424.1",
@@ -33,6 +34,8 @@ test('list', async () => {
           "comment": null,
           "data_type": "text",
           "default_value": null,
+          "domain_name": null,
+          "domain_schema": null,
           "enums": [],
           "format": "text",
           "id": "16424.2",
@@ -53,6 +56,8 @@ test('list', async () => {
           "comment": null,
           "data_type": "bigint",
           "default_value": null,
+          "domain_name": null,
+          "domain_schema": null,
           "enums": [],
           "format": "int8",
           "id": "16424.3",
@@ -75,8 +80,7 @@ test('list', async () => {
       "name": "todos_view",
       "schema": "public",
     }
-  `
-  )
+  `)
 })
 
 test('list without columns', async () => {
@@ -100,8 +104,7 @@ test('list without columns', async () => {
 test('retrieve', async () => {
   const res = await pgMeta.views.retrieve({ schema: 'public', name: 'todos_view' })
   expect(res).toMatchInlineSnapshot(
-    { data: { id: expect.any(Number) } },
-    `
+    { data: { id: expect.any(Number) } }, `
     {
       "data": {
         "columns": [
@@ -110,6 +113,8 @@ test('retrieve', async () => {
             "comment": null,
             "data_type": "bigint",
             "default_value": null,
+            "domain_name": null,
+            "domain_schema": null,
             "enums": [],
             "format": "int8",
             "id": "16424.1",
@@ -130,6 +135,8 @@ test('retrieve', async () => {
             "comment": null,
             "data_type": "text",
             "default_value": null,
+            "domain_name": null,
+            "domain_schema": null,
             "enums": [],
             "format": "text",
             "id": "16424.2",
@@ -150,6 +157,8 @@ test('retrieve', async () => {
             "comment": null,
             "data_type": "bigint",
             "default_value": null,
+            "domain_name": null,
+            "domain_schema": null,
             "enums": [],
             "format": "int8",
             "id": "16424.3",
@@ -174,6 +183,5 @@ test('retrieve', async () => {
       },
       "error": null,
     }
-  `
-  )
+  `)
 })
