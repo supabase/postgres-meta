@@ -4,6 +4,15 @@ import { filterByList, filterByValue } from './helpers.js'
 import { PostgresMetaResult, PostgresFunction, PostgresFunctionCreate } from './types.js'
 import { FUNCTIONS_SQL } from './sql/functions.sql.js'
 
+// GUC_LIST_INPUT parameters (e.g. search_path) expect a comma-separated list of
+// individually-quoted values. Scalar GUCs (e.g. statement_timeout = 5s) must be
+// a single quoted literal — unquoted `TO 5s` is a syntax error.
+const literalConfigValue = (value: string): string =>
+  value
+    .split(',')
+    .map((part) => literal(part.trim()))
+    .join(', ')
+
 export default class PostgresMetaFunctions {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
 
@@ -252,9 +261,10 @@ export default class PostgresMetaFunctions {
       ${
         config_params
           ? Object.entries(config_params)
-              .map(
-                ([param, value]: string[]) =>
-                  `SET ${param} ${value[0] === 'FROM CURRENT' ? 'FROM CURRENT' : 'TO ' + value}`
+              .map(([param, value]: string[]) =>
+                value === 'FROM CURRENT'
+                  ? `SET ${ident(param)} FROM CURRENT`
+                  : `SET ${ident(param)} TO ${literalConfigValue(value)}`
               )
               .join('\n')
           : ''
