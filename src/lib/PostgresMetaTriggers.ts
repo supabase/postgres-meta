@@ -4,6 +4,13 @@ import { filterByList, filterByValue } from './helpers.js'
 import { PostgresMetaResult, PostgresTrigger } from './types.js'
 import { TRIGGERS_SQL } from './sql/triggers.sql.js'
 
+const TRIGGER_ACTIVATIONS = ['BEFORE', 'AFTER', 'INSTEAD OF']
+const TRIGGER_ORIENTATIONS = ['ROW', 'STATEMENT']
+// An event is INSERT, DELETE, TRUNCATE, UPDATE, or UPDATE OF with a comma
+// separated list of plain column names.
+const TRIGGER_EVENT_PATTERN =
+  /^(INSERT|DELETE|TRUNCATE|UPDATE( OF [A-Za-z_][A-Za-z0-9_$]*(, [A-Za-z_][A-Za-z0-9_$]*)*)?)$/i
+
 export default class PostgresMetaTriggers {
   query: (sql: string) => Promise<PostgresMetaResult<any>>
 
@@ -145,6 +152,21 @@ export default class PostgresMetaTriggers {
     condition?: string
     function_args?: string[]
   }): Promise<PostgresMetaResult<PostgresTrigger>> {
+    // activation, events and orientation are interpolated into the SQL
+    // below, so they must be validated against the values Postgres accepts
+    // instead of being passed through as raw SQL.
+    if (!TRIGGER_ACTIVATIONS.includes(activation.toUpperCase())) {
+      return { data: null, error: { message: `Invalid trigger activation: ${activation}` } }
+    }
+    if (orientation !== undefined && !TRIGGER_ORIENTATIONS.includes(orientation.toUpperCase())) {
+      return { data: null, error: { message: `Invalid trigger orientation: ${orientation}` } }
+    }
+    for (const event of events) {
+      if (!TRIGGER_EVENT_PATTERN.test(event)) {
+        return { data: null, error: { message: `Invalid trigger event: ${event}` } }
+      }
+    }
+
     const qualifiedTableName = `${ident(schema)}.${ident(table)}`
     const qualifiedFunctionName = `${ident(function_schema)}.${ident(function_name)}`
     const triggerEvents = events.join(' OR ')
