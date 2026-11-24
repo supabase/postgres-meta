@@ -981,6 +981,41 @@ test('dropping column checks', async () => {
   await pgMeta.query(`drop table t`)
 })
 
+test('column check with NOT VALID suffix', async () => {
+  await pgMeta.query(`
+    create table public.t (id int8);
+    alter table public.t add constraint t_id_check check (id > 0) not valid;
+  `)
+
+  const res = await pgMeta.columns.retrieve({
+    schema: 'public',
+    table: 't',
+    name: 'id',
+  })
+  expect(res.error).toBeNull()
+  // Must be the expression only — not `id > 0) NOT VALI` from the old substring heuristic
+  expect(res.data?.check).toBe('id > 0')
+
+  await pgMeta.query(`drop table public.t`)
+})
+
+test('column check with NO INHERIT suffix', async () => {
+  await pgMeta.query(`
+    create table public.t (id int8);
+    alter table public.t add constraint t_id_check check (id > 0) no inherit;
+  `)
+
+  const res = await pgMeta.columns.retrieve({
+    schema: 'public',
+    table: 't',
+    name: 'id',
+  })
+  expect(res.error).toBeNull()
+  expect(res.data?.check).toBe('id > 0')
+
+  await pgMeta.query(`drop table public.t`)
+})
+
 test('column with fully-qualified type', async () => {
   await pgMeta.query(`create table public.t(); create schema s; create type s.my_type as enum ();`)
 
