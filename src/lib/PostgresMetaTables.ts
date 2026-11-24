@@ -171,7 +171,13 @@ export default class PostgresMetaTables {
     if (replica_identity === undefined) {
       // skip
     } else if (replica_identity === 'INDEX') {
-      replicaSql = `${alter} REPLICA IDENTITY USING INDEX ${replica_identity_index};`
+      if (replica_identity_index === undefined) {
+        return {
+          data: null,
+          error: { message: 'replica_identity_index is required when replica_identity is INDEX' },
+        }
+      }
+      replicaSql = `${alter} REPLICA IDENTITY USING INDEX ${ident(replica_identity_index)};`
     } else {
       replicaSql = `${alter} REPLICA IDENTITY ${replica_identity};`
     }
