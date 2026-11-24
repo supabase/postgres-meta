@@ -454,6 +454,43 @@ test("allow ' in comments", async () => {
   await pgMeta.tables.remove(res.data!.id)
 })
 
+test('replica identity index is quoted', async () => {
+  const { data: table } = await pgMeta.tables.create({ name: 't_replica_idx' })
+  await pgMeta.columns.create({
+    table_id: table!.id,
+    name: 'c',
+    type: 'int8',
+    is_nullable: false,
+  })
+  await pgMeta.query('CREATE UNIQUE INDEX "t_replica ""idx""" ON t_replica_idx (c)')
+
+  let res = await pgMeta.tables.update(table!.id, {
+    replica_identity: 'INDEX',
+    replica_identity_index: 't_replica "idx"',
+  })
+  expect(res).toMatchObject({
+    data: { replica_identity: 'INDEX' },
+    error: null,
+  })
+
+  res = await pgMeta.tables.update(table!.id, {
+    replica_identity: 'INDEX',
+    replica_identity_index: 'nonexistent_idx; DROP TABLE t_replica_idx; --',
+  })
+  expect(res.data).toBeNull()
+  expect(res.error).toMatchObject({
+    message: expect.stringContaining('nonexistent_idx; DROP TABLE t_replica_idx; --'),
+  })
+
+  res = await pgMeta.tables.retrieve({ id: table!.id })
+  expect(res).toMatchObject({
+    data: { name: 't_replica_idx', replica_identity: 'INDEX' },
+    error: null,
+  })
+
+  await pgMeta.tables.remove(table!.id)
+})
+
 test('primary keys', async () => {
   let res = await pgMeta.tables.create({ name: 't' })
   await pgMeta.columns.create({ table_id: res.data!.id, name: 'c', type: 'int8' })
