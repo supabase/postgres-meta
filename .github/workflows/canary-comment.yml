@@ -19,7 +19,7 @@ jobs:
       # Get PR number from the workflow run
       - name: Get PR info
         id: pr-info
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             // Get the workflow run details
@@ -60,7 +60,7 @@ jobs:
       - name: Extract canary info
         if: ${{ steps.pr-info.outputs.found == 'true' && steps.pr-info.outputs.has_canary_label == 'true' && github.event.workflow_run.conclusion == 'success' }}
         id: canary-info
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const workflowRun = context.payload.workflow_run;
