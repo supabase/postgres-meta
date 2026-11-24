@@ -95,7 +95,9 @@ export default class PostgresMetaSchemas {
       return { data: null, error }
     }
     const nameSql =
-      name === undefined ? '' : `ALTER SCHEMA ${ident(old!.name)} RENAME TO ${ident(name)};`
+      name === undefined || name === old!.name
+        ? ''
+        : `ALTER SCHEMA ${ident(old!.name)} RENAME TO ${ident(name)};`
     const ownerSql =
       owner === undefined ? '' : `ALTER SCHEMA ${ident(old!.name)} OWNER TO ${ident(owner)};`
     const sql = `BEGIN; ${ownerSql} ${nameSql} COMMIT;`
