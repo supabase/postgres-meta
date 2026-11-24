@@ -82,5 +82,14 @@ test('classifyOutcome does not read user SQL quoted in the formatted error', () 
       JSON.stringify({ error: 'terminating connection due to administrator command' })
     )
   ).toBe('db_unavailable')
+  // translateErrorToResponseCode turns these into the 504 and 503 that mgmt-api reports to Studio.
+  for (const [status, message] of [
+    [504, 'Connection terminated due to connection timeout'],
+    [503, 'sorry, too many clients already'],
+  ] as const) {
+    expect(classifyOutcome(status, JSON.stringify({ error: message, message }))).toBe(
+      'db_unavailable'
+    )
+  }
   expect(classifyOutcome(500, JSON.stringify({ error: 'boom' }))).toBe('server_error')
 })
