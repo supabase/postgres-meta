@@ -1,4 +1,5 @@
 import { expect, test } from 'vitest'
+import { PostgresMeta } from '../../src/lib'
 import { PostgresTablePrivileges } from '../../src/lib/types'
 import { app } from './utils'
 
@@ -373,5 +374,47 @@ test('revoke & grant table privileges w/ quoted table name', async () => {
   })
   if (res.json().error) {
     throw new Error(res.payload)
+  }
+})
+
+test('lists privileges for a non-owner role', async () => {
+  const admin = new PostgresMeta({
+    max: 1,
+    connectionString: 'postgresql://postgres:postgres@localhost:5432',
+  })
+  const role = `table_priv_reader_${Date.now()}`
+  const reader = new PostgresMeta({
+    max: 1,
+    connectionString: `postgresql://${role}:reader@localhost:5432/postgres`,
+  })
+
+  let roleCreated = false
+
+  try {
+    const created = await admin.query(`create role "${role}" login password 'reader'`)
+    expect(created.error, JSON.stringify(created.error)).toBeNull()
+    roleCreated = true
+
+    const granted = await admin.query(`grant select on table public.todos to "${role}"`)
+    expect(granted.error, JSON.stringify(granted.error)).toBeNull()
+
+    const res = await reader.tablePrivileges.list()
+    expect(res.error, JSON.stringify(res.error)).toBeNull()
+
+    const todos = res.data?.find(({ schema, name }) => schema === 'public' && name === 'todos')
+    expect(todos).toBeDefined()
+    expect(todos?.privileges).toContainEqual({
+      grantee: role,
+      grantor: 'postgres',
+      is_grantable: false,
+      privilege_type: 'SELECT',
+    })
+  } finally {
+    await reader.end()
+    if (roleCreated) {
+      await admin.query(`drop owned by "${role}"`)
+    }
+    await admin.query(`drop role if exists "${role}"`)
+    await admin.end()
   }
 })
