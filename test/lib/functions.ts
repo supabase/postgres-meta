@@ -531,3 +531,19 @@ test('retrieve function by args filter - function with no arguments', async () =
   })
   expect(res.error).toBeNull()
 })
+
+test('retrieve function by args filter - zero-argument overload among polymorphic functions', async () => {
+  const res = await pgMeta.functions.retrieve({
+    schema: 'public',
+    name: 'polymorphic_function_with_no_params_or_unnamed',
+    args: [],
+  })
+  expect(res.error).toBeNull()
+  expect(res.data).toMatchObject({
+    name: 'polymorphic_function_with_no_params_or_unnamed',
+    schema: 'public',
+    argument_types: '',
+    args: [],
+    return_type: 'integer',
+  })
+})
