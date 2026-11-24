@@ -233,7 +233,7 @@ export const init: (config: PoolConfig) => {
                 try {
                   // If the error isn't a "DatabaseError" assume it's a connection related we kill the connection
                   // To attempt a clean reconnect on next try
-                  await this.end.bind(this)
+                  await this.end()
                 } catch (error) {
                   console.error('Failed to end the connection on error: ', {
                     this: this,
@@ -247,7 +247,7 @@ export const init: (config: PoolConfig) => {
       },
 
       async end() {
-        Sentry.startSpan({ op: 'db', name: 'init.end' }, async () => {
+        return Sentry.startSpan({ op: 'db', name: 'init.end' }, async () => {
           try {
             const _pool = pool
             pool = null
