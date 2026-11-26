@@ -31,3 +31,36 @@ test('query string failing a route schema returns 400', async () => {
   const res = await app.inject({ method: 'GET', path: '/column-privileges?limit=abc' })
   expect(res.statusCode).toBe(400)
 })
+
+test('malformed JSON body returns 400', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    headers: { 'content-type': 'application/json' },
+    payload: '{"query": ',
+  })
+  expect(res.statusCode).toBe(400)
+  expect(res.json()).toHaveProperty('error')
+})
+
+test('empty body with JSON content type returns 400', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    headers: { 'content-type': 'application/json' },
+    payload: '',
+  })
+  expect(res.statusCode).toBe(400)
+  expect(res.json()).toHaveProperty('error')
+})
+
+test('unsupported content type returns 415', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    path: '/query',
+    headers: { 'content-type': 'text/xml' },
+    payload: '<query>select 1</query>',
+  })
+  expect(res.statusCode).toBe(415)
+  expect(res.json()).toHaveProperty('error')
+})

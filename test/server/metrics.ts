@@ -93,3 +93,16 @@ test('classifyOutcome does not read user SQL quoted in the formatted error', () 
   }
   expect(classifyOutcome(500, JSON.stringify({ error: 'boom' }))).toBe('server_error')
 })
+
+test('malformed request body is recorded as user_error', async () => {
+  await app.ready()
+  const labels = 'method="POST",route="/query",status_code="400",outcome="user_error"'
+  const before = await count(labels)
+  await app.inject({
+    method: 'POST',
+    path: '/query',
+    headers: { 'content-type': 'application/json' },
+    payload: '{"query": ',
+  })
+  expect(await count(labels)).toBe(before + 1)
+})

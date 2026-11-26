@@ -21,7 +21,12 @@ export const build = (opts: FastifyServerOptions = {}): FastifyInstance => {
 
   app.setErrorHandler((error, request, reply) => {
     app.log.error({ error: error.toString(), request: extractRequestForLogging(request) })
-    reply.code(error.validation ? 400 : 500).send({ error: error.message })
+    // Fastify's own errors (e.g. invalid JSON, unsupported media type) carry a 4xx statusCode.
+    const clientError =
+      error.statusCode !== undefined && error.statusCode >= 400 && error.statusCode < 500
+    reply
+      .code(error.validation ? 400 : clientError ? error.statusCode! : 500)
+      .send({ error: error.message })
   })
 
   app.setNotFoundHandler((request, reply) => {
